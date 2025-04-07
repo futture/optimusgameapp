@@ -1,0 +1,50 @@
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+
+# Flutter build output
+build/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/.symlinks/
+ios/Pods/
+ios/Runner.xcworkspace/
+macos/Flutter/Flutter.framework
+macos/Flutter/Flutter.podspec
+macos/.symlinks/
+macos/Pods/
+macos/Runner.xcworkspace/
+linux/flutter/ephemeral/
+windows/flutter/ephemeral/
+web/.dart_tool/
+
+# Android build output
+*.apk
+*.ap_
+*.aab
+*.aar
+android/app/debug
+android/app/profile
+android/app/release
+android/.gradle/
+android/.idea/
+android/local.properties
+android/.dart_tool/
+
+# IntelliJ related
+*.iml
+.idea/
+*.ipr
+*.iws
+
+# VS Code related
+.vscode/
+
+# Others
+*.log
+.flutter-plugins
+.flutter-plugins-dependencies
+.flutter-versions
+.metadata
