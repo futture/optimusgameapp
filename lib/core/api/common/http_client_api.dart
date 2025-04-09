@@ -25,6 +25,7 @@ class HttpClientService {
 
     Map<String, String> defaultHeaders = {
       'Authorization': 'Bearer $userToken',
+      'Content-Type': 'application/json'
     };
 
     final combinedHeaders = {

@@ -68,24 +68,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: Tela06SaladeJogoWidget.routeName,
           path: Tela06SaladeJogoWidget.routePath,
-          builder: (context, params) => Tela06SaladeJogoWidget(
-            respotaA: params.getParam(
-              'respotaA',
-              ParamType.bool,
-            ),
-            respostaB: params.getParam(
-              'respostaB',
-              ParamType.bool,
-            ),
-            respostaC: params.getParam(
-              'respostaC',
-              ParamType.bool,
-            ),
-            respostaD: params.getParam(
-              'respostaD',
-              ParamType.bool,
-            ),
-          ),
+          builder: (context, params) => Tela06SaladeJogoWidget(),
         ),
         FFRoute(
           name: Tela07EditarPerfilWidget.routeName,

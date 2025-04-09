@@ -2,7 +2,10 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'tela07_financas_model.dart';
 export 'tela07_financas_model.dart';
 
@@ -61,10 +64,10 @@ class _Tela07FinancasWidgetState extends State<Tela07FinancasWidget> {
             child: FlutterFlowIconButton(
               borderRadius: 8.0,
               buttonSize: 45.0,
-              fillColor: FlutterFlowTheme.of(context).primaryBackground,
+              fillColor: FlutterFlowTheme.of(context).alternate,
               icon: Icon(
                 Icons.arrow_back,
-                color: Colors.black,
+                color: FlutterFlowTheme.of(context).primaryText,
                 size: 24.0,
               ),
               onPressed: () async {
@@ -568,7 +571,7 @@ class _Tela07FinancasWidgetState extends State<Tela07FinancasWidget> {
                                         0.0, 30.0, 0.0, 0.0),
                                     child: FFButtonWidget(
                                       onPressed: () {
-                                        print('Button pressed ...');
+                                        print('SalvarDados pressed ...');
                                       },
                                       text: 'SALVAR',
                                       options: FFButtonOptions(
@@ -584,7 +587,7 @@ class _Tela07FinancasWidgetState extends State<Tela07FinancasWidget> {
                                             .titleSmall
                                             .override(
                                               fontFamily: 'Inter Tight',
-                                              color: Colors.white,
+                                              color: Colors.black,
                                               fontSize: 14.0,
                                               letterSpacing: 0.0,
                                             ),

@@ -1,10 +1,14 @@
-import '/components/modal_valida_conta_widget.dart';
+import 'package:projeto_game_quiz/components/modals/modal05_valida_conta/modal05_valida_conta_widget.dart';
+
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'tela01_criar_conta_model.dart';
 export 'tela01_criar_conta_model.dart';
 
@@ -46,7 +50,7 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget> {
               padding: MediaQuery.viewInsetsOf(context),
               child: Container(
                 height: 200.0,
-                child: ModalValidaContaWidget(),
+                child: Modal05ValidaContaWidget(),
               ),
             ),
           );
@@ -115,7 +119,7 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget> {
                     width: 350.0,
                     height: 570.0,
                     decoration: BoxDecoration(
-                      color: Color(0xFFF1F4F8),
+                      color: FlutterFlowTheme.of(context).primaryBackground,
                     ),
                     alignment: AlignmentDirectional(0.0, 0.0),
                     child: Column(
@@ -623,27 +627,8 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget> {
                               .addToStart(SizedBox(width: 10.0)),
                         ),
                         FFButtonWidget(
-                          onPressed: () async {
-                            await showModalBottomSheet(
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                              enableDrag: false,
-                              useSafeArea: true,
-                              context: context,
-                              builder: (context) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    FocusScope.of(context).unfocus();
-                                    FocusManager.instance.primaryFocus
-                                        ?.unfocus();
-                                  },
-                                  child: Padding(
-                                    padding: MediaQuery.viewInsetsOf(context),
-                                    child: ModalValidaContaWidget(),
-                                  ),
-                                );
-                              },
-                            ).then((value) => safeSetState(() {}));
+                          onPressed: () {
+                            print('cadastrar pressed ...');
                           },
                           text: 'CADASTRAR',
                           options: FFButtonOptions(
@@ -683,7 +668,7 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget> {
                                 .titleSmall
                                 .override(
                                   fontFamily: 'Inter Tight',
-                                  color: Color(0xC2210DDF),
+                                  color: FlutterFlowTheme.of(context).primary,
                                   fontSize: 17.0,
                                   letterSpacing: 0.0,
                                   decoration: TextDecoration.underline,

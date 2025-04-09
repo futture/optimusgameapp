@@ -1,1 +1,1 @@
-const BASE_URL = "localhost:8000/api";
+const BASE_URL = "192.168.8.181:8000/api/v1";

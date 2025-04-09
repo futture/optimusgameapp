@@ -78,7 +78,7 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget> {
                     width: 350.0,
                     height: 380.0,
                     decoration: BoxDecoration(
-                      color: Color(0xFFF1F4F8),
+                      color: FlutterFlowTheme.of(context).primaryBackground,
                     ),
                     alignment: AlignmentDirectional(0.0, 0.0),
                     child: Column(
@@ -316,8 +316,17 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget> {
                               .addToStart(SizedBox(width: 10.0)),
                         ),
                         FFButtonWidget(
-                          onPressed: () async {
-                            context.pushNamed(Tela03PrincipalWidget.routeName);
+                          onPressed: () {
+                            context.pushNamed(
+                              Tela03PrincipalWidget.routeName,
+                              extra: <String, dynamic>{
+                                kTransitionInfoKey: TransitionInfo(
+                                  hasTransition: true,
+                                  transitionType:
+                                      PageTransitionType.bottomToTop,
+                                ),
+                              },
+                            );
                           },
                           text: 'Entrar',
                           options: FFButtonOptions(
@@ -382,7 +391,7 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget> {
                                 .titleSmall
                                 .override(
                                   fontFamily: 'Inter Tight',
-                                  color: Color(0xC2210DDF),
+                                  color: FlutterFlowTheme.of(context).primary,
                                   fontSize: 14.0,
                                   letterSpacing: 0.0,
                                   decoration: TextDecoration.underline,

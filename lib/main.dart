@@ -1,13 +1,26 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:projeto_game_quiz/firebase_options.dart';
+import 'package:projeto_game_quiz/handlers/notification_handler.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import 'flutter_flow/flutter_flow_util.dart';
 import 'flutter_flow/internationalization.dart';
 
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print('Handling a background message: ${message.messageId}');
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   GoRouter.optionURLReflectsImperativeAPIs = true;
   usePathUrlStrategy();
 
@@ -29,6 +42,8 @@ class _MyAppState extends State<MyApp> {
   Locale? _locale;
 
   ThemeMode _themeMode = FlutterFlowTheme.themeMode;
+  late FirebaseMessaging messaging;
+  final NotificationHandler _notificationHandler = NotificationHandler();
 
   late AppStateNotifier _appStateNotifier;
   late GoRouter _router;
@@ -49,7 +64,23 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    messaging = FirebaseMessaging.instance;
 
+    messaging
+        .requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    )
+        .then((NotificationSettings settings) {
+      print('Permissões concedidas: ${settings.authorizationStatus}');
+    });
+
+    messaging.getToken().then((token) {
+      print("Token: $token");
+    });
+
+    _notificationHandler.setupNotificationHandler();
     _appStateNotifier = AppStateNotifier.instance;
     _router = createRouter(_appStateNotifier);
   }

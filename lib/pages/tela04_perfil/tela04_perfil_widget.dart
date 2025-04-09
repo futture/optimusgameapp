@@ -1,10 +1,15 @@
+import 'package:projeto_game_quiz/pages/tela11_editar_perfil/tela11_editar_perfil_widget.dart';
+
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import 'dart:ui';
 import '/index.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'tela04_perfil_model.dart';
 export 'tela04_perfil_model.dart';
 
@@ -45,9 +50,9 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: Color(0xFFF1F4F8),
+        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
           automaticallyImplyLeading: false,
           leading: FlutterFlowIconButton(
             borderColor: Colors.transparent,
@@ -56,26 +61,24 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
             buttonSize: 60.0,
             icon: Icon(
               Icons.arrow_back_rounded,
-              color: Color(0xFF14181B),
+              color: FlutterFlowTheme.of(context).primaryText,
               size: 30.0,
             ),
             onPressed: () async {
-              context.pushNamed(Tela03PrincipalWidget.routeName);
+              context.safePop();
             },
           ),
           title: Text(
-            'Perfil',
-            style: FlutterFlowTheme.of(context).bodyLarge.override(
-                  fontFamily: 'Plus Jakarta Sans',
-                  color: Color(0xFF14181B),
-                  fontSize: 16.0,
+            'PERFIL',
+            style: FlutterFlowTheme.of(context).titleLarge.override(
+                  fontFamily: 'Inter Tight',
+                  color: Color(0xFFEC8D0D),
                   letterSpacing: 0.0,
-                  fontWeight: FontWeight.normal,
                 ),
           ),
           actions: [],
-          centerTitle: false,
-          elevation: 0.0,
+          centerTitle: true,
+          elevation: 4.0,
         ),
         body: SafeArea(
           top: true,
@@ -88,7 +91,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: FlutterFlowTheme.of(context).secondaryBackground,
                     boxShadow: [
                       BoxShadow(
                         blurRadius: 3.0,
@@ -146,7 +149,8 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                                     .headlineSmall
                                     .override(
                                       fontFamily: 'Outfit',
-                                      color: Color(0xFF14181B),
+                                      color: FlutterFlowTheme.of(context)
+                                          .primaryText,
                                       fontSize: 20.0,
                                       letterSpacing: 0.0,
                                       fontWeight: FontWeight.w500,
@@ -161,7 +165,8 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                                       .labelMedium
                                       .override(
                                         fontFamily: 'Plus Jakarta Sans',
-                                        color: Color(0xFF57636C),
+                                        color: FlutterFlowTheme.of(context)
+                                            .primaryText,
                                         fontSize: 14.0,
                                         letterSpacing: 0.0,
                                         fontWeight: FontWeight.normal,
@@ -182,7 +187,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                   'Account',
                   style: FlutterFlowTheme.of(context).labelLarge.override(
                         fontFamily: 'Plus Jakarta Sans',
-                        color: Color(0xFF57636C),
+                        color: FlutterFlowTheme.of(context).primaryText,
                         fontSize: 16.0,
                         letterSpacing: 0.0,
                         fontWeight: FontWeight.normal,
@@ -195,7 +200,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                   width: double.infinity,
                   height: 60.0,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: FlutterFlowTheme.of(context).secondaryBackground,
                     boxShadow: [
                       BoxShadow(
                         blurRadius: 5.0,
@@ -204,6 +209,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                           0.0,
                           2.0,
                         ),
+                        spreadRadius: 4.0,
                       )
                     ],
                     borderRadius: BorderRadius.circular(12.0),
@@ -216,7 +222,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                       children: [
                         Icon(
                           Icons.attach_money_rounded,
-                          color: Color(0xFF57636C),
+                          color: FlutterFlowTheme.of(context).primaryText,
                           size: 24.0,
                         ),
                         Expanded(
@@ -229,7 +235,8 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                                   .bodyLarge
                                   .override(
                                     fontFamily: 'Plus Jakarta Sans',
-                                    color: Color(0xFF14181B),
+                                    color: FlutterFlowTheme.of(context)
+                                        .primaryText,
                                     fontSize: 16.0,
                                     letterSpacing: 0.0,
                                     fontWeight: FontWeight.normal,
@@ -241,7 +248,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                           alignment: AlignmentDirectional(0.9, 0.0),
                           child: Icon(
                             Icons.arrow_forward_ios,
-                            color: Color(0xFF57636C),
+                            color: FlutterFlowTheme.of(context).primaryText,
                             size: 18.0,
                           ),
                         ),
@@ -256,7 +263,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                   width: double.infinity,
                   height: 60.0,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: FlutterFlowTheme.of(context).secondaryBackground,
                     boxShadow: [
                       BoxShadow(
                         blurRadius: 5.0,
@@ -265,6 +272,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                           0.0,
                           2.0,
                         ),
+                        spreadRadius: 4.0,
                       )
                     ],
                     borderRadius: BorderRadius.circular(12.0),
@@ -277,7 +285,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                       children: [
                         Icon(
                           Icons.hotel_class,
-                          color: Color(0xFF57636C),
+                          color: FlutterFlowTheme.of(context).primaryText,
                           size: 24.0,
                         ),
                         Expanded(
@@ -290,7 +298,8 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                                   .bodyLarge
                                   .override(
                                     fontFamily: 'Plus Jakarta Sans',
-                                    color: Color(0xFF14181B),
+                                    color: FlutterFlowTheme.of(context)
+                                        .primaryText,
                                     fontSize: 16.0,
                                     letterSpacing: 0.0,
                                     fontWeight: FontWeight.normal,
@@ -302,7 +311,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                           alignment: AlignmentDirectional(0.9, 0.0),
                           child: Icon(
                             Icons.arrow_forward_ios,
-                            color: Color(0xFF57636C),
+                            color: FlutterFlowTheme.of(context).primaryText,
                             size: 18.0,
                           ),
                         ),
@@ -317,7 +326,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                   width: double.infinity,
                   height: 60.0,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: FlutterFlowTheme.of(context).secondaryBackground,
                     boxShadow: [
                       BoxShadow(
                         blurRadius: 5.0,
@@ -326,6 +335,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                           0.0,
                           2.0,
                         ),
+                        spreadRadius: 4.0,
                       )
                     ],
                     borderRadius: BorderRadius.circular(12.0),
@@ -338,7 +348,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                       children: [
                         Icon(
                           Icons.notifications_none,
-                          color: Color(0xFF57636C),
+                          color: FlutterFlowTheme.of(context).primaryText,
                           size: 24.0,
                         ),
                         Expanded(
@@ -346,12 +356,13 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                             padding: EdgeInsetsDirectional.fromSTEB(
                                 12.0, 0.0, 0.0, 0.0),
                             child: Text(
-                              'Notifições',
+                              'Notificações',
                               style: FlutterFlowTheme.of(context)
                                   .bodyLarge
                                   .override(
                                     fontFamily: 'Plus Jakarta Sans',
-                                    color: Color(0xFF14181B),
+                                    color: FlutterFlowTheme.of(context)
+                                        .primaryText,
                                     fontSize: 16.0,
                                     letterSpacing: 0.0,
                                     fontWeight: FontWeight.normal,
@@ -363,7 +374,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                           alignment: AlignmentDirectional(0.9, 0.0),
                           child: Icon(
                             Icons.arrow_forward_ios,
-                            color: Color(0xFF57636C),
+                            color: FlutterFlowTheme.of(context).primaryText,
                             size: 18.0,
                           ),
                         ),
@@ -378,7 +389,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                   width: double.infinity,
                   height: 60.0,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: FlutterFlowTheme.of(context).secondaryBackground,
                     boxShadow: [
                       BoxShadow(
                         blurRadius: 5.0,
@@ -387,6 +398,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                           0.0,
                           2.0,
                         ),
+                        spreadRadius: 4.0,
                       )
                     ],
                     borderRadius: BorderRadius.circular(12.0),
@@ -401,7 +413,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                           children: [
                             Icon(
                               Icons.account_circle_outlined,
-                              color: Color(0xFF57636C),
+                              color: FlutterFlowTheme.of(context).primaryText,
                               size: 24.0,
                             ),
                             Expanded(
@@ -414,7 +426,8 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                                       .bodyLarge
                                       .override(
                                         fontFamily: 'Plus Jakarta Sans',
-                                        color: Color(0xFF14181B),
+                                        color: FlutterFlowTheme.of(context)
+                                            .primaryText,
                                         fontSize: 16.0,
                                         letterSpacing: 0.0,
                                         fontWeight: FontWeight.normal,
@@ -426,7 +439,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                               alignment: AlignmentDirectional(0.9, 0.0),
                               child: Icon(
                                 Icons.arrow_forward_ios,
-                                color: Color(0xFF57636C),
+                                color: FlutterFlowTheme.of(context).primaryText,
                                 size: 18.0,
                               ),
                             ),
@@ -435,9 +448,9 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                       ),
                       FFButtonWidget(
                         onPressed: () async {
-                          context.pushNamed(Tela07EditarPerfilWidget.routeName);
+                          context.pushNamed(Tela11EditarPerfilWidget.routeName);
                         },
-                        text: 'Button',
+                        text: '',
                         options: FFButtonOptions(
                           width: 360.0,
                           height: 60.0,
@@ -445,7 +458,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                               16.0, 0.0, 16.0, 0.0),
                           iconPadding: EdgeInsetsDirectional.fromSTEB(
                               0.0, 0.0, 0.0, 0.0),
-                          color: Color(0x004B39EF),
+                          color: Color(0x001D2428),
                           textStyle:
                               FlutterFlowTheme.of(context).titleSmall.override(
                                     fontFamily: 'Inter Tight',
@@ -466,7 +479,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                   'General',
                   style: FlutterFlowTheme.of(context).labelLarge.override(
                         fontFamily: 'Plus Jakarta Sans',
-                        color: Color(0xFF57636C),
+                        color: FlutterFlowTheme.of(context).primaryText,
                         fontSize: 16.0,
                         letterSpacing: 0.0,
                         fontWeight: FontWeight.normal,
@@ -479,7 +492,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                   width: double.infinity,
                   height: 60.0,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: FlutterFlowTheme.of(context).secondaryBackground,
                     boxShadow: [
                       BoxShadow(
                         blurRadius: 5.0,
@@ -500,7 +513,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                       children: [
                         Icon(
                           Icons.help_outline_rounded,
-                          color: Color(0xFF57636C),
+                          color: FlutterFlowTheme.of(context).primaryText,
                           size: 24.0,
                         ),
                         Expanded(
@@ -513,7 +526,8 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                                   .bodyLarge
                                   .override(
                                     fontFamily: 'Plus Jakarta Sans',
-                                    color: Color(0xFF14181B),
+                                    color: FlutterFlowTheme.of(context)
+                                        .primaryText,
                                     fontSize: 16.0,
                                     letterSpacing: 0.0,
                                     fontWeight: FontWeight.normal,
@@ -525,7 +539,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                           alignment: AlignmentDirectional(0.9, 0.0),
                           child: Icon(
                             Icons.arrow_forward_ios,
-                            color: Color(0xFF57636C),
+                            color: FlutterFlowTheme.of(context).primaryText,
                             size: 18.0,
                           ),
                         ),
@@ -540,7 +554,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                   width: double.infinity,
                   height: 60.0,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: FlutterFlowTheme.of(context).secondaryBackground,
                     boxShadow: [
                       BoxShadow(
                         blurRadius: 5.0,
@@ -561,7 +575,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                       children: [
                         Icon(
                           Icons.privacy_tip_rounded,
-                          color: Color(0xFF57636C),
+                          color: FlutterFlowTheme.of(context).primaryText,
                           size: 24.0,
                         ),
                         Expanded(
@@ -574,7 +588,8 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                                   .bodyLarge
                                   .override(
                                     fontFamily: 'Plus Jakarta Sans',
-                                    color: Color(0xFF14181B),
+                                    color: FlutterFlowTheme.of(context)
+                                        .primaryText,
                                     fontSize: 16.0,
                                     letterSpacing: 0.0,
                                     fontWeight: FontWeight.normal,
@@ -586,7 +601,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                           alignment: AlignmentDirectional(0.9, 0.0),
                           child: Icon(
                             Icons.arrow_forward_ios,
-                            color: Color(0xFF57636C),
+                            color: FlutterFlowTheme.of(context).primaryText,
                             size: 18.0,
                           ),
                         ),
@@ -601,7 +616,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                   width: double.infinity,
                   height: 60.0,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: FlutterFlowTheme.of(context).secondaryBackground,
                     boxShadow: [
                       BoxShadow(
                         blurRadius: 5.0,
@@ -622,7 +637,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                       children: [
                         Icon(
                           Icons.ios_share,
-                          color: Color(0xFF57636C),
+                          color: FlutterFlowTheme.of(context).primaryText,
                           size: 24.0,
                         ),
                         Expanded(
@@ -635,7 +650,8 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                                   .bodyLarge
                                   .override(
                                     fontFamily: 'Plus Jakarta Sans',
-                                    color: Color(0xFF14181B),
+                                    color: FlutterFlowTheme.of(context)
+                                        .primaryText,
                                     fontSize: 16.0,
                                     letterSpacing: 0.0,
                                     fontWeight: FontWeight.normal,
@@ -645,7 +661,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                         ),
                         Icon(
                           Icons.arrow_forward_ios,
-                          color: Color(0xFF57636C),
+                          color: FlutterFlowTheme.of(context).primaryText,
                           size: 18.0,
                         ),
                       ],

@@ -1,8 +1,6 @@
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'home_page_model.dart';
 export 'home_page_model.dart';
 
@@ -26,15 +24,13 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     super.initState();
     _model = createModel(context, () => HomePageModel());
 
-    // On page load action.
-    SchedulerBinding.instance.addPostFrameCallback((_) async {
-      context.goNamed(
+    Future.delayed(const Duration(milliseconds: 20), () {
+      context.pushReplacementNamed(
         Tela00LoginWidget.routeName,
         extra: <String, dynamic>{
           kTransitionInfoKey: TransitionInfo(
             hasTransition: true,
-            transitionType: PageTransitionType.fade,
-            duration: Duration(milliseconds: 0),
+            transitionType: PageTransitionType.bottomToTop,
           ),
         },
       );
@@ -43,6 +39,21 @@ class _HomePageWidgetState extends State<HomePageWidget> {
 
   @override
   void dispose() {
+    // On page dispose action.
+    // () async {
+    //   await Future.delayed(const Duration(milliseconds: 20));
+
+    //   context.pushNamed(
+    //     Tela00LoginWidget.routeName,
+    //     extra: <String, dynamic>{
+    //       kTransitionInfoKey: TransitionInfo(
+    //         hasTransition: true,
+    //         transitionType: PageTransitionType.bottomToTop,
+    //       ),
+    //     },
+    //   );
+    // }();
+
     _model.dispose();
 
     super.dispose();
@@ -57,7 +68,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: Color(0xFFEC8D0D),
+        backgroundColor: Color(0xFF090036),
         body: SafeArea(
           top: true,
           child: Align(
@@ -66,27 +77,21 @@ class _HomePageWidgetState extends State<HomePageWidget> {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(200.0),
-                  child: Image.network(
-                    'https://images.unsplash.com/photo-1566140967404-b8b3932483f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHw0fHxsZWdvfGVufDB8fHx8MTc0MzYwMDYzMnww&ixlib=rb-4.0.3&q=80&w=1080',
-                    width: 200.0,
-                    height: 200.0,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Text(
-                  'GAME QUIZ',
-                  style: FlutterFlowTheme.of(context).displaySmall.override(
-                    fontFamily: 'Inter Tight',
-                    letterSpacing: 0.0,
-                    shadows: [
-                      Shadow(
-                        color: FlutterFlowTheme.of(context).secondaryText,
-                        offset: Offset(2.0, 2.0),
-                        blurRadius: 2.0,
-                      )
-                    ],
+                Align(
+                  alignment: AlignmentDirectional(0.0, 0.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(0.0),
+                      bottomRight: Radius.circular(0.0),
+                      topLeft: Radius.circular(0.0),
+                      topRight: Radius.circular(0.0),
+                    ),
+                    child: Image.asset(
+                      'assets/images/1000171765.jpg',
+                      width: double.infinity,
+                      height: 200.0,
+                      fit: BoxFit.fill,
+                    ),
                   ),
                 ),
               ]

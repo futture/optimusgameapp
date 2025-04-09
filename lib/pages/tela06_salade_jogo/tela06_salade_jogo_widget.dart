@@ -1,9 +1,14 @@
+import 'package:projeto_game_quiz/core/api/common/web_socket_api.dart';
+import 'package:projeto_game_quiz/core/api/services/question_service.dart';
+import 'package:projeto_game_quiz/core/models/requests/question_request.dart';
+import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
+import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
+
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_radio_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_timer.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:flutter/material.dart';
@@ -13,21 +18,10 @@ export 'tela06_salade_jogo_model.dart';
 
 /// Jogadas
 class Tela06SaladeJogoWidget extends StatefulWidget {
-  const Tela06SaladeJogoWidget({
-    super.key,
-    bool? respotaA,
-    bool? respostaB,
-    bool? respostaC,
-    bool? respostaD,
-  })  : this.respotaA = respotaA ?? true,
-        this.respostaB = respostaB ?? true,
-        this.respostaC = respostaC ?? true,
-        this.respostaD = respostaD ?? true;
+  Tela06SaladeJogoWidget({super.key, dynamic matchInfo})
+      : this.matchInfo = matchInfo;
 
-  final bool respotaA;
-  final bool respostaB;
-  final bool respostaC;
-  final bool respostaD;
+  final dynamic matchInfo;
 
   static String routeName = 'Tela06SaladeJogo';
   static String routePath = '/tela06SaladeJogo';
@@ -37,16 +31,32 @@ class Tela06SaladeJogoWidget extends StatefulWidget {
 }
 
 class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
-  late Tela06SaladeJogoModel _model;
+  double points = 0;
+  bool isLoading = true;
+  late MatchResponse matchInfo;
+  late QuestionResponse question;
+  int questionsAlreadyPresented = 0;
 
+  late Tela06SaladeJogoModel _model;
+  WebSocketService? _webSocketService;
+  final _questionService = QuestionService();
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => Tela06SaladeJogoModel());
-
+    _model.radioGroupValueController = FormFieldController<String>(null);
+    matchInfo = widget.matchInfo;
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+
+    fetchNextQuestionMatchAsync();
+
+    // _model.timerController = FlutterFlowTimerController(
+    //   StopWatchTimer(mode: StopWatchMode.countDown),
+    // );
+
+    // _model.timerController.onStartTimer();
   }
 
   @override
@@ -76,7 +86,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
             buttonSize: 60.0,
             icon: FaIcon(
               FontAwesomeIcons.bars,
-              color: Color(0xFF14181B),
+              color: FlutterFlowTheme.of(context).primaryText,
               size: 25.0,
             ),
             onPressed: () {
@@ -142,6 +152,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
+                                //Falta codigo não remover esta parte
                                 Align(
                                   alignment: AlignmentDirectional(0.0, 0.0),
                                   child: Container(
@@ -171,6 +182,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                                 .bodyMedium
                                                 .override(
                                                   fontFamily: 'Inter',
+                                                  color: Colors.black,
                                                   fontSize: 16.0,
                                                   letterSpacing: 0.0,
                                                 ),
@@ -181,6 +193,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                                 .bodyMedium
                                                 .override(
                                                   fontFamily: 'Inter',
+                                                  color: Colors.black,
                                                   fontSize: 16.0,
                                                   letterSpacing: 0.0,
                                                 ),
@@ -219,16 +232,18 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                                 .bodyMedium
                                                 .override(
                                                   fontFamily: 'Inter',
+                                                  color: Colors.black,
                                                   fontSize: 16.0,
                                                   letterSpacing: 0.0,
                                                 ),
                                           ),
                                           Text(
-                                            '1000',
+                                            '${points}',
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
                                                 .override(
                                                   fontFamily: 'Inter',
+                                                  color: Colors.black,
                                                   fontSize: 16.0,
                                                   letterSpacing: 0.0,
                                                 ),
@@ -262,7 +277,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                           maxHeight: 250.0,
                         ),
                         decoration: BoxDecoration(
-                          color: Color(0xFFF1F4F8),
+                          color: FlutterFlowTheme.of(context).primaryBackground,
                           boxShadow: [
                             BoxShadow(
                               blurRadius: 4.0,
@@ -296,7 +311,8 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                         width: 320.0,
                                         height: 25.0,
                                         decoration: BoxDecoration(
-                                          color: Color(0xFFF1F4F8),
+                                          color: FlutterFlowTheme.of(context)
+                                              .primaryBackground,
                                         ),
                                         child: Align(
                                           alignment:
@@ -312,12 +328,15 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                                 size: 18.0,
                                               ),
                                               Text(
-                                                '1',
+                                                '${questionsAlreadyPresented}',
                                                 style:
                                                     FlutterFlowTheme.of(context)
                                                         .bodyMedium
                                                         .override(
                                                           fontFamily: 'Inter',
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .primaryText,
                                                           fontSize: 16.0,
                                                           letterSpacing: 0.0,
                                                           fontWeight:
@@ -331,6 +350,9 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                                         .bodyMedium
                                                         .override(
                                                           fontFamily: 'Inter',
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .primaryText,
                                                           fontSize: 16.0,
                                                           letterSpacing: 0.0,
                                                           fontWeight:
@@ -338,12 +360,15 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                                         ),
                                               ),
                                               Text(
-                                                '10',
+                                                '${matchInfo.matchConfiguration!.numberOfQuestions}',
                                                 style:
                                                     FlutterFlowTheme.of(context)
                                                         .bodyMedium
                                                         .override(
                                                           fontFamily: 'Inter',
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .primaryText,
                                                           fontSize: 16.0,
                                                           letterSpacing: 0.0,
                                                           fontWeight:
@@ -379,15 +404,17 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                 ),
                                 child: Align(
                                   alignment: AlignmentDirectional(0.0, 0.0),
-                                  child: Text(
-                                    '19 X 20 + 55 = ?',
-                                    style: FlutterFlowTheme.of(context)
-                                        .titleMedium
-                                        .override(
-                                          fontFamily: 'Inter Tight',
-                                          letterSpacing: 0.0,
+                                  child: isLoading
+                                      ? CircularProgressIndicator()
+                                      : Text(
+                                          '${question.utterance}',
+                                          style: FlutterFlowTheme.of(context)
+                                              .titleMedium
+                                              .override(
+                                                fontFamily: 'Inter Tight',
+                                                letterSpacing: 0.0,
+                                              ),
                                         ),
-                                  ),
                                 ),
                               ),
                             ]
@@ -419,7 +446,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                           milliSecond: false,
                         ),
                         controller: _model.timerController,
-                        updateStateInterval: Duration(milliseconds: 100),
+                        updateStateInterval: Duration(milliseconds: 1),
                         onChanged: (value, displayTime, shouldUpdate) {
                           _model.timerMilliseconds = value;
                           _model.timerValue = displayTime;
@@ -447,649 +474,227 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                           autovalidateMode: AutovalidateMode.disabled,
                           child: Align(
                             alignment: AlignmentDirectional(0.0, 0.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Align(
-                                  alignment: AlignmentDirectional(0.0, 0.0),
-                                  child: Container(
-                                    width: 350.0,
-                                    height: 60.0,
-                                    constraints: BoxConstraints(
-                                      minWidth: 350.0,
-                                      minHeight: 60.0,
-                                      maxWidth: 900.0,
-                                      maxHeight: 100.0,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xFFEC8D0D),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          blurRadius: 4.0,
-                                          color: Color(0x33000000),
-                                          offset: Offset(
-                                            0.0,
-                                            2.0,
-                                          ),
-                                          spreadRadius: 5.0,
-                                        )
-                                      ],
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                    alignment: AlignmentDirectional(0.0, 0.0),
-                                    child: Align(
-                                      alignment: AlignmentDirectional(0.0, 0.0),
-                                      child: Container(
-                                        width: 350.0,
-                                        height: double.infinity,
-                                        child: Stack(
-                                          alignment:
-                                              AlignmentDirectional(0.0, 0.0),
-                                          children: [
-                                            Align(
-                                              alignment: AlignmentDirectional(
-                                                  0.0, 0.0),
-                                              child: Padding(
-                                                padding: EdgeInsets.all(13.0),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.max,
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Opacity(
-                                                      opacity: 0.0,
-                                                      child: Align(
-                                                        alignment:
-                                                            AlignmentDirectional(
-                                                                0.0, 0.0),
-                                                        child: FaIcon(
-                                                          FontAwesomeIcons.font,
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .primaryText,
-                                                          size: 24.0,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Align(
-                                                      alignment:
-                                                          AlignmentDirectional(
-                                                              0.0, 0.0),
-                                                      child: Text(
-                                                        '200',
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .titleLarge
-                                                                .override(
-                                                                  fontFamily:
-                                                                      'Inter Tight',
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                ),
-                                                      ),
-                                                    ),
-                                                    Align(
-                                                      alignment:
-                                                          AlignmentDirectional(
-                                                              0.0, 0.0),
-                                                      child: FaIcon(
-                                                        FontAwesomeIcons.font,
-                                                        color:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .primaryText,
-                                                        size: 22.0,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            Align(
-                                              alignment: AlignmentDirectional(
-                                                  0.0, 0.0),
-                                              child: FlutterFlowRadioButton(
-                                                options: ['opcaoA'].toList(),
-                                                onChanged: (val) =>
-                                                    safeSetState(() {}),
-                                                controller: _model
-                                                        .radioButtonAValueController ??=
-                                                    FormFieldController<String>(
-                                                        'opcaoA'),
-                                                optionHeight: 60.0,
-                                                optionWidth: 350.0,
-                                                textStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .labelMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                selectedTextStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          color:
-                                                              Color(0x0014181B),
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                textPadding:
-                                                    EdgeInsetsDirectional
-                                                        .fromSTEB(
-                                                            5.0, 0.0, 0.0, 0.0),
-                                                buttonPosition:
-                                                    RadioButtonPosition.left,
-                                                direction: Axis.vertical,
-                                                radioButtonColor:
-                                                    Color(0xFF00C90C),
-                                                inactiveRadioButtonColor:
-                                                    Color(0xFF14181B),
-                                                toggleable: false,
-                                                horizontalAlignment:
-                                                    WrapAlignment.start,
-                                                verticalAlignment:
-                                                    WrapCrossAlignment.start,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Align(
-                                  alignment: AlignmentDirectional(0.0, 0.0),
-                                  child: Container(
-                                    width: 350.0,
-                                    height: 60.0,
-                                    constraints: BoxConstraints(
-                                      minWidth: 350.0,
-                                      minHeight: 60.0,
-                                      maxWidth: 900.0,
-                                      maxHeight: 100.0,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xFFEC8D0D),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          blurRadius: 4.0,
-                                          color: Color(0x33000000),
-                                          offset: Offset(
-                                            0.0,
-                                            2.0,
-                                          ),
-                                          spreadRadius: 5.0,
-                                        )
-                                      ],
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                    alignment: AlignmentDirectional(0.0, 0.0),
-                                    child: Align(
-                                      alignment: AlignmentDirectional(0.0, 0.0),
-                                      child: Container(
-                                        width: 350.0,
-                                        height: double.infinity,
-                                        child: Stack(
-                                          alignment:
-                                              AlignmentDirectional(0.0, 0.0),
-                                          children: [
-                                            Align(
-                                              alignment: AlignmentDirectional(
-                                                  0.0, 0.0),
-                                              child: Padding(
-                                                padding: EdgeInsets.all(13.0),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.max,
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Opacity(
-                                                      opacity: 0.0,
-                                                      child: Align(
-                                                        alignment:
-                                                            AlignmentDirectional(
-                                                                0.0, 0.0),
-                                                        child: FaIcon(
-                                                          FontAwesomeIcons.font,
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .primaryText,
-                                                          size: 24.0,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Align(
-                                                      alignment:
-                                                          AlignmentDirectional(
-                                                              0.0, 0.0),
-                                                      child: Text(
-                                                        '504',
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .titleLarge
-                                                                .override(
-                                                                  fontFamily:
-                                                                      'Inter Tight',
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                ),
-                                                      ),
-                                                    ),
-                                                    Align(
-                                                      alignment:
-                                                          AlignmentDirectional(
-                                                              0.0, 0.0),
-                                                      child: FaIcon(
-                                                        FontAwesomeIcons.bold,
-                                                        color:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .primaryText,
-                                                        size: 22.0,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            Align(
-                                              alignment: AlignmentDirectional(
-                                                  0.0, 0.0),
-                                              child: FlutterFlowRadioButton(
-                                                options: ['opcaoB'].toList(),
-                                                onChanged: widget.respostaB
-                                                    ? null
-                                                    : (val) =>
-                                                        safeSetState(() {}),
-                                                controller: _model
-                                                        .radioButtonBValueController ??=
-                                                    FormFieldController<String>(
-                                                        'opcaoB'),
-                                                optionHeight: 60.0,
-                                                optionWidth: 350.0,
-                                                textStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .labelMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                selectedTextStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          color:
-                                                              Color(0x0014181B),
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                buttonPosition:
-                                                    RadioButtonPosition.left,
-                                                direction: Axis.vertical,
-                                                radioButtonColor:
-                                                    Color(0xFF00C90C),
-                                                inactiveRadioButtonColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primaryText,
-                                                toggleable: true,
-                                                horizontalAlignment:
-                                                    WrapAlignment.start,
-                                                verticalAlignment:
-                                                    WrapCrossAlignment.start,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Align(
-                                  alignment: AlignmentDirectional(0.0, 0.0),
-                                  child: Container(
-                                    width: 350.0,
-                                    height: 60.0,
-                                    constraints: BoxConstraints(
-                                      minWidth: 350.0,
-                                      minHeight: 60.0,
-                                      maxWidth: 900.0,
-                                      maxHeight: 100.0,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xFFEC8D0D),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          blurRadius: 4.0,
-                                          color: Color(0x33000000),
-                                          offset: Offset(
-                                            0.0,
-                                            2.0,
-                                          ),
-                                          spreadRadius: 5.0,
-                                        )
-                                      ],
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                    alignment: AlignmentDirectional(0.0, 0.0),
-                                    child: Align(
-                                      alignment: AlignmentDirectional(0.0, 0.0),
-                                      child: Container(
-                                        width: 350.0,
-                                        height: double.infinity,
-                                        child: Stack(
-                                          alignment:
-                                              AlignmentDirectional(0.0, 0.0),
-                                          children: [
-                                            Align(
-                                              alignment: AlignmentDirectional(
-                                                  0.0, 0.0),
-                                              child: Padding(
-                                                padding: EdgeInsets.all(13.0),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.max,
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Opacity(
-                                                      opacity: 0.0,
-                                                      child: Align(
-                                                        alignment:
-                                                            AlignmentDirectional(
-                                                                0.0, 0.0),
-                                                        child: FaIcon(
-                                                          FontAwesomeIcons.font,
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .primaryText,
-                                                          size: 24.0,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Align(
-                                                      alignment:
-                                                          AlignmentDirectional(
-                                                              0.0, 0.0),
-                                                      child: Text(
-                                                        '340',
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .titleLarge
-                                                                .override(
-                                                                  fontFamily:
-                                                                      'Inter Tight',
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                ),
-                                                      ),
-                                                    ),
-                                                    Text(
-                                                      'C',
-                                                      style: FlutterFlowTheme
-                                                              .of(context)
-                                                          .headlineSmall
-                                                          .override(
-                                                            fontFamily:
-                                                                'Inter Tight',
-                                                            letterSpacing: 0.0,
-                                                          ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            Align(
-                                              alignment: AlignmentDirectional(
-                                                  0.0, 0.0),
-                                              child: FlutterFlowRadioButton(
-                                                options: ['opcaoC'].toList(),
-                                                onChanged: widget.respostaC
-                                                    ? null
-                                                    : (val) =>
-                                                        safeSetState(() {}),
-                                                controller: _model
-                                                        .radioButtonCValueController ??=
-                                                    FormFieldController<String>(
-                                                        'opcaoC'),
-                                                optionHeight: 60.0,
-                                                optionWidth: 350.0,
-                                                textStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .labelMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                selectedTextStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          color:
-                                                              Color(0x0014181B),
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                buttonPosition:
-                                                    RadioButtonPosition.left,
-                                                direction: Axis.vertical,
-                                                radioButtonColor:
-                                                    Color(0xFF00C90C),
-                                                inactiveRadioButtonColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primaryText,
-                                                toggleable: true,
-                                                horizontalAlignment:
-                                                    WrapAlignment.start,
-                                                verticalAlignment:
-                                                    WrapCrossAlignment.start,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Align(
-                                  alignment: AlignmentDirectional(0.0, 0.0),
-                                  child: Container(
-                                    width: 350.0,
-                                    height: 60.0,
-                                    constraints: BoxConstraints(
-                                      minWidth: 350.0,
-                                      minHeight: 60.0,
-                                      maxWidth: 900.0,
-                                      maxHeight: 100.0,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xFFEC8D0D),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          blurRadius: 4.0,
-                                          color: Color(0x33000000),
-                                          offset: Offset(
-                                            0.0,
-                                            2.0,
-                                          ),
-                                          spreadRadius: 5.0,
-                                        )
-                                      ],
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                    alignment: AlignmentDirectional(0.0, 0.0),
-                                    child: Align(
-                                      alignment: AlignmentDirectional(0.0, 0.0),
-                                      child: Container(
-                                        width: 350.0,
-                                        height: double.infinity,
-                                        child: Stack(
-                                          alignment:
-                                              AlignmentDirectional(0.0, 0.0),
-                                          children: [
-                                            Align(
-                                              alignment: AlignmentDirectional(
-                                                  0.0, 0.0),
-                                              child: Padding(
-                                                padding: EdgeInsets.all(13.0),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.max,
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Text(
-                                                      'D',
-                                                      style: FlutterFlowTheme
-                                                              .of(context)
-                                                          .headlineSmall
-                                                          .override(
-                                                            fontFamily:
-                                                                'Inter Tight',
-                                                            letterSpacing: 0.0,
-                                                          ),
-                                                    ),
-                                                    Align(
-                                                      alignment:
-                                                          AlignmentDirectional(
-                                                              0.0, 0.0),
-                                                      child: Text(
-                                                        '435',
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .titleLarge
-                                                                .override(
-                                                                  fontFamily:
-                                                                      'Inter Tight',
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                ),
-                                                      ),
-                                                    ),
-                                                    Opacity(
-                                                      opacity: 0.0,
-                                                      child: Align(
-                                                        alignment:
-                                                            AlignmentDirectional(
-                                                                0.0, 0.0),
-                                                        child: FaIcon(
-                                                          FontAwesomeIcons.font,
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .primaryText,
-                                                          size: 24.0,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            if (widget.respostaD == true)
+                            child: isLoading
+                                ? CircularProgressIndicator()
+                                : Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      if (question.optionAnswers != null)
+                                        ...question.optionAnswers!.map((e) {
+                                          return Column(
+                                            children: [
                                               Align(
                                                 alignment: AlignmentDirectional(
                                                     0.0, 0.0),
-                                                child: FlutterFlowRadioButton(
-                                                  options: ['opcaoD'].toList(),
-                                                  onChanged: (val) =>
-                                                      safeSetState(() {}),
-                                                  controller: _model
-                                                          .radioButtonDValueController ??=
-                                                      FormFieldController<
-                                                          String>('opcaoD'),
-                                                  optionHeight: 60.0,
-                                                  optionWidth: 350.0,
-                                                  textStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .labelMedium
-                                                          .override(
-                                                            fontFamily: 'Inter',
-                                                            letterSpacing: 0.0,
+                                                child: Container(
+                                                  width: 350.0,
+                                                  height: 60.0,
+                                                  constraints: BoxConstraints(
+                                                    minWidth: 350.0,
+                                                    minHeight: 60.0,
+                                                    maxWidth: 900.0,
+                                                    maxHeight: 100.0,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: Color(0xFFEC8D0D),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        blurRadius: 4.0,
+                                                        color:
+                                                            Color(0x33000000),
+                                                        offset:
+                                                            Offset(0.0, 2.0),
+                                                        spreadRadius: 5.0,
+                                                      ),
+                                                    ],
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10.0),
+                                                  ),
+                                                  alignment:
+                                                      AlignmentDirectional(
+                                                          0.0, 0.0),
+                                                  child: Align(
+                                                    alignment:
+                                                        AlignmentDirectional(
+                                                            0.0, 0.0),
+                                                    child: Container(
+                                                      width: 350.0,
+                                                      height: double.infinity,
+                                                      child: Stack(
+                                                        alignment:
+                                                            AlignmentDirectional(
+                                                                0.0, 0.0),
+                                                        children: [
+                                                          Align(
+                                                            alignment:
+                                                                AlignmentDirectional(
+                                                                    0.0, 0.0),
+                                                            child: Padding(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .all(
+                                                                          13.0),
+                                                              child: Row(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .max,
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceBetween,
+                                                                children: [
+                                                                  Opacity(
+                                                                    opacity:
+                                                                        0.0,
+                                                                    child:
+                                                                        Align(
+                                                                      alignment:
+                                                                          AlignmentDirectional(
+                                                                              0.0,
+                                                                              0.0),
+                                                                      child:
+                                                                          FaIcon(
+                                                                        FontAwesomeIcons
+                                                                            .font,
+                                                                        color: FlutterFlowTheme.of(context)
+                                                                            .primaryText,
+                                                                        size:
+                                                                            24.0,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  Align(
+                                                                    alignment:
+                                                                        AlignmentDirectional(
+                                                                            0.0,
+                                                                            0.0),
+                                                                    child: Text(
+                                                                      '${e.textOption}',
+                                                                      style: FlutterFlowTheme.of(
+                                                                              context)
+                                                                          .titleLarge
+                                                                          .override(
+                                                                            fontFamily:
+                                                                                'Inter Tight',
+                                                                            color:
+                                                                                Colors.black,
+                                                                            letterSpacing:
+                                                                                0.0,
+                                                                          ),
+                                                                    ),
+                                                                  ),
+                                                                  Align(
+                                                                    alignment:
+                                                                        AlignmentDirectional(
+                                                                            0.0,
+                                                                            0.0),
+                                                                    child:
+                                                                        FaIcon(
+                                                                      FontAwesomeIcons
+                                                                          .font,
+                                                                      color: Colors
+                                                                          .black,
+                                                                      size:
+                                                                          22.0,
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
                                                           ),
-                                                  selectedTextStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .override(
-                                                            fontFamily: 'Inter',
-                                                            color: Color(
-                                                                0x0014181B),
-                                                            fontSize: 16.0,
-                                                            letterSpacing: 0.0,
+                                                          Align(
+                                                            alignment:
+                                                                AlignmentDirectional(
+                                                                    0.0, 0.0),
+                                                            child:
+                                                                FlutterFlowRadioButton(
+                                                              options: [
+                                                                '${e.codeOption}'
+                                                              ],
+                                                              onChanged: (val) {
+                                                                if (val ==
+                                                                    e.codeOption) {
+                                                                  sendUserResponseAsync(
+                                                                      e.id);
+                                                                }
+
+                                                                safeSetState(
+                                                                    () {});
+                                                              },
+                                                              controller: _model
+                                                                  .radioGroupValueController!,
+                                                              optionHeight:
+                                                                  60.0,
+                                                              optionWidth:
+                                                                  350.0,
+                                                              textStyle:
+                                                                  FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .labelMedium
+                                                                      .override(
+                                                                        fontFamily:
+                                                                            'Inter',
+                                                                        letterSpacing:
+                                                                            0.0,
+                                                                      ),
+                                                              selectedTextStyle:
+                                                                  FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodyMedium
+                                                                      .override(
+                                                                        fontFamily:
+                                                                            'Inter',
+                                                                        color: Color(
+                                                                            0x0014181B),
+                                                                        fontSize:
+                                                                            16.0,
+                                                                        letterSpacing:
+                                                                            0.0,
+                                                                      ),
+                                                              textPadding:
+                                                                  EdgeInsetsDirectional
+                                                                      .fromSTEB(
+                                                                          5.0,
+                                                                          0.0,
+                                                                          0.0,
+                                                                          0.0),
+                                                              buttonPosition:
+                                                                  RadioButtonPosition
+                                                                      .left,
+                                                              direction:
+                                                                  Axis.vertical,
+                                                              radioButtonColor:
+                                                                  Color(
+                                                                      0xFF00C90C),
+                                                              inactiveRadioButtonColor:
+                                                                  Color(
+                                                                      0xFF14181B),
+                                                              toggleable: false,
+                                                              horizontalAlignment:
+                                                                  WrapAlignment
+                                                                      .start,
+                                                              verticalAlignment:
+                                                                  WrapCrossAlignment
+                                                                      .start,
+                                                            ),
                                                           ),
-                                                  buttonPosition:
-                                                      RadioButtonPosition.left,
-                                                  direction: Axis.vertical,
-                                                  radioButtonColor:
-                                                      Color(0xFF00C90C),
-                                                  inactiveRadioButtonColor:
-                                                      Color(0xFF14181B),
-                                                  toggleable: false,
-                                                  horizontalAlignment:
-                                                      WrapAlignment.start,
-                                                  verticalAlignment:
-                                                      WrapCrossAlignment.start,
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
+                                              SizedBox(
+                                                  height:
+                                                      20.0), // Add space between options
+                                            ],
+                                          );
+                                        }).toList(),
+                                    ],
                                   ),
-                                ),
-                                Align(
-                                  alignment: AlignmentDirectional(0.0, 0.0),
-                                  child: Padding(
-                                    padding: EdgeInsets.all(15.0),
-                                    child: FFButtonWidget(
-                                      onPressed: () {
-                                        print('Button pressed ...');
-                                      },
-                                      text: 'Validar',
-                                      options: FFButtonOptions(
-                                        width: 350.0,
-                                        height: 45.0,
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            16.0, 0.0, 16.0, 0.0),
-                                        iconPadding:
-                                            EdgeInsetsDirectional.fromSTEB(
-                                                0.0, 0.0, 0.0, 0.0),
-                                        color: Color(0xFF01BF01),
-                                        textStyle: FlutterFlowTheme.of(context)
-                                            .titleMedium
-                                            .override(
-                                              fontFamily: 'Inter Tight',
-                                              letterSpacing: 0.0,
-                                              fontWeight: FontWeight.normal,
-                                            ),
-                                        elevation: 0.0,
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ]
-                                  .divide(SizedBox(height: 20.0))
-                                  .addToStart(SizedBox(height: 5.0))
-                                  .addToEnd(SizedBox(height: 20.0)),
-                            ),
                           ),
                         ),
                       ),
@@ -1102,5 +707,97 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
         ),
       ),
     );
+  }
+
+  Future<void> sendUserResponseAsync(String optionAnswerId) async {
+    var ee = await _questionService.answerQuestionAsync(
+        "792159b0-05ae-4fa2-b05e-8cf0e3c68a24",
+        PlayerAnswerRequest(
+            matchId: matchInfo.id,
+            questionId: question.id,
+            optionAnswerId: optionAnswerId,
+            answeredAt: DateTime.now().add(new Duration(seconds: 10))));
+
+    var xcxcx = await _questionService.answerQuestionAsync(
+        "4eb1e7f8-5238-4592-b1ed-4883b22ee9c3",
+        PlayerAnswerRequest(
+            matchId: matchInfo.id,
+            questionId: question.id,
+            optionAnswerId: optionAnswerId,
+            answeredAt: DateTime.now().add(new Duration(seconds: 10))));
+
+    if (ee["isSuccess"]) {
+      await getWebSocketEveryoneWhoRespondedAsync();
+    }
+  }
+
+  Future<void> fetchNextQuestionMatchAsync() async {
+    setState(() {
+      isLoading = true;
+    });
+    var resultQuestion =
+        await _questionService.nextQuestionMatchAsync(matchInfo.id);
+
+    if (resultQuestion["isSuccess"]) {
+      setState(() {
+        question = resultQuestion["data"];
+        questionsAlreadyPresented += 1;
+        isLoading = false;
+      });
+      if (_webSocketService != null) {
+        _webSocketService!.disconnect();
+      }
+    }
+  }
+
+  Future<void> getWebSocketEveryoneWhoRespondedAsync() async {
+    String url =
+        '/match/${matchInfo.id}/question/${question.id}/everyone-who-responded';
+
+    _webSocketService = WebSocketService(
+      url: url,
+      onMessageReceived: (message) {
+        var decodedMessage = jsonDecode(message);
+        var questionStats = QuestionStats.fromJson(decodedMessage);
+
+        var playerQuestionStats = {
+          ...?questionStats.erros?.map((e) => e.playerId),
+          ...?questionStats.hits?.map((e) => e.playerId),
+        }.toList();
+
+        if (playerQuestionStats.length ==
+            matchInfo.matchConfiguration!.numberOfPlayers) {
+          setState(() {
+            points += questionStats.hits
+                    ?.where((e) =>
+                        e.playerId == "792159b0-05ae-4fa2-b05e-8cf0e3c68a24")
+                    .fold(0.0, (sum, e) => sum! + (e.score ?? 0.0)) ??
+                0.0;
+          });
+
+          fetchNextQuestionMatchAsync();
+        } else {
+          print(
+              "Aguardando todos responderem! Para seguir para proxima questão...");
+        }
+
+        // if (_playersConnected >= _minPlayers) {
+        //   Navigator.of(context, rootNavigator: true).pop();
+        //   setState(() {
+        //     _isWaitingPlayers = false;
+        //   });
+
+        //   print("Partida pronta! Começando...");
+        // }
+      },
+      onError: (error) {
+        print("Erro no WebSocket: $error");
+      },
+      onDone: () {
+        print("Conexão WebSocket encerrada.");
+      },
+    );
+
+    _webSocketService!.connect();
   }
 }

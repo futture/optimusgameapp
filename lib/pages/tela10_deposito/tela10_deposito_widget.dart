@@ -3,7 +3,10 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'tela10_deposito_model.dart';
 export 'tela10_deposito_model.dart';
 
@@ -65,7 +68,7 @@ class _Tela10DepositoWidgetState extends State<Tela10DepositoWidget>
               fillColor: FlutterFlowTheme.of(context).primaryBackground,
               icon: Icon(
                 Icons.arrow_back,
-                color: Colors.black,
+                color: FlutterFlowTheme.of(context).primaryText,
                 size: 24.0,
               ),
               onPressed: () async {
@@ -110,16 +113,16 @@ class _Tela10DepositoWidgetState extends State<Tela10DepositoWidget>
                       child: FlutterFlowButtonTabBar(
                         useToggleButtonStyle: false,
                         labelStyle:
-                            FlutterFlowTheme.of(context).titleMedium.override(
+                            FlutterFlowTheme.of(context).titleSmall.override(
                                   fontFamily: 'Inter Tight',
                                   letterSpacing: 0.0,
                                 ),
                         unselectedLabelStyle:
-                            FlutterFlowTheme.of(context).titleMedium.override(
+                            FlutterFlowTheme.of(context).titleSmall.override(
                                   fontFamily: 'Inter Tight',
                                   letterSpacing: 0.0,
                                 ),
-                        labelColor: FlutterFlowTheme.of(context).primaryText,
+                        labelColor: Colors.black,
                         unselectedLabelColor:
                             FlutterFlowTheme.of(context).secondaryText,
                         backgroundColor: Color(0xFFEC8D0D),
