@@ -16,3 +16,8 @@ class CreateFcmTokenRequest {
     };
   }
 }
+
+
+class CreateUserRequest{
+  
+}

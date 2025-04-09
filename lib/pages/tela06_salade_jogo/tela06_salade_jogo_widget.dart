@@ -1,5 +1,7 @@
 import 'package:projeto_game_quiz/core/api/common/web_socket_api.dart';
 import 'package:projeto_game_quiz/core/api/services/question_service.dart';
+import 'package:projeto_game_quiz/core/api/services/question_web_socket_service.dart';
+import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/question_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
@@ -31,20 +33,22 @@ class Tela06SaladeJogoWidget extends StatefulWidget {
 }
 
 class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
+  String? userId = "";
   double points = 0;
   bool isLoading = true;
   late MatchResponse matchInfo;
   late QuestionResponse question;
   int questionsAlreadyPresented = 0;
-
   late Tela06SaladeJogoModel _model;
   WebSocketService? _webSocketService;
   final _questionService = QuestionService();
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  late final QuestionWebSocketService _questionWebSocketService;
 
   @override
   void initState() {
     super.initState();
+    getUserIdAsync();
     _model = createModel(context, () => Tela06SaladeJogoModel());
     _model.radioGroupValueController = FormFieldController<String>(null);
     matchInfo = widget.matchInfo;
@@ -61,6 +65,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
 
   @override
   void dispose() {
+    _questionWebSocketService.disconnect();
     _model.dispose();
 
     super.dispose();
@@ -709,24 +714,22 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
     );
   }
 
+  Future<void> getUserIdAsync() async {
+    var _userId = await UserUtil.getUserId();
+
+    setState(() => userId = _userId);
+  }
+
   Future<void> sendUserResponseAsync(String optionAnswerId) async {
-    var ee = await _questionService.answerQuestionAsync(
-        "792159b0-05ae-4fa2-b05e-8cf0e3c68a24",
+    var resultAnswerQuestion = await _questionService.answerQuestionAsync(
+        userId!,
         PlayerAnswerRequest(
             matchId: matchInfo.id,
             questionId: question.id,
             optionAnswerId: optionAnswerId,
             answeredAt: DateTime.now().add(new Duration(seconds: 10))));
 
-    var xcxcx = await _questionService.answerQuestionAsync(
-        "4eb1e7f8-5238-4592-b1ed-4883b22ee9c3",
-        PlayerAnswerRequest(
-            matchId: matchInfo.id,
-            questionId: question.id,
-            optionAnswerId: optionAnswerId,
-            answeredAt: DateTime.now().add(new Duration(seconds: 10))));
-
-    if (ee["isSuccess"]) {
+    if (resultAnswerQuestion["isSuccess"]) {
       await getWebSocketEveryoneWhoRespondedAsync();
     }
   }
@@ -751,44 +754,22 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
   }
 
   Future<void> getWebSocketEveryoneWhoRespondedAsync() async {
-    String url =
-        '/match/${matchInfo.id}/question/${question.id}/everyone-who-responded';
+    _questionWebSocketService = QuestionWebSocketService(
+      matchInfo: matchInfo,
+      question: question,
+      userId: userId!,
+      onUpdate: (stats) {
+        // opcional: mostrar progresso parcial, se quiser
+      },
+      onAllPlayersResponded: (stats) {
+        setState(() {
+          points += stats.hits
+                  ?.where((e) => e.playerId == userId)
+                  .fold(0.0, (sum, e) => sum! + (e.score ?? 0.0)) ??
+              0.0;
+        });
 
-    _webSocketService = WebSocketService(
-      url: url,
-      onMessageReceived: (message) {
-        var decodedMessage = jsonDecode(message);
-        var questionStats = QuestionStats.fromJson(decodedMessage);
-
-        var playerQuestionStats = {
-          ...?questionStats.erros?.map((e) => e.playerId),
-          ...?questionStats.hits?.map((e) => e.playerId),
-        }.toList();
-
-        if (playerQuestionStats.length ==
-            matchInfo.matchConfiguration!.numberOfPlayers) {
-          setState(() {
-            points += questionStats.hits
-                    ?.where((e) =>
-                        e.playerId == "792159b0-05ae-4fa2-b05e-8cf0e3c68a24")
-                    .fold(0.0, (sum, e) => sum! + (e.score ?? 0.0)) ??
-                0.0;
-          });
-
-          fetchNextQuestionMatchAsync();
-        } else {
-          print(
-              "Aguardando todos responderem! Para seguir para proxima questão...");
-        }
-
-        // if (_playersConnected >= _minPlayers) {
-        //   Navigator.of(context, rootNavigator: true).pop();
-        //   setState(() {
-        //     _isWaitingPlayers = false;
-        //   });
-
-        //   print("Partida pronta! Começando...");
-        // }
+        fetchNextQuestionMatchAsync();
       },
       onError: (error) {
         print("Erro no WebSocket: $error");
@@ -798,6 +779,6 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
       },
     );
 
-    _webSocketService!.connect();
+    _questionWebSocketService.connect();
   }
 }

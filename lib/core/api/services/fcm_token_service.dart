@@ -3,7 +3,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:projeto_game_quiz/core/api/services/user_service.dart';
 import 'package:projeto_game_quiz/core/models/requests/user_request.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class FcmTokenService {
   String? _token;
@@ -14,7 +13,6 @@ class FcmTokenService {
   Future<void> initFirebaseMessaging(BuildContext context) async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-    final prefs = await SharedPreferences.getInstance();
 
     _token = await messaging.getToken();
     print("Token FCM: $_token");

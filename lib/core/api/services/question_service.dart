@@ -1,9 +1,12 @@
 import 'package:projeto_game_quiz/core/api/common/http_client_api.dart';
-import 'package:projeto_game_quiz/core/models/common/error_response.dart';
+import 'package:projeto_game_quiz/core/api/utils/error_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/question_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
 
 class QuestionService {
+  
+  ErrorUtil _errorUtil = ErrorUtil();
+
   final httpService = HttpClientService();
 
   Future<dynamic> getQuestionByMatchIdAsync(String matchId) async {
@@ -31,14 +34,7 @@ class QuestionService {
 
       return {"isSuccess": true, "data": result};
     } catch (e) {
-      if (e is ErrorResponse) {
-        return {"isSuccess": false, "error": e};
-      } else {
-        return {
-          "isSuccess": false,
-          "error": {"message": "Ocorreu um erro inesperado"}
-        };
-      }
+      return _errorUtil.handleError(e);
     }
   }
 
@@ -51,14 +47,7 @@ class QuestionService {
 
       return {"isSuccess": true, "data": result};
     } catch (e) {
-      if (e is ErrorResponse) {
-        return {"isSuccess": false, "error": e};
-      } else {
-        return {
-          "isSuccess": false,
-          "error": {"message": "Ocorreu um erro inesperado"}
-        };
-      }
+      return _errorUtil.handleError(e);
     }
   }
 

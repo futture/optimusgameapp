@@ -90,4 +90,5 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22"
+    implementation 'com.it_nomads.fluttersecurestorage:flutter_secure_storage:5.0.2'
 }

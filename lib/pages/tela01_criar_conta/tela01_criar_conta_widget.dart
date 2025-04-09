@@ -1,14 +1,12 @@
 import 'package:projeto_game_quiz/components/modals/modal05_valida_conta/modal05_valida_conta_widget.dart';
-
+import 'package:projeto_game_quiz/core/api/services/user_service.dart';
+import '/components/modal_valida_conta_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'tela01_criar_conta_model.dart';
 export 'tela01_criar_conta_model.dart';
 
@@ -627,8 +625,81 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget> {
                               .addToStart(SizedBox(width: 10.0)),
                         ),
                         FFButtonWidget(
-                          onPressed: () {
-                            print('cadastrar pressed ...');
+                          onPressed: () async {
+                            Map<String, dynamic> userData = {
+                              'nome_completo':
+                                  _model.inputMomeCompletoTextController?.text,
+                              'telefone':
+                                  _model.inputTelefoneTextController?.text,
+                              'email': _model.inputEmailTextController?.text,
+                              'senha': _model.inputSenhaTextController1?.text,
+                            };
+                            String? otp = await showModalBottomSheet<String>(
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              enableDrag: false,
+                              useSafeArea: true,
+                              context: context,
+                              builder: (context) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    FocusScope.of(context).unfocus();
+                                    FocusManager.instance.primaryFocus
+                                        ?.unfocus();
+                                  },
+                                  child: Padding(
+                                    padding: MediaQuery.viewInsetsOf(context),
+                                    child: ModalValidaContaWidget(),
+                                  ),
+                                );
+                              },
+                            );
+
+                            // Verifica se o OTP foi inserido
+                            if (otp != null && otp.isNotEmpty) {
+                              print(
+                                  "OTP inserido: $otp"); // Aqui você pode imprimir o OTP no console ou usar em outro lugar
+
+                              // Agora você pode validar o OTP, enviar para o servidor, ou qualquer outra lógica necessária
+                              var resultOtp = await UserService()
+                                  .verifyOtp(userData['email'], otp);
+
+                              if (resultOtp["isSuccess"]) {
+                                // OTP válido, agora cria o usuário
+                                var resultCreateUser = 
+                                    await UserService().createUser(userData);
+
+                                if (resultCreateUser["isSuccess"]) {
+                                  // Usuário criado com sucesso
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            "Usuário cadastrado com sucesso!")),
+                                  );
+                                } else {
+                                  // Erro ao criar o usuário
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            "Falha ao criar usuário. Tente novamente.")),
+                                  );
+                                }
+                              } else {
+                                // OTP inválido
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          "OTP inválido. Tente novamente.")),
+                                );
+                              }
+                            } else {
+                              // Caso o OTP não tenha sido inserido
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content:
+                                        Text("Você precisa inserir um OTP.")),
+                              );
+                            }
                           },
                           text: 'CADASTRAR',
                           options: FFButtonOptions(

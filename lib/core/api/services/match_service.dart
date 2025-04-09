@@ -1,10 +1,12 @@
 import 'package:projeto_game_quiz/core/api/common/http_client_api.dart';
-import 'package:projeto_game_quiz/core/api/common/web_socket_api.dart';
-import 'package:projeto_game_quiz/core/models/common/error_response.dart';
+import 'package:projeto_game_quiz/core/api/utils/error_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 
 class MatchService {
+
+  ErrorUtil _errorUtil = ErrorUtil();
+
   final httpService = HttpClientService();
 
   Future<dynamic> getMatchByMatchIdAsync(String matchId) async {
@@ -16,7 +18,7 @@ class MatchService {
       );
       return {"isSuccess": true, "data": successResult};
     } catch (e) {
-      return {"isSuccess": false, "error": e};
+      return _errorUtil.handleError(e);
     }
   }
 
@@ -30,7 +32,7 @@ class MatchService {
       );
       return {"isSuccess": true, "data": successResult};
     } catch (e) {
-      return {"isSuccess": false, "error": e};
+      return _errorUtil.handleError(e);
     }
   }
 
@@ -43,7 +45,7 @@ class MatchService {
       );
       return {"isSuccess": true, "data": successResult};
     } catch (e) {
-      return {"isSuccess": false, "error": e};
+      return _errorUtil.handleError(e);
     }
   }
 
@@ -55,14 +57,7 @@ class MatchService {
 
       return {"isSuccess": true, "data": result};
     } catch (e) {
-      if (e is ErrorResponse) {
-        return {"isSuccess": false, "error": e};
-      } else {
-        return {
-          "isSuccess": false,
-          "error": {"message": "Ocorreu um erro inesperado"}
-        };
-      }
+      return _errorUtil.handleError(e);
     }
   }
 
@@ -74,14 +69,7 @@ class MatchService {
 
       return {"isSuccess": true, "data": result};
     } catch (e) {
-      if (e is ErrorResponse) {
-        return {"isSuccess": false, "error": e};
-      } else {
-        return {
-          "isSuccess": false,
-          "error": {"message": "Ocorreu um erro inesperado"}
-        };
-      }
+      return _errorUtil.handleError(e);
     }
   }
 
@@ -92,14 +80,7 @@ class MatchService {
 
       return {"isSuccess": true, "data": result};
     } catch (e) {
-      if (e is ErrorResponse) {
-        return {"isSuccess": false, "error": e};
-      } else {
-        return {
-          "isSuccess": false,
-          "error": {"message": "Ocorreu um erro inesperado"}
-        };
-      }
+      return _errorUtil.handleError(e);
     }
   }
 
@@ -110,14 +91,7 @@ class MatchService {
 
       return {"isSuccess": true, "data": result};
     } catch (e) {
-      if (e is ErrorResponse) {
-        return {"isSuccess": false, "error": e};
-      } else {
-        return {
-          "isSuccess": false,
-          "error": {"message": "Ocorreu um erro inesperado"}
-        };
-      }
+      return _errorUtil.handleError(e);
     }
   }
 

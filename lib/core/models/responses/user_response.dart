@@ -12,7 +12,7 @@ class UserResponse {
       required this.email,
       required this.phone_number,
       required this.phone_number_mask,
-      required this.role});
+      this.role});
 
   factory UserResponse.FromJson(Map<String, dynamic> json) => UserResponse(
       id: json["id"],
