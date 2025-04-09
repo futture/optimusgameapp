@@ -1,3 +1,5 @@
+import 'package:projeto_game_quiz/core/api/services/user_service.dart';
+
 import '/components/modal_valida_conta_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -624,7 +626,15 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget> {
                         ),
                         FFButtonWidget(
                           onPressed: () async {
-                            await showModalBottomSheet(
+                            Map<String, dynamic> userData = {
+                              'nome_completo':
+                                  _model.inputMomeCompletoTextController?.text,
+                              'telefone':
+                                  _model.inputTelefoneTextController?.text,
+                              'email': _model.inputEmailTextController?.text,
+                              'senha': _model.inputSenhaTextController1?.text,
+                            };
+                            String? otp = await showModalBottomSheet<String>(
                               isScrollControlled: true,
                               backgroundColor: Colors.transparent,
                               enableDrag: false,
@@ -643,7 +653,53 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget> {
                                   ),
                                 );
                               },
-                            ).then((value) => safeSetState(() {}));
+                            );
+
+                            // Verifica se o OTP foi inserido
+                            if (otp != null && otp.isNotEmpty) {
+                              print(
+                                  "OTP inserido: $otp"); // Aqui você pode imprimir o OTP no console ou usar em outro lugar
+
+                              // Agora você pode validar o OTP, enviar para o servidor, ou qualquer outra lógica necessária
+                              bool otpValido = await UserService()
+                                  .verifyOtp(userData['email'], otp);
+
+                              if (otpValido) {
+                                // OTP válido, agora cria o usuário
+                                bool usuarioCriado =
+                                    await UserService().createUser(userData);
+
+                                if (usuarioCriado) {
+                                  // Usuário criado com sucesso
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            "Usuário cadastrado com sucesso!")),
+                                  );
+                                } else {
+                                  // Erro ao criar o usuário
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            "Falha ao criar usuário. Tente novamente.")),
+                                  );
+                                }
+                              } else {
+                                // OTP inválido
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          "OTP inválido. Tente novamente.")),
+                                );
+                              }
+                            } else {
+                              // Caso o OTP não tenha sido inserido
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content:
+                                        Text("Você precisa inserir um OTP.")),
+                              );
+                            }
                           },
                           text: 'CADASTRAR',
                           options: FFButtonOptions(

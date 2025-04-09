@@ -1,3 +1,6 @@
+import 'package:projeto_game_quiz/core/api/services/user_service.dart';
+import 'package:projeto_game_quiz/core/api/utils/token_util.dart';
+
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -317,7 +320,51 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget> {
                         ),
                         FFButtonWidget(
                           onPressed: () async {
-                            context.pushNamed(Tela03PrincipalWidget.routeName);
+                            final email = _model.inputEmailTextController.text;
+                            final senha = _model.inputSenhaTextController.text;
+
+                            // Verificando se o email e senha foram inseridos
+                            if (email.isEmpty || senha.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Por favor, insira e-mail e senha')),
+                              );
+                              return;
+                            }
+
+                            try { 
+                              UserService userService = UserService(); 
+                              final token =
+                                  await userService.loginUser(email, senha); 
+                              if (token != null) { 
+                                TokenUtil.saveToken(token['access_token'], token['expires_in']);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Credenciais Válidas. Sucesso!'),
+                                    backgroundColor:
+                                        Colors.green,
+                                  ),
+                                );
+                                await Future.delayed(Duration(seconds: 1)); 
+                                context
+                                    .pushNamed(Tela03PrincipalWidget.routeName);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          'Credenciais inválidas. Tente novamente.')),
+                                );
+                              }
+                            } catch (e) {
+                              // Se algo der errado, exibe uma mensagem de erro
+                              print('Erro ao realizar login: $e');
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Erro ao realizar login. Tente novamente.')),
+                              );
+                            }
                           },
                           text: 'Entrar',
                           options: FFButtonOptions(

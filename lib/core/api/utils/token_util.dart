@@ -17,10 +17,12 @@ class TokenUtil {
     return true;
   }
 
-  static Future<void> saveToken(String token, int expirationTime) async {
+  static Future<void> saveToken(String token, int expiresIn) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('access_token', token);
-    await prefs.setInt('expiration_time', expirationTime);
+    final expirationTimestamp =
+        DateTime.now().add(Duration(seconds: expiresIn)).millisecondsSinceEpoch;
+    await prefs.setInt('expiration_time', expirationTimestamp);
   }
 
   static Future<void> removeToken() async {
@@ -29,8 +31,21 @@ class TokenUtil {
     await prefs.remove('expiration_time');
   }
 
-  static Future<String?> getToken () async {
+  static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString("access_token");
+    final token = prefs.getString('access_token');
+    final expirationTimestamp = prefs.getInt('expiration_time');
+
+    if (token == null || expirationTimestamp == null) {
+      return null;
+    }
+    final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
+
+    if (currentTimestamp > expirationTimestamp) {
+      await prefs.remove('access_token');
+      await prefs.remove('expiration_time');
+      return null;
+    }
+    return token;
   }
 }

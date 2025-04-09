@@ -1,3 +1,5 @@
+import 'package:projeto_game_quiz/core/api/utils/token_util.dart';
+
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -581,12 +583,33 @@ class _ModaMenuPagianInicialWidgetState
                             .addToEnd(SizedBox(width: 5.0)),
                       ),
                       Opacity(
-                        opacity: 0.0,
+                        opacity: 1.0,
                         child: FFButtonWidget(
-                          onPressed: () {
-                            print('Button pressed ...');
+                          onPressed: () async {
+                            try {
+                              TokenUtil.removeToken();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content:
+                                      Text('Sessão terminada com sucesso!'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                              await Future.delayed(Duration(seconds: 1));
+                              context.pushNamed(Tela00LoginWidget.routeName);
+                            } catch (e) {
+                              print('Erro ao terminar sessão: $e');
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      'Erro ao terminar sessão. Tente novamente.'),
+                                  backgroundColor:
+                                      Colors.red, // Cor vermelha para erro
+                                ),
+                              );
+                            }
                           },
-                          text: 'terminarSession',
+                          text: 'Terminar Sessão',
                           options: FFButtonOptions(
                             width: 340.0,
                             height: 45.0,
