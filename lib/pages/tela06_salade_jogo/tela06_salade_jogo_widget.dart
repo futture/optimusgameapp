@@ -1,11 +1,3 @@
-import 'package:projeto_game_quiz/core/api/common/web_socket_api.dart';
-import 'package:projeto_game_quiz/core/api/services/question_service.dart';
-import 'package:projeto_game_quiz/core/api/services/question_web_socket_service.dart';
-import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
-import 'package:projeto_game_quiz/core/models/requests/question_request.dart';
-import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
-import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
-
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_radio_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -33,41 +25,24 @@ class Tela06SaladeJogoWidget extends StatefulWidget {
 }
 
 class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
-  String? userId = "";
-  double points = 0;
-  bool isLoading = true;
-  late MatchResponse matchInfo;
-  late QuestionResponse question;
-  int questionsAlreadyPresented = 0;
   late Tela06SaladeJogoModel _model;
-  WebSocketService? _webSocketService;
-  final _questionService = QuestionService();
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  late final QuestionWebSocketService _questionWebSocketService;
 
   @override
   void initState() {
     super.initState();
-    getUserIdAsync();
+
     _model = createModel(context, () => Tela06SaladeJogoModel());
     _model.radioGroupValueController = FormFieldController<String>(null);
-    matchInfo = widget.matchInfo;
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    _model.matchInfo = widget.matchInfo;
 
-    fetchNextQuestionMatchAsync();
-
-    // _model.timerController = FlutterFlowTimerController(
-    //   StopWatchTimer(mode: StopWatchMode.countDown),
-    // );
-
-    // _model.timerController.onStartTimer();
+    _model.getUserIdAsync(() => setState(() {}));
+    _model.fetchNextQuestionMatchAsync(() => setState(() {}));
   }
 
   @override
   void dispose() {
-    _questionWebSocketService.disconnect();
     _model.dispose();
-
     super.dispose();
   }
 
@@ -243,7 +218,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                                 ),
                                           ),
                                           Text(
-                                            '${points}',
+                                            '${_model.points}',
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
                                                 .override(
@@ -333,7 +308,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                                 size: 18.0,
                                               ),
                                               Text(
-                                                '${questionsAlreadyPresented}',
+                                                '${_model.questionsAlreadyPresented}',
                                                 style:
                                                     FlutterFlowTheme.of(context)
                                                         .bodyMedium
@@ -365,7 +340,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                                         ),
                                               ),
                                               Text(
-                                                '${matchInfo.matchConfiguration!.numberOfQuestions}',
+                                                '${_model.matchInfo.matchConfiguration!.numberOfQuestions}',
                                                 style:
                                                     FlutterFlowTheme.of(context)
                                                         .bodyMedium
@@ -409,10 +384,10 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                 ),
                                 child: Align(
                                   alignment: AlignmentDirectional(0.0, 0.0),
-                                  child: isLoading
+                                  child: _model.isLoading
                                       ? CircularProgressIndicator()
                                       : Text(
-                                          '${question.utterance}',
+                                          '${_model.question.utterance}',
                                           style: FlutterFlowTheme.of(context)
                                               .titleMedium
                                               .override(
@@ -479,7 +454,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                           autovalidateMode: AutovalidateMode.disabled,
                           child: Align(
                             alignment: AlignmentDirectional(0.0, 0.0),
-                            child: isLoading
+                            child: _model.isLoading
                                 ? CircularProgressIndicator()
                                 : Column(
                                     mainAxisSize: MainAxisSize.max,
@@ -487,8 +462,9 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      if (question.optionAnswers != null)
-                                        ...question.optionAnswers!.map((e) {
+                                      if (_model.question.optionAnswers != null)
+                                        ..._model.question.optionAnswers!
+                                            .map((e) {
                                           return Column(
                                             children: [
                                               Align(
@@ -622,8 +598,10 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                                               onChanged: (val) {
                                                                 if (val ==
                                                                     e.codeOption) {
-                                                                  sendUserResponseAsync(
-                                                                      e.id);
+                                                                  _model.sendUserResponseAsync(
+                                                                      e.id,
+                                                                      () => setState(
+                                                                          () {}));
                                                                 }
 
                                                                 safeSetState(
@@ -712,73 +690,5 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
         ),
       ),
     );
-  }
-
-  Future<void> getUserIdAsync() async {
-    var _userId = await UserUtil.getUserId();
-
-    setState(() => userId = _userId);
-  }
-
-  Future<void> sendUserResponseAsync(String optionAnswerId) async {
-    var resultAnswerQuestion = await _questionService.answerQuestionAsync(
-        userId!,
-        PlayerAnswerRequest(
-            matchId: matchInfo.id,
-            questionId: question.id,
-            optionAnswerId: optionAnswerId,
-            answeredAt: DateTime.now().add(new Duration(seconds: 10))));
-
-    if (resultAnswerQuestion["isSuccess"]) {
-      await getWebSocketEveryoneWhoRespondedAsync();
-    }
-  }
-
-  Future<void> fetchNextQuestionMatchAsync() async {
-    setState(() {
-      isLoading = true;
-    });
-    var resultQuestion =
-        await _questionService.nextQuestionMatchAsync(matchInfo.id);
-
-    if (resultQuestion["isSuccess"]) {
-      setState(() {
-        question = resultQuestion["data"];
-        questionsAlreadyPresented += 1;
-        isLoading = false;
-      });
-      if (_webSocketService != null) {
-        _webSocketService!.disconnect();
-      }
-    }
-  }
-
-  Future<void> getWebSocketEveryoneWhoRespondedAsync() async {
-    _questionWebSocketService = QuestionWebSocketService(
-      matchInfo: matchInfo,
-      question: question,
-      userId: userId!,
-      onUpdate: (stats) {
-        // opcional: mostrar progresso parcial, se quiser
-      },
-      onAllPlayersResponded: (stats) {
-        setState(() {
-          points += stats.hits
-                  ?.where((e) => e.playerId == userId)
-                  .fold(0.0, (sum, e) => sum! + (e.score ?? 0.0)) ??
-              0.0;
-        });
-
-        fetchNextQuestionMatchAsync();
-      },
-      onError: (error) {
-        print("Erro no WebSocket: $error");
-      },
-      onDone: () {
-        print("Conexão WebSocket encerrada.");
-      },
-    );
-
-    _questionWebSocketService.connect();
   }
 }

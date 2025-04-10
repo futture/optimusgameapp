@@ -1,11 +1,3 @@
-import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warning00_campo_vazio_widget.dart';
-import 'package:projeto_game_quiz/core/api/services/match_service.dart';
-import 'package:projeto_game_quiz/core/api/services/match_web_socket_service.dart';
-import 'package:projeto_game_quiz/core/api/services/room_service.dart';
-import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
-import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
-import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
-
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_timer.dart';
@@ -26,42 +18,20 @@ class ModaListadeSalaWidget extends StatefulWidget {
 }
 
 class _ModaListadeSalaWidgetState extends State<ModaListadeSalaWidget> {
-  String userId = "";
-  int _minPlayers = 1;
-  String matchId = "";
-  MatchResponse? matchInfo;
-  int _playersConnected = 0;
-  bool _isWaitingPlayers = false;
   late ModaListadeSalaModel _model;
-  final roomService = RoomService();
-  final matchService = MatchService();
-  late final MatchWebSocketService _matchWebSocketService;
-
-  void onWaitingPlayers() {
-    setState(() {
-      _isWaitingPlayers = false;
-    });
-  }
-
-  @override
-  void setState(VoidCallback callback) {
-    super.setState(callback);
-    _model.onUpdate();
-  }
 
   @override
   void initState() {
     super.initState();
+
     _model = createModel(context, () => ModaListadeSalaModel());
-    getUserIdAsync();
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    _model.onWaitingPlayersCallback = () => setState(() {});
+    _model.getUserIdAsync(() => setState(() {}));
   }
 
   @override
   void dispose() {
-    _matchWebSocketService.disconnect();
-    _model.maybeDispose();
-
+    _model.dispose();
     super.dispose();
   }
 
@@ -159,7 +129,7 @@ class _ModaListadeSalaWidgetState extends State<ModaListadeSalaWidget> {
                               padding: EdgeInsets.all(5.0),
                               child: FFButtonWidget(
                                 onPressed: () async {
-                                  await createMatch(4, 5,
+                                  await _model.createMatch(4, 5,
                                       "SALA-4-${DateTime.now().minute}${DateTime.now().second}${DateTime.now().hour}");
                                 },
                                 text: 'INICIAR SALA DE 4',
@@ -195,7 +165,7 @@ class _ModaListadeSalaWidgetState extends State<ModaListadeSalaWidget> {
                             padding: EdgeInsets.all(5.0),
                             child: FFButtonWidget(
                               onPressed: () async {
-                                await createMatch(8, 5,
+                                await _model.createMatch(8, 5,
                                     "SALA-8-${DateTime.now().minute}${DateTime.now().second}${DateTime.now().hour}");
                               },
                               text: 'INICIAR SALA DE 8',
@@ -230,7 +200,7 @@ class _ModaListadeSalaWidgetState extends State<ModaListadeSalaWidget> {
                             padding: EdgeInsets.all(5.0),
                             child: FFButtonWidget(
                               onPressed: () async {
-                                await createMatch(16, 5,
+                                await _model.createMatch(16, 5,
                                     "SALA-16-${DateTime.now().minute}${DateTime.now().second}${DateTime.now().hour}");
                               },
                               text: 'INICIAR SALA DE 16',
@@ -368,135 +338,5 @@ class _ModaListadeSalaWidgetState extends State<ModaListadeSalaWidget> {
         ),
       ),
     );
-  }
-
-  void showWaitingDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        content: Row(
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(width: 16.0),
-            Expanded(
-              child: Text(
-                'Procurando participantes disponíveis...\n'
-                'Participantes conectados: $_playersConnected / $_minPlayers',
-                style: FlutterFlowTheme.of(context).bodyMedium,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> getUserIdAsync() async {
-    var _userId = await UserUtil.getUserId();
-
-    setState(() => userId = _userId!);
-  }
-
-  Future<void> createMatch(
-      int numberOfPlayers, int numberOfQuestions, String nameRoom) async {
-    const int timeToRespond = 10;
-    try {
-      final roomResult = await roomService.createRoomAsync(
-        CreateRoomRequest(nameRoom: nameRoom),
-      );
-
-      if (roomResult["isSuccess"] != true) {
-          await Warning00ErrorUtil.showDialogMessageError(
-            context,
-            roomResult["error"].detail.message,
-            roomResult["error"].detail.details);
-        print("Erro ao criar sala");
-        return;
-      }
-
-      final String roomId = roomResult["data"]["id"];
-      final matchRequest = CreateMatchRequest(
-        isSingleWinner: true,
-        timeToRespond: timeToRespond,
-        numberOfPlayers: numberOfPlayers,
-        matchStartDate: DateTime.now(),
-        endDateOfMatch: DateTime.now().add(
-          Duration(seconds: timeToRespond * numberOfQuestions),
-        ),
-        numberOfQuestions: numberOfQuestions,
-        numberOfAnswerOptions: 5,
-        minimumNumberOfPlayers: numberOfPlayers,
-        minimumAmountToPlay: 500,
-        premiumRate: 0.75,
-      );
-
-      final matchResult =
-          await matchService.createMatchAsync(roomId, matchRequest);
-
-      if (matchResult["isSuccess"] != true) {
-          await Warning00ErrorUtil.showDialogMessageError(
-            context,
-            matchResult["error"].detail.message,
-            matchResult["error"].detail.details);
-        print("Erro ao criar partida");
-        return;
-      }
-
-      final String matchId = matchResult["data"]["id"];
-      final playerResult = await matchService.addPlayerMatchAsync(
-        matchId,
-        AddPlayerMatchRequest(playerId: userId),
-      );
-
-      if (playerResult["isSuccess"] != true) {
-        await Warning00ErrorUtil.showDialogMessageError(
-            context,
-            playerResult["error"].detail.message,
-            playerResult["error"].detail.details);
-        print("Erro ao adicionar jogador à partida");
-        return;
-      }
-      if (_isWaitingPlayers) {
-        showWaitingDialog();
-      }
-
-      await getMatchByMatchIdAsync();
-      await getWebSocketWaitForPlayerAsync();
-      Navigator.of(context).pop();
-    } catch (e) {
-      print("Erro inesperado ao criar partida: $e");
-    }
-  }
-
-  Future<void> getMatchByMatchIdAsync() async {
-    var resultMatch = await matchService.getMatchByMatchIdAsync(matchId);
-
-    if (resultMatch["isSuccess"]) {
-      setState(() {
-        matchInfo = resultMatch["data"];
-      });
-    }
-  }
-
-  Future<void> getWebSocketWaitForPlayerAsync() async {
-    _matchWebSocketService = MatchWebSocketService(
-      matchId: matchId,
-      context: context,
-      matchInfo: matchInfo!,
-      onOther: onWaitingPlayers,
-      onMatchUpdate: (match) {
-        setState(() {
-          _playersConnected = match.playersConnected;
-          _minPlayers = match.minPlayers;
-          _isWaitingPlayers = true;
-        });
-      },
-      onError: (error) => print("Erro no WebSocket: $error"),
-      onDone: () => print("Conexão WebSocket encerrada."),
-    );
-
-    _matchWebSocketService.connect();
   }
 }
