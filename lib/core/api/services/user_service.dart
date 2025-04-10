@@ -1,7 +1,9 @@
 import 'package:projeto_game_quiz/core/api/common/http_client_api.dart';
 import 'package:projeto_game_quiz/core/api/utils/error_util.dart';
 import 'package:projeto_game_quiz/core/api/utils/token_util.dart';
+import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/user_request.dart';
+import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 
 class UserService {
   ErrorUtil _errorUtil = ErrorUtil();
@@ -16,6 +18,22 @@ class UserService {
         body: request.toJson(),
       );
       return {"isSuccess": true, "data": result};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
+  Future<dynamic> getUserInfoAsync() async {
+    try {
+      final successResult = await httpService.request<UserResponse>(
+        '/user/me',
+        method: 'GET',
+        successParser: (json) => UserResponse.FromJson(json),
+      );
+
+      UserUtil.saveUserInfoData(successResult);
+
+      return {"isSuccess": true, "data": successResult};
     } catch (e) {
       return _errorUtil.handleError(e);
     }
@@ -37,7 +55,7 @@ class UserService {
   Future<Map<String, dynamic>> sendOtp(String email) async {
     try {
       final result = await httpService.request(
-        '/send_otp/',
+        '/send_otp',
         method: 'POST',
         body: {'email': email},
       );
@@ -50,7 +68,7 @@ class UserService {
   Future<Map<String, dynamic>> verifyOtp(String email, String otp) async {
     try {
       final result = await httpService.request(
-        '/verify_otp/',
+        '/verify_otp',
         method: 'POST',
         body: {'email': email, 'otp': otp},
       );
@@ -63,14 +81,23 @@ class UserService {
   Future<Map<String, dynamic>> loginUser(String email, String password) async {
     try {
       final result = await httpService.request(
-        '/api/v1/users/login/',
+        '/users/login',
         method: 'POST',
-        body: {'email': email, 'password': password},
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: {
+          'grant_type': 'password',
+          'username': email,
+          'password': password,
+          'scope': '',
+          'client_id': 'string',
+          'client_secret': 'string',
+        },
       );
-
       TokenUtil.removeToken();
 
       TokenUtil.saveToken(result['access_token'], result['expires_in']);
+
+      getUserInfoAsync();
 
       return {
         "isSuccess": true,

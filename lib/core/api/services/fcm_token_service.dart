@@ -2,6 +2,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:projeto_game_quiz/core/api/services/user_service.dart';
+import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/user_request.dart';
 
 class FcmTokenService {
@@ -13,19 +14,18 @@ class FcmTokenService {
   Future<void> initFirebaseMessaging(BuildContext context) async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-
+    var _userId = await UserUtil.getUserId();
+    
     _token = await messaging.getToken();
     print("Token FCM: $_token");
 
     await _getDeviceInfo(context);
 
-    var userId = "792159b0-05ae-4fa2-b05e-8cf0e3c68a24";
-
-    if (userId != null &&
+    if (_userId != null &&
         _token != null &&
         _deviceName != null &&
         _deviceId != null) {
-      _sendTokenToServer(userId, _token!, _deviceName!, _deviceId!);
+      _sendTokenToServer(_userId, _token!, _deviceName!, _deviceId!);
     }
   }
 

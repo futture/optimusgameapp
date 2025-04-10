@@ -50,7 +50,7 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
                   FocusScope.of(dialogContext).unfocus();
                   FocusManager.instance.primaryFocus?.unfocus();
                 },
-                child: Warning00CampoVazioWidget(),
+                child: Warning00CampoVazioWidget(titulo: "", detalhe: ""),
               ),
             );
           },

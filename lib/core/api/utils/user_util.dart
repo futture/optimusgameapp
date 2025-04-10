@@ -1,9 +1,7 @@
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class UserUtil {
-  
   static Future<String?> getUserId() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString("userId");
@@ -23,14 +21,12 @@ class UserUtil {
     final phone_number = prefs.getString("phone_number");
     final phone_number_mask = prefs.getString("phone_number_mask");
 
-
     return UserResponse(
         id: userId!,
         name: name!,
         email: email!,
-        phone_number:phone_number!,
-        phone_number_mask:  phone_number_mask!
-       );
+        phone_number: phone_number!,
+        phone_number_mask: phone_number_mask!);
   }
 
   static Future<void> saveUserInfoData(UserResponse userInfo) async {
