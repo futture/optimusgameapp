@@ -29,7 +29,6 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
 
   FormFieldController<String>? radioGroupValueController;
 
-  // ✅ Adicionando os campos necessários
   String? userId = '';
   double points = 0;
   bool isLoading = true;
