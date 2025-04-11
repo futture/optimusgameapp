@@ -6,11 +6,13 @@ import 'warning04_reducao_de_saldo_model.dart';
 export 'warning04_reducao_de_saldo_model.dart';
 
 class Warning04ReducaoDeSaldoWidget extends StatefulWidget {
+  final bool? subscribe;
   final dynamic matchInfo;
 
   const Warning04ReducaoDeSaldoWidget({
     super.key,
     this.matchInfo,
+    this.subscribe
   });
 
   @override
@@ -32,7 +34,7 @@ class _Warning04ReducaoDeSaldoWidgetState
     _model.matchInfo = widget.matchInfo;
     _model.initState(context);
 
-    _model.joinTheMatchAsync();
+    //_model.joinTheMatchAsync(null);
   }
 
   @override
@@ -44,7 +46,7 @@ class _Warning04ReducaoDeSaldoWidgetState
 
   @override
   Widget build(BuildContext context) {
-    if (_model.isWaitingPlayers) {
+    if (_model.isWaitingPlayers && widget.subscribe == null) {
       Future.delayed(Duration.zero, () {
         showDialog(
           context: context,
@@ -111,8 +113,8 @@ class _Warning04ReducaoDeSaldoWidgetState
                 setState(() {
                   _model.isWaitingPlayers = true;
                 });
-
-                await _model.joinTheMatchAsync();
+                
+                await _model.joinTheMatchAsync(widget.subscribe);
               },
               text: 'Confirmar Inscrição',
               options: FFButtonOptions(

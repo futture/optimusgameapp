@@ -1,4 +1,5 @@
 // imports...
+import 'package:projeto_game_quiz/components/warnings/warning04_reducao_de_saldo/warning04_reducao_de_saldo_widget.dart';
 import 'package:projeto_game_quiz/core/api/services/fcm_token_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
@@ -45,6 +46,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
     _model = createModel(context, () => Tela03PrincipalModel());
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    _model.getUserInfoAndAccountInfoAsync(setState, context);
   }
 
   @override
@@ -238,7 +240,9 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                             alignment:
                                                 AlignmentDirectional(-1.0, 0.0),
                                             child: Text(
-                                              'FERNANDO JÚNIOR ALMEIDA',
+                                              _model.user == null
+                                                  ? "Carregando..."
+                                                  : _model.user!.name,
                                               style:
                                                   FlutterFlowTheme.of(context)
                                                       .bodyMedium
@@ -253,7 +257,9 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                             alignment:
                                                 AlignmentDirectional(-1.0, 0.0),
                                             child: Text(
-                                              'ID: 1234567890',
+                                              _model.userAccountInfo == null
+                                                  ? "Carregando..."
+                                                  : 'ID: ${_model.userAccountInfo!.accountNumber}',
                                               style:
                                                   FlutterFlowTheme.of(context)
                                                       .bodyMedium
@@ -296,7 +302,11 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                         ),
                                   ),
                                   Text(
-                                    '100.000.000.000,00',
+                                    _model.userAccountInfo == null
+                                        ? "Carregando..."
+                                        : _model
+                                            .userAccountInfo!.availableBalance
+                                            .toString(),
                                     style: FlutterFlowTheme.of(context)
                                         .titleMedium
                                         .override(
@@ -722,7 +732,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                         ),
                       ),
                       FutureBuilder(
-                        future: matchService.getAllMatchAsync(),
+                        future: matchService.getAllMatchAsync(true, null),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
@@ -869,8 +879,30 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                         .around(SizedBox(height: 10.0)),
                   ),
                   FFButtonWidget(
-                    onPressed: () {
-                      print('Partida ${match.id} clicada');
+                    onPressed: () async {
+                      await _model.checkPlayerAlreadyRegisteredMatchAsync(
+                          setState, match.id);
+
+                      if (!_model.isNotRegisteredMatch) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                Tela06SaladeJogoWidget(matchInfo: match),
+                          ),
+                        );
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return Dialog(
+                              backgroundColor: Colors.transparent,
+                              insetPadding: EdgeInsets.all(24),
+                              child: Warning04ReducaoDeSaldoWidget(
+                                  subscribe: true, matchInfo: match),
+                            );
+                          },
+                        );
+                      }
                     },
                     text: '',
                     options: FFButtonOptions(

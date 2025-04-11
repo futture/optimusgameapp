@@ -1,5 +1,3 @@
-import 'package:provider/provider.dart';
-
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -20,7 +18,6 @@ class Tela07FinancasWidget extends StatefulWidget {
 
 class _Tela07FinancasWidgetState extends State<Tela07FinancasWidget> {
   late Tela07FinancasModel _model;
-  bool _isEditingIban = false;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -120,78 +117,38 @@ class _Tela07FinancasWidgetState extends State<Tela07FinancasWidget> {
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Text(
-                              'Os seus dados financeiros serão utilizados exclusivamente para efectuar as transferências dos seus ganhos',
-                              textAlign: TextAlign.justify,
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'Inter',
-                                    fontSize: 15.0,
-                                    letterSpacing: 0.0,
-                                  ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.monetization_on,
+                                  color: Color(0xFFEC8D0D),
+                                  size: 76.0,
+                                ),
+                                SizedBox(height: 10),
+                                Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10.0),
+                                    child: Center(
+                                      child: Text(
+                                        'DADOS FINANCEIRO.',
+                                        textAlign: TextAlign.justify,
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .override(
+                                              fontFamily: 'Inter',
+                                              fontSize: 15.0,
+                                              letterSpacing: 0.0,
+                                            ),
+                                      ),
+                                    )),
+                              ],
                             ),
                             SizedBox(height: 20),
-                            TextFormField(
-                              controller: _model.textController1,
-                              focusNode: _model.textFieldFocusNode1,
-                              autofocus: false,
-                              enabled: _isEditingIban ||
-                                  _model.textController1.text.isEmpty,
-                              decoration: InputDecoration(
-                                isDense: true,
-                                hintText:
-                                    'Ex.: A0O600000000000000000000000000000',
-                                hintStyle: FlutterFlowTheme.of(context)
-                                    .labelMedium
-                                    .override(
-                                      fontFamily: 'Inter',
-                                      fontSize: 15.0,
-                                      letterSpacing: 0.0,
-                                    ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                filled: true,
-                                fillColor: FlutterFlowTheme.of(context)
-                                    .secondaryBackground,
-                                suffixIcon: (!_isEditingIban &&
-                                        _model.textController1.text.isNotEmpty)
-                                    ? InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            _isEditingIban = true;
-                                          });
-                                          // Foca no campo assim que liberar edição
-                                          Future.delayed(
-                                              Duration(milliseconds: 100), () {
-                                            FocusScope.of(context).requestFocus(
-                                                _model.textFieldFocusNode1);
-                                          });
-                                        },
-                                        child: Icon(Icons.edit,
-                                            color: Colors.grey),
-                                      )
-                                    : null,
-                              ),
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'Inter',
-                                    letterSpacing: 0.0,
-                                  ),
-                              validator: _model.textController1Validator
-                                  .asValidator(context),
-                            ),
                             Align(
                               alignment: AlignmentDirectional(-1.0, -1.0),
                               child: Text(
-                                'Nº do IBAN',
+                                'Nº DO IBAN:',
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -201,104 +158,99 @@ class _Tela07FinancasWidgetState extends State<Tela07FinancasWidget> {
                                     ),
                               ),
                             ),
-                            TextFormField(
-                              controller: _model.textController1,
-                              focusNode: _model.textFieldFocusNode1,
-                              autofocus: false,
-                              enabled: _model.isEditingIban,
-                              decoration: InputDecoration(
-                                isDense: true,
-                                hintText:
-                                    'Ex.: A0O600000000000000000000000000000',
-                                hintStyle: FlutterFlowTheme.of(context)
-                                    .labelMedium
-                                    .override(
-                                      fontFamily: 'Inter',
-                                      fontSize: 15.0,
-                                      letterSpacing: 0.0,
+                            SizedBox(height: 5),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _model.textController1,
+                                    focusNode: _model.textFieldFocusNode1,
+                                    autofocus: false,
+                                    enabled: _model.isEditingIban ||
+                                        _model.textController1.text.isEmpty,
+                                    decoration: InputDecoration(
+                                      isDense: true,
+                                      hintText:
+                                          'Ex.: A0O600000000000000000000000000000',
+                                      hintStyle: FlutterFlowTheme.of(context)
+                                          .labelMedium
+                                          .override(
+                                            fontFamily: 'Inter',
+                                            fontSize: 15.0,
+                                            letterSpacing: 0.0,
+                                          ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide.none,
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide.none,
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                      ),
+                                      filled: true,
+                                      fillColor: FlutterFlowTheme.of(context)
+                                          .secondaryBackground,
                                     ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(8.0),
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          fontFamily: 'Inter',
+                                          letterSpacing: 0.0,
+                                        ),
+                                    validator: _model.textController1Validator
+                                        .asValidator(context),
+                                  ),
                                 ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                filled: true,
-                                fillColor: FlutterFlowTheme.of(context)
-                                    .secondaryBackground,
-                                suffixIcon: _model.isEditingIban
-                                    ? null
-                                    : GestureDetector(
-                                        onTap: () {
-                                          setState(() {
-                                            _model.isEditingIban = true;
-                                          });
+                                SizedBox(width: 8),
+                                Material(
+                                  color: FlutterFlowTheme.of(context).alternate,
+                                  shape: CircleBorder(),
+                                  child: InkWell(
+                                    customBorder: CircleBorder(),
+                                    onTap: () async {
+                                      if (_model.isEditingIban) {
+                                        await _model.createAccountInfoAsync();
+                                      }
+
+                                      setState(() {
+                                        _model.isEditingIban =
+                                            !_model.isEditingIban;
+                                      });
+
+                                      if (_model.isEditingIban) {
+                                        Future.delayed(
+                                            Duration(milliseconds: 100), () {
                                           FocusScope.of(context).requestFocus(
                                               _model.textFieldFocusNode1);
-                                        },
-                                        child: IgnorePointer(
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                                right: 8.0),
-                                            child: Icon(Icons.edit,
-                                                color: Colors.grey),
-                                          ),
-                                        ),
+                                        });
+                                      } else {
+                                        FocusScope.of(context).unfocus();
+                                      }
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Icon(
+                                        _model.isEditingIban
+                                            ? Icons.check
+                                            : Icons.edit,
+                                        size: 12.0,
+                                        color: _model.isEditingIban
+                                            ? Colors.green
+                                            : Colors.deepOrange,
                                       ),
-                              ),
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'Inter',
-                                    letterSpacing: 0.0,
-                                  ),
-                              validator: _model.textController1Validator
-                                  .asValidator(context),
-                            ),
-                            TextFormField(
-                              controller: _model.textController1,
-                              focusNode: _model.textFieldFocusNode1,
-                              autofocus: false,
-                              enabled: _model.textController1.text.isEmpty,
-                              decoration: InputDecoration(
-                                isDense: true,
-                                hintText:
-                                    'Ex.: A0O600000000000000000000000000000',
-                                hintStyle: FlutterFlowTheme.of(context)
-                                    .labelMedium
-                                    .override(
-                                      fontFamily: 'Inter',
-                                      fontSize: 15.0,
-                                      letterSpacing: 0.0,
                                     ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                filled: true,
-                                fillColor: FlutterFlowTheme.of(context)
-                                    .secondaryBackground,
-                              ),
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'Inter',
-                                    letterSpacing: 0.0,
                                   ),
-                              validator: _model.textController1Validator
-                                  .asValidator(context),
+                                ),
+                              ],
                             ),
                             SizedBox(height: 5),
                             Align(
                               alignment: AlignmentDirectional(-1.0, -1.0),
                               child: Text(
-                                'Nº da conta',
+                                'Nº DE CONTA:',
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -308,41 +260,92 @@ class _Tela07FinancasWidgetState extends State<Tela07FinancasWidget> {
                                     ),
                               ),
                             ),
-                            TextFormField(
-                              controller: _model.textController2,
-                              focusNode: _model.textFieldFocusNode2,
-                              autofocus: false,
-                              enabled: _model.textController2.text.isEmpty,
-                              decoration: InputDecoration(
-                                isDense: true,
-                                hintText: 'Ex.:00000000000000',
-                                hintStyle: FlutterFlowTheme.of(context)
-                                    .labelMedium
-                                    .override(
-                                      fontFamily: 'Inter',
-                                      fontSize: 15.0,
-                                      letterSpacing: 0.0,
+                            SizedBox(height: 5),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _model.textController2,
+                                    focusNode: _model.textFieldFocusNode2,
+                                    autofocus: false,
+                                    enabled: _model.isEditingConta ||
+                                        _model.textController2.text.isEmpty,
+                                    decoration: InputDecoration(
+                                      isDense: true,
+                                      hintText: 'Ex.: 000000000000',
+                                      hintStyle: FlutterFlowTheme.of(context)
+                                          .labelMedium
+                                          .override(
+                                            fontFamily: 'Inter',
+                                            fontSize: 15.0,
+                                            letterSpacing: 0.0,
+                                          ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide.none,
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide.none,
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                      ),
+                                      filled: true,
+                                      fillColor: FlutterFlowTheme.of(context)
+                                          .secondaryBackground,
                                     ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                filled: true,
-                                fillColor: FlutterFlowTheme.of(context)
-                                    .secondaryBackground,
-                              ),
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'Inter',
-                                    letterSpacing: 0.0,
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          fontFamily: 'Inter',
+                                          letterSpacing: 0.0,
+                                        ),
+                                    validator: _model.textController2Validator
+                                        .asValidator(context),
                                   ),
-                              validator: _model.textController1Validator
-                                  .asValidator(context),
+                                ),
+                                SizedBox(width: 8),
+                                Material(
+                                  color: FlutterFlowTheme.of(context).alternate,
+                                  shape: CircleBorder(),
+                                  child: InkWell(
+                                    customBorder: CircleBorder(),
+                                    onTap: () async {
+                                      if (_model.isEditingConta) {
+                                        await _model.createAccountInfoAsync();
+                                      }
+
+                                      setState(() {
+                                        _model.isEditingConta =
+                                            !_model.isEditingConta;
+                                      });
+
+                                      if (_model.isEditingConta) {
+                                        Future.delayed(
+                                            Duration(milliseconds: 100), () {
+                                          FocusScope.of(context).requestFocus(
+                                              _model.textFieldFocusNode2);
+                                        });
+                                      } else {
+                                        FocusScope.of(context).unfocus();
+                                      }
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Icon(
+                                        _model.isEditingConta
+                                            ? Icons.check
+                                            : Icons.edit,
+                                        size: 12.0,
+                                        color: _model.isEditingConta
+                                            ? Colors.green
+                                            : Colors.deepOrange,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             SizedBox(height: 30),
                             if (_model.textController1.text.isEmpty &&

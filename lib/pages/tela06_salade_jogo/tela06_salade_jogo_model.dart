@@ -32,6 +32,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   String? userId = '';
   double points = 0;
   bool isLoading = true;
+  String answerOptionId = "";
   int questionsAlreadyPresented = 0;
 
   late MatchResponse matchInfo;

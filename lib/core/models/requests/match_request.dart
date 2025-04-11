@@ -7,6 +7,7 @@ class CreateRoomRequest {
 }
 
 class CreateMatchRequest {
+  final bool isEvent;
   final bool isSingleWinner;
   final int timeToRespond;
   final int numberOfPlayers;
@@ -19,7 +20,8 @@ class CreateMatchRequest {
   final double premiumRate;
 
   CreateMatchRequest(
-      {required this.isSingleWinner,
+      {required this.isEvent,
+      required this.isSingleWinner,
       required this.timeToRespond,
       required this.numberOfPlayers,
       required this.matchStartDate,
@@ -31,6 +33,7 @@ class CreateMatchRequest {
       required this.premiumRate});
 
   Map<String, dynamic> toJson() => {
+        "isEvent": isEvent,
         "isSingleWinner": isSingleWinner,
         "timeToRespond": timeToRespond,
         "numberOfPlayers": numberOfPlayers,

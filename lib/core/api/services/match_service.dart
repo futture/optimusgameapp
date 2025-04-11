@@ -4,7 +4,6 @@ import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 
 class MatchService {
-
   ErrorUtil _errorUtil = ErrorUtil();
 
   final httpService = HttpClientService();
@@ -22,10 +21,20 @@ class MatchService {
     }
   }
 
-  Future<dynamic> getAllMatchAsync() async {
+  Future<dynamic> getAllMatchAsync(bool? isEvent, String? status) async {
     try {
+      String route = "/match";
+
+      if (isEvent != null) {
+        route += "?isEvent=${isEvent}";
+      } else if (status != null) {
+        route += "?status=$status";
+      } else if (isEvent != null && status != null) {
+        route += "?isEvent=${isEvent}&status=$status";
+      }
+
       final successResult = await httpService.request<List<MatchResponse>>(
-        '/match',
+        route,
         method: 'GET',
         successParser: (json) =>
             (json as List).map((item) => MatchResponse.fromJson(item)).toList(),
@@ -48,6 +57,19 @@ class MatchService {
       return _errorUtil.handleError(e);
     }
   }
+
+  Future<dynamic> checkPlayerAlreadyRegisteredMatchAsync(String matchId, String userId) async {
+    try {
+      final successResult = await httpService.request(
+        '/match/${matchId}/user/${userId}',
+        method: 'GET'
+      );
+      return {"isSuccess": true, "data": successResult};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
 
   Future<dynamic> createMatchAsync(
       String roomId, CreateMatchRequest request) async {
@@ -94,5 +116,4 @@ class MatchService {
       return _errorUtil.handleError(e);
     }
   }
-
 }

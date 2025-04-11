@@ -30,11 +30,10 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
     super.initState();
     _model = createModel(context, () => Tela08CarteiraModel());
 
-    // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      if ((_model.textController1.text == null ||
+      if ((_model.textController1.text.isEmpty ||
               _model.textController1.text == '') ||
-          (_model.textController2.text == null ||
+          (_model.textController2.text.isEmpty ||
               _model.textController2.text == '')) {
         await showDialog(
           context: context,

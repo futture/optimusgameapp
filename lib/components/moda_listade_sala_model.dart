@@ -13,7 +13,6 @@ import 'moda_listade_sala_widget.dart' show ModaListadeSalaWidget;
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:flutter/material.dart';
 
-
 class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
   /// State fields
   final timerInitialTimeMs = 60000;
@@ -56,7 +55,8 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
     callback?.call();
   }
 
-  Future<void> createMatch(int numberOfPlayers, int numberOfQuestions, String nameRoom) async {
+  Future<void> createMatch(
+      int numberOfPlayers, int numberOfQuestions, String nameRoom) async {
     const int timeToRespond = 10;
 
     try {
@@ -75,11 +75,13 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
 
       final String createdRoomId = roomResult["data"]["id"];
       final matchRequest = CreateMatchRequest(
+        isEvent: false,
         isSingleWinner: true,
         timeToRespond: timeToRespond,
         numberOfPlayers: numberOfPlayers,
         matchStartDate: DateTime.now(),
-        endDateOfMatch: DateTime.now().add(Duration(seconds: timeToRespond * numberOfQuestions)),
+        endDateOfMatch: DateTime.now()
+            .add(Duration(seconds: timeToRespond * numberOfQuestions)),
         numberOfQuestions: numberOfQuestions,
         numberOfAnswerOptions: 5,
         minimumNumberOfPlayers: numberOfPlayers,
@@ -87,7 +89,8 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
         premiumRate: 0.75,
       );
 
-      final matchResult = await matchService.createMatchAsync(createdRoomId, matchRequest);
+      final matchResult =
+          await matchService.createMatchAsync(createdRoomId, matchRequest);
 
       if (matchResult["isSuccess"] != true) {
         await Warning00ErrorUtil.showDialogMessageError(
@@ -153,7 +156,8 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
 
     _matchWebSocketService.connect();
   }
-    void showWaitingDialog() {
+
+  void showWaitingDialog() {
     showDialog(
       context: context,
       barrierDismissible: false,

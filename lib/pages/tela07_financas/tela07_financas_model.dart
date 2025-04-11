@@ -43,10 +43,12 @@ class Tela07FinancasModel extends FlutterFlowModel<Tela07FinancasWidget> {
     textController3?.dispose();
   }
 
-Future<void> getUserIdAndAccountInfo(void Function(VoidCallback fn) setState, BuildContext context) async {
-  await getUserIdAsync(setState);
-  await getAccountInfoAsync(setState, context);
-}
+  Future<void> getUserIdAndAccountInfo(
+      void Function(VoidCallback fn) setState, BuildContext context) async {
+    await getUserIdAsync(setState);
+    await getAccountInfoAsync(setState, context);
+  }
+
   Future<void> getUserIdAsync(void Function(VoidCallback fn) setState) async {
     var _userId = await UserUtil.getUserId();
     setState(() {
@@ -54,7 +56,8 @@ Future<void> getUserIdAndAccountInfo(void Function(VoidCallback fn) setState, Bu
     });
   }
 
-  Future<void> getAccountInfoAsync(void Function(VoidCallback fn) setState, BuildContext context) async {
+  Future<void> getAccountInfoAsync(
+      void Function(VoidCallback fn) setState, BuildContext context) async {
     if (userId != null && userId != "") {
       var result = await _accountService.getAccountByUserIdAsync(userId!);
       if (result["isSuccess"]) {

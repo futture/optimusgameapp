@@ -1,3 +1,4 @@
+import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warning00_campo_vazio_widget.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_web_socket_service.dart';
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
@@ -14,7 +15,7 @@ class Warning04ReducaoDeSaldoModel
     extends FlutterFlowModel<Warning04ReducaoDeSaldoWidget> {
   /// Serviços e variáveis
   final MatchService _matchService = MatchService();
-  late MatchWebSocketService _matchWebSocketService;
+  MatchWebSocketService? _matchWebSocketService;
 
   late MatchResponse matchInfo;
   late BuildContext context;
@@ -32,7 +33,7 @@ class Warning04ReducaoDeSaldoModel
 
   @override
   void dispose() {
-    _matchWebSocketService.disconnect();
+    _matchWebSocketService?.disconnect();
   }
 
   Future<void> getUserIdAsync(VoidCallback? callback) async {
@@ -40,17 +41,20 @@ class Warning04ReducaoDeSaldoModel
     callback?.call();
   }
 
-  Future<void> joinTheMatchAsync() async {
+  Future<void> joinTheMatchAsync(bool? subscribe) async {
     var result = await _matchService.addPlayerMatchAsync(
       matchInfo.id,
       AddPlayerMatchRequest(
-        playerId: "792159b0-05ae-4fa2-b05e-8cf0e3c68a24",
+        playerId: userId,
       ),
     );
 
-    if (result != null) {
+    if (result["isSuccess"] && subscribe == null) {
       await getWebSocketWaitForPlayerAsync();
       onStateUpdate?.call();
+    } else {
+      Warning00ErrorUtil.showDialogMessageError(context,
+          result["error"].detail.message, result["error"].detail.details);
     }
   }
 
@@ -69,7 +73,7 @@ class Warning04ReducaoDeSaldoModel
       onDone: () => print("Conexão WebSocket encerrada."),
     );
 
-    _matchWebSocketService.connect();
+    _matchWebSocketService?.connect();
   }
 
   Future<void> startMatchAsync() async {

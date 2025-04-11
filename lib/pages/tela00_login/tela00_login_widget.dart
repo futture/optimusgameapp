@@ -1,4 +1,3 @@
-import 'package:projeto_game_quiz/core/api/services/user_service.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -53,398 +52,247 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
           top: true,
-          child: Align(
-            alignment: AlignmentDirectional(0.0, 0.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Align(
-                  alignment: AlignmentDirectional(0.0, 0.0),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(200.0),
-                    child: Image.network(
-                      'https://images.unsplash.com/photo-1604594849809-dfedbc827105?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHw3fHxtb25leXxlbnwwfHx8fDE3NDM2MjA1MTR8MA&ixlib=rb-4.0.3&q=80&w=1080',
-                      width: 200.0,
-                      height: 200.0,
-                      fit: BoxFit.fill,
-                      alignment: Alignment(0.0, 0.0),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.only(bottom: 24.0),
+            physics: BouncingScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height,
+              ),
+              child: IntrinsicHeight(
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    SizedBox(height: 20),
+                    Align(
+                      alignment: Alignment.center,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(200.0),
+                        child: Image.network(
+                          'https://images.unsplash.com/photo-1604594849809-dfedbc827105?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHw3fHxtb25leXxlbnwwfHx8fDE3NDM2MjA1MTR8MA&ixlib=rb-4.0.3&q=80&w=1080',
+                          width: 200.0,
+                          height: 200.0,
+                          fit: BoxFit.fill,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                Form(
-                  key: _model.formKey,
-                  autovalidateMode: AutovalidateMode.disabled,
-                  child: Container(
-                    width: 350.0,
-                    height: 380.0,
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).primaryBackground,
-                    ),
-                    alignment: AlignmentDirectional(0.0, 0.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Align(
-                          alignment: AlignmentDirectional(-0.8, -1.0),
-                          child: Text(
-                            'Email ou Telefone',
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  fontFamily: 'Inter',
-                                  fontSize: 16.0,
-                                  letterSpacing: 0.0,
-                                ),
-                          ),
+                    SizedBox(height: 10),
+                    Form(
+                      key: _model.formKey,
+                      autovalidateMode: AutovalidateMode.disabled,
+                      child: Container(
+                        width: 350.0,
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        decoration: BoxDecoration(
+                          color: FlutterFlowTheme.of(context).primaryBackground,
                         ),
-                        Container(
-                          width: 320.0,
-                          child: TextFormField(
-                            controller: _model.inputEmailTextController,
-                            focusNode: _model.inputEmailFocusNode,
-                            autofocus: false,
-                            obscureText: false,
-                            decoration: InputDecoration(
-                              isDense: true,
-                              labelStyle: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .override(
-                                    fontFamily: 'Inter',
-                                    fontSize: 17.0,
-                                    letterSpacing: 0.0,
-                                  ),
-                              hintText: 'abc012@gmail.com',
-                              hintStyle: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .override(
-                                    fontFamily: 'Inter',
-                                    fontSize: 17.0,
-                                    letterSpacing: 0.0,
-                                  ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0x00000000),
-                                  width: 1.0,
-                                ),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0x00000000),
-                                  width: 1.0,
-                                ),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              errorBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: FlutterFlowTheme.of(context).error,
-                                  width: 1.0,
-                                ),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              focusedErrorBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: FlutterFlowTheme.of(context).error,
-                                  width: 1.0,
-                                ),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              filled: true,
-                              fillColor: FlutterFlowTheme.of(context)
-                                  .secondaryBackground,
-                            ),
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  fontFamily: 'Inter',
-                                  fontSize: 17.0,
-                                  letterSpacing: 0.0,
-                                ),
-                            textAlign: TextAlign.justify,
-                            cursorColor:
-                                FlutterFlowTheme.of(context).primaryText,
-                            validator: _model.inputEmailTextControllerValidator
-                                .asValidator(context),
-                          ),
-                        ),
-                        Align(
-                          alignment: AlignmentDirectional(-0.8, -1.0),
-                          child: Text(
-                            'Senha',
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  fontFamily: 'Inter',
-                                  fontSize: 16.0,
-                                  letterSpacing: 0.0,
-                                ),
-                          ),
-                        ),
-                        Container(
-                          width: 320.0,
-                          child: TextFormField(
-                            controller: _model.inputSenhaTextController,
-                            focusNode: _model.inputSenhaFocusNode,
-                            autofocus: false,
-                            obscureText: !_model.inputSenhaVisibility,
-                            decoration: InputDecoration(
-                              isDense: true,
-                              labelStyle: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .override(
-                                    fontFamily: 'Inter',
-                                    fontSize: 17.0,
-                                    letterSpacing: 0.0,
-                                  ),
-                              hintText: 'Januario Pinto',
-                              hintStyle: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .override(
-                                    fontFamily: 'Inter',
-                                    fontSize: 17.0,
-                                    letterSpacing: 0.0,
-                                  ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0x00000000),
-                                  width: 1.0,
-                                ),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0x00000000),
-                                  width: 1.0,
-                                ),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              errorBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: FlutterFlowTheme.of(context).error,
-                                  width: 1.0,
-                                ),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              focusedErrorBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: FlutterFlowTheme.of(context).error,
-                                  width: 1.0,
-                                ),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              filled: true,
-                              fillColor: FlutterFlowTheme.of(context)
-                                  .secondaryBackground,
-                              suffixIcon: InkWell(
-                                onTap: () => safeSetState(
-                                  () => _model.inputSenhaVisibility =
-                                      !_model.inputSenhaVisibility,
-                                ),
-                                focusNode: FocusNode(skipTraversal: true),
-                                child: Icon(
-                                  _model.inputSenhaVisibility
-                                      ? Icons.visibility_outlined
-                                      : Icons.visibility_off_outlined,
-                                  size: 22,
-                                ),
-                              ),
-                            ),
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  fontFamily: 'Inter',
-                                  fontSize: 17.0,
-                                  letterSpacing: 0.0,
-                                ),
-                            textAlign: TextAlign.justify,
-                            maxLength: 16,
-                            buildCounter: (context,
-                                    {required currentLength,
-                                    required isFocused,
-                                    maxLength}) =>
-                                null,
-                            cursorColor:
-                                FlutterFlowTheme.of(context).primaryText,
-                            validator: _model.inputSenhaTextControllerValidator
-                                .asValidator(context),
-                          ),
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Theme(
-                              data: ThemeData(
-                                checkboxTheme: CheckboxThemeData(
-                                  visualDensity: VisualDensity.compact,
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(4.0),
-                                  ),
-                                ),
-                                unselectedWidgetColor:
-                                    FlutterFlowTheme.of(context).alternate,
-                              ),
-                              child: Checkbox(
-                                value: _model.checkboxValue ??= true,
-                                onChanged: (newValue) async {
-                                  safeSetState(
-                                      () => _model.checkboxValue = newValue!);
-                                },
-                                side: BorderSide(
-                                  width: 2,
-                                  color: FlutterFlowTheme.of(context).alternate,
-                                ),
-                                activeColor:
-                                    FlutterFlowTheme.of(context).primary,
-                                checkColor: FlutterFlowTheme.of(context).info,
+                            // Email
+                            Align(
+                              alignment: AlignmentDirectional(-0.8, -1.0),
+                              child: Text(
+                                'Email ou Telefone',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      fontFamily: 'Inter',
+                                      fontSize: 16.0,
+                                    ),
                               ),
                             ),
-                            Text(
-                              'Lembrar Senha',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'Inter',
-                                    fontSize: 17.0,
-                                    letterSpacing: 0.0,
-                                  ),
+                            SizedBox(height: 5),
+                            Container(
+                              width: 320.0,
+                              child: TextFormField(
+                                controller: _model.inputEmailTextController,
+                                focusNode: _model.inputEmailFocusNode,
+                                decoration: _inputDecoration(
+                                    context, 'abc012@gmail.com'),
+                                style: _inputStyle(context),
+                                textAlign: TextAlign.justify,
+                                cursorColor:
+                                    FlutterFlowTheme.of(context).primaryText,
+                                validator: _model
+                                    .inputEmailTextControllerValidator
+                                    .asValidator(context),
+                              ),
                             ),
-                          ]
-                              .divide(SizedBox(width: 10.0))
-                              .addToStart(SizedBox(width: 10.0)),
-                        ),
-                        FFButtonWidget(
-                          onPressed: () async {
-                            final email = _model.inputEmailTextController.text;
-                            final senha = _model.inputSenhaTextController.text;
-
-                            // Verificando se o email e senha foram inseridos
-                            if (email.isEmpty || senha.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        'Por favor, insira e-mail e senha')),
-                              );
-                              return;
-                            }
-
-                            try {
-                              UserService userService = UserService();
-                              final resultToken =
-                                  await userService.loginUser(email, senha);
-                              if (resultToken["isSuccess"]) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content:
-                                        Text('Credenciais Válidas. Sucesso!'),
-                                    backgroundColor: Colors.green,
+                            SizedBox(height: 10),
+                            // Senha
+                            Align(
+                              alignment: AlignmentDirectional(-0.8, -1.0),
+                              child: Text(
+                                'Senha',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      fontFamily: 'Inter',
+                                      fontSize: 16.0,
+                                    ),
+                              ),
+                            ),
+                            SizedBox(height: 5),
+                            Container(
+                              width: 320.0,
+                              child: TextFormField(
+                                controller: _model.inputSenhaTextController,
+                                focusNode: _model.inputSenhaFocusNode,
+                                obscureText: !_model.inputSenhaVisibility,
+                                decoration: _inputDecoration(
+                                  context,
+                                  'Januario Pinto',
+                                  suffixIcon: InkWell(
+                                    onTap: () => safeSetState(() =>
+                                        _model.inputSenhaVisibility =
+                                            !_model.inputSenhaVisibility),
+                                    child: Icon(
+                                      _model.inputSenhaVisibility
+                                          ? Icons.visibility_outlined
+                                          : Icons.visibility_off_outlined,
+                                      size: 22,
+                                    ),
                                   ),
-                                );
-                                await Future.delayed(Duration(seconds: 1));
-                                context
-                                    .pushNamed(Tela03PrincipalWidget.routeName);
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(
-                                          'Credenciais inválidas. Tente novamente.')),
-                                );
-                              }
-                            } catch (e) {
-                              // Se algo der errado, exibe uma mensagem de erro
-                              print('Erro ao realizar login: $e');
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        'Erro ao realizar login. Tente novamente.')),
-                              );
-                            }
-                          },
-                          text: 'Entrar',
-                          options: FFButtonOptions(
-                            width: 320.0,
-                            height: 45.0,
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                16.0, 0.0, 16.0, 0.0),
-                            iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                0.0, 0.0, 0.0, 0.0),
-                            color: Color(0xFFEC8D0D),
-                            textStyle: FlutterFlowTheme.of(context)
-                                .titleSmall
-                                .override(
-                                  fontFamily: 'Inter Tight',
-                                  color: Colors.black,
-                                  fontSize: 17.0,
-                                  letterSpacing: 0.0,
                                 ),
-                            elevation: 0.0,
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                        ),
-                        FFButtonWidget(
-                          onPressed: () async {
-                            context.pushNamed(Tela01CriarContaWidget.routeName);
-                          },
-                          text: 'Criar Conta',
-                          options: FFButtonOptions(
-                            width: 320.0,
-                            height: 45.0,
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                16.0, 0.0, 16.0, 0.0),
-                            iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                0.0, 0.0, 0.0, 0.0),
-                            color: Color(0xFFEC8D0D),
-                            textStyle: FlutterFlowTheme.of(context)
-                                .titleSmall
-                                .override(
-                                  fontFamily: 'Inter Tight',
-                                  color: Colors.black,
-                                  fontSize: 17.0,
-                                  letterSpacing: 0.0,
+                                style: _inputStyle(context),
+                                textAlign: TextAlign.justify,
+                                maxLength: 16,
+                                buildCounter: (context,
+                                        {required currentLength,
+                                        required isFocused,
+                                        maxLength}) =>
+                                    null,
+                                cursorColor:
+                                    FlutterFlowTheme.of(context).primaryText,
+                                validator: _model
+                                    .inputSenhaTextControllerValidator
+                                    .asValidator(context),
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            // Lembrar senha
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Theme(
+                                  data: ThemeData(
+                                    checkboxTheme: CheckboxThemeData(
+                                      visualDensity: VisualDensity.compact,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(4.0),
+                                      ),
+                                    ),
+                                    unselectedWidgetColor:
+                                        FlutterFlowTheme.of(context).alternate,
+                                  ),
+                                  child: Checkbox(
+                                    value: _model.checkboxValue ??= true,
+                                    onChanged: (newValue) => safeSetState(
+                                        () => _model.checkboxValue = newValue!),
+                                    activeColor:
+                                        FlutterFlowTheme.of(context).primary,
+                                    checkColor:
+                                        FlutterFlowTheme.of(context).info,
+                                  ),
                                 ),
-                            elevation: 0.0,
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                        ),
-                        FFButtonWidget(
-                          onPressed: () {
-                            print('CriarCont pressed ...');
-                          },
-                          text: 'Esqueceu  a senha?',
-                          options: FFButtonOptions(
-                            width: 320.0,
-                            height: 45.0,
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                16.0, 0.0, 16.0, 0.0),
-                            iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                0.0, 0.0, 0.0, 0.0),
-                            color: Color(0x00EC8D0D),
-                            textStyle: FlutterFlowTheme.of(context)
-                                .titleSmall
-                                .override(
-                                  fontFamily: 'Inter Tight',
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  fontSize: 14.0,
-                                  letterSpacing: 0.0,
-                                  decoration: TextDecoration.underline,
+                                SizedBox(width: 10),
+                                Text(
+                                  'Lembrar Senha',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        fontFamily: 'Inter',
+                                        fontSize: 17.0,
+                                      ),
                                 ),
-                            elevation: 0.0,
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
+                              ],
+                            ),
+                            SizedBox(height: 10),
+                            _authButton(context, 'Entrar', () async {
+                              await _model.signInAsync();
+                            }),
+                            SizedBox(height: 4),
+                            _authButton(context, 'Criar Conta', () async {
+                              context
+                                  .pushNamed(Tela01CriarContaWidget.routeName);
+                            }),
+                            _authButton(
+                              context,
+                              'Esqueceu  a senha?',
+                              () {},
+                              transparent: true,
+                              underline: true,
+                            ),
+                          ],
                         ),
-                      ]
-                          .divide(SizedBox(height: 10.0))
-                          .around(SizedBox(height: 10.0)),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ].divide(SizedBox(height: 20.0)).around(SizedBox(height: 20.0)),
+              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(BuildContext context, String hint,
+      {Widget? suffixIcon}) {
+    return InputDecoration(
+      isDense: true,
+      hintText: hint,
+      filled: true,
+      fillColor: FlutterFlowTheme.of(context).secondaryBackground,
+      suffixIcon: suffixIcon,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8.0),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8.0),
+        borderSide: BorderSide.none,
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8.0),
+        borderSide: BorderSide(color: FlutterFlowTheme.of(context).error),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8.0),
+        borderSide: BorderSide(color: FlutterFlowTheme.of(context).error),
+      ),
+    );
+  }
+
+  TextStyle _inputStyle(BuildContext context) {
+    return FlutterFlowTheme.of(context).bodyMedium.override(
+          fontFamily: 'Inter',
+          fontSize: 17.0,
+        );
+  }
+
+  Widget _authButton(BuildContext context, String text, VoidCallback onPressed,
+      {bool transparent = false, bool underline = false}) {
+    return FFButtonWidget(
+      onPressed: onPressed,
+      text: text,
+      options: FFButtonOptions(
+        width: 320.0,
+        height: 45.0,
+        color: transparent ? Colors.transparent : Color(0xFFEC8D0D),
+        textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+              fontFamily: 'Inter Tight',
+              color: transparent
+                  ? FlutterFlowTheme.of(context).primary
+                  : Colors.black,
+              fontSize: 17.0,
+              decoration:
+                  underline ? TextDecoration.underline : TextDecoration.none,
+            ),
+        elevation: 0.0,
+        borderRadius: BorderRadius.circular(8.0),
       ),
     );
   }
