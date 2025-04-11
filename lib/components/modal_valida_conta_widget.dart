@@ -1,3 +1,5 @@
+import 'package:projeto_game_quiz/core/api/services/user_service.dart';
+
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -10,7 +12,8 @@ import 'modal_valida_conta_model.dart';
 export 'modal_valida_conta_model.dart';
 
 class ModalValidaContaWidget extends StatefulWidget {
-  const ModalValidaContaWidget({super.key});
+   final String phoneNumber; 
+  const ModalValidaContaWidget({super.key, required this.phoneNumber});
 
   @override
   State<ModalValidaContaWidget> createState() => _ModalValidaContaWidgetState();
@@ -300,19 +303,22 @@ class _ModalValidaContaWidgetState extends State<ModalValidaContaWidget> {
                                 Padding(
                                   padding: EdgeInsets.all(5.0),
                                   child: FFButtonWidget(
-                                    onPressed: () async {
-                                      if (_model.otpTextController.text ==
-                                          '012345') {
+                                    onPressed: () async { 
+                                      String phone = widget.phoneNumber;
+                                      String otp1 = "2";
+                                      String otp = _model.otpTextController.text;
+                                      String result = (await UserService().verifyOtp(phone, otp1)) as String;
+                                      if (!result.isEmpty) { 
                                         context.pushNamed(
                                             Tela03PrincipalWidget.routeName);
-                                      } else {
+                                      } else { 
                                         await showDialog(
                                           context: context,
                                           builder: (alertDialogContext) {
                                             return AlertDialog(
-                                              title: Text('Verificar  OTP'),
+                                              title: Text('Verificar OTP'),
                                               content:
-                                                  Text('Código OTP inálivdo'),
+                                                  Text('Código OTP inválido'),
                                               actions: [
                                                 TextButton(
                                                   onPressed: () =>

@@ -52,12 +52,12 @@ class UserService {
     }
   }
 
-  Future<Map<String, dynamic>> sendOtp(String email) async {
+  Future<Map<String, dynamic>> sendOtp(String phone_number) async {
     try {
       final result = await httpService.request(
-        '/send_otp',
+        '/users/send-otp',
         method: 'POST',
-        body: {'email': email},
+        body: {'phone_number': phone_number},
       );
       return {"isSuccess": true, "data": result};
     } catch (e) {
@@ -65,12 +65,12 @@ class UserService {
     }
   }
 
-  Future<Map<String, dynamic>> verifyOtp(String email, String otp) async {
+  Future<Map<String, dynamic>> verifyOtp(String phone_number, String otp) async {
     try {
       final result = await httpService.request(
         '/verify_otp',
-        method: 'POST',
-        body: {'email': email, 'otp': otp},
+        method: 'post',
+        body: {'phone_number': phone_number, 'otp': otp},
       );
       return {"isSuccess": true, "data": result};
     } catch (e) {

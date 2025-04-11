@@ -68,7 +68,7 @@ class Tela00LoginModel extends FlutterFlowModel<Tela00LoginWidget> {
           context, "Falha ao efetuar o login", "Preencha o campo senha");
       return;
     }
-    final resultToken = await userService.loginUser(email, password);
+    final resultToken = await userService.loginUser(email, password); 
     if (resultToken["isSuccess"]) {
       await Future.delayed(Duration(seconds: 1));
       context!.pushNamed(Tela03PrincipalWidget.routeName);

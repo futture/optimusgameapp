@@ -626,15 +626,30 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget> {
                         ),
                         FFButtonWidget(
                           onPressed: () async {
-                            Map<String, dynamic> userData = {
-                              'nome_completo':
-                                  _model.inputMomeCompletoTextController?.text,
-                              'telefone':
-                                  _model.inputTelefoneTextController?.text,
-                              'email': _model.inputEmailTextController?.text,
-                              'senha': _model.inputSenhaTextController1?.text,
-                            };
-                            String? otp = await showModalBottomSheet<String>(
+                            // Coleta dos dados do formulário
+                            String nomeCompleto =
+                                _model.inputMomeCompletoTextController?.text ??
+                                    '';
+                            String telefone =
+                                _model.inputTelefoneTextController?.text ?? '';
+                            String email =
+                                _model.inputEmailTextController?.text ?? '';
+                            String senha =
+                                _model.inputSenhaTextController1?.text ?? '';
+                            if (nomeCompleto.isEmpty ||
+                                telefone.isEmpty ||
+                                email.isEmpty ||
+                                senha.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        "Por favor, preencha todos os campos.")),
+                              );
+                              return;
+                            }
+                            String phoneNumber = '+244'+(_model.inputTelefoneTextController!.text).toString();
+                            await UserService().sendOtp(phoneNumber);
+                            String? otpResult = await showModalBottomSheet<String>(
                               isScrollControlled: true,
                               backgroundColor: Colors.transparent,
                               enableDrag: false,
@@ -649,35 +664,34 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget> {
                                   },
                                   child: Padding(
                                     padding: MediaQuery.viewInsetsOf(context),
-                                    child: ModalValidaContaWidget(),
+                                    child: ModalValidaContaWidget(phoneNumber: phoneNumber),
                                   ),
                                 );
                               },
-                            );
+                            ); 
+                            print("Assim mesmo $otpResult");
+                            final otp = 3;
+                            if (otp != null) {
+                              print("OTP inserido:"); 
+                              var resultOtp =
+                                  await UserService().verifyOtp(phoneNumber, "fdu");
 
-                            // Verifica se o OTP foi inserido
-                            if (otp != null && otp.isNotEmpty) {
-                              print(
-                                  "OTP inserido: $otp"); // Aqui você pode imprimir o OTP no console ou usar em outro lugar
-
-                              // Agora você pode validar o OTP, enviar para o servidor, ou qualquer outra lógica necessária
-                              var resultOtp = await UserService()
-                                  .verifyOtp(userData['email'], otp);
-
-                              if (resultOtp["isSuccess"]) {
-                                // OTP válido, agora cria o usuário
-                                var resultCreateUser = 
-                                    await UserService().createUser(userData);
+                              if (resultOtp["isSuccess"]) { 
+                                var resultCreateUser =
+                                    await UserService().createUser({
+                                  'nome_completo': nomeCompleto,
+                                  'telefone': telefone,
+                                  'email': email,
+                                  'senha': senha,
+                                });
 
                                 if (resultCreateUser["isSuccess"]) {
-                                  // Usuário criado com sucesso
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                         content: Text(
                                             "Usuário cadastrado com sucesso!")),
                                   );
                                 } else {
-                                  // Erro ao criar o usuário
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                         content: Text(
@@ -685,7 +699,6 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget> {
                                   );
                                 }
                               } else {
-                                // OTP inválido
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                       content: Text(
@@ -693,7 +706,6 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget> {
                                 );
                               }
                             } else {
-                              // Caso o OTP não tenha sido inserido
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                     content:
