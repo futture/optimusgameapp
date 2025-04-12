@@ -6,6 +6,7 @@ import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
+import 'package:projeto_game_quiz/pages/tela06_salade_jogo/tela06_salade_jogo_widget.dart';
 
 import '/flutter_flow/flutter_flow_timer.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -117,13 +118,12 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
         return;
       }
 
-      if (isWaitingPlayers) {
-        showWaitingDialog();
-      }
-
       await getMatchByMatchIdAsync();
       await getWebSocketWaitForPlayerAsync();
-      Navigator.of(context).pop();
+
+      // if (isWaitingPlayers) {
+      //   showWaitingDialog();
+      // }
     } catch (e) {
       print("Erro inesperado ao criar partida: $e");
     }
@@ -133,6 +133,11 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
     final resultMatch = await matchService.getMatchByMatchIdAsync(matchId);
     if (resultMatch["isSuccess"]) {
       matchInfo = resultMatch["data"];
+       Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => Tela06SaladeJogoWidget(matchInfo: matchInfo),
+          ),
+        );
     }
   }
 
@@ -149,6 +154,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
         playersConnected = match.playersConnected;
         minPlayers = match.minPlayers;
         isWaitingPlayers = true;
+        showWaitingDialog();
       },
       onError: (error) => print("Erro no WebSocket: $error"),
       onDone: () => print("Conexão WebSocket encerrada."),

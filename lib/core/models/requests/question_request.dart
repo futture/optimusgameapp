@@ -1,19 +1,19 @@
 class PlayerAnswerRequest {
   final String matchId;
   final String questionId;
-  final DateTime answeredAt;
+  final int responseTimeInSecond;
   final String optionAnswerId;
 
   PlayerAnswerRequest(
       {required this.matchId,
       required this.questionId,
       required this.optionAnswerId,
-      required this.answeredAt});
+      required this.responseTimeInSecond});
 
   Map<String, dynamic> toJson() => {
         "matchId": matchId,
         "questionId": questionId,
-        "answeredAt": answeredAt.toIso8601String(),
+        "responseTimeInSecond": responseTimeInSecond,
         "optionAnswerId": optionAnswerId
       };
 }

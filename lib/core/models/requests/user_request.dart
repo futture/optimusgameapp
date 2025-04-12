@@ -17,9 +17,29 @@ class CreateFcmTokenRequest {
   }
 }
 
+class CreateUserRequest {
+  final String name;
+  final String email;
+  final String phone_number;
+  final String phone_number_mask;
+  final String role_id;
+  final String password;
 
-class CreateUserRequest{
-  
+  CreateUserRequest({
+    required this.name,
+    required this.email,
+    required this.phone_number,
+    required this.phone_number_mask,
+    required this.role_id,
+    required this.password,
+  });
+
+  Map<String, dynamic> toJson() => {
+        "name": name,
+        "email": email,
+        "phone_number": phone_number,
+        "phone_number_mask": phone_number_mask,
+        "role_id": role_id,
+        "password": password
+      };
 }
-
-

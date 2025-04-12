@@ -1,3 +1,5 @@
+import 'package:projeto_game_quiz/pages/tela14_fim_partida/tela14_fim_partida_widget.dart';
+
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_timer.dart';
@@ -129,8 +131,14 @@ class _ModaListadeSalaWidgetState extends State<ModaListadeSalaWidget> {
                               padding: EdgeInsets.all(5.0),
                               child: FFButtonWidget(
                                 onPressed: () async {
-                                  await _model.createMatch(4, 5,
-                                      "SALA-4-${DateTime.now().minute}${DateTime.now().second}${DateTime.now().hour}");
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          Tela14FimPartidaViewWidget(),
+                                    ),
+                                  );
+                                  // await _model.createMatch(2, 5,
+                                  // "SALA-4-${DateTime.now().minute}${DateTime.now().second}${DateTime.now().hour}");
                                 },
                                 text: 'INICIAR SALA DE 4',
                                 options: FFButtonOptions(

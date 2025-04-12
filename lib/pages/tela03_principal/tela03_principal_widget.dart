@@ -3,6 +3,8 @@ import 'package:projeto_game_quiz/components/warnings/warning04_reducao_de_saldo
 import 'package:projeto_game_quiz/core/api/services/fcm_token_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
+import 'package:projeto_game_quiz/pages/tela12_vitoria_view/tela12_vitoria_view_widget.dart';
+import 'package:projeto_game_quiz/pages/tela14_fim_partida/tela14_fim_partida_widget.dart';
 
 import '/components/moda_listade_sala_widget.dart';
 import '/components/moda_menu_pagian_inicial_widget.dart';
@@ -880,6 +882,12 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                   ),
                   FFButtonWidget(
                     onPressed: () async {
+                      // Navigator.of(context).push(
+                      //   MaterialPageRoute(
+                      //     builder: (_) => Tela14FimPartidaViewWidget(),
+                      //   ),
+                      // );
+
                       await _model.checkPlayerAlreadyRegisteredMatchAsync(
                           setState, match.id);
 

@@ -68,23 +68,22 @@ class Warning04ReducaoDeSaldoModel
         minPlayers = match.minPlayers;
         isWaitingPlayers = true;
         onStateUpdate?.call();
+        if (playersConnected >= minPlayers) {
+          _matchWebSocketService?.disconnect();
+         Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Tela06SaladeJogoWidget(
+                matchInfo: matchInfo,
+              ),
+            ),
+          );
+        }
       },
       onError: (error) => print("Erro no WebSocket: $error"),
       onDone: () => print("Conexão WebSocket encerrada."),
     );
 
     _matchWebSocketService?.connect();
-  }
-
-  Future<void> startMatchAsync() async {
-    var resultStartMatch = await _matchService.startMatchAsync(matchInfo.id);
-
-    if (resultStartMatch["isSuccess"]) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => Tela06SaladeJogoWidget(matchInfo: matchInfo),
-        ),
-      );
-    }
   }
 }

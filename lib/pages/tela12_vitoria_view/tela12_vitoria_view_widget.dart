@@ -1,3 +1,5 @@
+import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
+
 import '/flutter_flow/flutter_flow_button_tabbar.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -8,7 +10,8 @@ import 'tela12_vitoria_view_model.dart';
 export 'tela12_vitoria_view_model.dart';
 
 class Tela12VitoriaViewWidget extends StatefulWidget {
-  const Tela12VitoriaViewWidget({super.key});
+  final dynamic gameResultInfo;
+  const Tela12VitoriaViewWidget({super.key, this.gameResultInfo});
 
   static String routeName = 'Tela12VitoriaView';
   static String routePath = '/tela12VitoriaView';
@@ -21,6 +24,7 @@ class Tela12VitoriaViewWidget extends StatefulWidget {
 class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
     with TickerProviderStateMixin {
   late Tela12VitoriaViewModel _model;
+  late MatchResultResponse? _matchResultInfo;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -34,6 +38,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
       length: 3,
       initialIndex: 0,
     )..addListener(() => safeSetState(() {}));
+    _matchResultInfo = widget.gameResultInfo;
   }
 
   @override
@@ -88,7 +93,8 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
           top: true,
           child: Padding(
             padding: EdgeInsets.all(20.0),
-            child: Column(
+            child:
+             Column(
               children: [
                 Align(
                   alignment: Alignment(0.0, 0),
@@ -1581,6 +1587,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                           ),
                         ),
                       ),
+                     
                       Padding(
                         padding:
                             EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
@@ -1679,6 +1686,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                                             ),
                                           ),
                                         ),
+                                        //for (var i = 0; i < 6; i++)
                                         Container(
                                           width: 100.0,
                                           height: 165.0,
@@ -1846,376 +1854,6 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                                     mainAxisSize: MainAxisSize.max,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Container(
-                                        width: double.infinity,
-                                        height: 70.0,
-                                        decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryBackground,
-                                          borderRadius:
-                                              BorderRadius.circular(20.0),
-                                        ),
-                                        child: Align(
-                                          alignment:
-                                              AlignmentDirectional(0.0, 0.0),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                '5',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          fontSize: 15.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                              ),
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(50.0),
-                                                child: Image.network(
-                                                  'https://picsum.photos/seed/781/600',
-                                                  width: 50.0,
-                                                  height: 50.0,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                              Text(
-                                                'Joao Pinto',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                              ),
-                                              Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
-                                                        100.0, 0.0, 0.0, 0.0),
-                                                child: Text(
-                                                  '2500',
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        fontFamily: 'Inter',
-                                                        fontSize: 16.0,
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                                ),
-                                              ),
-                                            ]
-                                                .divide(SizedBox(width: 10.0))
-                                                .addToStart(
-                                                    SizedBox(width: 10.0))
-                                                .addToEnd(
-                                                    SizedBox(width: 10.0)),
-                                          ),
-                                        ),
-                                      ),
-                                      Container(
-                                        width: double.infinity,
-                                        height: 70.0,
-                                        decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryBackground,
-                                          borderRadius:
-                                              BorderRadius.circular(20.0),
-                                        ),
-                                        child: Align(
-                                          alignment:
-                                              AlignmentDirectional(0.0, 0.0),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                '5',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          fontSize: 15.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                              ),
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(50.0),
-                                                child: Image.network(
-                                                  'https://picsum.photos/seed/781/600',
-                                                  width: 50.0,
-                                                  height: 50.0,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                              Text(
-                                                'Joao Pinto',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                              ),
-                                              Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
-                                                        100.0, 0.0, 0.0, 0.0),
-                                                child: Text(
-                                                  '2500',
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        fontFamily: 'Inter',
-                                                        fontSize: 16.0,
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                                ),
-                                              ),
-                                            ]
-                                                .divide(SizedBox(width: 10.0))
-                                                .addToStart(
-                                                    SizedBox(width: 10.0))
-                                                .addToEnd(
-                                                    SizedBox(width: 10.0)),
-                                          ),
-                                        ),
-                                      ),
-                                      Container(
-                                        width: double.infinity,
-                                        height: 70.0,
-                                        decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryBackground,
-                                          borderRadius:
-                                              BorderRadius.circular(20.0),
-                                        ),
-                                        child: Align(
-                                          alignment:
-                                              AlignmentDirectional(0.0, 0.0),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                '5',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          fontSize: 15.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                              ),
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(50.0),
-                                                child: Image.network(
-                                                  'https://picsum.photos/seed/781/600',
-                                                  width: 50.0,
-                                                  height: 50.0,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                              Text(
-                                                'Joao Pinto',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                              ),
-                                              Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
-                                                        100.0, 0.0, 0.0, 0.0),
-                                                child: Text(
-                                                  '2500',
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        fontFamily: 'Inter',
-                                                        fontSize: 16.0,
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                                ),
-                                              ),
-                                            ]
-                                                .divide(SizedBox(width: 10.0))
-                                                .addToStart(
-                                                    SizedBox(width: 10.0))
-                                                .addToEnd(
-                                                    SizedBox(width: 10.0)),
-                                          ),
-                                        ),
-                                      ),
-                                      Container(
-                                        width: double.infinity,
-                                        height: 70.0,
-                                        decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryBackground,
-                                          borderRadius:
-                                              BorderRadius.circular(20.0),
-                                        ),
-                                        child: Align(
-                                          alignment:
-                                              AlignmentDirectional(0.0, 0.0),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                '5',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          fontSize: 15.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                              ),
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(50.0),
-                                                child: Image.network(
-                                                  'https://picsum.photos/seed/781/600',
-                                                  width: 50.0,
-                                                  height: 50.0,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                              Text(
-                                                'Joao Pinto',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                              ),
-                                              Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
-                                                        100.0, 0.0, 0.0, 0.0),
-                                                child: Text(
-                                                  '2500',
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        fontFamily: 'Inter',
-                                                        fontSize: 16.0,
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                                ),
-                                              ),
-                                            ]
-                                                .divide(SizedBox(width: 10.0))
-                                                .addToStart(
-                                                    SizedBox(width: 10.0))
-                                                .addToEnd(
-                                                    SizedBox(width: 10.0)),
-                                          ),
-                                        ),
-                                      ),
-                                      Container(
-                                        width: double.infinity,
-                                        height: 70.0,
-                                        decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryBackground,
-                                          borderRadius:
-                                              BorderRadius.circular(20.0),
-                                        ),
-                                        child: Align(
-                                          alignment:
-                                              AlignmentDirectional(0.0, 0.0),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                '5',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          fontSize: 15.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                              ),
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(50.0),
-                                                child: Image.network(
-                                                  'https://picsum.photos/seed/781/600',
-                                                  width: 50.0,
-                                                  height: 50.0,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                              Text(
-                                                'Joao Pinto',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          fontSize: 16.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                              ),
-                                              Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
-                                                        100.0, 0.0, 0.0, 0.0),
-                                                child: Text(
-                                                  '2500',
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        fontFamily: 'Inter',
-                                                        fontSize: 16.0,
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                                ),
-                                              ),
-                                            ]
-                                                .divide(SizedBox(width: 10.0))
-                                                .addToStart(
-                                                    SizedBox(width: 10.0))
-                                                .addToEnd(
-                                                    SizedBox(width: 10.0)),
-                                          ),
-                                        ),
-                                      ),
                                       Container(
                                         width: double.infinity,
                                         height: 70.0,

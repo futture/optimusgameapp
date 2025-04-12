@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:projeto_game_quiz/core/api/common/web_socket_api.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
@@ -30,7 +31,7 @@ class QuestionWebSocketService {
 
   void connect() {
     final url =
-        '/match/${matchInfo.id}/question/${question.id}/everyone-who-responded';
+        '/match/${matchInfo.id}/question/${question.id}/user/${userId}/everyone-who-responded';
 
     _webSocketService = WebSocketService(
       url: url,
@@ -62,4 +63,5 @@ class QuestionWebSocketService {
   void disconnect() {
     _webSocketService.disconnect();
   }
+
 }

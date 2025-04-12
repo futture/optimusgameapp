@@ -93,11 +93,11 @@ class UserService {
           'client_secret': 'string',
         },
       );
-      TokenUtil.removeToken();
+      await TokenUtil.removeToken();
 
-      TokenUtil.saveToken(result['access_token'], result['expires_in']);
+      await TokenUtil.saveToken(result['access_token'], result['expires_in']);
 
-      getUserInfoAsync();
+      await getUserInfoAsync();
 
       return {
         "isSuccess": true,

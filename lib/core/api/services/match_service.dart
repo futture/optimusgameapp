@@ -21,6 +21,19 @@ class MatchService {
     }
   }
 
+  Future<dynamic> getMatchStartNoticeAsync(String matchId) async {
+    try {
+      final successResult = await httpService.request<MatchResponse>(
+        '/match/$matchId/match-start-notice',
+        method: 'GET',
+        successParser: (json) => MatchResponse.fromJson(json),
+      );
+      return {"isSuccess": true, "data": successResult};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
   Future<dynamic> getAllMatchAsync(bool? isEvent, String? status) async {
     try {
       String route = "/match";
@@ -58,18 +71,16 @@ class MatchService {
     }
   }
 
-  Future<dynamic> checkPlayerAlreadyRegisteredMatchAsync(String matchId, String userId) async {
+  Future<dynamic> checkPlayerAlreadyRegisteredMatchAsync(
+      String matchId, String userId) async {
     try {
-      final successResult = await httpService.request(
-        '/match/${matchId}/user/${userId}',
-        method: 'GET'
-      );
+      final successResult = await httpService
+          .request('/match/${matchId}/user/${userId}', method: 'GET');
       return {"isSuccess": true, "data": successResult};
     } catch (e) {
       return _errorUtil.handleError(e);
     }
   }
-
 
   Future<dynamic> createMatchAsync(
       String roomId, CreateMatchRequest request) async {
@@ -108,8 +119,11 @@ class MatchService {
 
   Future<dynamic> endGameAsync(String matchId) async {
     try {
-      final result = await httpService
-          .request('/match/$matchId/end-match', method: 'PATCH', body: {});
+      final result = await httpService.request<MatchResultResponse>(
+          '/match/$matchId/end-match',
+          method: 'PATCH',
+          body: {},
+          successParser: (json) => MatchResultResponse.fromJson(json));
 
       return {"isSuccess": true, "data": result};
     } catch (e) {

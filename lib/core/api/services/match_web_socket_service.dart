@@ -12,7 +12,7 @@ class MatchWebSocketService {
   final BuildContext context;
 
   late final WebSocketService _webSocketService;
-  late final MatchService _matchService;
+  late final MatchService _matchService = MatchService();
 
   void Function(MatchTotalNumberPlayerResponse matchInfo)? onMatchUpdate;
   void Function(dynamic error)? onError;

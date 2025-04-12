@@ -9,11 +9,8 @@ class Warning04ReducaoDeSaldoWidget extends StatefulWidget {
   final bool? subscribe;
   final dynamic matchInfo;
 
-  const Warning04ReducaoDeSaldoWidget({
-    super.key,
-    this.matchInfo,
-    this.subscribe
-  });
+  const Warning04ReducaoDeSaldoWidget(
+      {super.key, this.matchInfo, this.subscribe});
 
   @override
   State<Warning04ReducaoDeSaldoWidget> createState() =>
@@ -59,7 +56,7 @@ class _Warning04ReducaoDeSaldoWidgetState
                 CircularProgressIndicator(),
                 SizedBox(height: 16),
                 Text(
-                  'Jogadores conectados: $_model.playersConnected / $_model.minPlayers',
+                  'Jogadores conectados: ${_model.playersConnected} / ${_model.minPlayers}',
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -113,7 +110,7 @@ class _Warning04ReducaoDeSaldoWidgetState
                 setState(() {
                   _model.isWaitingPlayers = true;
                 });
-                
+
                 await _model.joinTheMatchAsync(widget.subscribe);
               },
               text: 'Confirmar Inscrição',
