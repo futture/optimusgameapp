@@ -143,7 +143,7 @@ class PlayerRankingResponse {
   final String playerId;
   final int hits;
   final int errors;
-  final double totalResponseTime;
+  final int totalResponseTime;
   final int timesInTop3;
   final int points;
   final double prize;
@@ -168,10 +168,12 @@ class PlayerRankingResponse {
           playerId: json["playerId"],
           hits: json["hits"],
           errors: json["errors"],
-          totalResponseTime: json["totalResponseTime"],
+          totalResponseTime: json["totalResponseTime"].round(),
           timesInTop3: json["timesInTop3"],
           points: json["points"],
-          prize: json["prize"],
+          prize: json["prize"] is String
+              ? double.parse(json["prize"])
+              : (json["prize"] as num).toDouble(),
           winner: json["winner"],
           position: json["position"]);
 }

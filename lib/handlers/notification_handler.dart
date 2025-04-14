@@ -35,7 +35,7 @@ class NotificationHandler {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) =>
-                      Tela13DadosDePartidaWidget(matchId: data["matchId"]),
+                      Tela13DadosDePartidaWidget(matchId: data["matchId"], recebeuNotificaca: true),
                 ),
               );
             }
@@ -68,7 +68,7 @@ class NotificationHandler {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) =>
-                      Tela13DadosDePartidaWidget(matchId: data["matchId"]),
+                      Tela13DadosDePartidaWidget(matchId: data["matchId"],recebeuNotificaca: true),
                 ),
               );
             }

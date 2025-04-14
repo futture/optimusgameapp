@@ -41,7 +41,8 @@ class Warning04ReducaoDeSaldoModel
     callback?.call();
   }
 
-  Future<void> joinTheMatchAsync(bool? subscribe) async {
+  Future<void> joinTheMatchAsync(
+      bool? subscribe, bool? recebeuNotificaca) async {
     var result = await _matchService.addPlayerMatchAsync(
       matchInfo.id,
       AddPlayerMatchRequest(
@@ -50,40 +51,49 @@ class Warning04ReducaoDeSaldoModel
     );
 
     if (result["isSuccess"] && subscribe == null) {
-      await getWebSocketWaitForPlayerAsync();
+      await getWebSocketWaitForPlayerAsync(recebeuNotificaca);
       onStateUpdate?.call();
     } else {
-      Warning00ErrorUtil.showDialogMessageError(context,
-          result["error"].detail.message, result["error"].detail.details);
+      if (result.containsKey("error")) {
+        Warning00ErrorUtil.showDialogMessageError(context,
+            result["error"].detail.message, result["error"].detail.details);
+      } else {}
     }
   }
 
-  Future<void> getWebSocketWaitForPlayerAsync() async {
-    _matchWebSocketService = MatchWebSocketService(
-      matchId: matchInfo.id,
-      context: context,
-      matchInfo: matchInfo,
-      onMatchUpdate: (match) {
-        playersConnected = match.playersConnected;
-        minPlayers = match.minPlayers;
-        isWaitingPlayers = true;
-        onStateUpdate?.call();
-        if (playersConnected >= minPlayers) {
-          _matchWebSocketService?.disconnect();
-         Navigator.push(
-            context,
+Future<void> getWebSocketWaitForPlayerAsync(bool? recebeuNotificaca) async {
+  _matchWebSocketService = MatchWebSocketService(
+    matchId: matchInfo.id,
+    context: context,
+    matchInfo: matchInfo,
+    onMatchUpdate: (match) {
+      playersConnected = match.playersConnected;
+      minPlayers = match.minPlayers;
+      isWaitingPlayers = true;
+      onStateUpdate?.call();
+
+      if (playersConnected >= minPlayers) {
+        if (!isWaitingPlayers) return;
+
+        isWaitingPlayers = false;
+        _matchWebSocketService?.disconnect();
+        if (context.mounted) {
+          Navigator.of(context).pushReplacement(
             MaterialPageRoute(
-              builder: (context) => Tela06SaladeJogoWidget(
+              builder: (_) => Tela06SaladeJogoWidget(
                 matchInfo: matchInfo,
+                recebeuNotificaca: recebeuNotificaca,
               ),
             ),
           );
         }
-      },
-      onError: (error) => print("Erro no WebSocket: $error"),
-      onDone: () => print("Conexão WebSocket encerrada."),
-    );
+      }
+    },
+    onError: (error) => print("Erro no WebSocket: $error"),
+    onDone: () => print("Conexão WebSocket encerrada."),
+  );
 
-    _matchWebSocketService?.connect();
-  }
+  _matchWebSocketService?.connect();
+}
+
 }

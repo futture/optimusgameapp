@@ -40,8 +40,12 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
       if (widget.recebeuNotificaca == null) {
         _model.getMatchStartNoticeAsync(setState);
       }
-      _model.fetchNextQuestionMatchAsync(setState);
+      _model.fetchNextQuestionMatchAsync(safeSetState);
     }
+  }
+
+  void safeSetState(VoidCallback fn) {
+    if (mounted) setState(fn);
   }
 
   @override
@@ -439,17 +443,17 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                 color: Color(0xFFFF0505),
                               ),
                             ),
-                            alignment: AlignmentDirectional(0.0, 0.0),
-                            child: Text(
+                            child: Center(
+                                child: Text(
                               '${_model.secondsRemaining}s',
                               style: TextStyle(
-                                fontSize: 32,
+                                fontSize: 20,
                                 color: _model.secondsRemaining <= 3
                                     ? Colors.red
                                     : Colors.black,
                                 fontWeight: FontWeight.bold,
                               ),
-                            )
+                            ))
 
                             // FlutterFlowTimer(
                             //   initialTime: _model.timerInitialTimeMs,
