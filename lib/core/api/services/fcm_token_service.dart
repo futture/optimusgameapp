@@ -5,7 +5,6 @@ import 'package:projeto_game_quiz/core/api/services/user_service.dart';
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/user_request.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:html' as html;
 
 class FcmTokenService {
   String? _token;
@@ -32,8 +31,8 @@ class FcmTokenService {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
     if (kIsWeb) {
-      _deviceName = html.window.navigator.userAgent;
-      _deviceId = html.window.navigator.userAgent;
+      _deviceName = "Unknown-Web";
+      _deviceId = "Unknown-Web";
     } else if (Theme.of(context).platform == TargetPlatform.android) {
       AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
       _deviceName = androidInfo.model;

@@ -205,45 +205,47 @@ class _Tela07FinancasWidgetState extends State<Tela07FinancasWidget> {
                                   ),
                                 ),
                                 SizedBox(width: 8),
-                                Material(
-                                  color: FlutterFlowTheme.of(context).alternate,
-                                  shape: CircleBorder(),
-                                  child: InkWell(
-                                    customBorder: CircleBorder(),
-                                    onTap: () async {
-                                      if (_model.isEditingIban) {
-                                        await _model.createAccountInfoAsync();
-                                      }
+                                if (!_model.isCreate)
+                                  Material(
+                                    color:
+                                        FlutterFlowTheme.of(context).alternate,
+                                    shape: CircleBorder(),
+                                    child: InkWell(
+                                      customBorder: CircleBorder(),
+                                      onTap: () async {
+                                        if (_model.isEditingIban) {
+                                          await _model.createAccountInfoAsync();
+                                        }
 
-                                      setState(() {
-                                        _model.isEditingIban =
-                                            !_model.isEditingIban;
-                                      });
-
-                                      if (_model.isEditingIban) {
-                                        Future.delayed(
-                                            Duration(milliseconds: 100), () {
-                                          FocusScope.of(context).requestFocus(
-                                              _model.textFieldFocusNode1);
+                                        setState(() {
+                                          _model.isEditingIban =
+                                              !_model.isEditingIban;
                                         });
-                                      } else {
-                                        FocusScope.of(context).unfocus();
-                                      }
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Icon(
-                                        _model.isEditingIban
-                                            ? Icons.check
-                                            : Icons.edit,
-                                        size: 12.0,
-                                        color: _model.isEditingIban
-                                            ? Colors.green
-                                            : Colors.deepOrange,
+
+                                        if (_model.isEditingIban) {
+                                          Future.delayed(
+                                              Duration(milliseconds: 100), () {
+                                            FocusScope.of(context).requestFocus(
+                                                _model.textFieldFocusNode1);
+                                          });
+                                        } else {
+                                          FocusScope.of(context).unfocus();
+                                        }
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(10.0),
+                                        child: Icon(
+                                          _model.isEditingIban
+                                              ? Icons.check
+                                              : Icons.edit,
+                                          size: 12.0,
+                                          color: _model.isEditingIban
+                                              ? Colors.green
+                                              : Colors.deepOrange,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
                               ],
                             ),
                             SizedBox(height: 5),
@@ -306,50 +308,51 @@ class _Tela07FinancasWidgetState extends State<Tela07FinancasWidget> {
                                   ),
                                 ),
                                 SizedBox(width: 8),
-                                Material(
-                                  color: FlutterFlowTheme.of(context).alternate,
-                                  shape: CircleBorder(),
-                                  child: InkWell(
-                                    customBorder: CircleBorder(),
-                                    onTap: () async {
-                                      if (_model.isEditingConta) {
-                                        await _model.createAccountInfoAsync();
-                                      }
+                                if (!_model.isCreate)
+                                  Material(
+                                    color:
+                                        FlutterFlowTheme.of(context).alternate,
+                                    shape: CircleBorder(),
+                                    child: InkWell(
+                                      customBorder: CircleBorder(),
+                                      onTap: () async {
+                                        if (_model.isEditingConta) {
+                                          await _model.createAccountInfoAsync();
+                                        }
 
-                                      setState(() {
-                                        _model.isEditingConta =
-                                            !_model.isEditingConta;
-                                      });
-
-                                      if (_model.isEditingConta) {
-                                        Future.delayed(
-                                            Duration(milliseconds: 100), () {
-                                          FocusScope.of(context).requestFocus(
-                                              _model.textFieldFocusNode2);
+                                        setState(() {
+                                          _model.isEditingConta =
+                                              !_model.isEditingConta;
                                         });
-                                      } else {
-                                        FocusScope.of(context).unfocus();
-                                      }
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Icon(
-                                        _model.isEditingConta
-                                            ? Icons.check
-                                            : Icons.edit,
-                                        size: 12.0,
-                                        color: _model.isEditingConta
-                                            ? Colors.green
-                                            : Colors.deepOrange,
+
+                                        if (_model.isEditingConta) {
+                                          Future.delayed(
+                                              Duration(milliseconds: 100), () {
+                                            FocusScope.of(context).requestFocus(
+                                                _model.textFieldFocusNode2);
+                                          });
+                                        } else {
+                                          FocusScope.of(context).unfocus();
+                                        }
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(10.0),
+                                        child: Icon(
+                                          _model.isEditingConta
+                                              ? Icons.check
+                                              : Icons.edit,
+                                          size: 12.0,
+                                          color: _model.isEditingConta
+                                              ? Colors.green
+                                              : Colors.deepOrange,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
                               ],
                             ),
                             SizedBox(height: 30),
-                            if (_model.textController1.text.isEmpty &&
-                                _model.textController2.text.isEmpty)
+                            if (_model.isCreate)
                               FFButtonWidget(
                                 onPressed: () async {
                                   await _model.createAccountInfoAsync();

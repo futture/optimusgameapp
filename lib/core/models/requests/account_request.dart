@@ -17,7 +17,7 @@ class DepositAmountAccountRequest{
       DepositAmountAccountRequest({required this.amount});
 
       Map<String, dynamic> toJson()
-        =>{
+        => {
           "amount": amount,
         };
 }

@@ -32,14 +32,13 @@ class CreateUserRequest {
     required this.phone_number_mask,
     required this.role_id,
     required this.password,
-  });
-
+  }); 
   Map<String, dynamic> toJson() => {
         "name": name,
         "email": email,
         "phone_number": phone_number,
         "phone_number_mask": phone_number_mask,
         "role_id": role_id,
-        "password": password
+        "password": password,
       };
 }

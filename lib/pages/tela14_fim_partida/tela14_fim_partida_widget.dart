@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_util.dart';
 import 'package:projeto_game_quiz/pages/tela14_fim_partida/tela14_fim_partida_model.dart';
-
-enum TrofeuTipo { ouro, prata, bronze, perdedor }
 
 class Tela14FimPartidaViewWidget extends StatefulWidget {
   final dynamic gameResultInfo;
@@ -23,12 +22,12 @@ class Tela14FimPartidaViewWidget extends StatefulWidget {
 
 class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
     with TickerProviderStateMixin {
-  late Tela14FimPartidaViewModel _model;
   MatchResponse? matchInfo;
-  List<JogadorResultado> resultados = List.empty();
   Set<int> expandedIndices = {};
+  late Tela14FimPartidaViewModel _model;
   late MatchResultResponse? gameResultInfo;
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  List<JogadorResultado> resultados = List.empty();
 
   @override
   void initState() {
@@ -42,41 +41,8 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
 
     matchInfo = widget.matchInfo;
     gameResultInfo = widget.gameResultInfo;
-
-    resultados = gameResultInfo?.generalRanking.map((ranking) {
-          return JogadorResultado(
-            nome: ranking.playerName,
-            pontos: ranking.points,
-            premio: ranking.prize,
-            perguntasCertas: ranking.hits,
-            perguntasErradas: ranking.errors,
-            top3vezes: ranking.timesInTop3,
-            posicao: ranking.position,
-            isWinner: ranking.winner == true,
-          );
-        }).toList() ??
-        [];
-
-    resultados.sort((a, b) => a.posicao.compareTo(b.posicao));
-
-    final vencedores = resultados.where((r) => r.isWinner).toList();
-
-    if (vencedores.length == 1) {
-      vencedores[0].trofeu = TrofeuTipo.ouro;
-    } else if (vencedores.length > 1) {
-      for (int i = 0; i < vencedores.length && i < 3; i++) {
-        switch (i) {
-          case 0:
-            vencedores[i].trofeu = TrofeuTipo.ouro;
-            break;
-          case 1:
-            vencedores[i].trofeu = TrofeuTipo.prata;
-            break;
-          case 2:
-            vencedores[i].trofeu = TrofeuTipo.bronze;
-            break;
-        }
-      }
+    if(gameResultInfo != null){
+      resultados = _model.processarResultados(gameResultInfo);
     }
   }
 
@@ -121,15 +87,14 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                           matchInfo!.matchConfiguration!.isSingleWinner
                               ? 'Parabéns ao campeão!'
                               : 'Parabéns aos campeões!',
-                          style: TextStyle(
-                              fontSize: 22, fontWeight: FontWeight.bold),
+                          style: FlutterFlowTheme.of(context).bodyMedium,
                         ),
                       const SizedBox(height: 10),
                       Text(
                         matchInfo == null
                             ? "Carregando..."
                             : 'Duração da partida: ${matchInfo!.matchConfiguration!.timeToRespond * matchInfo!.matchConfiguration!.numberOfQuestions} segundos',
-                        style: TextStyle(fontSize: 16),
+                        style: FlutterFlowTheme.of(context).bodyMedium,
                       ),
                       const SizedBox(height: 20),
                       ListView.builder(
@@ -345,28 +310,4 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
       ],
     );
   }
-}
-
-class JogadorResultado {
-  final String nome;
-  final int pontos;
-  final double premio;
-  final int perguntasCertas;
-  final int perguntasErradas;
-  final int? top3vezes;
-  final int posicao;
-  final bool isWinner;
-  TrofeuTipo trofeu;
-
-  JogadorResultado({
-    required this.nome,
-    required this.pontos,
-    required this.premio,
-    required this.perguntasCertas,
-    required this.perguntasErradas,
-    required this.top3vezes,
-    required this.posicao,
-    required this.isWinner,
-    this.trofeu = TrofeuTipo.perdedor,
-  });
 }

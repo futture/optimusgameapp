@@ -1,3 +1,5 @@
+enum TrofeuTipo { ouro, prata, bronze, perdedor }
+
 class CreateRoomRequest {
   final String nameRoom;
 
@@ -53,4 +55,29 @@ class AddPlayerMatchRequest {
   AddPlayerMatchRequest({required this.playerId});
 
   Map<String, dynamic> toJson() => {"playerId": playerId};
+}
+
+
+class JogadorResultado {
+  final String nome;
+  final int pontos;
+  final double premio;
+  final int perguntasCertas;
+  final int perguntasErradas;
+  final int? top3vezes;
+  final int posicao;
+  final bool isWinner;
+  TrofeuTipo trofeu;
+
+  JogadorResultado({
+    required this.nome,
+    required this.pontos,
+    required this.premio,
+    required this.perguntasCertas,
+    required this.perguntasErradas,
+    required this.top3vezes,
+    required this.posicao,
+    required this.isWinner,
+    this.trofeu = TrofeuTipo.perdedor,
+  });
 }

@@ -7,7 +7,7 @@ import 'package:projeto_game_quiz/core/api/utils/token_util.dart';
 import 'package:projeto_game_quiz/core/models/common/error_response.dart';
 
 class HttpClientService {
-  final String baseUrl = "http://$BASE_URL";
+  final String baseUrl = "https://$BASE_URL";
 
   HttpClientService();
 

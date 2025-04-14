@@ -247,6 +247,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                                   FlutterFlowTheme.of(context)
                                                       .bodyMedium
                                                       .override(
+                                                        color: Colors.black,
                                                         fontFamily: 'Inter',
                                                         fontSize: 14.0,
                                                         letterSpacing: 0.0,
@@ -264,6 +265,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                                   FlutterFlowTheme.of(context)
                                                       .bodyMedium
                                                       .override(
+                                                        color: Colors.black,
                                                         fontFamily: 'Inter',
                                                         fontSize: 13.0,
                                                         letterSpacing: 0.0,
@@ -295,6 +297,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                     style: FlutterFlowTheme.of(context)
                                         .bodyMedium
                                         .override(
+                                          color: Colors.black,
                                           fontFamily: 'Inter',
                                           fontSize: 18.0,
                                           letterSpacing: 0.0,
@@ -310,6 +313,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                     style: FlutterFlowTheme.of(context)
                                         .titleMedium
                                         .override(
+                                          color: Colors.black,
                                           fontFamily: 'Inter Tight',
                                           letterSpacing: 0.0,
                                           fontWeight: FontWeight.bold,
@@ -320,6 +324,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                     style: FlutterFlowTheme.of(context)
                                         .bodyMedium
                                         .override(
+                                          color: Colors.black,
                                           fontFamily: 'Inter',
                                           fontSize: 18.0,
                                           letterSpacing: 0.0,
@@ -727,7 +732,6 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                   ].divide(SizedBox(width: 10.0)),
                                 ),
                               ),
-                            
                             ],
                           ),
                         ),

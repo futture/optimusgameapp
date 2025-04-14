@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 class Tela07FinancasModel extends FlutterFlowModel<Tela07FinancasWidget> {
   ///  State fields for stateful widgets in this page.
   String? userId = "";
+  bool isCreate = true;
   bool isEditingIban = false;
   bool isEditingConta = false;
   final formKey = GlobalKey<FormState>();
@@ -62,10 +63,14 @@ class Tela07FinancasModel extends FlutterFlowModel<Tela07FinancasWidget> {
       var result = await _accountService.getAccountByUserIdAsync(userId!);
       if (result["isSuccess"]) {
         setState(() {
+          isCreate = false;
           textController1.text = result["data"].iban;
           textController2.text = result["data"].accountNumber;
         });
       } else {
+        setState(() {
+          isCreate = false;
+        });
         Warning00ErrorUtil.showDialogMessageError(context,
             result["error"].detail.message, result["error"].detail.details);
       }
