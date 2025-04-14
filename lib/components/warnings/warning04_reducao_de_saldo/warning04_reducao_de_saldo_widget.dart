@@ -8,12 +8,10 @@ export 'warning04_reducao_de_saldo_model.dart';
 class Warning04ReducaoDeSaldoWidget extends StatefulWidget {
   final bool? subscribe;
   final dynamic matchInfo;
+  final bool? recebeuNotificaca;
 
-  const Warning04ReducaoDeSaldoWidget({
-    super.key,
-    this.matchInfo,
-    this.subscribe
-  });
+  const Warning04ReducaoDeSaldoWidget(
+      {super.key, this.matchInfo, this.subscribe, this.recebeuNotificaca});
 
   @override
   State<Warning04ReducaoDeSaldoWidget> createState() =>
@@ -33,8 +31,6 @@ class _Warning04ReducaoDeSaldoWidgetState
     _model.onStateUpdate = () => setState(() {});
     _model.matchInfo = widget.matchInfo;
     _model.initState(context);
-
-    //_model.joinTheMatchAsync(null);
   }
 
   @override
@@ -59,7 +55,7 @@ class _Warning04ReducaoDeSaldoWidgetState
                 CircularProgressIndicator(),
                 SizedBox(height: 16),
                 Text(
-                  'Jogadores conectados: $_model.playersConnected / $_model.minPlayers',
+                  'Jogadores conectados: ${_model.playersConnected} / ${_model.minPlayers}',
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -113,8 +109,8 @@ class _Warning04ReducaoDeSaldoWidgetState
                 setState(() {
                   _model.isWaitingPlayers = true;
                 });
-                
-                await _model.joinTheMatchAsync(widget.subscribe);
+
+                await _model.joinTheMatchAsync(widget.subscribe, widget.recebeuNotificaca);
               },
               text: 'Confirmar Inscrição',
               options: FFButtonOptions(

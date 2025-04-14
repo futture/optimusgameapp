@@ -1,12 +1,9 @@
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_widgets.dart';
-
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_radio_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_timer.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/form_field_controller.dart';
-import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'tela06_salade_jogo_model.dart';
@@ -14,10 +11,10 @@ export 'tela06_salade_jogo_model.dart';
 
 /// Jogadas
 class Tela06SaladeJogoWidget extends StatefulWidget {
-  Tela06SaladeJogoWidget({super.key, dynamic matchInfo})
-      : this.matchInfo = matchInfo;
-
   final dynamic matchInfo;
+  Tela06SaladeJogoWidget({super.key, dynamic matchInfo, this.recebeuNotificaca})
+      : this.matchInfo = matchInfo;
+  final bool? recebeuNotificaca;
 
   static String routeName = 'Tela06SaladeJogo';
   static String routePath = '/tela06SaladeJogo';
@@ -36,10 +33,19 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
 
     _model = createModel(context, () => Tela06SaladeJogoModel());
     _model.radioGroupValueController = FormFieldController<String>(null);
-    _model.matchInfo = widget.matchInfo;
+    if (widget.matchInfo != null) {
+      _model.matchInfo = widget.matchInfo;
 
-    _model.getUserIdAsync(setState);
-    _model.fetchNextQuestionMatchAsync(setState);
+      _model.getUserIdAsync(setState);
+      if (widget.recebeuNotificaca == null) {
+        _model.getMatchStartNoticeAsync(setState);
+      }
+      _model.fetchNextQuestionMatchAsync(safeSetState);
+    }
+  }
+
+  void safeSetState(VoidCallback fn) {
+    if (mounted) setState(fn);
   }
 
   @override
@@ -427,43 +433,55 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                           ),
                         ),
                         Container(
-                          width: 35.0,
-                          height: 35.0,
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                            borderRadius: BorderRadius.circular(40.0),
-                            border: Border.all(
-                              color: Color(0xFFFF0505),
+                            width: 35.0,
+                            height: 35.0,
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context)
+                                  .secondaryBackground,
+                              borderRadius: BorderRadius.circular(40.0),
+                              border: Border.all(
+                                color: Color(0xFFFF0505),
+                              ),
                             ),
-                          ),
-                          alignment: AlignmentDirectional(0.0, 0.0),
-                          child: FlutterFlowTimer(
-                            initialTime: _model.timerInitialTimeMs,
-                            getDisplayTime: (value) =>
-                                StopWatchTimer.getDisplayTime(
-                              value,
-                              hours: false,
-                              minute: false,
-                              milliSecond: false,
+                            child: Center(
+                                child: Text(
+                              '${_model.secondsRemaining}s',
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: _model.secondsRemaining <= 3
+                                    ? Colors.red
+                                    : Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ))
+
+                            // FlutterFlowTimer(
+                            //   initialTime: _model.timerInitialTimeMs,
+                            //   getDisplayTime: (value) =>
+                            //       StopWatchTimer.getDisplayTime(
+                            //     value,
+                            //     hours: false,
+                            //     minute: false,
+                            //     milliSecond: false,
+                            //   ),
+                            //   controller: _model.timerController,
+                            //   updateStateInterval: Duration(milliseconds: 1),
+                            //   onChanged: (value, displayTime, shouldUpdate) {
+                            //     _model.timerMilliseconds = value;
+                            //     _model.timerValue = displayTime;
+                            //     if (shouldUpdate) safeSetState(() {});
+                            //   },
+                            //   textAlign: TextAlign.start,
+                            //   style: FlutterFlowTheme.of(context)
+                            //       .headlineSmall
+                            //       .override(
+                            //         fontFamily: 'Inter Tight',
+                            //         color: Color(0xFFFF0D00),
+                            //         letterSpacing: 0.0,
+                            //       ),
+                            // ),
+
                             ),
-                            controller: _model.timerController,
-                            updateStateInterval: Duration(milliseconds: 1),
-                            onChanged: (value, displayTime, shouldUpdate) {
-                              _model.timerMilliseconds = value;
-                              _model.timerValue = displayTime;
-                              if (shouldUpdate) safeSetState(() {});
-                            },
-                            textAlign: TextAlign.start,
-                            style: FlutterFlowTheme.of(context)
-                                .headlineSmall
-                                .override(
-                                  fontFamily: 'Inter Tight',
-                                  color: Color(0xFFFF0D00),
-                                  letterSpacing: 0.0,
-                                ),
-                          ),
-                        ),
                         Container(
                           width: 390.0,
                           height: 420.0,
@@ -685,6 +703,8 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                       alignment: AlignmentDirectional(0.0, 0.0),
                                       child: FFButtonWidget(
                                         onPressed: () async {
+                                          _model
+                                              .mostrarDialogAguardando(context);
                                           await _model.sendUserResponseAsync(
                                               _model.answerOptionId, setState);
                                         },

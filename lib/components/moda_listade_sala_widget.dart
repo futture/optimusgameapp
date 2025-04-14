@@ -129,7 +129,17 @@ class _ModaListadeSalaWidgetState extends State<ModaListadeSalaWidget> {
                               padding: EdgeInsets.all(5.0),
                               child: FFButtonWidget(
                                 onPressed: () async {
-                                  await _model.createMatch(4, 5,
+                                  // Navigator.of(context).push(
+                                  //   MaterialPageRoute(
+                                  //     builder: (_) =>
+                                  //         Tela14FimPartidaViewWidget(
+                                  //       gameResultInfo: null,
+                                  //     ),
+                                  //   ),
+                                  // );
+                                  // await _model.getMatchByMatchIdAsyncdd(
+                                  //     "89ae065d-3f01-4381-a62a-d2905f2d74f4");
+                                  await _model.createMatch(2, 5,
                                       "SALA-4-${DateTime.now().minute}${DateTime.now().second}${DateTime.now().hour}");
                                 },
                                 text: 'INICIAR SALA DE 4',

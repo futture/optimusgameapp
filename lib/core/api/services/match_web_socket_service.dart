@@ -11,8 +11,8 @@ class MatchWebSocketService {
   final MatchResponse matchInfo;
   final BuildContext context;
 
-  late final WebSocketService _webSocketService;
-  late final MatchService _matchService;
+  WebSocketService? _webSocketService;
+  late final MatchService _matchService = MatchService();
 
   void Function(MatchTotalNumberPlayerResponse matchInfo)? onMatchUpdate;
   void Function(dynamic error)? onError;
@@ -41,15 +41,16 @@ class MatchWebSocketService {
         onMatchUpdate?.call(matchUpdate);
 
         if (matchUpdate.playersConnected >= matchUpdate.minPlayers) {
-          onOther!();
           await startMatchAsync();
+
+          if (onOther != null) onOther!();
         }
       },
       onError: onError,
       onDone: onDone,
     );
 
-    _webSocketService.connect();
+    _webSocketService?.connect();
   }
 
   Future<void> startMatchAsync() async {
@@ -75,6 +76,6 @@ class MatchWebSocketService {
   }
 
   void disconnect() {
-    _webSocketService.disconnect();
+    _webSocketService?.disconnect();
   }
 }

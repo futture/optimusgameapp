@@ -42,23 +42,23 @@ class OptionAnswersResponse {
 
 class QuestionStats {
   String? questionId;
-  List<Erros>? erros;
-  List<Hits>? hits;
+  List<ErrosResponse>? erros;
+  List<HitsResponse>? hits;
 
   QuestionStats({this.questionId, this.erros, this.hits});
 
   QuestionStats.fromJson(Map<String, dynamic> json) {
     questionId = json['questionId'];
     if (json['erros'] != null) {
-      erros = <Erros>[];
+      erros = <ErrosResponse>[];
       json['erros'].forEach((v) {
-        erros!.add(new Erros.fromJson(v));
+        erros!.add(new ErrosResponse.fromJson(v));
       });
     }
     if (json['hits'] != null) {
-      hits = <Hits>[];
+      hits = <HitsResponse>[];
       json['hits'].forEach((v) {
-        hits!.add(new Hits.fromJson(v));
+        hits!.add(new HitsResponse.fromJson(v));
       });
     }
   }
@@ -76,15 +76,15 @@ class QuestionStats {
   }
 }
 
-class Erros {
+class ErrosResponse {
   String? playerId;
-  double? time;
+  int? time;
   bool? isCorrect;
   int? score;
 
-  Erros({this.playerId, this.time, this.isCorrect, this.score});
+  ErrosResponse({this.playerId, this.time, this.isCorrect, this.score});
 
-  Erros.fromJson(Map<String, dynamic> json) {
+  ErrosResponse.fromJson(Map<String, dynamic> json) {
     playerId = json['playerId'];
     time = json['time'];
     isCorrect = json['isCorrect'];
@@ -101,15 +101,15 @@ class Erros {
   }
 }
 
-class Hits {
+class HitsResponse {
   String? playerId;
-  double? time;
+  int? time;
   bool? isCorrect;
   int? score;
 
-  Hits({this.playerId, this.time, this.isCorrect, this.score});
+  HitsResponse({this.playerId, this.time, this.isCorrect, this.score});
 
-  Hits.fromJson(Map<String, dynamic> json) {
+  HitsResponse.fromJson(Map<String, dynamic> json) {
     playerId = json['playerId'];
     time = json['time'];
     isCorrect = json['isCorrect'];

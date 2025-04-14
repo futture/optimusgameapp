@@ -12,7 +12,9 @@ export 'tela13_dados_de_partida_model.dart';
 
 class Tela13DadosDePartidaWidget extends StatefulWidget {
   final String? matchId;
-  const Tela13DadosDePartidaWidget({super.key, this.matchId});
+  final bool? recebeuNotificaca;
+  const Tela13DadosDePartidaWidget(
+      {super.key, this.matchId, this.recebeuNotificaca});
 
   static String routeName = 'Tela13DadosDePartida';
   static String routePath = '/tela13DadosDePartida';
@@ -359,8 +361,11 @@ class _Tela13DadosDePartidaWidgetState
                                                       Colors.transparent,
                                                   insetPadding:
                                                       EdgeInsets.all(24),
-                                                  child: Warning04ReducaoDeSaldoWidget(
-                                                      matchInfo: matchInfo),
+                                                  child:
+                                                      Warning04ReducaoDeSaldoWidget(
+                                                          matchInfo: matchInfo,
+                                                          recebeuNotificaca:
+                                                              true),
                                                 );
                                               },
                                             );

@@ -5,7 +5,7 @@ import 'package:projeto_game_quiz/core/api/services/room_service.dart';
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
-import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
+import 'package:projeto_game_quiz/pages/tela06_salade_jogo/tela06_salade_jogo_widget.dart';
 
 import '/flutter_flow/flutter_flow_timer.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -14,6 +14,9 @@ import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:flutter/material.dart';
 
 class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
+  bool isShowWaitingDialogOpen = false;
+  late BuildContext currentShowWaitingDialog;
+
   /// State fields
   final timerInitialTimeMs = 60000;
   int timerMilliseconds = 60000;
@@ -34,7 +37,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
   int playersConnected = 0;
   bool isWaitingPlayers = false;
 
-  late final MatchWebSocketService _matchWebSocketService;
+  MatchWebSocketService? _matchWebSocketService;
 
   /// Callbacks externos
   VoidCallback? onWaitingPlayersCallback;
@@ -47,7 +50,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
   @override
   void dispose() {
     timerController.dispose();
-    _matchWebSocketService.disconnect();
+    _matchWebSocketService?.disconnect();
   }
 
   Future<void> getUserIdAsync(VoidCallback? callback) async {
@@ -117,13 +120,8 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
         return;
       }
 
-      if (isWaitingPlayers) {
-        showWaitingDialog();
-      }
-
-      await getMatchByMatchIdAsync();
+      await getMatchByMatchIdAsyncdd(matchId);
       await getWebSocketWaitForPlayerAsync();
-      Navigator.of(context).pop();
     } catch (e) {
       print("Erro inesperado ao criar partida: $e");
     }
@@ -136,46 +134,95 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
     }
   }
 
+  Future<void> getMatchByMatchIdAsyncdd(matchId) async {
+    final resultMatch = await matchService.getMatchByMatchIdAsync(matchId);
+    if (resultMatch["isSuccess"]) {
+      matchInfo = resultMatch["data"];
+      // Navigator.of(context).push(
+      //   MaterialPageRoute(
+      //     builder: (_) => Tela06SaladeJogoWidget(
+      //       matchInfo: matchInfo,
+      //       recebeuNotificaca: false,
+      //     ),
+      //   ),
+      // );
+    }
+  }
+
   Future<void> getWebSocketWaitForPlayerAsync() async {
     _matchWebSocketService = MatchWebSocketService(
       matchId: matchId,
       context: context,
       matchInfo: matchInfo!,
       onOther: () {
+        if (!isWaitingPlayers) return;
+
         isWaitingPlayers = false;
+
+        if (isShowWaitingDialogOpen && Navigator.of(context).canPop()) {
+          Navigator.of(currentShowWaitingDialog).pop();
+          isShowWaitingDialogOpen = false;
+        }
+
+        _matchWebSocketService?.disconnect();
+
         onWaitingPlayersCallback?.call();
+
+        if (context.mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => Tela06SaladeJogoWidget(
+                matchInfo: matchInfo,
+                recebeuNotificaca: false,
+              ),
+            ),
+          );
+        }
       },
       onMatchUpdate: (match) {
         playersConnected = match.playersConnected;
         minPlayers = match.minPlayers;
         isWaitingPlayers = true;
+        showWaitingDialog();
       },
       onError: (error) => print("Erro no WebSocket: $error"),
       onDone: () => print("Conexão WebSocket encerrada."),
     );
 
-    _matchWebSocketService.connect();
+    _matchWebSocketService?.connect();
   }
 
   void showWaitingDialog() {
+    if (isShowWaitingDialogOpen) return;
+
+    isShowWaitingDialogOpen = true;
+    currentShowWaitingDialog = context;
+
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        content: Row(
+      builder: (_) => AlertDialog(
+        title: const Text("Aguardando jogadores..."),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(),
-            const SizedBox(width: 16.0),
-            Expanded(
-              child: Text(
-                'Procurando participantes disponíveis...\n'
-                'Participantes conectados: $playersConnected / $minPlayers',
-                style: FlutterFlowTheme.of(context).bodyMedium,
-              ),
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text(
+              "Esperando participantes conectarem, Participante conectados: $playersConnected / $minPlayers",
             ),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _matchWebSocketService?.disconnect();
+              isShowWaitingDialogOpen = false;
+            },
+            child: const Text("Fechar"),
+          ),
+        ],
       ),
     );
   }
