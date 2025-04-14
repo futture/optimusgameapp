@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:projeto_game_quiz/core/api/services/user_service.dart';
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/user_request.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:html' as html;
 
 class FcmTokenService {
   String? _token;
@@ -15,16 +17,13 @@ class FcmTokenService {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
 
     var _userId = await UserUtil.getUserId();
-    
+
     _token = await messaging.getToken();
     print("Token FCM: $_token");
 
     await _getDeviceInfo(context);
 
-    if (_userId != null &&
-        _token != null &&
-        _deviceName != null &&
-        _deviceId != null) {
+    if (_userId != null && _token != null) {
       _sendTokenToServer(_userId, _token!, _deviceName!, _deviceId!);
     }
   }
@@ -32,7 +31,10 @@ class FcmTokenService {
   Future<void> _getDeviceInfo(BuildContext context) async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
-    if (Theme.of(context).platform == TargetPlatform.android) {
+    if (kIsWeb) {
+      _deviceName = html.window.navigator.userAgent;
+      _deviceId = html.window.navigator.userAgent;
+    } else if (Theme.of(context).platform == TargetPlatform.android) {
       AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
       _deviceName = androidInfo.model;
       _deviceId = androidInfo.id;
@@ -40,6 +42,9 @@ class FcmTokenService {
       IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
       _deviceName = iosInfo.utsname.machine;
       _deviceId = iosInfo.identifierForVendor;
+    } else {
+      _deviceName = "Unknown";
+      _deviceId = "Unknown";
     }
 
     print("Nome do dispositivo: $_deviceName");

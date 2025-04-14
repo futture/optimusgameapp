@@ -166,7 +166,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
       onUpdate: (_) {},
       onAllPlayersResponded: (stats) {
         _questionWebSocketService?.disconnect();
-        
+
         fecharDialogoAguardando();
 
         if (!gameFinished) {
@@ -194,7 +194,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const AlertDialog(
+      builder: (_) => AlertDialog(
         title: Text("Aguardando jogadores..."),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -204,6 +204,15 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
             Text("Esperando todos responderem a pergunta..."),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _questionWebSocketService?.disconnect();
+            },
+            child: const Text("Fechar"),
+          ),
+        ],
       ),
     );
   }
@@ -226,8 +235,10 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
       setState(() => gameResult = resultEndGame["data"]);
       Navigator.of(context!).pushReplacement(
         MaterialPageRoute(
-          builder: (_) =>
-              Tela14FimPartidaViewWidget(gameResultInfo: gameResult),
+          builder: (_) => Tela14FimPartidaViewWidget(
+            gameResultInfo: gameResult,
+            matchInfo: matchInfo,
+          ),
         ),
       );
     } else {

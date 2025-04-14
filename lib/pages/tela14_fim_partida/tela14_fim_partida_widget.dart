@@ -3,7 +3,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_util.dart';
-import 'package:projeto_game_quiz/flutter_flow/flutter_flow_widgets.dart';
 import 'package:projeto_game_quiz/pages/tela14_fim_partida/tela14_fim_partida_model.dart';
 
 enum TrofeuTipo { ouro, prata, bronze, perdedor }
@@ -117,11 +116,14 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                       Icon(FontAwesomeIcons.trophy,
                           size: 60, color: Colors.amber),
                       const SizedBox(height: 10),
-                      Text(
-                        'Parabéns aos campeões!',
-                        style: TextStyle(
-                            fontSize: 22, fontWeight: FontWeight.bold),
-                      ),
+                      if (matchInfo != null)
+                        Text(
+                          matchInfo!.matchConfiguration!.isSingleWinner
+                              ? 'Parabéns ao campeão!'
+                              : 'Parabéns aos campeões!',
+                          style: TextStyle(
+                              fontSize: 22, fontWeight: FontWeight.bold),
+                        ),
                       const SizedBox(height: 10),
                       Text(
                         matchInfo == null
