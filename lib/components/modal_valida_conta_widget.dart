@@ -1,4 +1,7 @@
 import 'package:projeto_game_quiz/core/api/services/user_service.dart';
+import 'package:projeto_game_quiz/core/models/responses/otp_code_response.dart';
+import 'package:projeto_game_quiz/dialogs/error-dialog-widget.dart';
+import 'package:projeto_game_quiz/dialogs/success-dialog-widget.dart';
 
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -12,8 +15,7 @@ import 'modal_valida_conta_model.dart';
 export 'modal_valida_conta_model.dart';
 
 class ModalValidaContaWidget extends StatefulWidget {
-   final String phoneNumber; 
-  const ModalValidaContaWidget({super.key, required this.phoneNumber});
+  const ModalValidaContaWidget({super.key});
 
   @override
   State<ModalValidaContaWidget> createState() => _ModalValidaContaWidgetState();
@@ -303,30 +305,73 @@ class _ModalValidaContaWidgetState extends State<ModalValidaContaWidget> {
                                 Padding(
                                   padding: EdgeInsets.all(5.0),
                                   child: FFButtonWidget(
-                                    onPressed: () async { 
-                                      String phone = widget.phoneNumber;
-                                      String otp1 = "2";
-                                      String otp = _model.otpTextController.text;
-                                      String result = (await UserService().verifyOtp(phone, otp1)) as String;
-                                      if (!result.isEmpty) { 
-                                        context.pushNamed(
-                                            Tela03PrincipalWidget.routeName);
-                                      } else { 
-                                        await showDialog(
-                                          context: context,
-                                          builder: (alertDialogContext) {
-                                            return AlertDialog(
-                                              title: Text('Verificar OTP'),
-                                              content:
-                                                  Text('Código OTP inválido'),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () =>
-                                                      Navigator.pop(
-                                                          alertDialogContext),
-                                                  child: Text('Ok'),
+                                    onPressed: () async {
+                                      String otp =
+                                          _model.otpTextController.text;
+                                      final response =
+                                          await UserService().validateOtp(otp);
+                                      if (response["isSuccess"]) {
+                                        OtpCodeResponse data =
+                                            response["data"] as OtpCodeResponse;
+                                        if (otp == data.code) {
+                                          await showDialog(
+                                            context: context,
+                                            barrierDismissible: false,
+                                            builder: (dialogContext) { 
+                                              Future.delayed(
+                                                  Duration(seconds: 2), () {
+                                                Navigator.pop(
+                                                    dialogContext); 
+                                                Navigator.pop(context,
+                                                    true);
+                                              });
+
+                                              return Dialog(
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                insetPadding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 40.0),
+                                                child: SuccessDialogWidget(
+                                                  message:
+                                                      'Código validado com sucesso!',
+                                                  onOk:
+                                                      () {}, 
                                                 ),
-                                              ],
+                                              );
+                                            },
+                                          );
+                                          return;
+                                        }
+                                      } else {
+                                        await showGeneralDialog(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          barrierLabel: "Erro OTP",
+                                          barrierColor: Colors.black54,
+                                          transitionDuration:
+                                              const Duration(milliseconds: 400),
+                                          pageBuilder: (context, animation,
+                                              secondaryAnimation) {
+                                            return Center(
+                                              child: ErrorDialogWidget(
+                                                message: 'Código OTP inválido',
+                                                onOk: () {
+                                                  Navigator.pop(context, false);
+                                                },
+                                              ),
+                                            );
+                                          },
+                                          transitionBuilder: (context,
+                                              animation,
+                                              secondaryAnimation,
+                                              child) {
+                                            return ScaleTransition(
+                                              scale: CurvedAnimation(
+                                                parent: animation,
+                                                curve: Curves.easeOutBack,
+                                              ),
+                                              child: child,
                                             );
                                           },
                                         );

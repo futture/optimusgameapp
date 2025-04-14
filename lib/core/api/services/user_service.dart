@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:projeto_game_quiz/core/api/common/http_client_api.dart';
 import 'package:projeto_game_quiz/core/api/utils/error_util.dart';
 import 'package:projeto_game_quiz/core/api/utils/token_util.dart';
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/user_request.dart';
+import 'package:projeto_game_quiz/core/models/responses/otp_code_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 
 class UserService {
@@ -39,16 +42,24 @@ class UserService {
     }
   }
 
-  Future<Map<String, dynamic>> createUser(Map<String, dynamic> userData) async {
+  Future<dynamic> createUser(CreateUserRequest userRequest) async {
     try {
-      final result = await httpService.request(
-        '/users',
+      final obj = userRequest.toJson();
+      print(obj);
+      final response = await httpService.request(
+        '/users/register',
         method: 'POST',
-        body: userData,
+        body: obj
       );
-      return {"isSuccess": true, "data": result};
+      
+      if (response != null && response["id"] != null) {
+      final userResponse = UserResponse.FromJson(response);
+      return {"isSuccess": true, "data": userResponse};
+    } else {
+      return {"isSuccess": false, "message": "Erro ao criar usuário"};
+    }
     } catch (e) {
-      return _errorUtil.handleError(e);
+      return {"isSuccess": false, "message": e.toString()};
     }
   }
 
@@ -65,13 +76,28 @@ class UserService {
     }
   }
 
-  Future<Map<String, dynamic>> verifyOtp(String phone_number, String otp) async {
+  Future<Map<String, dynamic>> verifyOtp(
+      String phone_number, String otp) async {
     try {
       final result = await httpService.request(
         '/verify_otp',
         method: 'post',
         body: {'phone_number': phone_number, 'otp': otp},
       );
+      return {"isSuccess": true, "data": result};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> validateOtp(String code) async {
+    try {
+      final result = await httpService.request<OtpCodeResponse>(
+        '/otp/$code',
+        method: 'GET',
+        successParser: (json) => OtpCodeResponse.fromJson(json),
+      );
+
       return {"isSuccess": true, "data": result};
     } catch (e) {
       return _errorUtil.handleError(e);

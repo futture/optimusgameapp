@@ -1,7 +1,9 @@
+import 'package:projeto_game_quiz/pages/tela01_criar_conta/tela01_criar_conta_widget.dart';
+import 'package:projeto_game_quiz/pages/tela14_fim_partida/tela14_fim_partida_widget.dart';
+
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import '/index.dart';
+import '/flutter_flow/flutter_flow_widgets.dart'; 
 import 'package:flutter/material.dart';
 import 'tela00_login_model.dart';
 export 'tela00_login_model.dart';
@@ -214,7 +216,7 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget> {
                               await _model.signInAsync();
                             }),
                             SizedBox(height: 4),
-                            _authButton(context, 'Criar Conta', () async {
+                            _authButton(context, 'Criar Conta', () async { 
                               context
                                   .pushNamed(Tela01CriarContaWidget.routeName);
                             }),

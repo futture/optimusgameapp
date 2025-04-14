@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:projeto_game_quiz/pages/tela12_vitoria_view/tela12_vitoria_view_widget.dart';
+import 'package:projeto_game_quiz/pages/tela14_fim_partida/tela14_fim_partida_widget.dart';
 import 'package:provider/provider.dart';
 
 import '/flutter_flow/flutter_flow_util.dart';
@@ -89,6 +91,16 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: Tela09HistoricoJodosWidget.routeName,
           path: Tela09HistoricoJodosWidget.routePath,
           builder: (context, params) => Tela09HistoricoJodosWidget(),
+        ),
+        FFRoute(
+          name: Tela12VitoriaViewWidget.routeName,
+          path: Tela12VitoriaViewWidget.routePath,
+          builder: (context, params) => Tela12VitoriaViewWidget(),
+        ),
+        FFRoute(
+          name: Tela14FimPartidaViewWidget.routeName,
+          path: Tela14FimPartidaViewWidget.routePath,
+          builder: (context, params) => Tela14FimPartidaViewWidget(),
         ),
         FFRoute(
           name: Tela10DepositoWidget.routeName,
