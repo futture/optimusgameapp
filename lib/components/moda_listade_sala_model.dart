@@ -152,8 +152,10 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
   Future<void> getWebSocketWaitForPlayerAsync() async {
     _matchWebSocketService = MatchWebSocketService(
       matchId: matchId,
+      userId: userId,
       context: context,
       matchInfo: matchInfo!,
+      
       onOther: () {
         if (!isWaitingPlayers) return;
 
@@ -179,6 +181,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
           );
         }
       },
+     
       onMatchUpdate: (match) {
         playersConnected = match.playersConnected;
         minPlayers = match.minPlayers;
@@ -190,6 +193,20 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
     );
 
     _matchWebSocketService?.connect();
+  }
+
+  Future<void> leaveTheMatchAsync(context) async {
+    var result = await matchService.leaveTheMatchAsync(matchId, userId);
+    if (result["isSuccess"]) {
+      Navigator.of(context).pop();
+      _matchWebSocketService?.disconnect();
+    } else {
+      await Warning00ErrorUtil.showDialogMessageError(
+        context,
+        result["error"].detail.message,
+        result["error"].detail.details,
+      );
+    }
   }
 
   void showWaitingDialog() {
@@ -215,8 +232,8 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
+            onPressed: () async {
+              await leaveTheMatchAsync(context);
               _matchWebSocketService?.disconnect();
               isShowWaitingDialogOpen = false;
             },

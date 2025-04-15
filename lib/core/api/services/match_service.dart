@@ -106,6 +106,18 @@ class MatchService {
     }
   }
 
+  Future<dynamic> leaveTheMatchAsync(
+      String matchId, String userId) async {
+    try {
+      final result = await httpService.request('/match/$matchId/user/$userId',
+          method: 'DELETE', body: {});
+
+      return {"isSuccess": true, "data": result};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
   Future<dynamic> startMatchAsync(String matchId) async {
     try {
       final result = await httpService

@@ -42,29 +42,6 @@ class _Warning04ReducaoDeSaldoWidgetState
 
   @override
   Widget build(BuildContext context) {
-    if (_model.isWaitingPlayers && widget.subscribe == null) {
-      Future.delayed(Duration.zero, () {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (_) => AlertDialog(
-            title: Text("Aguardando jogadores..."),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text(
-                  'Jogadores conectados: ${_model.playersConnected} / ${_model.minPlayers}',
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        );
-      });
-    }
-
     return Container(
       width: 280.0,
       height: 210.0,

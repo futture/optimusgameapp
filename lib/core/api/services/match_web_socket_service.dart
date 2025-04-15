@@ -9,6 +9,7 @@ import 'package:projeto_game_quiz/pages/tela06_salade_jogo/tela06_salade_jogo_wi
 class MatchWebSocketService {
   final String matchId;
   final MatchResponse matchInfo;
+  final String userId;
   final BuildContext context;
 
   WebSocketService? _webSocketService;
@@ -21,6 +22,7 @@ class MatchWebSocketService {
 
   MatchWebSocketService(
       {required this.matchId,
+      required this.userId,
       required this.context,
       required this.matchInfo,
       this.onMatchUpdate,
@@ -29,7 +31,7 @@ class MatchWebSocketService {
       this.onOther});
 
   void connect() {
-    final url = '/wait-for-players/$matchId';
+    final url = '/wait-for-players/match/$matchId/user/$userId';
 
     _webSocketService = WebSocketService(
       url: url,

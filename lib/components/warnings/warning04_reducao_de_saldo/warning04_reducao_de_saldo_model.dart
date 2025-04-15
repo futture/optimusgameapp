@@ -4,6 +4,7 @@ import 'package:projeto_game_quiz/core/api/services/match_web_socket_service.dar
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
+import 'package:projeto_game_quiz/index.dart';
 import 'package:projeto_game_quiz/pages/tela06_salade_jogo/tela06_salade_jogo_widget.dart';
 
 import '/flutter_flow/flutter_flow_util.dart';
@@ -13,7 +14,8 @@ import 'package:flutter/material.dart';
 
 class Warning04ReducaoDeSaldoModel
     extends FlutterFlowModel<Warning04ReducaoDeSaldoWidget> {
-  /// Serviços e variáveis
+  bool isShowWaitingDialogOpen = false;
+  late BuildContext currentShowWaitingDialog;
   final MatchService _matchService = MatchService();
   MatchWebSocketService? _matchWebSocketService;
 
@@ -61,22 +63,24 @@ class Warning04ReducaoDeSaldoModel
     }
   }
 
-Future<void> getWebSocketWaitForPlayerAsync(bool? recebeuNotificaca) async {
-  _matchWebSocketService = MatchWebSocketService(
-    matchId: matchInfo.id,
-    context: context,
-    matchInfo: matchInfo,
-    onMatchUpdate: (match) {
-      playersConnected = match.playersConnected;
-      minPlayers = match.minPlayers;
-      isWaitingPlayers = true;
-      onStateUpdate?.call();
-
-      if (playersConnected >= minPlayers) {
+  Future<void> getWebSocketWaitForPlayerAsync(bool? recebeuNotificaca) async {
+    _matchWebSocketService = MatchWebSocketService(
+      userId: userId,
+      matchId: matchInfo.id,
+      context: context,
+      matchInfo: matchInfo,
+      onOther: () {
         if (!isWaitingPlayers) return;
 
         isWaitingPlayers = false;
+
+        if (isShowWaitingDialogOpen && Navigator.of(context).canPop()) {
+          Navigator.of(currentShowWaitingDialog).pop();
+          isShowWaitingDialogOpen = false;
+        }
+
         _matchWebSocketService?.disconnect();
+
         if (context.mounted) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
@@ -87,13 +91,89 @@ Future<void> getWebSocketWaitForPlayerAsync(bool? recebeuNotificaca) async {
             ),
           );
         }
-      }
-    },
-    onError: (error) => print("Erro no WebSocket: $error"),
-    onDone: () => print("Conexão WebSocket encerrada."),
-  );
+      },
+      onMatchUpdate: (match) {
+        showWaitingDialog();
+        playersConnected = match.playersConnected;
+        minPlayers = match.minPlayers;
+        isWaitingPlayers = true;
+        onStateUpdate?.call();
 
-  _matchWebSocketService?.connect();
-}
+        // if (playersConnected >= minPlayers) {
+        //   if (!isWaitingPlayers) return;
 
+        //   isWaitingPlayers = false;
+        //   _matchWebSocketService?.disconnect();
+        //   if (context.mounted) {
+        //     Navigator.of(context).pushReplacement(
+        //       MaterialPageRoute(
+        //         builder: (_) => Tela06SaladeJogoWidget(
+        //           matchInfo: matchInfo,
+        //           recebeuNotificaca: recebeuNotificaca,
+        //         ),
+        //       ),
+        //     );
+        //   }
+        // }
+      },
+      onError: (error) => print("Erro no WebSocket: $error"),
+      onDone: () => print("Conexão WebSocket encerrada."),
+    );
+
+    _matchWebSocketService?.connect();
+  }
+
+  void showWaitingDialog() {
+    if (isShowWaitingDialogOpen) return;
+
+    isShowWaitingDialogOpen = true;
+    currentShowWaitingDialog = context;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: const Text("Aguardando jogadores..."),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text(
+              "Esperando participantes conectarem, Participante conectados: $playersConnected / $minPlayers",
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              await leaveTheMatchAsync(context);
+              _matchWebSocketService?.disconnect();
+              isShowWaitingDialogOpen = false;
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (_) => Tela03PrincipalWidget(),
+                ),
+              );
+            },
+            child: const Text("Fechar"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> leaveTheMatchAsync(context) async {
+    var result = await _matchService.leaveTheMatchAsync(matchInfo.id, userId);
+    if (result["isSuccess"]) {
+      Navigator.of(context).pop();
+      _matchWebSocketService?.disconnect();
+    } else {
+      await Warning00ErrorUtil.showDialogMessageError(
+        context,
+        result["error"].detail.message,
+        result["error"].detail.details,
+      );
+    }
+  }
 }

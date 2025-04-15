@@ -4,6 +4,7 @@ import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_util.dart';
+import 'package:projeto_game_quiz/pages/tela03_principal/tela03_principal_widget.dart';
 import 'package:projeto_game_quiz/pages/tela14_fim_partida/tela14_fim_partida_model.dart';
 
 class Tela14FimPartidaViewWidget extends StatefulWidget {
@@ -41,7 +42,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
 
     matchInfo = widget.matchInfo;
     gameResultInfo = widget.gameResultInfo;
-    if(gameResultInfo != null){
+    if (gameResultInfo != null) {
       resultados = _model.processarResultados(gameResultInfo);
     }
   }
@@ -64,8 +65,11 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pushNamedAndRemoveUntil(
-                context, '/tela03Principal', (route) => false);
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => Tela03PrincipalWidget(),
+              ),
+            );
           },
         ),
       ),
@@ -134,8 +138,11 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                       const SizedBox(height: 20),
                       ElevatedButton.icon(
                         onPressed: () {
-                          Navigator.pushNamedAndRemoveUntil(
-                              context, '/tela03Principal', (route) => false);
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (_) => Tela03PrincipalWidget(),
+                            ),
+                          );
                         },
                         icon: Icon(Icons.home),
                         label: Text("Menu Inicial"),
