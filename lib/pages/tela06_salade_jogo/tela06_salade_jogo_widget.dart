@@ -12,9 +12,14 @@ export 'tela06_salade_jogo_model.dart';
 /// Jogadas
 class Tela06SaladeJogoWidget extends StatefulWidget {
   final dynamic matchInfo;
-  Tela06SaladeJogoWidget({super.key, dynamic matchInfo, this.recebeuNotificaca})
+  Tela06SaladeJogoWidget(
+      {super.key,
+      dynamic matchInfo,
+      this.recebeuNotificaca,
+      this.playersConnected})
       : this.matchInfo = matchInfo;
   final bool? recebeuNotificaca;
+  final int? playersConnected;
 
   static String routeName = 'Tela06SaladeJogo';
   static String routePath = '/tela06SaladeJogo';
@@ -35,6 +40,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
     _model.radioGroupValueController = FormFieldController<String>(null);
     if (widget.matchInfo != null) {
       _model.matchInfo = widget.matchInfo;
+      _model.playersConnected = widget.playersConnected;
 
       _model.getUserIdAsync(setState);
       if (widget.recebeuNotificaca == null) {

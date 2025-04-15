@@ -5,6 +5,7 @@ import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
 
 class QuestionWebSocketService {
   final String userId;
+  final int? playersConnected;
   final MatchResponse matchInfo;
   final QuestionResponse question;
   late final WebSocketService _webSocketService;
@@ -21,6 +22,7 @@ class QuestionWebSocketService {
     required this.matchInfo,
     required this.question,
     required this.userId,
+    this.playersConnected,
     this.onAllPlayersResponded,
     this.onUpdate,
     this.onError,
@@ -47,6 +49,10 @@ class QuestionWebSocketService {
         if (playerQuestionStats.length ==
             matchInfo.room?.roomConfiguration?.numberOfPlayers) {
           onAllPlayersResponded?.call(questionStats);
+        } else if (playersConnected != null) {
+          if (playersConnected == playerQuestionStats.length) {
+            onAllPlayersResponded?.call(questionStats);
+          }
         } else {
           print("Aguardando todos responderem...");
         }
@@ -61,5 +67,4 @@ class QuestionWebSocketService {
   void disconnect() {
     _webSocketService.disconnect();
   }
-
 }

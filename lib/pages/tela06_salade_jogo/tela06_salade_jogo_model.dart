@@ -35,6 +35,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   int timerMilliseconds = 10000;
   int secondsRemaining = 10;
   int questionsAlreadyPresented = 0;
+  int? playersConnected = 0;
   bool isDialogFinishingMatchOpen = false;
   String timerValue = StopWatchTimer.getDisplayTime(
     10000,
@@ -164,6 +165,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
       question: question,
       userId: userId!,
       onUpdate: (_) {},
+      playersConnected: playersConnected,
       onAllPlayersResponded: (stats) {
         _questionWebSocketService?.disconnect();
 

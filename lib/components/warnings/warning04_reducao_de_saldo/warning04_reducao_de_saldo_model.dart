@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warning00_campo_vazio_widget.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_web_socket_service.dart';
@@ -5,7 +7,6 @@ import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/index.dart';
-import 'package:projeto_game_quiz/pages/tela06_salade_jogo/tela06_salade_jogo_widget.dart';
 
 import '/flutter_flow/flutter_flow_util.dart';
 import 'warning04_reducao_de_saldo_widget.dart'
@@ -14,6 +15,8 @@ import 'package:flutter/material.dart';
 
 class Warning04ReducaoDeSaldoModel
     extends FlutterFlowModel<Warning04ReducaoDeSaldoWidget> {
+  Timer? startTimeoutTimer;
+  final Duration timeoutDuration = Duration(seconds: 20);
   bool isShowWaitingDialogOpen = false;
   late BuildContext currentShowWaitingDialog;
   final MatchService _matchService = MatchService();
@@ -24,6 +27,7 @@ class Warning04ReducaoDeSaldoModel
   String userId = "";
   int playersConnected = 0;
   int minPlayers = 1;
+  int numberOfPlayers = 1;
   bool isWaitingPlayers = false;
 
   VoidCallback? onStateUpdate;
@@ -86,6 +90,7 @@ class Warning04ReducaoDeSaldoModel
             MaterialPageRoute(
               builder: (_) => Tela06SaladeJogoWidget(
                 matchInfo: matchInfo,
+                
                 recebeuNotificaca: recebeuNotificaca,
               ),
             ),
@@ -96,25 +101,37 @@ class Warning04ReducaoDeSaldoModel
         showWaitingDialog();
         playersConnected = match.playersConnected;
         minPlayers = match.minPlayers;
+        numberOfPlayers = match.numberOfPlayers;
         isWaitingPlayers = true;
         onStateUpdate?.call();
 
-        // if (playersConnected >= minPlayers) {
-        //   if (!isWaitingPlayers) return;
+        startTimeoutTimer ??= Timer(timeoutDuration, () async {
+          if (playersConnected >= minPlayers) {
+            await _matchWebSocketService?.startMatchAsync();
 
-        //   isWaitingPlayers = false;
-        //   _matchWebSocketService?.disconnect();
-        //   if (context.mounted) {
-        //     Navigator.of(context).pushReplacement(
-        //       MaterialPageRoute(
-        //         builder: (_) => Tela06SaladeJogoWidget(
-        //           matchInfo: matchInfo,
-        //           recebeuNotificaca: recebeuNotificaca,
-        //         ),
-        //       ),
-        //     );
-        //   }
-        // }
+            isWaitingPlayers = false;
+
+            if (isShowWaitingDialogOpen && Navigator.of(context).canPop()) {
+              Navigator.of(currentShowWaitingDialog).pop();
+              isShowWaitingDialogOpen = false;
+            }
+
+            _matchWebSocketService?.disconnect();
+
+            if (context.mounted) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (_) => Tela06SaladeJogoWidget(
+                    matchInfo: matchInfo,
+                    recebeuNotificaca: recebeuNotificaca,
+                    playersConnected: playersConnected,
+                  ),
+                ),
+              );
+            }
+          }
+          startTimeoutTimer = null;
+        });
       },
       onError: (error) => print("Erro no WebSocket: $error"),
       onDone: () => print("Conexão WebSocket encerrada."),
@@ -140,7 +157,7 @@ class Warning04ReducaoDeSaldoModel
             CircularProgressIndicator(),
             SizedBox(height: 16),
             Text(
-              "Esperando participantes conectarem, Participante conectados: $playersConnected / $minPlayers",
+              "Esperando participantes conectarem, Participante conectados: $playersConnected / $numberOfPlayers",
             ),
           ],
         ),

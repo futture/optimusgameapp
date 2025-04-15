@@ -206,6 +206,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
                   builder: (_) => Tela06SaladeJogoWidget(
                     matchInfo: matchInfo,
                     recebeuNotificaca: false,
+                    playersConnected: playersConnected,
                   ),
                 ),
               );
@@ -253,7 +254,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
             CircularProgressIndicator(),
             SizedBox(height: 16),
             Text(
-              "Esperando participantes conectarem, Participante conectados: $playersConnected / $minPlayers",
+              "Esperando participantes conectarem, Participante conectados: $playersConnected / $numberOfPlayers",
             ),
           ],
         ),
