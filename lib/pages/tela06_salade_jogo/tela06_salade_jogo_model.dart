@@ -231,6 +231,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
     _questionWebSocketService?.disconnect();
 
     final resultEndGame = await _matchService.endGameAsync(matchInfo.id);
+    
     if (resultEndGame["isSuccess"]) {
       setState(() => gameResult = resultEndGame["data"]);
       Navigator.of(context!).pushReplacement(
