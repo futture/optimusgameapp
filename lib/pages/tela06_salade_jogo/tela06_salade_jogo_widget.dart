@@ -364,7 +364,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                                         ),
                                                   ),
                                                   Text(
-                                                    '${_model.matchInfo.matchConfiguration!.numberOfQuestions}',
+                                                    '${_model.matchInfo.room!.roomConfiguration!.numberOfQuestions}',
                                                     style: FlutterFlowTheme.of(
                                                             context)
                                                         .bodyMedium
@@ -704,7 +704,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                       child: FFButtonWidget(
                                         onPressed: () async {
                                           _model
-                                              .mostrarDialogAguardando(context);
+                                              .showDialogWaitingPlayer(context);
                                           await _model.sendUserResponseAsync(
                                               _model.answerOptionId, setState);
                                         },

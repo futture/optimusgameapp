@@ -70,7 +70,7 @@ class _Warning04ReducaoDeSaldoWidgetState
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.0),
             child: Text(
-              'Atenção: ao se inscrever nesta sala será reduzido do seu saldo a taxa de ${_model.matchInfo.matchConfiguration!.minimumAmountToPlay}Kz para poder jogar',
+              'Atenção: ao se inscrever nesta sala será reduzido do seu saldo a taxa de ${_model.matchInfo.room!.roomConfiguration!.minimumAmountToPlay}Kz para poder jogar',
               textAlign: TextAlign.center,
               style: FlutterFlowTheme.of(context).labelMedium.override(
                     fontFamily: 'Plus Jakarta Sans',

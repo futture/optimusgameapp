@@ -197,7 +197,7 @@ class _Tela13DadosDePartidaWidgetState
                                               ),
                                         ),
                                         Text(
-                                          '${matchInfo!.matchConfiguration!.numberOfPlayers}',
+                                          '${matchInfo!.room!.roomConfiguration!.numberOfPlayers}',
                                           style: FlutterFlowTheme.of(context)
                                               .bodyLarge
                                               .override(
@@ -238,7 +238,7 @@ class _Tela13DadosDePartidaWidgetState
                                               ),
                                         ),
                                         Text(
-                                          '${(matchInfo!.matchConfiguration!.minimumAmountToPlay * matchInfo!.matchConfiguration!.numberOfPlayers) * matchInfo!.matchConfiguration!.premiumRate}Kz',
+                                          '${(matchInfo!.room!.roomConfiguration!.minimumAmountToPlay * matchInfo!.room!.roomConfiguration!.numberOfPlayers) * matchInfo!.room!.roomConfiguration!.premiumRate}Kz',
                                           style: FlutterFlowTheme.of(context)
                                               .bodyLarge
                                               .override(
@@ -279,7 +279,7 @@ class _Tela13DadosDePartidaWidgetState
                                               ),
                                         ),
                                         Text(
-                                          '${matchInfo!.matchConfiguration!.minimumAmountToPlay}Kz',
+                                          '${matchInfo!.room!.roomConfiguration!.minimumAmountToPlay}Kz',
                                           style: FlutterFlowTheme.of(context)
                                               .bodyLarge
                                               .override(
@@ -320,7 +320,7 @@ class _Tela13DadosDePartidaWidgetState
                                               ),
                                         ),
                                         Text(
-                                          '${matchInfo!.matchConfiguration!.numberOfQuestions * matchInfo!.matchConfiguration!.timeToRespond}s',
+                                          '${matchInfo!.room!.roomConfiguration!.numberOfQuestions * matchInfo!.room!.roomConfiguration!.timeToRespond}s',
                                           style: FlutterFlowTheme.of(context)
                                               .bodyLarge
                                               .override(

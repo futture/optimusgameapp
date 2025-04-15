@@ -826,7 +826,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                 Icon(Icons.watch_later, size: 22.0),
                                 Text(
                                   formatHour(
-                                      match.matchConfiguration?.matchStartDate),
+                                      match.matchStartDate),
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16),
@@ -858,7 +858,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                               children: [
                                 FaIcon(FontAwesomeIcons.donate, size: 20.0),
                                 Text(
-                                    '${match.matchConfiguration?.minimumAmountToPlay}KZ'),
+                                    '${match.room?.roomConfiguration?.minimumAmountToPlay}KZ'),
                               ].divide(SizedBox(width: 5.0)),
                             ),
                           ),

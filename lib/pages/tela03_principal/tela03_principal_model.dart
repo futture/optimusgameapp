@@ -105,18 +105,18 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
       final now = DateTime.now();
       final futureMatches = matches
           .where(
-              (m) => m.matchConfiguration?.matchStartDate.isAfter(now) ?? false)
+              (m) => m.matchStartDate.isAfter(now))
           .toList();
 
       if (futureMatches.isNotEmpty) {
         final MatchResponse closestMatch = futureMatches.reduce((a, b) => a
-                .matchConfiguration!.matchStartDate
-                .isBefore(b.matchConfiguration!.matchStartDate)
+                   .matchStartDate
+                .isBefore(b.matchStartDate)
             ? a
             : b);
 
         final diff =
-            closestMatch.matchConfiguration!.matchStartDate.difference(now);
+            closestMatch.matchStartDate.difference(now);
 
         setState(() {
           nextMatch = closestMatch;
@@ -130,7 +130,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
         });
 
         Timer.periodic(Duration(seconds: 1), (timer) {
-          final remaining = closestMatch.matchConfiguration!.matchStartDate
+          final remaining = closestMatch.matchStartDate
               .difference(DateTime.now());
 
           if (remaining.inSeconds <= 2 && !alerted) {

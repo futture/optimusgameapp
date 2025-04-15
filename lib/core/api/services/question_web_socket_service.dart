@@ -45,7 +45,7 @@ class QuestionWebSocketService {
         }.toList();
 
         if (playerQuestionStats.length ==
-            matchInfo.matchConfiguration?.numberOfPlayers) {
+            matchInfo.room?.roomConfiguration?.numberOfPlayers) {
           onAllPlayersResponded?.call(questionStats);
         } else {
           print("Aguardando todos responderem...");

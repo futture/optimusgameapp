@@ -9,43 +9,15 @@ class CreateRoomRequest {
 }
 
 class CreateMatchRequest {
-  final bool isEvent;
-  final bool isSingleWinner;
-  final int timeToRespond;
-  final int numberOfPlayers;
   final DateTime matchStartDate;
   final DateTime endDateOfMatch;
-  final int numberOfQuestions;
-  final int numberOfAnswerOptions;
-  final int minimumNumberOfPlayers;
-  final double minimumAmountToPlay;
-  final double premiumRate;
 
   CreateMatchRequest(
-      {required this.isEvent,
-      required this.isSingleWinner,
-      required this.timeToRespond,
-      required this.numberOfPlayers,
-      required this.matchStartDate,
-      required this.endDateOfMatch,
-      required this.numberOfQuestions,
-      required this.numberOfAnswerOptions,
-      required this.minimumNumberOfPlayers,
-      required this.minimumAmountToPlay,
-      required this.premiumRate});
+      {required this.matchStartDate, required this.endDateOfMatch});
 
   Map<String, dynamic> toJson() => {
-        "isEvent": isEvent,
-        "isSingleWinner": isSingleWinner,
-        "timeToRespond": timeToRespond,
-        "numberOfPlayers": numberOfPlayers,
         "matchStartDate": matchStartDate.toIso8601String(),
         "endDateOfMatch": endDateOfMatch.toIso8601String(),
-        "numberOfQuestions": numberOfQuestions,
-        "numberOfAnswerOptions": numberOfAnswerOptions,
-        "minimumNumberOfPlayers": minimumNumberOfPlayers,
-        "minimumAmountToPlay": minimumAmountToPlay,
-        "premiumRate": premiumRate
       };
 }
 
@@ -57,6 +29,37 @@ class AddPlayerMatchRequest {
   Map<String, dynamic> toJson() => {"playerId": playerId};
 }
 
+class UpdateRoomConfigurationRequest {
+  final bool isSingleWinner;
+  final int timeToRespond;
+  final int numberOfPlayers;
+  final int numberOfQuestions;
+  final int numberOfAnswerOptions;
+  final int minimumNumberOfPlayers;
+  final double minimumAmountToPlay;
+  final double premiumRate;
+
+  UpdateRoomConfigurationRequest(
+      {required this.isSingleWinner,
+      required this.timeToRespond,
+      required this.numberOfPlayers,
+      required this.numberOfQuestions,
+      required this.numberOfAnswerOptions,
+      required this.minimumNumberOfPlayers,
+      required this.minimumAmountToPlay,
+      required this.premiumRate});
+
+  Map<String, dynamic> toJson() => {
+        "isSingleWinner": isSingleWinner,
+        "timeToRespond": timeToRespond,
+        "numberOfPlayers": numberOfPlayers,
+        "numberOfQuestions": numberOfQuestions,
+        "numberOfAnswerOptions": numberOfAnswerOptions,
+        "minimumNumberOfPlayers": minimumNumberOfPlayers,
+        "minimumAmountToPlay": minimumAmountToPlay,
+        "premiumRate": premiumRate
+      };
+}
 
 class JogadorResultado {
   final String nome;

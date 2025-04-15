@@ -32,11 +32,10 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   bool hasStarted = false;
   bool isDialogOpen = false;
   bool gameFinished = false;
-
   int timerMilliseconds = 10000;
   int secondsRemaining = 10;
   int questionsAlreadyPresented = 0;
-
+  bool isDialogFinishingMatchOpen = false;
   String timerValue = StopWatchTimer.getDisplayTime(
     10000,
     hours: false,
@@ -54,6 +53,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   QuestionWebSocketService? _questionWebSocketService;
   Timer? countdownTimer;
   late BuildContext currentContext;
+  late BuildContext currentDialogFinishingMatchOpenContext;
 
   @override
   void initState(BuildContext context) {
@@ -120,8 +120,8 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
     questionsAlreadyPresented += 1;
 
     if (questionsAlreadyPresented >
-            matchInfo.matchConfiguration!.numberOfQuestions &&
-        !matchInfo.matchConfiguration!.isEvent!) {
+            matchInfo.room!.roomConfiguration!.numberOfQuestions &&
+        !matchInfo.room!.roomConfiguration!.isEvent!) {
       gameFinished = true;
       await endGameFlow(setState);
       return;
@@ -157,7 +157,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   }
 
   Future<void> getWebSocketEveryoneWhoRespondedAsync(Function setState) async {
-    mostrarDialogAguardando(context!);
+    showDialogWaitingPlayer(context!);
 
     _questionWebSocketService = QuestionWebSocketService(
       matchInfo: matchInfo,
@@ -167,7 +167,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
       onAllPlayersResponded: (stats) {
         _questionWebSocketService?.disconnect();
 
-        fecharDialogoAguardando();
+        closeDialogWaitingPlayer();
 
         if (!gameFinished) {
           points += stats.hits
@@ -185,7 +185,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
     _questionWebSocketService?.connect();
   }
 
-  void mostrarDialogAguardando(BuildContext context) {
+  void showDialogWaitingPlayer(BuildContext context) {
     if (isDialogOpen) return;
 
     isDialogOpen = true;
@@ -217,23 +217,63 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
     );
   }
 
-  void fecharDialogoAguardando() {
+  void showDialogFinishingMatch(BuildContext context) {
+    if (isDialogFinishingMatchOpen) return;
+
+    isDialogFinishingMatchOpen = true;
+    currentDialogFinishingMatchOpenContext = context;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: Text("Finalizando a partida..."),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text("Preparar os resultados da partida, aguardem.."),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text("Fechar"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void closeDialogWaitingPlayer() {
     if (isDialogOpen && Navigator.canPop(currentContext)) {
       Navigator.of(currentContext).pop();
       isDialogOpen = false;
     }
   }
 
+  void closeDialogEndingGame() {
+    if (isDialogFinishingMatchOpen &&
+        Navigator.canPop(currentDialogFinishingMatchOpenContext)) {
+      Navigator.of(currentDialogFinishingMatchOpenContext).pop();
+      isDialogFinishingMatchOpen = false;
+    }
+  }
+
   Future<void> endGameFlow(Function setState) async {
     gameFinished = true;
     countdownTimer?.cancel();
-    fecharDialogoAguardando();
+    closeDialogWaitingPlayer();
     _questionWebSocketService?.disconnect();
-
+    showDialogFinishingMatch(context!);
     final resultEndGame = await _matchService.endGameAsync(matchInfo.id);
-    
+
     if (resultEndGame["isSuccess"]) {
       setState(() => gameResult = resultEndGame["data"]);
+      closeDialogEndingGame();
       Navigator.of(context!).pushReplacement(
         MaterialPageRoute(
           builder: (_) => Tela14FimPartidaViewWidget(

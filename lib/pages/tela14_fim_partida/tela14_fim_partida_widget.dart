@@ -88,7 +88,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                       const SizedBox(height: 10),
                       if (matchInfo != null)
                         Text(
-                          matchInfo!.matchConfiguration!.isSingleWinner
+                          matchInfo!.room!.roomConfiguration!.isSingleWinner
                               ? 'Parabéns ao campeão!'
                               : 'Parabéns aos campeões!',
                           style: FlutterFlowTheme.of(context).bodyMedium,
@@ -97,7 +97,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                       Text(
                         matchInfo == null
                             ? "Carregando..."
-                            : 'Duração da partida: ${matchInfo!.matchConfiguration!.timeToRespond * matchInfo!.matchConfiguration!.numberOfQuestions} segundos',
+                            : 'Duração da partida: ${matchInfo!.room!.roomConfiguration!.timeToRespond * matchInfo!.room!.roomConfiguration!.numberOfQuestions} segundos',
                         style: FlutterFlowTheme.of(context).bodyMedium,
                       ),
                       const SizedBox(height: 20),

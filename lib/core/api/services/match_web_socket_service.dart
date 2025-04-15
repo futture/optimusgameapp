@@ -42,7 +42,7 @@ class MatchWebSocketService {
 
         onMatchUpdate?.call(matchUpdate);
 
-        if (matchUpdate.playersConnected >= matchUpdate.minPlayers) {
+        if (matchUpdate.playersConnected >= matchUpdate.numberOfPlayers) {
           await startMatchAsync();
 
           if (onOther != null) onOther!();

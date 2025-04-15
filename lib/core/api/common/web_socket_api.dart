@@ -7,7 +7,7 @@ class WebSocketService {
   final Function(String) onMessageReceived;
   final void Function(Object)? onError;
   final void Function()? onDone;
-  late final String _baseUrl = "wss://$BASE_URL/ws";
+  late final String _baseUrl = "ws://$BASE_URL/ws";
   WebSocketService({
     required this.url,
     required this.onMessageReceived,

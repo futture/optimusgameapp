@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:projeto_game_quiz/core/api/common/http_client_api.dart';
 import 'package:projeto_game_quiz/core/api/utils/error_util.dart';
 import 'package:projeto_game_quiz/core/api/utils/token_util.dart';

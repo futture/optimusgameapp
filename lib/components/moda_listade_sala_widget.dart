@@ -27,6 +27,7 @@ class _ModaListadeSalaWidgetState extends State<ModaListadeSalaWidget> {
     _model = createModel(context, () => ModaListadeSalaModel());
     _model.onWaitingPlayersCallback = () => setState(() {});
     _model.getUserIdAsync(() => setState(() {}));
+    _model.getRoomAsync(setState);
   }
 
   @override
@@ -119,124 +120,44 @@ class _ModaListadeSalaWidgetState extends State<ModaListadeSalaWidget> {
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Align(
-                        alignment: AlignmentDirectional(0.0, 0.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.all(5.0),
-                              child: FFButtonWidget(
-                                onPressed: () async {
-                                  // Navigator.of(context).push(
-                                  //   MaterialPageRoute(
-                                  //     builder: (_) =>
-                                  //         Tela14FimPartidaViewWidget(
-                                  //       gameResultInfo: null,
-                                  //     ),
-                                  //   ),
-                                  // );
-                                  // await _model.getMatchByMatchIdAsyncdd(
-                                  //     "89ae065d-3f01-4381-a62a-d2905f2d74f4");
-                                  await _model.createMatch(4, 5,
-                                      "SALA-4-${DateTime.now().minute}${DateTime.now().second}${DateTime.now().hour}");
-                                },
-                                text: 'INICIAR SALA DE 4',
-                                options: FFButtonOptions(
-                                  width: 300.0,
-                                  height: 45.0,
-                                  padding: EdgeInsetsDirectional.fromSTEB(
-                                      16.0, 0.0, 16.0, 0.0),
-                                  iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 0.0, 0.0, 0.0),
-                                  color: Color(0xFFEC8D0D),
-                                  textStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .override(
-                                        fontFamily: 'Inter Tight',
-                                        color: FlutterFlowTheme.of(context)
-                                            .primaryText,
-                                        letterSpacing: 0.0,
-                                      ),
-                                  elevation: 0.0,
-                                  borderRadius: BorderRadius.circular(8.0),
+                      ..._model.rooms.map((e) => Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.all(5.0),
+                                child: FFButtonWidget(
+                                  onPressed: () async {
+                                    await _model.createMatch(
+                                        e.roomConfiguration!.numberOfPlayers,
+                                        e.roomConfiguration!.numberOfQuestions,
+                                        e.roomConfiguration!.timeToRespond,
+                                        e.id);
+                                  },
+                                  text:
+                                      'INICIAR SALA DE ${e.roomConfiguration!.numberOfPlayers}',
+                                  options: FFButtonOptions(
+                                    width: 300.0,
+                                    height: 45.0,
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        16.0, 0.0, 16.0, 0.0),
+                                    iconPadding: EdgeInsets.zero,
+                                    color: Color(0xFFEC8D0D),
+                                    textStyle: FlutterFlowTheme.of(context)
+                                        .titleSmall
+                                        .override(
+                                          fontFamily: 'Inter Tight',
+                                          color: FlutterFlowTheme.of(context)
+                                              .primaryText,
+                                          letterSpacing: 0.0,
+                                        ),
+                                    elevation: 0.0,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.all(5.0),
-                            child: FFButtonWidget(
-                              onPressed: () async {
-                                await _model.createMatch(8, 5,
-                                    "SALA-8-${DateTime.now().minute}${DateTime.now().second}${DateTime.now().hour}");
-                              },
-                              text: 'INICIAR SALA DE 8',
-                              options: FFButtonOptions(
-                                width: 300.0,
-                                height: 45.0,
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    16.0, 0.0, 16.0, 0.0),
-                                iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 0.0, 0.0, 0.0),
-                                color: Color(0xFFEC8D0D),
-                                textStyle: FlutterFlowTheme.of(context)
-                                    .titleSmall
-                                    .override(
-                                      fontFamily: 'Inter Tight',
-                                      color: FlutterFlowTheme.of(context)
-                                          .primaryText,
-                                      letterSpacing: 0.0,
-                                    ),
-                                elevation: 0.0,
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.all(5.0),
-                            child: FFButtonWidget(
-                              onPressed: () async {
-                                await _model.createMatch(16, 5,
-                                    "SALA-16-${DateTime.now().minute}${DateTime.now().second}${DateTime.now().hour}");
-                              },
-                              text: 'INICIAR SALA DE 16',
-                              options: FFButtonOptions(
-                                width: 300.0,
-                                height: 45.0,
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    16.0, 0.0, 16.0, 0.0),
-                                iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 0.0, 0.0, 0.0),
-                                color: Color(0xFFEC8D0D),
-                                textStyle: FlutterFlowTheme.of(context)
-                                    .titleSmall
-                                    .override(
-                                      fontFamily: 'Inter Tight',
-                                      color: FlutterFlowTheme.of(context)
-                                          .primaryText,
-                                      letterSpacing: 0.0,
-                                    ),
-                                elevation: 0.0,
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                            ],
+                          )),
                     ],
                   ),
                 ),
