@@ -92,7 +92,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
     }
   }
 
-  Future<void> carregarPartidas(void Function(VoidCallback fn) setState) async {
+  Future<void> loadMatches(void Function(VoidCallback fn) setState) async {
     isLoadingMatches = true;
     final response = await matchService.getAllMatchAsync(true, null);
 

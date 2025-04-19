@@ -3,7 +3,9 @@ import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'tela14_fim_partida_widget.dart' show Tela14FimPartidaViewWidget;
 import 'package:flutter/material.dart';
-class Tela14FimPartidaViewModel extends FlutterFlowModel<Tela14FimPartidaViewWidget> {
+
+class Tela14FimPartidaViewModel
+    extends FlutterFlowModel<Tela14FimPartidaViewWidget> {
   TabController? tabBarController;
   int get tabBarCurrentIndex =>
       tabBarController != null ? tabBarController!.index : 0;
@@ -16,7 +18,8 @@ class Tela14FimPartidaViewModel extends FlutterFlowModel<Tela14FimPartidaViewWid
     tabBarController?.dispose();
   }
 
-  List<JogadorResultado> processarResultados(MatchResultResponse? gameResultInfo) {
+  List<JogadorResultado> processarResultados(
+      MatchResultResponse? gameResultInfo) {
     final resultados = gameResultInfo?.generalRanking.map((ranking) {
           return JogadorResultado(
             nome: ranking.playerName,

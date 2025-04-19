@@ -94,8 +94,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
         matchId: matchInfo.id,
         questionId: question.id,
         optionAnswerId: optionAnswerId,
-        responseTimeInSecond:
-            (timerController.timer.rawTime.value / 1000).round(),
+        responseTimeInSecond: secondsRemaining,
       ),
     );
 

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:projeto_game_quiz/components/moda_menu_pagian_inicial_widget.dart';
 import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_util.dart';
 import 'package:projeto_game_quiz/pages/tela03_principal/tela03_principal_widget.dart';
@@ -57,21 +59,53 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
       appBar: AppBar(
-        title: const Text('Fim da Partida'),
-        centerTitle: true,
-        backgroundColor: Colors.deepOrange,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (_) => Tela03PrincipalWidget(),
-              ),
-            );
-          },
+        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        automaticallyImplyLeading: false,
+        leading: Padding(
+          padding: EdgeInsetsDirectional.fromSTEB(18.0, 0.0, 0.0, 0.0),
+          child: FlutterFlowIconButton(
+            borderRadius: 8.0,
+            buttonSize: 45.0,
+            fillColor: FlutterFlowTheme.of(context).primaryBackground,
+            icon: FaIcon(
+              FontAwesomeIcons.bars,
+              color: Colors.black,
+              size: 24.0,
+            ),
+            onPressed: () async {
+              await showModalBottomSheet(
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                enableDrag: false,
+                context: context,
+                builder: (context) {
+                  return GestureDetector(
+                    onTap: () {
+                      FocusScope.of(context).unfocus();
+                      FocusManager.instance.primaryFocus?.unfocus();
+                    },
+                    child: Padding(
+                      padding: MediaQuery.viewInsetsOf(context),
+                      child: ModaMenuPagianInicialWidget(),
+                    ),
+                  );
+                },
+              ).then((value) => safeSetState(() {}));
+            },
+          ),
         ),
+        title: Text(
+          'GAME QUIZ',
+          style: FlutterFlowTheme.of(context).headlineSmall.override(
+                fontFamily: 'Inter Tight',
+                color: Color(0xFFEC8D0D),
+                letterSpacing: 0.0,
+              ),
+        ),
+        centerTitle: true,
+        elevation: 4.0,
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -91,14 +125,19 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                           matchInfo!.room!.roomConfiguration!.isSingleWinner
                               ? 'Parabéns ao campeão!'
                               : 'Parabéns aos campeões!',
-                          style: FlutterFlowTheme.of(context).bodyMedium,
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    fontFamily: 'Inter',
+                                  ),
                         ),
                       const SizedBox(height: 10),
                       Text(
                         matchInfo == null
                             ? "Carregando..."
                             : 'Duração da partida: ${matchInfo!.room!.roomConfiguration!.timeToRespond * matchInfo!.room!.roomConfiguration!.numberOfQuestions} segundos',
-                        style: FlutterFlowTheme.of(context).bodyMedium,
+                        style: FlutterFlowTheme.of(context)
+                            .bodyMedium
+                            .override(fontFamily: 'Inter'),
                       ),
                       const SizedBox(height: 20),
                       ListView.builder(
@@ -125,10 +164,6 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                                   posicao: index,
                                 ),
                               ),
-                              // MatchCard(
-                              //     context: context,
-                              //     jogador: jogador,
-                              //     posicao: index),
                               if (expandedIndices.contains(index))
                                 _buildTabelaExpandida(jogador),
                             ],
@@ -303,7 +338,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: Text(
             titulo,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -311,6 +346,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: Text(
             valor,
+            style: TextStyle(color: Colors.black),
             overflow: TextOverflow.ellipsis,
           ),
         ),
