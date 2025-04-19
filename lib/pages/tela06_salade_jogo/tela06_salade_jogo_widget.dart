@@ -489,33 +489,6 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ))
-
-                                // FlutterFlowTimer(
-                                //   initialTime: _model.timerInitialTimeMs,
-                                //   getDisplayTime: (value) =>
-                                //       StopWatchTimer.getDisplayTime(
-                                //     value,
-                                //     hours: false,
-                                //     minute: false,
-                                //     milliSecond: false,
-                                //   ),
-                                //   controller: _model.timerController,
-                                //   updateStateInterval: Duration(milliseconds: 1),
-                                //   onChanged: (value, displayTime, shouldUpdate) {
-                                //     _model.timerMilliseconds = value;
-                                //     _model.timerValue = displayTime;
-                                //     if (shouldUpdate) safeSetState(() {});
-                                //   },
-                                //   textAlign: TextAlign.start,
-                                //   style: FlutterFlowTheme.of(context)
-                                //       .headlineSmall
-                                //       .override(
-                                //         fontFamily: 'Inter Tight',
-                                //         color: Color(0xFFFF0D00),
-                                //         letterSpacing: 0.0,
-                                //       ),
-                                // ),
-
                                 ),
                             Container(
                               width: 390.0,
