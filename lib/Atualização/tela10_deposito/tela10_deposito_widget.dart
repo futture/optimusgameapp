@@ -82,22 +82,22 @@ class _Tela10DepositoWidgetState extends State<Tela10DepositoWidget> {
           top: true,
           child: Align(
             alignment: AlignmentDirectional(0.0, -1.0),
-            child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              constraints: BoxConstraints(
-                minWidth: 300.0,
-                minHeight: 852.0,
-                maxWidth: 500.0,
-                maxHeight: 1000.0,
-              ),
-              decoration: BoxDecoration(
-                color: FlutterFlowTheme.of(context).primaryBackground,
-              ),
-              child: Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
-                child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+            child: Padding(
+              padding: EdgeInsetsDirectional.fromSTEB(25.0, 0.0, 25.0, 25.0),
+              child: Container(
+                width: double.infinity,
+                height: double.infinity,
+                constraints: BoxConstraints(
+                  minWidth: 300.0,
+                  minHeight: 852.0,
+                  maxWidth: 500.0,
+                  maxHeight: 1000.0,
+                ),
+                decoration: BoxDecoration(
+                  color: FlutterFlowTheme.of(context).primaryBackground,
+                ),
+                child: Align(
+                  alignment: AlignmentDirectional(0.0, 0.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.start,
