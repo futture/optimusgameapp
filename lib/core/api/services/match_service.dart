@@ -23,10 +23,9 @@ class MatchService {
 
   Future<dynamic> getMatchStartNoticeAsync(String matchId) async {
     try {
-      final successResult = await httpService.request<MatchResponse>(
+      final successResult = await httpService.request(
         '/match/$matchId/match-start-notice',
         method: 'GET',
-        successParser: (json) => MatchResponse.fromJson(json),
       );
       return {"isSuccess": true, "data": successResult};
     } catch (e) {

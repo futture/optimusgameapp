@@ -8,13 +8,11 @@ import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/responses/account_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
-
 import '/flutter_flow/flutter_flow_timer.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/instant_timer.dart';
 import '/index.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
-import 'tela03_principal_widget.dart' show Tela03PrincipalWidget;
 import 'package:flutter/material.dart';
 
 class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
@@ -29,7 +27,6 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
   MatchWebSocketService? _matchWebSocketService;
   final AccountService accountService = AccountService();
   final MatchService matchService = MatchService();
-  // State field(s) for Timer widget.
   final timerInitialTimeMs = 10800000;
   int timerMilliseconds = 10800000;
   String timerValue =
@@ -88,9 +85,6 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
           isNotRegisteredMatch = true;
         });
       }
-
-      // Warning00ErrorUtil.showDialogMessageError(context,
-      //     result["error"].detail.message, result["error"].detail.details);
     }
   }
 
@@ -193,25 +187,87 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
       onScheduledMatchUpdate: (stats) {
         _matchWebSocketService?.disconnect();
 
-        final isUserInMatch = stats.players.contains(user!.id);
-
-        if (isUserInMatch) {
-          Navigator.of(context!).pushReplacement(
-            MaterialPageRoute(
-              builder: (_) => Tela06SaladeJogoWidget(
-                matchInfo: match,
-                nextQuestion: stats.nextQuestion,
-              ),
-            ),
-          );
+        if (stats.error != null) {
+          _showErrorDialog(stats.error, match.id);
         } else {
-          debugPrint("Usuário não está na lista de jogadores desta partida.");
+          final isUserInMatch = stats.players?.contains(user!.id);
+
+          if (isUserInMatch!) {
+            Navigator.of(context!).push(
+              MaterialPageRoute(
+                builder: (_) => Tela06SaladeJogoWidget(
+                  matchInfo: match,
+                  nextQuestion: stats.nextQuestion,
+                ),
+              ),
+            );
+          } else {
+            debugPrint("Usuário não está na lista de jogadores desta partida.");
+          }
         }
       },
-      onError: (e) => debugPrint("Erro no WebSocket: $e"),
+      onError: (e) {
+        handleWebSocketFailureIfNeeded(() => {});
+        debugPrint("Erro no WebSocket: $e");
+      },
       onDone: () => debugPrint("Conexão WebSocket encerrada."),
     );
 
     _matchWebSocketService?.connectStartScheduledSatch();
+  }
+
+  void handleWebSocketFailureIfNeeded(Function setState) {
+    //   final totalQuestionsToRespond =
+    //       matchInfo?.room?.roomConfiguration?.numberOfQuestions ?? 0;
+
+    //   if (questionsAlreadyPresented >= totalQuestionsToRespond) {
+    //     setState(() {
+    //       isBtnEndGameManually = true;
+    //     });
+    //   } else {
+    //     Navigator.of(context!).pushReplacement(
+    //       MaterialPageRoute(
+    //         builder: (_) => Tela03PrincipalWidget(),
+    //       ),
+    //     );
+    //     //Navigator.of(context!).popUntil((route) => route.isFirst);
+    //   }
+  }
+
+  void _showErrorDialog(error, matchId) {
+    if (error == null) return;
+    showDialog(
+      context: context!,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(error.detail.message!),
+          content: Text(error.detail.details!),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                startScheduledSatchAsync(() {}, nextMatch!);
+              },
+              child: const Text("Tentar Novamente"),
+            ),
+            TextButton(
+              onPressed: () async {
+                await leaveTheMatchAsync(matchId);
+                Navigator.of(context).pop();
+              },
+              child: const Text("Sair Da Partida"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> leaveTheMatchAsync(matchId) async {
+    var result = await matchService.leaveTheMatchAsync(matchId, user!.id);
+    if (!result["isSuccess"]) {
+      Warning00ErrorUtil.showDialogMessageError(context,
+          result["error"].detail.message, result["error"].detail.details);
+    }
   }
 }

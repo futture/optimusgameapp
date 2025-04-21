@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:projeto_game_quiz/pages/tela03_principal/tela03_principal_widget.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warning00_campo_vazio_widget.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
@@ -36,6 +37,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   bool gameFinished = false;
   bool isButtonDisabled = false;
   int timerMilliseconds = 10000;
+  bool isBtnEndGameManually = false;
   int questionsAlreadyPresented = 0;
   int? playersConnected = 0;
   bool isDialogFinishingMatchOpen = false;
@@ -179,7 +181,10 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
           fetchNextQuestionMatchAsync(setState, stats.nextQuestion);
         }
       },
-      onError: (e) => print("Erro no WebSocket: $e"),
+      onError: (e) {
+        print("Erro no WebSocket: $e");
+        handleWebSocketFailureIfNeeded(setState);
+      },
       onDone: () => print("Conexão WebSocket encerrada."),
     );
 
@@ -244,6 +249,13 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
             },
             child: const Text("Fechar"),
           ),
+          if (isBtnEndGameManually)
+            TextButton(
+              onPressed: () async {
+                await endGameFlow(() => {});
+              },
+              child: const Text("Terminar manualmente"),
+            ),
         ],
       ),
     );
@@ -312,6 +324,24 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
         "Erro ao finalizar partida",
         e.toString(),
       );
+    }
+  }
+
+  void handleWebSocketFailureIfNeeded(Function setState) {
+    final totalQuestionsToRespond =
+        matchInfo?.room?.roomConfiguration?.numberOfQuestions ?? 0;
+
+    if (questionsAlreadyPresented >= totalQuestionsToRespond) {
+      setState(() {
+        isBtnEndGameManually = true;
+      });
+    } else {
+      Navigator.of(context!).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => Tela03PrincipalWidget(),
+        ),
+      );
+      //Navigator.of(context!).popUntil((route) => route.isFirst);
     }
   }
 }

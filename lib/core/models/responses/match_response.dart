@@ -1,3 +1,4 @@
+import 'package:projeto_game_quiz/core/models/common/error_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 
@@ -209,22 +210,27 @@ class QuestionStatsResponse {
       );
 }
 
-
 class ScheduledMatchStartResponse {
-  final MatchResponse match;
-  final QuestionResponse nextQuestion;
-  final List<String> players;
+  final MatchResponse? match;
+  final QuestionResponse? nextQuestion;
+  final List<String>? players;
+  final DetailErrorResponse? error;
 
-  ScheduledMatchStartResponse({
-    required this.match,
-    required this.nextQuestion,
-    required this.players,
-  });
+  ScheduledMatchStartResponse(
+      {required this.match,
+      required this.nextQuestion,
+      required this.players,
+      this.error});
 
   factory ScheduledMatchStartResponse.fromJson(Map<String, dynamic> json) {
     return ScheduledMatchStartResponse(
-      match: MatchResponse.fromJson(json["match"]),
-      nextQuestion: QuestionResponse.fromJson(json["nextQuestion"]),
+      error:
+          json["error"] != null ? DetailErrorResponse.fromJson(json["error"]) : null,
+      match:
+          json["match"] != null ? MatchResponse.fromJson(json["match"]) : null,
+      nextQuestion: json["nextQuestion"] != null
+          ? QuestionResponse.fromJson(json["nextQuestion"])
+          : null,
       players: List<String>.from(json["players"] ?? []),
     );
   }
