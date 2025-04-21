@@ -19,6 +19,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
   bool isShowWaitingDialogOpen = false;
   late BuildContext currentShowWaitingDialog;
   Timer? startTimeoutTimer;
+  bool isLoadingRooms = false;
   final Duration timeoutDuration = Duration(seconds: 20);
 
   /// State fields
@@ -55,6 +56,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
   @override
   void dispose() {
     timerController.dispose();
+    startTimeoutTimer?.cancel();
     _matchWebSocketService?.disconnect();
   }
 
@@ -64,12 +66,16 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
   }
 
   Future<void> getRoomAsync(void Function(VoidCallback) setState) async {
+    setState(() {
+      isLoadingRooms = true;
+    });
     final resultRoom = await roomService.getAllRoomAsync(false);
 
     if (resultRoom["isSuccess"] == true) {
       final fetchedRooms = resultRoom["data"];
       setState(() {
         rooms = fetchedRooms;
+        isLoadingRooms = false;
       });
     } else {
       final error = resultRoom["error"].detail;
@@ -81,14 +87,13 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
     }
   }
 
-  Future<void> createMatch(
-      int numberOfPlayers, int numberOfQuestions, int timeToRespond, String roomId) async {
+  Future<void> createMatch(int numberOfPlayers, int numberOfQuestions,
+      int timeToRespond, String roomId) async {
     try {
       final matchRequest = CreateMatchRequest(
-        matchStartDate: DateTime.now(),
-        endDateOfMatch: DateTime.now()
-            .add(Duration(seconds: timeToRespond * numberOfQuestions))
-      );
+          matchStartDate: DateTime.now(),
+          endDateOfMatch: DateTime.now()
+              .add(Duration(seconds: timeToRespond * numberOfQuestions)));
 
       final matchResult =
           await matchService.createMatchAsync(roomId, matchRequest);
@@ -136,14 +141,6 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
     final resultMatch = await matchService.getMatchByMatchIdAsync(matchId);
     if (resultMatch["isSuccess"]) {
       matchInfo = resultMatch["data"];
-      // Navigator.of(context).push(
-      //   MaterialPageRoute(
-      //     builder: (_) => Tela06SaladeJogoWidget(
-      //       matchInfo: matchInfo,
-      //       recebeuNotificaca: false,
-      //     ),
-      //   ),
-      // );
     }
   }
 
@@ -153,7 +150,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
       userId: userId,
       context: context,
       matchInfo: matchInfo!,
-      onOther: () {
+      onOther: (match) {
         if (!isWaitingPlayers) return;
 
         isWaitingPlayers = false;
@@ -173,6 +170,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
               builder: (_) => Tela06SaladeJogoWidget(
                 matchInfo: matchInfo,
                 recebeuNotificaca: false,
+                nextQuestion: match.nextQuestion,
               ),
             ),
           );
@@ -184,37 +182,6 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
         numberOfPlayers = match.numberOfPlayers;
         isWaitingPlayers = true;
         showWaitingDialog();
-
-        startTimeoutTimer ??= Timer(timeoutDuration, () async {
-          if (playersConnected >= minPlayers) {
-            await _matchWebSocketService?.startMatchAsync();
-
-            isWaitingPlayers = false;
-
-            if (isShowWaitingDialogOpen && Navigator.of(context).canPop()) {
-              Navigator.of(currentShowWaitingDialog).pop();
-              isShowWaitingDialogOpen = false;
-            }
-
-            _matchWebSocketService?.disconnect();
-
-            onWaitingPlayersCallback?.call();
-
-            if (context.mounted) {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (_) => Tela06SaladeJogoWidget(
-                    matchInfo: matchInfo,
-                    recebeuNotificaca: false,
-                    playersConnected: playersConnected,
-                  ),
-                ),
-              );
-            }
-          }
-
-          startTimeoutTimer = null;
-        });
       },
       onError: (error) => print("Erro no WebSocket: $error"),
       onDone: () => print("Conexão WebSocket encerrada."),

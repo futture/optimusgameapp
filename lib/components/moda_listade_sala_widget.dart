@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_timer.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import '/index.dart';
-import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'moda_listade_sala_model.dart';
@@ -38,55 +35,47 @@ class _ModaListadeSalaWidgetState extends State<ModaListadeSalaWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: AlignmentDirectional(0.0, 0.0),
+    return Center(
       child: Container(
         width: 350.0,
-        height: 370.0,
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
+        ),
         decoration: BoxDecoration(
           color: FlutterFlowTheme.of(context).primaryBackground,
           boxShadow: [
             BoxShadow(
               blurRadius: 4.0,
               color: Color(0x33000000),
-              offset: Offset(
-                0.0,
-                1.0,
-              ),
+              offset: Offset(0.0, 1.0),
               spreadRadius: 5.0,
             )
           ],
           borderRadius: BorderRadius.circular(10.0),
         ),
-        child: SingleChildScrollView(
+        child: IntrinsicHeight(
           child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 9.0, vertical: 10.0),
                 child: Row(
-                  mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     FaIcon(
                       FontAwesomeIcons.layerGroup,
                       color: FlutterFlowTheme.of(context).primaryText,
                       size: 20.0,
                     ),
-                    Align(
-                      alignment: AlignmentDirectional(0.0, 0.0),
-                      child: Text(
-                        'SALAS DISPONÍVEIS',
-                        style:
-                            FlutterFlowTheme.of(context).titleMedium.override(
-                                  fontFamily: 'Inter Tight',
-                                  fontSize: 18.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.normal,
-                                ),
-                      ),
+                    Text(
+                      'SALAS DISPONÍVEIS',
+                      style: FlutterFlowTheme.of(context).titleMedium.override(
+                            fontFamily: 'Inter Tight',
+                            fontSize: 18.0,
+                            letterSpacing: 0.0,
+                            fontWeight: FontWeight.normal,
+                          ),
                     ),
                     FlutterFlowIconButton(
                       borderRadius: 8.0,
@@ -98,173 +87,78 @@ class _ModaListadeSalaWidgetState extends State<ModaListadeSalaWidget> {
                         color: FlutterFlowTheme.of(context).primaryText,
                         size: 24.0,
                       ),
-                      onPressed: () async {
-                        context.safePop();
-                      },
+                      onPressed: () => context.safePop(),
                     ),
-                  ]
-                      .divide(SizedBox(width: 10.0))
-                      .addToStart(SizedBox(width: 9.0))
-                      .addToEnd(SizedBox(width: 9.0)),
+                  ],
                 ),
               ),
-              Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
-                child: Container(
-                  width: double.infinity,
-                  height: 200.0,
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).primaryBackground,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ..._model.rooms.map((e) => Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.all(5.0),
-                                child: FFButtonWidget(
-                                  onPressed: () async {
-                                    await _model.createMatch(
-                                        e.roomConfiguration!.numberOfPlayers,
-                                        e.roomConfiguration!.numberOfQuestions,
-                                        e.roomConfiguration!.timeToRespond,
-                                        e.id);
-                                  },
-                                  text:
-                                      'INICIAR SALA DE ${e.roomConfiguration!.numberOfPlayers}',
-                                  options: FFButtonOptions(
-                                    width: 300.0,
-                                    height: 45.0,
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: EdgeInsets.zero,
-                                    color: Color(0xFFEC8D0D),
-                                    textStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .override(
-                                          fontFamily: 'Inter Tight',
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
-                                          letterSpacing: 0.0,
-                                        ),
-                                    elevation: 0.0,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )),
-                    ],
-                  ),
-                ),
-              ),
-              Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
-                child: Container(
-                  width: double.infinity,
-                  height: 100.0,
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).primaryBackground,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.diamond_rounded,
-                            color: FlutterFlowTheme.of(context).primaryText,
-                            size: 22.0,
-                          ),
-                          Align(
-                            alignment: AlignmentDirectional(0.0, 0.0),
-                            child: Text(
-                              'SUPER PARTIDA',
-                              style: FlutterFlowTheme.of(context)
-                                  .titleMedium
+              if (_model.rooms.isNotEmpty)
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.only(bottom: 12.0),
+                    physics: BouncingScrollPhysics(),
+                    child: Column(
+                      children: _model.rooms.map((e) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(vertical: 4.0),
+                          child: FFButtonWidget(
+                            onPressed: () async {
+                              await _model.createMatch(
+                                e.roomConfiguration!.numberOfPlayers,
+                                e.roomConfiguration!.numberOfQuestions,
+                                e.roomConfiguration!.timeToRespond,
+                                e.id,
+                              );
+                            },
+                            text:
+                                'INICIAR SALA DE ${e.roomConfiguration!.numberOfPlayers}',
+                            options: FFButtonOptions(
+                              width: 300.0,
+                              height: 45.0,
+                              color: Color(0xFFEC8D0D),
+                              textStyle: FlutterFlowTheme.of(context)
+                                  .titleSmall
                                   .override(
                                     fontFamily: 'Inter Tight',
-                                    fontSize: 18.0,
+                                    color: FlutterFlowTheme.of(context)
+                                        .primaryText,
                                     letterSpacing: 0.0,
-                                    fontWeight: FontWeight.normal,
                                   ),
+                              elevation: 0.0,
+                              borderRadius: BorderRadius.circular(8.0),
                             ),
                           ),
-                          FlutterFlowTimer(
-                            initialTime: _model.timerInitialTimeMs,
-                            getDisplayTime: (value) =>
-                                StopWatchTimer.getDisplayTime(value,
-                                    milliSecond: false),
-                            controller: _model.timerController,
-                            updateStateInterval: Duration(milliseconds: 1000),
-                            onChanged: (value, displayTime, shouldUpdate) {
-                              _model.timerMilliseconds = value;
-                              _model.timerValue = displayTime;
-                              if (shouldUpdate) safeSetState(() {});
-                            },
-                            textAlign: TextAlign.start,
-                            style: FlutterFlowTheme.of(context)
-                                .headlineSmall
-                                .override(
-                                  fontFamily: 'Inter Tight',
-                                  fontSize: 20.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.normal,
-                                ),
-                          ),
-                        ]
-                            .divide(SizedBox(width: 10.0))
-                            .addToStart(SizedBox(width: 9.0))
-                            .addToEnd(SizedBox(width: 9.0)),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              if (_model.isLoadingRooms)
+                Center(child: CircularProgressIndicator())
+              else if (_model.rooms.isEmpty)
+                Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.videogame_asset_outlined,
+                          size: 48, color: Colors.grey),
+                      SizedBox(height: 12),
+                      Text(
+                        'Nenhuma partida encontrada.',
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
                       ),
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.all(5.0),
-                            child: FFButtonWidget(
-                              onPressed: () async {
-                                context.pushNamed(
-                                    Tela06SaladeJogoWidget.routeName);
-                              },
-                              text: 'INICIAR SUPER PARTIDA',
-                              options: FFButtonOptions(
-                                width: 300.0,
-                                height: 45.0,
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    16.0, 0.0, 16.0, 0.0),
-                                iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 0.0, 0.0, 0.0),
-                                color: Color(0xFF00B80E),
-                                textStyle: FlutterFlowTheme.of(context)
-                                    .titleSmall
-                                    .override(
-                                      fontFamily: 'Inter Tight',
-                                      color: FlutterFlowTheme.of(context)
-                                          .primaryText,
-                                      letterSpacing: 0.0,
-                                    ),
-                                elevation: 0.0,
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                            ),
-                          ),
-                        ],
+                      SizedBox(height: 12),
+                      IconButton(
+                        icon: Icon(Icons.refresh, size: 30),
+                        tooltip: 'Recarregar',
+                        onPressed: () async {
+                          await _model.getRoomAsync(setState);
+                        },
                       ),
                     ],
                   ),
-                ),
-              ),
-            ].divide(SizedBox(height: 5.0)).addToStart(SizedBox(height: 20.0)),
+                )
+            ],
           ),
         ),
       ),

@@ -26,10 +26,9 @@ class Warning04ReducaoDeSaldoModel
   late BuildContext context;
   String userId = "";
   int playersConnected = 0;
-  int minPlayers = 1;
-  int numberOfPlayers = 1;
+  int minPlayers = 0;
+  int numberOfPlayers = 0;
   bool isWaitingPlayers = false;
-
   VoidCallback? onStateUpdate;
 
   @override
@@ -39,6 +38,7 @@ class Warning04ReducaoDeSaldoModel
 
   @override
   void dispose() {
+    startTimeoutTimer?.cancel();
     _matchWebSocketService?.disconnect();
   }
 
@@ -73,7 +73,7 @@ class Warning04ReducaoDeSaldoModel
       matchId: matchInfo.id,
       context: context,
       matchInfo: matchInfo,
-      onOther: () {
+      onOther: (match) {
         if (!isWaitingPlayers) return;
 
         isWaitingPlayers = false;
@@ -89,49 +89,22 @@ class Warning04ReducaoDeSaldoModel
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (_) => Tela06SaladeJogoWidget(
-                matchInfo: matchInfo,
-                
-                recebeuNotificaca: recebeuNotificaca,
-              ),
+                  matchInfo: matchInfo,
+                  recebeuNotificaca: recebeuNotificaca,
+                  nextQuestion: match.nextQuestion),
             ),
           );
         }
       },
       onMatchUpdate: (match) {
         showWaitingDialog();
+
         playersConnected = match.playersConnected;
         minPlayers = match.minPlayers;
         numberOfPlayers = match.numberOfPlayers;
         isWaitingPlayers = true;
+
         onStateUpdate?.call();
-
-        startTimeoutTimer ??= Timer(timeoutDuration, () async {
-          if (playersConnected >= minPlayers) {
-            await _matchWebSocketService?.startMatchAsync();
-
-            isWaitingPlayers = false;
-
-            if (isShowWaitingDialogOpen && Navigator.of(context).canPop()) {
-              Navigator.of(currentShowWaitingDialog).pop();
-              isShowWaitingDialogOpen = false;
-            }
-
-            _matchWebSocketService?.disconnect();
-
-            if (context.mounted) {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (_) => Tela06SaladeJogoWidget(
-                    matchInfo: matchInfo,
-                    recebeuNotificaca: recebeuNotificaca,
-                    playersConnected: playersConnected,
-                  ),
-                ),
-              );
-            }
-          }
-          startTimeoutTimer = null;
-        });
       },
       onError: (error) => print("Erro no WebSocket: $error"),
       onDone: () => print("Conexão WebSocket encerrada."),
@@ -141,44 +114,105 @@ class Warning04ReducaoDeSaldoModel
   }
 
   void showWaitingDialog() {
-    if (isShowWaitingDialogOpen) return;
+    if (isShowWaitingDialogOpen || !context.mounted) return;
 
     isShowWaitingDialogOpen = true;
-    currentShowWaitingDialog = context;
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        title: const Text("Aguardando jogadores..."),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text(
-              "Esperando participantes conectarem, Participante conectados: $playersConnected / $numberOfPlayers",
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              await leaveTheMatchAsync(context);
-              _matchWebSocketService?.disconnect();
-              isShowWaitingDialogOpen = false;
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (_) => Tela03PrincipalWidget(),
+      builder: (BuildContext dialogContext) {
+        currentShowWaitingDialog = dialogContext;
+
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            _matchWebSocketService?.onPlayersUpdate = (match) {
+              setStateDialog(() {
+                playersConnected = match.playersConnected;
+                numberOfPlayers = match.numberOfPlayers;
+              });
+            };
+
+            return AlertDialog(
+              title: const Text("Aguardando jogadores..."),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Esperando participantes conectarem,\nConectados: $playersConnected / $numberOfPlayers",
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    await leaveTheMatchAsync(dialogContext);
+                    _matchWebSocketService?.disconnect();
+                    isShowWaitingDialogOpen = false;
+
+                    if (dialogContext.mounted) {
+                      Navigator.of(dialogContext).pop();
+                    }
+
+                    if (context.mounted) {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (_) => Tela03PrincipalWidget(),
+                        ),
+                      );
+                    }
+                  },
+                  child: const Text("Fechar"),
                 ),
-              );
-            },
-            child: const Text("Fechar"),
-          ),
-        ],
-      ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
+
+  // void showWaitingDialog() {
+  //   if (isShowWaitingDialogOpen) return;
+
+  //   isShowWaitingDialogOpen = true;
+  //   currentShowWaitingDialog = context;
+
+  //   showDialog(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     builder: (_) => AlertDialog(
+  //       title: const Text("Aguardando jogadores..."),
+  //       content: Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         children: [
+  //           CircularProgressIndicator(),
+  //           SizedBox(height: 16),
+  //           Text(
+  //             "Esperando participantes conectarem, Participante conectados: $playersConnected / $numberOfPlayers",
+  //           ),
+  //         ],
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () async {
+  //             await leaveTheMatchAsync(context);
+  //             _matchWebSocketService?.disconnect();
+  //             isShowWaitingDialogOpen = false;
+  //             Navigator.of(context).pushReplacement(
+  //               MaterialPageRoute(
+  //                 builder: (_) => Tela03PrincipalWidget(),
+  //               ),
+  //             );
+  //           },
+  //           child: const Text("Fechar"),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Future<void> leaveTheMatchAsync(context) async {
     var result = await _matchService.leaveTheMatchAsync(matchInfo.id, userId);

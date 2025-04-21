@@ -6,13 +6,18 @@ class RoomResponse {
   final String nameRoom;
   final RoomConfigurationResponse? roomConfiguration;
 
-  RoomResponse({required this.id, required this.nameRoom, required this.roomConfiguration});
+  RoomResponse(
+      {required this.id,
+      required this.nameRoom,
+      required this.roomConfiguration});
 
-  factory RoomResponse.fromJson(Map<String, dynamic> json) =>
-      RoomResponse(id: json["id"], nameRoom: json["name"], 
-      roomConfiguration: json["roomConfiguration"] != null
-          ? RoomConfigurationResponse.fromJson(json["roomConfiguration"])
-          : null, );
+  factory RoomResponse.fromJson(Map<String, dynamic> json) => RoomResponse(
+        id: json["id"],
+        nameRoom: json["name"],
+        roomConfiguration: json["roomConfiguration"] != null
+            ? RoomConfigurationResponse.fromJson(json["roomConfiguration"])
+            : null,
+      );
 }
 
 class MatchResponse {
@@ -87,7 +92,7 @@ class RoomConfigurationResponse {
       required this.premiumRate});
 
   factory RoomConfigurationResponse.fromJson(Map<String, dynamic> json) =>
-     RoomConfigurationResponse(
+      RoomConfigurationResponse(
           id: json["id"],
           isEvent: json["isEvent"],
           premiumRate: json["premiumRate"],
@@ -106,17 +111,21 @@ class MatchTotalNumberPlayerResponse {
   final int minPlayers;
   final int numberOfPlayers;
   final bool isReady;
-
+  final QuestionResponse? nextQuestion;
   MatchTotalNumberPlayerResponse(
       {required this.matchId,
       required this.playersConnected,
       required this.minPlayers,
       required this.numberOfPlayers,
-      required this.isReady});
+      required this.isReady,
+      this.nextQuestion});
 
   factory MatchTotalNumberPlayerResponse.fromJson(Map<String, dynamic> json) =>
       MatchTotalNumberPlayerResponse(
         matchId: json["matchId"],
+        nextQuestion: json["nextQuestion"] == null
+            ? null
+            : QuestionResponse.fromJson(json["nextQuestion"]),
         isReady: json["isReady"],
         minPlayers: json["minPlayers"],
         numberOfPlayers: json["numberOfPlayers"],
@@ -198,4 +207,25 @@ class QuestionStatsResponse {
             .map((e) => HitsResponse.fromJson(e))
             .toList(),
       );
+}
+
+
+class ScheduledMatchStartResponse {
+  final MatchResponse match;
+  final QuestionResponse nextQuestion;
+  final List<String> players;
+
+  ScheduledMatchStartResponse({
+    required this.match,
+    required this.nextQuestion,
+    required this.players,
+  });
+
+  factory ScheduledMatchStartResponse.fromJson(Map<String, dynamic> json) {
+    return ScheduledMatchStartResponse(
+      match: MatchResponse.fromJson(json["match"]),
+      nextQuestion: QuestionResponse.fromJson(json["nextQuestion"]),
+      players: List<String>.from(json["players"] ?? []),
+    );
+  }
 }

@@ -57,143 +57,151 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: scaffoldKey,
-      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-      appBar: AppBar(
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        automaticallyImplyLeading: false,
-        leading: Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(18.0, 0.0, 0.0, 0.0),
-          child: FlutterFlowIconButton(
-            borderRadius: 8.0,
-            buttonSize: 45.0,
-            fillColor: FlutterFlowTheme.of(context).primaryBackground,
-            icon: FaIcon(
-              FontAwesomeIcons.bars,
-              color: Colors.black,
-              size: 24.0,
-            ),
-            onPressed: () async {
-              await showModalBottomSheet(
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                enableDrag: false,
-                context: context,
-                builder: (context) {
-                  return GestureDetector(
-                    onTap: () {
-                      FocusScope.of(context).unfocus();
-                      FocusManager.instance.primaryFocus?.unfocus();
+    return WillPopScope(
+        onWillPop: () async {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => Tela03PrincipalWidget()),
+          );
+          return false;
+        },
+        child: Scaffold(
+          key: scaffoldKey,
+          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+          appBar: AppBar(
+            backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+            automaticallyImplyLeading: false,
+            leading: Padding(
+              padding: EdgeInsetsDirectional.fromSTEB(18.0, 0.0, 0.0, 0.0),
+              child: FlutterFlowIconButton(
+                borderRadius: 8.0,
+                buttonSize: 45.0,
+                fillColor: FlutterFlowTheme.of(context).primaryBackground,
+                icon: FaIcon(
+                  FontAwesomeIcons.bars,
+                  color: Colors.black,
+                  size: 24.0,
+                ),
+                onPressed: () async {
+                  await showModalBottomSheet(
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    enableDrag: false,
+                    context: context,
+                    builder: (context) {
+                      return GestureDetector(
+                        onTap: () {
+                          FocusScope.of(context).unfocus();
+                          FocusManager.instance.primaryFocus?.unfocus();
+                        },
+                        child: Padding(
+                          padding: MediaQuery.viewInsetsOf(context),
+                          child: ModaMenuPagianInicialWidget(),
+                        ),
+                      );
                     },
-                    child: Padding(
-                      padding: MediaQuery.viewInsetsOf(context),
-                      child: ModaMenuPagianInicialWidget(),
-                    ),
-                  );
+                  ).then((value) => safeSetState(() {}));
                 },
-              ).then((value) => safeSetState(() {}));
-            },
-          ),
-        ),
-        title: Text(
-          'GAME QUIZ',
-          style: FlutterFlowTheme.of(context).headlineSmall.override(
-                fontFamily: 'Inter Tight',
-                color: Color(0xFFEC8D0D),
-                letterSpacing: 0.0,
               ),
-        ),
-        centerTitle: true,
-        elevation: 4.0,
-      ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: 600),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Icon(FontAwesomeIcons.trophy,
-                          size: 60, color: Colors.amber),
-                      const SizedBox(height: 10),
-                      if (matchInfo != null)
-                        Text(
-                          matchInfo!.room!.roomConfiguration!.isSingleWinner
-                              ? 'Parabéns ao campeão!'
-                              : 'Parabéns aos campeões!',
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
+            ),
+            title: Text(
+              'GAME QUIZ',
+              style: FlutterFlowTheme.of(context).headlineSmall.override(
+                    fontFamily: 'Inter Tight',
+                    color: Color(0xFFEC8D0D),
+                    letterSpacing: 0.0,
+                  ),
+            ),
+            centerTitle: true,
+            elevation: 4.0,
+          ),
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 600),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Icon(FontAwesomeIcons.trophy,
+                              size: 60, color: Colors.amber),
+                          const SizedBox(height: 10),
+                          if (matchInfo != null)
+                            Text(
+                              matchInfo!.room!.roomConfiguration!.isSingleWinner
+                                  ? 'Parabéns ao campeão!'
+                                  : 'Parabéns aos campeões!',
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
                                     fontFamily: 'Inter',
                                   ),
-                        ),
-                      const SizedBox(height: 10),
-                      Text(
-                        matchInfo == null
-                            ? "Carregando..."
-                            : 'Duração da partida: ${matchInfo!.room!.roomConfiguration!.timeToRespond * matchInfo!.room!.roomConfiguration!.numberOfQuestions} segundos',
-                        style: FlutterFlowTheme.of(context)
-                            .bodyMedium
-                            .override(fontFamily: 'Inter'),
-                      ),
-                      const SizedBox(height: 20),
-                      ListView.builder(
-                        itemCount: resultados.length,
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          final jogador = resultados[index];
-                          return Column(
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    if (expandedIndices.contains(index)) {
-                                      expandedIndices.remove(index);
-                                    } else {
-                                      expandedIndices.add(index);
-                                    }
-                                  });
-                                },
-                                child: MatchCard(
-                                  context: context,
-                                  jogador: jogador,
-                                  posicao: index,
-                                ),
-                              ),
-                              if (expandedIndices.contains(index))
-                                _buildTabelaExpandida(jogador),
-                            ],
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (_) => Tela03PrincipalWidget(),
                             ),
-                          );
-                        },
-                        icon: Icon(Icons.home),
-                        label: Text("Menu Inicial"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepOrange,
-                        ),
+                          const SizedBox(height: 10),
+                          Text(
+                            matchInfo == null
+                                ? "Carregando..."
+                                : 'Duração da partida: ${matchInfo!.room!.roomConfiguration!.timeToRespond * matchInfo!.room!.roomConfiguration!.numberOfQuestions} segundos',
+                            style: FlutterFlowTheme.of(context)
+                                .bodyMedium
+                                .override(fontFamily: 'Inter'),
+                          ),
+                          const SizedBox(height: 20),
+                          ListView.builder(
+                            itemCount: resultados.length,
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemBuilder: (context, index) {
+                              final jogador = resultados[index];
+                              return Column(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        if (expandedIndices.contains(index)) {
+                                          expandedIndices.remove(index);
+                                        } else {
+                                          expandedIndices.add(index);
+                                        }
+                                      });
+                                    },
+                                    child: MatchCard(
+                                      context: context,
+                                      jogador: jogador,
+                                      posicao: index,
+                                    ),
+                                  ),
+                                  if (expandedIndices.contains(index))
+                                    _buildTabelaExpandida(jogador),
+                                ],
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (_) => Tela03PrincipalWidget(),
+                                ),
+                              );
+                            },
+                            icon: Icon(Icons.home),
+                            label: Text("Menu Inicial"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.deepOrange,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
+              );
+            },
+          ),
+        ));
   }
 
   Widget MatchCard({

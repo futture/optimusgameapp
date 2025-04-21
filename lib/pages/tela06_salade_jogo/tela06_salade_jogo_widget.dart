@@ -1,3 +1,4 @@
+import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_radio_button.dart';
@@ -16,10 +17,12 @@ class Tela06SaladeJogoWidget extends StatefulWidget {
       {super.key,
       dynamic matchInfo,
       this.recebeuNotificaca,
-      this.playersConnected})
+      this.playersConnected,
+      this.nextQuestion})
       : this.matchInfo = matchInfo;
   final bool? recebeuNotificaca;
   final int? playersConnected;
+  final QuestionResponse? nextQuestion;
 
   static String routeName = 'Tela06SaladeJogo';
   static String routePath = '/tela06SaladeJogo';
@@ -46,7 +49,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
       if (widget.recebeuNotificaca == null) {
         _model.getMatchStartNoticeAsync(setState);
       }
-      _model.fetchNextQuestionMatchAsync(safeSetState);
+      _model.fetchNextQuestionMatchAsync(safeSetState, widget.nextQuestion);
     }
   }
 
@@ -393,7 +396,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                                                 ),
                                                       ),
                                                       Text(
-                                                        '${_model.matchInfo.room!.roomConfiguration!.numberOfQuestions}',
+                                                        '${_model.matchInfo!.room!.roomConfiguration!.numberOfQuestions}',
                                                         style:
                                                             FlutterFlowTheme.of(
                                                                     context)
@@ -488,8 +491,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                         : Colors.black,
                                     fontWeight: FontWeight.bold,
                                   ),
-                                ))
-                                ),
+                                ))),
                             Container(
                               width: 390.0,
                               height: 420.0,
@@ -724,15 +726,38 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
                                           alignment:
                                               AlignmentDirectional(0.0, 0.0),
                                           child: FFButtonWidget(
-                                            onPressed: () async {
-                                              _model.showDialogWaitingPlayer(
-                                                  context);
-                                              await _model
-                                                  .sendUserResponseAsync(
-                                                      _model.answerOptionId,
-                                                      setState);
-                                            },
-                                            text: 'Validar',
+                                            onPressed: _model.isButtonDisabled
+                                                ? null
+                                                : () async {
+                                                    if (_model.answerOptionId ==
+                                                        "") {
+                                                      return;
+                                                    }
+
+                                                    setState(() {
+                                                      _model.isButtonDisabled =
+                                                          true;
+                                                      _model.isLoading = true;
+                                                    });
+
+                                                    _model
+                                                        .showDialogWaitingPlayer(
+                                                            context);
+                                                    await _model
+                                                        .sendUserResponseAsync(
+                                                            _model
+                                                                .answerOptionId,
+                                                            setState);
+                                                  },
+                                            text: _model.isLoading
+                                                ? 'Validando...'
+                                                : 'Validar',
+                                            icon: _model.isLoading
+                                                ? CircularProgressIndicator(
+                                                    color: Colors.white,
+                                                    strokeWidth: 2,
+                                                  )
+                                                : null,
                                             options: FFButtonOptions(
                                               width: 350.0,
                                               height: 45.0,

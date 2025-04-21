@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warning00_campo_vazio_widget.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
 import 'package:projeto_game_quiz/core/api/services/question_service.dart';
@@ -11,9 +13,7 @@ import 'package:projeto_game_quiz/pages/tela14_fim_partida/tela14_fim_partida_wi
 import '/flutter_flow/flutter_flow_timer.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/form_field_controller.dart';
-import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'tela06_salade_jogo_widget.dart' show Tela06SaladeJogoWidget;
-import 'package:flutter/material.dart';
 
 class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   final formKey = GlobalKey<FormState>();
@@ -28,12 +28,14 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
 
   String? userId = '';
   double points = 0;
+  int position = 0;
   bool isLoading = true;
   bool hasStarted = false;
+  int secondsRemaining = 10;
   bool isDialogOpen = false;
   bool gameFinished = false;
+  bool isButtonDisabled = false;
   int timerMilliseconds = 10000;
-  int secondsRemaining = 10;
   int questionsAlreadyPresented = 0;
   int? playersConnected = 0;
   bool isDialogFinishingMatchOpen = false;
@@ -47,7 +49,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   String answerOptionId = "";
   String? get selectedOption => radioGroupValueController?.value;
 
-  late MatchResponse matchInfo;
+  MatchResponse? matchInfo;
   late MatchResultResponse gameResult;
   late QuestionResponse question;
 
@@ -73,7 +75,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
     countdownTimer?.cancel();
 
     countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
-      if (--secondsRemaining <= 0) {
+      if (--secondsRemaining == 0) {
         timer.cancel();
         await sendUserResponseAsync("", setState);
       }
@@ -91,57 +93,48 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
     final result = await _questionService.answerQuestionAsync(
       userId!,
       PlayerAnswerRequest(
-        matchId: matchInfo.id,
+        matchId: matchInfo!.id,
         questionId: question.id,
         optionAnswerId: optionAnswerId,
         responseTimeInSecond: secondsRemaining,
       ),
     );
 
-    if (result["isSuccess"]) {
-      await getWebSocketEveryoneWhoRespondedAsync(setState);
+    if (!result["isSuccess"]) {
+      if (result["error"].detail.code != "ERR_QUESTION_NOTFOUND") {
+        Warning00ErrorUtil.showDialogMessageError(
+          context,
+          result["error"].detail.message,
+          result["error"].detail.details,
+        );
+      }
     } else {
-      Warning00ErrorUtil.showDialogMessageError(
-        context,
-        result["error"].detail.message,
-        result["error"].detail.details,
-      );
+      await getWebSocketEveryoneWhoRespondedAsync(setState);
     }
   }
 
-  Future<void> fetchNextQuestionMatchAsync(Function setState) async {
-    if (gameFinished) return;
+  Future<void> fetchNextQuestionMatchAsync(
+    Function setState,
+    QuestionResponse? nextQuestion,
+  ) async {
+    if (userId == null || userId == "") await getUserIdAsync(setState);
+
     setState(() {
       isLoading = true;
       answerOptionId = "";
       radioGroupValueController?.value = null;
     });
 
-    questionsAlreadyPresented += 1;
+    setState(() {
+      question = nextQuestion!;
+      isButtonDisabled = false;
+      isLoading = false;
+      secondsRemaining = matchInfo == null
+          ? 10
+          : matchInfo!.room!.roomConfiguration!.timeToRespond;
+    });
 
-    if (questionsAlreadyPresented >
-            matchInfo.room!.roomConfiguration!.numberOfQuestions &&
-        !matchInfo.room!.roomConfiguration!.isEvent!) {
-      gameFinished = true;
-      await endGameFlow(setState);
-      return;
-    }
-
-    final result = await _questionService.nextQuestionMatchAsync(matchInfo.id);
-
-    if (result["isSuccess"]) {
-      setState(() {
-        question = result["data"];
-        isLoading = false;
-      });
-      iniciarContadorRegressivo(setState);
-    } else {
-      Warning00ErrorUtil.showDialogMessageError(
-        context,
-        result["error"].detail.message,
-        result["error"].detail.details,
-      );
-    }
+    iniciarContadorRegressivo(setState);
   }
 
   Future<void> getMatchStartNoticeAsync(Function setState) async {
@@ -149,7 +142,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
 
     setState(() => isLoading = true);
 
-    final result = await _matchService.getMatchStartNoticeAsync(matchInfo.id);
+    final result = await _matchService.getMatchStartNoticeAsync(matchInfo!.id);
 
     if (result["isSuccess"]) {
       setState(() => hasStarted = true);
@@ -157,26 +150,33 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   }
 
   Future<void> getWebSocketEveryoneWhoRespondedAsync(Function setState) async {
-    showDialogWaitingPlayer(context!);
+    _questionWebSocketService?.disconnect();
 
     _questionWebSocketService = QuestionWebSocketService(
-      matchInfo: matchInfo,
+      matchInfo: matchInfo!,
       question: question,
       userId: userId!,
       onUpdate: (_) {},
-      playersConnected: playersConnected,
+      onWaitingForPlayersResponse: (stats) {
+        if (!isDialogOpen) {
+          showDialogWaitingPlayer(context!);
+        }
+      },
       onAllPlayersResponded: (stats) {
-        _questionWebSocketService?.disconnect();
-
         closeDialogWaitingPlayer();
 
-        if (!gameFinished) {
-          points += stats.hits
-                  ?.where((e) => e.playerId == userId)
-                  .fold(0.0, (sum, e) => sum! + (e.score?.toDouble() ?? 0.0)) ??
-              0.0;
+        points += stats.hits
+                ?.where((e) => e.playerId == userId)
+                .fold(0.0, (sum, e) => sum! + (e.score?.toDouble() ?? 0.0)) ??
+            0.0;
 
-          fetchNextQuestionMatchAsync(setState);
+        questionsAlreadyPresented = stats.totalQuestionsResponded!;
+
+        if (stats.gameFinished == true) {
+          _questionWebSocketService?.disconnect();
+          endGameFlow(setState, gameResultFromBackend: stats.gameResult);
+        } else if (stats.nextQuestion != null) {
+          fetchNextQuestionMatchAsync(setState, stats.nextQuestion);
         }
       },
       onError: (e) => print("Erro no WebSocket: $e"),
@@ -234,7 +234,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
           children: [
             CircularProgressIndicator(),
             SizedBox(height: 16),
-            Text("Preparar os resultados da partida, aguardem.."),
+            Text("Preparar os resultados da partida, aguardem..."),
           ],
         ),
         actions: [
@@ -264,17 +264,39 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
     }
   }
 
-  Future<void> endGameFlow(Function setState) async {
+  Future<void> endGameFlow(Function setState,
+      {dynamic gameResultFromBackend}) async {
     gameFinished = true;
     countdownTimer?.cancel();
     closeDialogWaitingPlayer();
     _questionWebSocketService?.disconnect();
-    showDialogFinishingMatch(context!);
-    final resultEndGame = await _matchService.endGameAsync(matchInfo.id);
 
-    if (resultEndGame["isSuccess"]) {
-      setState(() => gameResult = resultEndGame["data"]);
+    showDialogFinishingMatch(context!);
+
+    try {
+      if (gameResultFromBackend == null) {
+        var resultEndGame = await _matchService.endGameAsync(matchInfo!.id);
+        if (resultEndGame["isSuccess"]) {
+          Navigator.of(context!).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => Tela14FimPartidaViewWidget(
+                gameResultInfo: gameResult,
+                matchInfo: matchInfo,
+              ),
+            ),
+          );
+        } else {
+          closeDialogEndingGame();
+          Warning00ErrorUtil.showDialogMessageError(
+              context,
+              resultEndGame["error"].detail.message,
+              resultEndGame["error"].detail.details);
+        }
+      }
+
+      setState(() => gameResult = gameResultFromBackend);
       closeDialogEndingGame();
+
       Navigator.of(context!).pushReplacement(
         MaterialPageRoute(
           builder: (_) => Tela14FimPartidaViewWidget(
@@ -283,11 +305,12 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
           ),
         ),
       );
-    } else {
+    } catch (e) {
+      closeDialogEndingGame();
       Warning00ErrorUtil.showDialogMessageError(
         context,
-        resultEndGame["error"].detail.message,
-        resultEndGame["error"].detail.details,
+        "Erro ao finalizar partida",
+        e.toString(),
       );
     }
   }

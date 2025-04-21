@@ -5,31 +5,32 @@ import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
 
 class QuestionWebSocketService {
   final String userId;
-  final int? playersConnected;
   final MatchResponse matchInfo;
   final QuestionResponse question;
-  late final WebSocketService _webSocketService;
 
   final void Function(QuestionStats questionStats)? onAllPlayersResponded;
-
   final void Function(QuestionStats questionStats)? onUpdate;
-
+  final void Function(QuestionStats questionStats)? onWaitingForPlayersResponse;
   final void Function(dynamic error)? onError;
-
   final void Function()? onDone;
+  bool _isConnected = false;
+  bool get isConnected => _isConnected;
+  late final WebSocketService _webSocketService;
 
   QuestionWebSocketService({
     required this.matchInfo,
     required this.question,
     required this.userId,
-    this.playersConnected,
     this.onAllPlayersResponded,
     this.onUpdate,
+    this.onWaitingForPlayersResponse,
     this.onError,
     this.onDone,
   });
 
   void connect() {
+    if (_isConnected) return;
+
     final url =
         '/match/${matchInfo.id}/question/${question.id}/user/${userId}/everyone-who-responded';
 
@@ -41,30 +42,28 @@ class QuestionWebSocketService {
 
         onUpdate?.call(questionStats);
 
-        final playerQuestionStats = {
-          ...?questionStats.erros?.map((e) => e.playerId),
-          ...?questionStats.hits?.map((e) => e.playerId),
-        }.toList();
-
-        if (playerQuestionStats.length ==
-            matchInfo.room?.roomConfiguration?.numberOfPlayers) {
+        if (questionStats.isReady == true) {
           onAllPlayersResponded?.call(questionStats);
-        } else if (playersConnected != null) {
-          if (playersConnected == playerQuestionStats.length) {
-            onAllPlayersResponded?.call(questionStats);
-          }
         } else {
-          print("Aguardando todos responderem...");
+          onWaitingForPlayersResponse?.call(questionStats);
         }
       },
-      onError: onError,
-      onDone: onDone,
+      onError: (e) {
+        _isConnected = false;
+        onError?.call(e);
+      },
+      onDone: () {
+        _isConnected = false;
+        onDone?.call();
+      },
     );
 
     _webSocketService.connect();
+    _isConnected = true;
   }
 
   void disconnect() {
+    if (!_isConnected) return;
     _webSocketService.disconnect();
   }
 }

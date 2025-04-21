@@ -20,7 +20,7 @@ class ErrorResponse {
 
   factory ErrorResponse.fromJson(Map<String, dynamic> json) {
     return ErrorResponse(
-      code: json["code"] ?? "",
+      code: json["err_code"] ?? "",
       message: json["message"] ?? "",
       details: json["details"] ?? "",
       errors:

@@ -9,9 +9,11 @@ class Warning04ReducaoDeSaldoWidget extends StatefulWidget {
   final bool? subscribe;
   final dynamic matchInfo;
   final bool? recebeuNotificaca;
+  final VoidCallback? onConfirmed;
+
 
   const Warning04ReducaoDeSaldoWidget(
-      {super.key, this.matchInfo, this.subscribe, this.recebeuNotificaca});
+      {super.key, this.matchInfo, this.subscribe, this.recebeuNotificaca, this.onConfirmed});
 
   @override
   State<Warning04ReducaoDeSaldoWidget> createState() =>
@@ -83,11 +85,10 @@ class _Warning04ReducaoDeSaldoWidgetState
             padding: EdgeInsets.fromLTRB(20.0, 0, 20.0, 20.0),
             child: FFButtonWidget(
               onPressed: () async {
-                setState(() {
-                  _model.isWaitingPlayers = true;
-                });
-
-                await _model.joinTheMatchAsync(widget.subscribe, widget.recebeuNotificaca);
+                if (widget.subscribe == null) _model.showWaitingDialog();
+                await _model.joinTheMatchAsync(
+                    widget.subscribe, widget.recebeuNotificaca);
+                    widget.onConfirmed?.call();
               },
               text: 'Confirmar Inscrição',
               options: FFButtonOptions(
