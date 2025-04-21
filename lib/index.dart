@@ -16,5 +16,5 @@ export '/pages/tela08_carteira/tela08_carteira_widget.dart'
     show Tela08CarteiraWidget;
 export '/pages/tela09_historico_jodos/tela09_historico_jodos_widget.dart'
     show Tela09HistoricoJodosWidget;
-export '/pages/tela10_deposito/tela10_deposito_widget.dart'
-    show Tela10DepositoWidget;
+export 'package:projeto_game_quiz/Atualização/tela10_deposito/tela10_deposito_lista_widget.dart'
+    show Tela10DepositoListaWidget;

@@ -1,8 +1,11 @@
 // imports...
+import 'package:projeto_game_quiz/Atualiza%C3%A7%C3%A3o/tela10_deposito/tela10_deposito_lista_widget.dart';
 import 'package:projeto_game_quiz/components/warnings/warning04_reducao_de_saldo/warning04_reducao_de_saldo_widget.dart';
 import 'package:projeto_game_quiz/core/api/services/fcm_token_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
+import 'package:projeto_game_quiz/pages/payment_method/payment_selection_screen.dart';
+
 import '/components/moda_listade_sala_widget.dart';
 import '/components/moda_menu_pagian_inicial_widget.dart';
 import '/components/modals_deposito_widget.dart';
@@ -41,12 +44,11 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
   void initState() {
     super.initState();
     _fcmTokenService.initFirebaseMessaging(context);
+
     _model = createModel(context, () => Tela03PrincipalModel());
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
-
     _model.getUserInfoAndAccountInfoAsync(setState, context);
-    _model.carregarPartidas(setState);
   }
 
   @override
@@ -259,7 +261,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                             child: Text(
                                               _model.userAccountInfo == null
                                                   ? "Carregando..."
-                                                  : 'ID: ${_model.userAccountInfo!.accountNumber}',
+                                                  : 'Conta: ${_model.userAccountInfo!.accountNumber}',
                                               style:
                                                   FlutterFlowTheme.of(context)
                                                       .bodyMedium
@@ -342,26 +344,8 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                 children: [
                                   FFButtonWidget(
                                     onPressed: () async {
-                                      await showModalBottomSheet(
-                                        isScrollControlled: true,
-                                        backgroundColor: Colors.transparent,
-                                        enableDrag: false,
-                                        context: context,
-                                        builder: (context) {
-                                          return GestureDetector(
-                                            onTap: () {
-                                              FocusScope.of(context).unfocus();
-                                              FocusManager.instance.primaryFocus
-                                                  ?.unfocus();
-                                            },
-                                            child: Padding(
-                                              padding: MediaQuery.viewInsetsOf(
-                                                  context),
-                                              child: ModalsDepositoWidget(),
-                                            ),
-                                          );
-                                        },
-                                      ).then((value) => safeSetState(() {}));
+                                      context.pushNamed(
+                                          Tela10DepositoListaWidget.routeName);
                                     },
                                     text: 'DEPOSITAR',
                                     icon: Icon(
@@ -727,25 +711,36 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                   ].divide(SizedBox(width: 10.0)),
                                 ),
                               ),
-                            
                             ],
                           ),
                         ),
                       ),
-                      if (_model.isLoadingMatches)
-                        Center(child: CircularProgressIndicator())
-                      else if (_model.matchList.isEmpty)
-                        Text('Nenhuma partida encontrada.')
-                      else
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: _model.matchList.length,
-                          itemBuilder: (context, index) {
-                            final match = _model.matchList[index];
-                            return MatchCard(match);
-                          },
-                        )
+                      FutureBuilder(
+                        future: matchService.getAllMatchAsync(true, null),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator());
+                          } else if (snapshot.hasError ||
+                              !(snapshot.data?['isSuccess'] ?? false)) {
+                            return Center(
+                                child: Text('Erro ao carregar partidas'));
+                          } else {
+                            final List<MatchResponse> matches =
+                                snapshot.data['data'];
+
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: matches.length,
+                              itemBuilder: (context, index) {
+                                final match = matches[index];
+                                return MatchCard(match);
+                              },
+                            );
+                          }
+                        },
+                      )
                     ]
                         .divide(SizedBox(height: 20.0))
                         .addToStart(SizedBox(height: 0.0))
@@ -869,12 +864,6 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                   ),
                   FFButtonWidget(
                     onPressed: () async {
-                      // Navigator.of(context).push(
-                      //   MaterialPageRoute(
-                      //     builder: (_) => Tela14FimPartidaViewWidget(),
-                      //   ),
-                      // );
-
                       await _model.checkPlayerAlreadyRegisteredMatchAsync(
                           setState, match.id);
 
