@@ -41,6 +41,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   int questionsAlreadyPresented = 0;
   int? playersConnected = 0;
   bool isDialogFinishingMatchOpen = false;
+
   String timerValue = StopWatchTimer.getDisplayTime(
     10000,
     hours: false,
@@ -73,7 +74,9 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   }
 
   void iniciarContadorRegressivo(Function setState) {
-    secondsRemaining = timerMilliseconds ~/ 1000;
+    final timeToRespond =
+        matchInfo?.room?.roomConfiguration?.timeToRespond ?? 10;
+    secondsRemaining = timeToRespond;
     countdownTimer?.cancel();
 
     countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
@@ -91,7 +94,9 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   }
 
   Future<void> sendUserResponseAsync(
-      String optionAnswerId, Function setState) async {
+    String optionAnswerId,
+    Function setState,
+  ) async {
     final result = await _questionService.answerQuestionAsync(
       userId!,
       PlayerAnswerRequest(
@@ -131,9 +136,6 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
       question = nextQuestion!;
       isButtonDisabled = false;
       isLoading = false;
-      secondsRemaining = matchInfo == null
-          ? 10
-          : matchInfo!.room!.roomConfiguration!.timeToRespond;
     });
 
     iniciarContadorRegressivo(setState);
@@ -152,7 +154,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   }
 
   Future<void> getWebSocketEveryoneWhoRespondedAsync(Function setState) async {
-    _questionWebSocketService?.disconnect();
+    //_questionWebSocketService?.disconnect();
 
     _questionWebSocketService = QuestionWebSocketService(
       matchInfo: matchInfo!,
@@ -165,6 +167,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
         }
       },
       onAllPlayersResponded: (stats) {
+        _questionWebSocketService?.disconnect();
         closeDialogWaitingPlayer();
 
         points += stats.hits
@@ -175,7 +178,6 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
         questionsAlreadyPresented = stats.totalQuestionsResponded!;
 
         if (stats.gameFinished == true) {
-          _questionWebSocketService?.disconnect();
           endGameFlow(setState, gameResultFromBackend: stats.gameResult);
         } else if (stats.nextQuestion != null) {
           fetchNextQuestionMatchAsync(setState, stats.nextQuestion);
@@ -300,9 +302,10 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
         } else {
           closeDialogEndingGame();
           Warning00ErrorUtil.showDialogMessageError(
-              context,
-              resultEndGame["error"].detail.message,
-              resultEndGame["error"].detail.details);
+            context,
+            resultEndGame["error"].detail.message,
+            resultEndGame["error"].detail.details,
+          );
         }
       }
 
@@ -341,7 +344,6 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
           builder: (_) => Tela03PrincipalWidget(),
         ),
       );
-      //Navigator.of(context!).popUntil((route) => route.isFirst);
     }
   }
 }

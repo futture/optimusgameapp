@@ -8,6 +8,7 @@ import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/responses/account_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
+import 'package:projeto_game_quiz/dialogs/success-dialog-widget.dart';
 import '/flutter_flow/flutter_flow_timer.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/instant_timer.dart';
@@ -147,9 +148,11 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
         timerMilliseconds = remaining.inMilliseconds;
       });
 
-      if (remaining.inSeconds <= 2 && !alerted) {
+      if (remaining.inSeconds <= 7 && !alerted && remaining.inSeconds > 0) {
         alerted = true;
         await _callApiBeforeMatchStart(match.id);
+      }
+      if (remaining.inSeconds <= 0) {
         await startScheduledSatchAsync(setState, match);
       }
 
@@ -178,7 +181,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
 
   Future<void> startScheduledSatchAsync(
       Function setState, MatchResponse match) async {
-    _matchWebSocketService?.disconnect();
+    //_matchWebSocketService?.disconnect();
 
     _matchWebSocketService = MatchWebSocketService(
       matchInfo: match,
@@ -187,7 +190,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
       onScheduledMatchUpdate: (stats) {
         _matchWebSocketService?.disconnect();
 
-        if (stats.error != null) {
+        if (stats.error != null && stats.error!.detail != null) {
           _showErrorDialog(stats.error, match.id);
         } else {
           final isUserInMatch = stats.players?.contains(user!.id);
@@ -236,38 +239,81 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
 
   void _showErrorDialog(error, matchId) {
     if (error == null) return;
+    if (error.detail == null) return;
+
     showDialog(
       context: context!,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(error.detail.message!),
-          content: Text(error.detail.details!),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                startScheduledSatchAsync(() {}, nextMatch!);
-              },
-              child: const Text("Tentar Novamente"),
-            ),
-            TextButton(
-              onPressed: () async {
-                await leaveTheMatchAsync(matchId);
-                Navigator.of(context).pop();
-              },
-              child: const Text("Sair Da Partida"),
-            ),
-          ],
+      builder: (BuildContext _dialogContext) {
+        bool isRetrying = false;
+        bool isLeaving = false;
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(error.detail.message!),
+              content: Text(error.detail.details!),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: isRetrying
+                      ? null
+                      : () {
+                          setState(() => isRetrying = true);
+                          startScheduledSatchAsync(() {}, nextMatch!)
+                              .whenComplete(() {
+                            if (Navigator.of(_dialogContext).canPop()) {
+                              Navigator.of(_dialogContext)
+                                  .pop(); // Fecha o erro
+                            }
+                          });
+                        },
+                  child: isRetrying
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text("Tentar Novamente"),
+                ),
+                if (error.detail.code == "ERR_INSUFFICIENT_NUMBER_PLAYERS")
+                  TextButton(
+                    onPressed: isLeaving
+                        ? null
+                        : () async {
+                            setState(() => isLeaving = true);
+                            if (Navigator.of(_dialogContext).canPop()) {
+                              Navigator.of(_dialogContext).pop();
+                            }
+                            await leaveTheMatchAsync(
+                                matchId, () {}, _dialogContext);
+                          },
+                    child: isLeaving
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text("Sair Da Partida"),
+                  ),
+              ],
+            );
+          },
         );
       },
     );
   }
 
-  Future<void> leaveTheMatchAsync(matchId) async {
+  Future<void> leaveTheMatchAsync(
+      matchId, void Function()? func, BuildContext _dialogContext) async {
     var result = await matchService.leaveTheMatchAsync(matchId, user!.id);
     if (!result["isSuccess"]) {
       Warning00ErrorUtil.showDialogMessageError(context,
           result["error"].detail.message, result["error"].detail.details);
+    } else {
+      if (Navigator.of(_dialogContext).canPop()) {
+        Navigator.of(_dialogContext).pop();
+      }
+      SuccessDialogWidgetUtil.showDialogMessageSuccess(
+          context, "Sair da partida", "", func);
     }
   }
 }
