@@ -154,7 +154,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   }
 
   Future<void> getWebSocketEveryoneWhoRespondedAsync(Function setState) async {
-    //_questionWebSocketService?.disconnect();
+    _questionWebSocketService?.disconnect();
 
     _questionWebSocketService = QuestionWebSocketService(
       matchInfo: matchInfo!,
@@ -294,7 +294,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
           Navigator.of(context!).pushReplacement(
             MaterialPageRoute(
               builder: (_) => Tela14FimPartidaViewWidget(
-                gameResultInfo: gameResult,
+                gameResultInfo: resultEndGame["data"],
                 matchInfo: matchInfo,
               ),
             ),
@@ -321,12 +321,30 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
         ),
       );
     } catch (e) {
-      closeDialogEndingGame();
-      Warning00ErrorUtil.showDialogMessageError(
-        context,
-        "Erro ao finalizar partida",
-        e.toString(),
-      );
+      //if(){
+      var resultEndGame = await _matchService.endGameAsync(matchInfo!.id);
+      if (resultEndGame["isSuccess"]) {
+        Navigator.of(context!).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => Tela14FimPartidaViewWidget(
+              gameResultInfo: resultEndGame["data"],
+              matchInfo: matchInfo,
+            ),
+          ),
+        );
+      } else {
+        Warning00ErrorUtil.showDialogMessageError(
+          context,
+          resultEndGame["error"].detail.message,
+          resultEndGame["error"].detail.details,
+        );
+      }
+      // closeDialogEndingGame();
+      // Warning00ErrorUtil.showDialogMessageError(
+      //   context,
+      //   "Erro ao finalizar partida",
+      //   e.toString(),
+      // );
     }
   }
 
