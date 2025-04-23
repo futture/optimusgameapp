@@ -12,6 +12,7 @@ import 'package:projeto_game_quiz/flutter_flow/flutter_flow_widgets.dart';
 import 'package:projeto_game_quiz/pages/tela03_principal/tela03_principal_widget.dart';
 import 'package:projeto_game_quiz/pages/tela15_sala_customizada/tela15_sala_customizada_model.dart';
 
+
 class Tela15SalaCustomizadaViewWidget extends StatefulWidget {
   final dynamic gameResultInfo;
   final dynamic matchInfo;
@@ -35,6 +36,16 @@ class _Tela15SalaCustomizadaViewWidgetState
   late MatchResultResponse? gameResultInfo;
   final scaffoldKey = GlobalKey<ScaffoldState>();
   List<JogadorResultado> resultados = List.empty();
+  
+  // Lista de usuários simulada (substitua por sua lógica real de busca)
+  final Map<String, String> usuarios = {
+    '123': 'João Silva',
+    '456': 'Maria Santos',
+    '789': 'Carlos Oliveira',
+  };
+  
+  // Lista de usuários adicionados
+  List<Map<String, String>> usuariosAdicionados = [];
 
   @override
   void initState() {
@@ -48,6 +59,14 @@ class _Tela15SalaCustomizadaViewWidgetState
   void dispose() {
     _model.dispose();
     super.dispose();
+  }
+  
+  void adicionarUsuario(String id) {
+    final nome = usuarios[id] ?? 'Usuário Desconhecido';
+    setState(() {
+      usuariosAdicionados.add({'id': id, 'nome': nome});
+      _model.idTextController?.clear();
+    });
   }
 
   @override
@@ -160,7 +179,6 @@ class _Tela15SalaCustomizadaViewWidgetState
                             .divide(SizedBox(width: 10.0))
                             .addToStart(SizedBox(width: 9.0))
                             .addToEnd(SizedBox(width: 9.0)),
-                      ),
                     ),
                     Align(
                       alignment: AlignmentDirectional(0.0, 0.0),
@@ -246,10 +264,7 @@ class _Tela15SalaCustomizadaViewWidgetState
                                                         return const Iterable<
                                                             String>.empty();
                                                       }
-                                                      return [
-                                                        'Option 1',
-                                                        'Opcao 2'
-                                                      ].where((option) {
+                                                      return usuarios.keys.where((option) {
                                                         final lowercaseOption =
                                                             option
                                                                 .toLowerCase();
@@ -300,6 +315,7 @@ class _Tela15SalaCustomizadaViewWidgetState
                                                       safeSetState(() => _model
                                                               .idSelectedOption =
                                                           selection);
+                                                      adicionarUsuario(selection);
                                                       FocusScope.of(context)
                                                           .unfocus();
                                                     },
@@ -743,6 +759,39 @@ class _Tela15SalaCustomizadaViewWidgetState
                         ),
                       ),
                     ),
+                    if (usuariosAdicionados.isNotEmpty)
+                      Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Usuários Adicionados:',
+                              style: FlutterFlowTheme.of(context)
+                                  .titleMedium
+                                  .override(
+                                    fontFamily: 'Inter Tight',
+                                    fontSize: 16.0,
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            SizedBox(height: 8.0),
+                            ...usuariosAdicionados.map((usuario) => ListTile(
+                                  title: Text(usuario['nome'] ?? ''),
+                                  subtitle: Text('ID: ${usuario['id']}'),
+                                  trailing: IconButton(
+                                    icon: Icon(Icons.delete),
+                                    onPressed: () {
+                                      setState(() {
+                                        usuariosAdicionados.remove(usuario);
+                                      });
+                                    },
+                                  ),
+                                )),
+                          ],
+                        ),
+                      ),
                   ]
                       .divide(SizedBox(height: 5.0))
                       .addToStart(SizedBox(height: 20.0)),
