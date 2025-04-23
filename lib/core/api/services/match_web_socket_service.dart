@@ -54,7 +54,7 @@ class MatchWebSocketService {
   }
 
   void connectStartScheduledSatch() {
-    final url = '/start-scheduled-match/match/$matchId';
+    final url = '/start-scheduled-match/match/$matchId/player/$userId';
 
     _webSocketService = WebSocketService(
       url: url,

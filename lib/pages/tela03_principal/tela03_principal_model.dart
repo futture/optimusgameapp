@@ -181,9 +181,10 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
 
   Future<void> startScheduledSatchAsync(
       Function setState, MatchResponse match) async {
-    //_matchWebSocketService?.disconnect();
+    _matchWebSocketService?.disconnect();
 
     _matchWebSocketService = MatchWebSocketService(
+      userId: user!.id,
       matchInfo: match,
       context: context!,
       matchId: match.id,
