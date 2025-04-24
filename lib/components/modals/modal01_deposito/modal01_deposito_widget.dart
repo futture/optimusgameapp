@@ -64,7 +64,8 @@ class _Modal01DepositoWidgetState extends State<Modal01DepositoWidget> {
           ],
           borderRadius: BorderRadius.circular(10.0),
         ),
-        child: SingleChildScrollView(
+        child: 
+        SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -619,6 +620,7 @@ class _Modal01DepositoWidgetState extends State<Modal01DepositoWidget> {
             ].divide(SizedBox(height: 5.0)).addToStart(SizedBox(height: 20.0)),
           ),
         ),
+      
       ),
     );
   }

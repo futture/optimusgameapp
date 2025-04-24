@@ -1,3 +1,5 @@
+import 'package:projeto_game_quiz/pages/tela15_sala_customizada/tela15_sala_customizada_widget.dart';
+
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -157,7 +159,42 @@ class _ModaListadeSalaWidgetState extends State<ModaListadeSalaWidget> {
                       ),
                     ],
                   ),
-                )
+                ),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.only(bottom: 12.0),
+                  physics: BouncingScrollPhysics(),
+                  child: Column(children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 4.0),
+                      child: FFButtonWidget(
+                        onPressed: () async {
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                                builder: (_) =>
+                                    Tela15SalaCustomizadaViewWidget()),
+                          );
+                        },
+                        text: 'INICIAR SALA CUSTOMIZADA',
+                        options: FFButtonOptions(
+                          width: 300.0,
+                          height: 45.0,
+                          color: Color.fromARGB(255, 139, 235, 30),
+                          textStyle: FlutterFlowTheme.of(context)
+                              .titleSmall
+                              .override(
+                                fontFamily: 'Inter Tight',
+                                color: FlutterFlowTheme.of(context).primaryText,
+                                letterSpacing: 0.0,
+                              ),
+                          elevation: 0.0,
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                    )
+                  ]),
+                ),
+              ),
             ],
           ),
         ),

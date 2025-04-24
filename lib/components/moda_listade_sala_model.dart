@@ -123,7 +123,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
         return;
       }
 
-      await getMatchByMatchIdAsyncdd(matchId);
+      await getMatchByMatchIdAsync();
       await getWebSocketWaitForPlayerAsync();
     } catch (e) {
       print("Erro inesperado ao criar partida: $e");
@@ -131,13 +131,6 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
   }
 
   Future<void> getMatchByMatchIdAsync() async {
-    final resultMatch = await matchService.getMatchByMatchIdAsync(matchId);
-    if (resultMatch["isSuccess"]) {
-      matchInfo = resultMatch["data"];
-    }
-  }
-
-  Future<void> getMatchByMatchIdAsyncdd(matchId) async {
     final resultMatch = await matchService.getMatchByMatchIdAsync(matchId);
     if (resultMatch["isSuccess"]) {
       matchInfo = resultMatch["data"];
@@ -238,4 +231,5 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
       ),
     );
   }
+
 }

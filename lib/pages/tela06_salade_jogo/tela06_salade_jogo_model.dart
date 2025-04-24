@@ -119,7 +119,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
         //TODO logica para forçar a proxima questão.
         var forceNextQuestion = await _questionService.nextQuestionMatchAsync(matchInfo!.id);
         if(forceNextQuestion["isSuccess"]){
-          await fetchNextQuestionMatchAsync(setState, forceNextQuestion);
+          await fetchNextQuestionMatchAsync(setState, forceNextQuestion["data"]);
         }
       }
     } else {

@@ -24,6 +24,19 @@ class UserService {
     }
   }
 
+  Future<dynamic> getPlayerByIdAsync(String playerId)  async{
+    try {
+      final successResult = await httpService.request<UserResponse>(
+        '/users/$playerId',
+        method: 'GET',
+        successParser: (json) => UserResponse.FromJson(json),
+      );
+      return {"isSuccess": true, "data": successResult};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
   Future<dynamic> getUserInfoAsync() async {
     try {
       final successResult = await httpService.request<UserResponse>(
@@ -44,18 +57,15 @@ class UserService {
     try {
       final obj = userRequest.toJson();
       print(obj);
-      final response = await httpService.request(
-        '/users/register',
-        method: 'POST',
-        body: obj
-      );
-      
+      final response = await httpService.request('/users/register',
+          method: 'POST', body: obj);
+
       if (response != null && response["id"] != null) {
-      final userResponse = UserResponse.FromJson(response);
-      return {"isSuccess": true, "data": userResponse};
-    } else {
-      return {"isSuccess": false, "message": "Erro ao criar usuário"};
-    }
+        final userResponse = UserResponse.FromJson(response);
+        return {"isSuccess": true, "data": userResponse};
+      } else {
+        return {"isSuccess": false, "message": "Erro ao criar usuário"};
+      }
     } catch (e) {
       return {"isSuccess": false, "message": e.toString()};
     }

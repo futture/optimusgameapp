@@ -2,10 +2,15 @@ enum TrofeuTipo { ouro, prata, bronze, perdedor }
 
 class CreateRoomRequest {
   final String nameRoom;
+  final CreateRoomConfigurationRequest roomConfiguration;
 
-  CreateRoomRequest({required this.nameRoom});
+  CreateRoomRequest({required this.nameRoom, required this.roomConfiguration});
 
-  Map<String, dynamic> toJson() => {"name": this.nameRoom, "code": "AAA"};
+  Map<String, dynamic> toJson() => {
+        "name": this.nameRoom,
+        "code": "AAA",
+        "roomConfiguration": this.roomConfiguration.toJson()
+      };
 }
 
 class CreateMatchRequest {
@@ -23,10 +28,12 @@ class CreateMatchRequest {
 
 class AddPlayerMatchRequest {
   final String playerId;
+  final List<String>? playerIds;
 
-  AddPlayerMatchRequest({required this.playerId});
+  AddPlayerMatchRequest({required this.playerId, this.playerIds});
 
-  Map<String, dynamic> toJson() => {"playerId": playerId};
+  Map<String, dynamic> toJson() =>
+      {"playerId": playerId, "partPlayersId": playerIds};
 }
 
 class UpdateRoomConfigurationRequest {
@@ -52,6 +59,44 @@ class UpdateRoomConfigurationRequest {
   Map<String, dynamic> toJson() => {
         "isSingleWinner": isSingleWinner,
         "timeToRespond": timeToRespond,
+        "numberOfPlayers": numberOfPlayers,
+        "numberOfQuestions": numberOfQuestions,
+        "numberOfAnswerOptions": numberOfAnswerOptions,
+        "minimumNumberOfPlayers": minimumNumberOfPlayers,
+        "minimumAmountToPlay": minimumAmountToPlay,
+        "premiumRate": premiumRate
+      };
+}
+
+class CreateRoomConfigurationRequest {
+  final bool isEvent;
+  final bool isSingleWinner;
+  final bool isSimpleQuestions;
+  final int timeToRespond;
+  final int numberOfPlayers;
+  final int numberOfQuestions;
+  final int numberOfAnswerOptions;
+  final int minimumNumberOfPlayers;
+  final double minimumAmountToPlay;
+  final double premiumRate;
+
+  CreateRoomConfigurationRequest(
+      {required this.isEvent,
+      required this.isSingleWinner,
+      required this.timeToRespond,
+      required this.numberOfPlayers,
+      required this.isSimpleQuestions,
+      required this.numberOfQuestions,
+      required this.numberOfAnswerOptions,
+      required this.minimumNumberOfPlayers,
+      required this.minimumAmountToPlay,
+      required this.premiumRate});
+
+  Map<String, dynamic> toJson() => {
+        "isEvent": isEvent,
+        "isSingleWinner": isSingleWinner,
+        "timeToRespond": timeToRespond,
+        "isSimpleQuestions": isSimpleQuestions,
         "numberOfPlayers": numberOfPlayers,
         "numberOfQuestions": numberOfQuestions,
         "numberOfAnswerOptions": numberOfAnswerOptions,
