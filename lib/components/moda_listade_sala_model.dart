@@ -69,7 +69,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
     setState(() {
       isLoadingRooms = true;
     });
-    final resultRoom = await roomService.getAllRoomAsync(false);
+    final resultRoom = await roomService.getAllRoomAsync(false, false);
 
     if (resultRoom["isSuccess"] == true) {
       final fetchedRooms = resultRoom["data"];
@@ -231,5 +231,4 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
       ),
     );
   }
-
 }

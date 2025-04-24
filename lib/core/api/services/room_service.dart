@@ -9,10 +9,10 @@ class RoomService {
   ErrorUtil _errorUtil = ErrorUtil();
   final httpService = HttpClientService();
 
-  Future<dynamic> getAllRoomAsync(bool isEvent) async {
+  Future<dynamic> getAllRoomAsync(bool isEvent, bool isCustomized) async {
     try {
       final successResult = await httpService.request<List<RoomResponse>>(
-        '/rooms?isEvent=$isEvent',
+        '/rooms?isEvent=$isEvent&isCustomized=$isCustomized',
         method: 'GET',
         successParser: (json) =>(json as List).map((item) => RoomResponse.fromJson(item)).toList(),
       );

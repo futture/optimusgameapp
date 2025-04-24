@@ -159,7 +159,7 @@ class Tela15SalaCustomizadaViewModel
     setState(() {
       isLoadingRooms = true;
     });
-    final resultRoom = await roomService.getAllRoomAsync(false);
+    final resultRoom = await roomService.getAllRoomAsync(false, false);
 
     if (resultRoom["isSuccess"] == true) {
       final fetchedRooms = resultRoom["data"];
@@ -179,11 +179,12 @@ class Tela15SalaCustomizadaViewModel
 
   Future<String?> createRoomAsync() async {
     var result = await roomService.createRoomAsync(CreateRoomRequest(
+        isCustomized: true,
         nameRoom: "SALA-CUSTOMIZADA",
         roomConfiguration: CreateRoomConfigurationRequest(
             isEvent: false,
-            isSingleWinner: true,
-            isSimpleQuestions: true,
+            isSingleWinner: onlyOneWinner,
+            isSimpleQuestions: isSimpleQuestion,
             timeToRespond: TIME_TO_RESPONSE,
             numberOfPlayers: int.parse(numberPlayerTextController.text),
             numberOfQuestions: int.parse(numberQuestionTextController.text),

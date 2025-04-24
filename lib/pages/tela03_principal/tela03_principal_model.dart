@@ -17,7 +17,6 @@ import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:flutter/material.dart';
 
 class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
-  ///  State fields for stateful widgets in this page.
   List<MatchResponse> matchList = [];
   MatchResponse? nextMatch;
   bool isLoadingMatches = true;
@@ -35,9 +34,12 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
   FlutterFlowTimerController timerController =
       FlutterFlowTimerController(StopWatchTimer(mode: StopWatchMode.countDown));
   InstantTimer? instantTimer;
-
+  bool isDialogStartScheduledMatchOpen = false;
+  late BuildContext currentDialogStartScheduledMatchOpenContext;
   @override
-  void initState(BuildContext context) {}
+  void initState(BuildContext context) {
+    currentDialogStartScheduledMatchOpenContext = context;
+  }
 
   @override
   void dispose() {
@@ -153,7 +155,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
         await _callApiBeforeMatchStart(match.id);
       }
       if (remaining.inSeconds <= 0) {
-        await startScheduledSatchAsync(setState, match);
+        //await startScheduledSatchAsync(setState, match);
       }
 
       if (remaining.isNegative) {
@@ -191,9 +193,14 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
       onScheduledMatchUpdate: (stats) {
         _matchWebSocketService?.disconnect();
 
+        showDialogStartScheduledMatch(
+            currentDialogStartScheduledMatchOpenContext);
+
         if (stats.error != null && stats.error!.detail != null) {
           _showErrorDialog(stats.error, match.id);
+          closeDialogStartScheduledMatch();
         } else {
+          closeDialogStartScheduledMatch();
           final isUserInMatch = stats.players?.contains(user!.id);
 
           if (isUserInMatch!) {
@@ -315,6 +322,52 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
       }
       SuccessDialogWidgetUtil.showDialogMessageSuccess(
           context, "Sair da partida", "", func);
+    }
+  }
+
+  void showDialogStartScheduledMatch(BuildContext context) {
+    if (isDialogStartScheduledMatchOpen) return;
+
+    isDialogStartScheduledMatchOpen = true;
+    currentDialogStartScheduledMatchOpenContext = context;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: Text("Iniciando a partida..."),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text("Preparar tudo para a partida, aguardem..."),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text("Fechar"),
+          ),
+          // if (isBtnEndGameManually)
+          //   TextButton(
+          //     onPressed: () async {
+          //       await endGameFlow(() => {});
+          //     },
+          //     child: const Text("Terminar manualmente"),
+          //   ),
+        ],
+      ),
+    );
+  }
+
+  void closeDialogStartScheduledMatch() {
+    if (isDialogStartScheduledMatchOpen &&
+        Navigator.canPop(currentDialogStartScheduledMatchOpenContext)) {
+      Navigator.of(currentDialogStartScheduledMatchOpenContext).pop();
+      isDialogStartScheduledMatchOpen = false;
     }
   }
 }

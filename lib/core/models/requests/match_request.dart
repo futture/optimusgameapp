@@ -2,13 +2,18 @@ enum TrofeuTipo { ouro, prata, bronze, perdedor }
 
 class CreateRoomRequest {
   final String nameRoom;
+  final bool isCustomized;
   final CreateRoomConfigurationRequest roomConfiguration;
 
-  CreateRoomRequest({required this.nameRoom, required this.roomConfiguration});
+  CreateRoomRequest(
+      {required this.nameRoom,
+      required this.isCustomized,
+      required this.roomConfiguration});
 
   Map<String, dynamic> toJson() => {
-        "name": this.nameRoom,
         "code": "AAA",
+        "name": this.nameRoom,
+        "isCustomized": this.isCustomized,
         "roomConfiguration": this.roomConfiguration.toJson()
       };
 }

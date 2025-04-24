@@ -1,4 +1,6 @@
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_timer.dart';
 import 'package:projeto_game_quiz/pages/tela15_sala_customizada/tela15_sala_customizada_widget.dart';
+import 'package:stop_watch_timer/stop_watch_timer.dart';
 
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -160,41 +162,130 @@ class _ModaListadeSalaWidgetState extends State<ModaListadeSalaWidget> {
                     ],
                   ),
                 ),
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.only(bottom: 12.0),
-                  physics: BouncingScrollPhysics(),
-                  child: Column(children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 4.0),
-                      child: FFButtonWidget(
-                        onPressed: () async {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                                builder: (_) =>
-                                    Tela15SalaCustomizadaViewWidget()),
-                          );
-                        },
-                        text: 'INICIAR SALA CUSTOMIZADA',
-                        options: FFButtonOptions(
-                          width: 300.0,
-                          height: 45.0,
-                          color: Color.fromARGB(255, 139, 235, 30),
-                          textStyle: FlutterFlowTheme.of(context)
-                              .titleSmall
-                              .override(
-                                fontFamily: 'Inter Tight',
-                                color: FlutterFlowTheme.of(context).primaryText,
-                                letterSpacing: 0.0,
-                              ),
-                          elevation: 0.0,
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
+
+              Align(
+                alignment: AlignmentDirectional(0.0, 0.0),
+                child: Container(
+                  width: double.infinity,
+                  height: 100.0,
+                  decoration: BoxDecoration(
+                    color: FlutterFlowTheme.of(context).primaryBackground,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.diamond_rounded,
+                            color: FlutterFlowTheme.of(context).primaryText,
+                            size: 22.0,
+                          ),
+                          Align(
+                            alignment: AlignmentDirectional(0.0, 0.0),
+                            child: Text(
+                              'PARTIDAS ENTRE AMIGOS',
+                              style: FlutterFlowTheme.of(context)
+                                  .titleMedium
+                                  .override(
+                                    fontFamily: 'Inter Tight',
+                                    fontSize: 18.0,
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                            ),
+                          ),
+                          Icon(
+                            Icons.forest_outlined,
+                            color: FlutterFlowTheme.of(context).primaryText,
+                            size: 22.0,
+                          ),
+                        ]
+                            .divide(SizedBox(width: 10.0))
+                            .addToStart(SizedBox(width: 9.0))
+                            .addToEnd(SizedBox(width: 9.0)),
                       ),
-                    )
-                  ]),
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.all(5.0),
+                            child: FFButtonWidget(
+                              onPressed: () async {
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          Tela15SalaCustomizadaViewWidget()),
+                                );
+                              },
+                              text: 'INICIAR PARTIDAS ENTRE AMIGOS',
+                              options: FFButtonOptions(
+                                width: 300.0,
+                                height: 45.0,
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    16.0, 0.0, 16.0, 0.0),
+                                iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                    0.0, 0.0, 0.0, 0.0),
+                                color: Color(0xFF00B80E),
+                                textStyle: FlutterFlowTheme.of(context)
+                                    .titleSmall
+                                    .override(
+                                      fontFamily: 'Inter Tight',
+                                      color: Colors.black,
+                                      letterSpacing: 0.0,
+                                    ),
+                                elevation: 0.0,
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
+
+              // Flexible(
+              //   child: SingleChildScrollView(
+              //     padding: EdgeInsets.only(bottom: 12.0),
+              //     physics: BouncingScrollPhysics(),
+              //     child: Column(children: [
+              //       Padding(
+              //         padding: EdgeInsets.symmetric(vertical: 4.0),
+              //         child: FFButtonWidget(
+              //           onPressed: () async {
+              //             Navigator.of(context).pushReplacement(
+              //               MaterialPageRoute(
+              //                   builder: (_) =>
+              //                       Tela15SalaCustomizadaViewWidget()),
+              //             );
+              //           },
+              //           text: 'INICIAR SALA ENTRE AMIGOS',
+              //           options: FFButtonOptions(
+              //             width: 300.0,
+              //             height: 45.0,
+              //             color: Color.fromARGB(255, 139, 235, 30),
+              //             textStyle: FlutterFlowTheme.of(context)
+              //                 .titleSmall
+              //                 .override(
+              //                   fontFamily: 'Inter Tight',
+              //                   color: FlutterFlowTheme.of(context).primaryText,
+              //                   letterSpacing: 0.0,
+              //                 ),
+              //             elevation: 0.0,
+              //             borderRadius: BorderRadius.circular(8.0),
+              //           ),
+              //         ),
+              //       )
+              //     ]),
+              //   ),
+              // ),
             ],
           ),
         ),
