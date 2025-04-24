@@ -16,6 +16,9 @@ class Tela15SalaCustomizadaViewModel
     extends FlutterFlowModel<Tela15SalaCustomizadaViewWidget> {
   int TIME_TO_RESPONSE = 10;
   UserResponse? user;
+  bool isSimpleQuestion = true;
+  bool onlyOneWinner = true;
+
   final formKey = GlobalKey<FormState>();
   List<Map<String, String>> addedUsers = [];
 
@@ -118,6 +121,22 @@ class Tela15SalaCustomizadaViewModel
   Future<void> getPlayerByIdAsync(
       String playerId, void Function(VoidCallback fn) setState) async {
     var result = await userService.getPlayerByIdAsync(playerId);
+    if (result["isSuccess"]) {
+      setState(() {
+        user = result["data"];
+      });
+    } else {
+      await Warning00ErrorUtil.showDialogMessageError(
+        context,
+        result["error"].detail.message,
+        result["error"].detail.details,
+      );
+    }
+  }
+
+  Future<void> getPlayerByPhoneNumberAsync(
+      String phoneNumber, void Function(VoidCallback fn) setState) async {
+    var result = await userService.getUserByPhoneNumbrAsync(phoneNumber);
     if (result["isSuccess"]) {
       setState(() {
         user = result["data"];
@@ -333,13 +352,13 @@ class Tela15SalaCustomizadaViewModel
     );
   }
 
-  Future<void> addUser(String id, setState) async {
-    await getPlayerByIdAsync(id, setState);
+  Future<void> addUser(String phoneNumber, setState) async {
+    await getPlayerByPhoneNumberAsync(phoneNumber, setState);
     if (user == null) return;
     final nome = user?.name ?? 'Usuário Desconhecido';
     if (addedUsers.length < int.parse(numberPlayerTextController.text) - 1) {
       setState(() {
-        addedUsers.add({'id': id, 'nome': nome});
+        addedUsers.add({'id': user!.id, 'nome': nome});
         idTextController?.clear();
       });
     } else {

@@ -37,6 +37,20 @@ class UserService {
     }
   }
 
+  Future<dynamic> getUserByPhoneNumbrAsync(String phoneNumber)  async{
+    try {
+      final successResult = await httpService.request<UserResponse>(
+        '/users/phone-number/$phoneNumber',
+        method: 'GET',
+        successParser: (json) => UserResponse.FromJson(json),
+      );
+      return {"isSuccess": true, "data": successResult};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
+
   Future<dynamic> getUserInfoAsync() async {
     try {
       final successResult = await httpService.request<UserResponse>(

@@ -181,6 +181,92 @@ class _Tela15SalaCustomizadaViewWidgetState
                     validator: (val) => _model.validateMontante(context, val),
                     lengthText: 10,
                     keyboardType: TextInputType.number),
+                Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: ExpansionTile(
+                        tilePadding: EdgeInsets.zero,
+                        title: Text(
+                          'Adicionais',
+                          style:
+                              FlutterFlowTheme.of(context).titleMedium.override(
+                                    fontFamily: 'Inter Tight',
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                        ),
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 5.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Tipo de Pergunta:',
+                                  style: FlutterFlowTheme.of(context)
+                                      .labelLarge
+                                      .override(
+                                        fontFamily: 'Inter',
+                                        color: FlutterFlowTheme.of(context)
+                                            .primaryText,
+                                        letterSpacing: 0.0,
+                                      ),
+                                ),
+                                RadioListTile<bool>(
+                                  dense: true,
+                                  title: const Text('Simples'),
+                                  value: true,
+                                  groupValue: _model.isSimpleQuestion,
+                                  onChanged: (value) {
+                                    setState(
+                                        () => _model.isSimpleQuestion = value!);
+                                  },
+                                ),
+                                RadioListTile<bool>(
+                                  dense: true,
+                                  title: const Text('Completa'),
+                                  value: false,
+                                  groupValue: _model.isSimpleQuestion,
+                                  onChanged: (value) {
+                                    setState(
+                                        () => _model.isSimpleQuestion = value!);
+                                  },
+                                ),
+                                const SizedBox(height: 10.0),
+                                Text(
+                                  'Vencedores:',
+                                  style: FlutterFlowTheme.of(context)
+                                      .labelLarge
+                                      .override(
+                                        fontFamily: 'Inter',
+                                        color: FlutterFlowTheme.of(context)
+                                            .primaryText,
+                                        letterSpacing: 0.0,
+                                      ),
+                                ),
+                                RadioListTile<bool>(
+                                  dense: true,
+                                  title: const Text('Apenas 1 vencedor'),
+                                  value: true,
+                                  groupValue: _model.onlyOneWinner,
+                                  onChanged: (value) {
+                                    setState(
+                                        () => _model.onlyOneWinner = value!);
+                                  },
+                                ),
+                                RadioListTile<bool>(
+                                  dense: true,
+                                  title: const Text('Vários vencedores'),
+                                  value: false,
+                                  groupValue: _model.onlyOneWinner,
+                                  onChanged: (value) {
+                                    setState(
+                                        () => _model.onlyOneWinner = value!);
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ])),
                 if (_model.addedUsers.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -390,7 +476,7 @@ class _Tela15SalaCustomizadaViewWidgetState
         children: [
           buildInput(
             context: context,
-            label: 'ID DO JOGADOR',
+            label: 'Nº DE TELEFONE JOGADOR',
             controller: model.idTextController!,
             focusNode: model.idFocusNode!,
             hintText: 'Ex.: 0000.0000.0000',
