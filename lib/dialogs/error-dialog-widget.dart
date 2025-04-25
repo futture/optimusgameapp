@@ -19,29 +19,32 @@ class ErrorDialogWidget extends StatefulWidget {
 class _ErrorDialogWidgetState extends State<ErrorDialogWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  late Animation<Offset> _offsetAnimation;
+  late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
-  late Animation<double> _iconScaleAnimation;
-  late Animation<double> _circleAnimation;
 
   @override
   void initState() {
     super.initState();
 
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 800),
       vsync: this,
+      duration: const Duration(milliseconds: 700),
     )..forward();
 
-    _scaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
-
-    _iconScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
-    );
-
-    _circleAnimation = Tween<double>(begin: 0.0, end: 120.0).animate(
+    _offsetAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.1),
+      end: Offset.zero,
+    ).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.95, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.decelerate),
     );
   }
 
@@ -53,53 +56,40 @@ class _ErrorDialogWidgetState extends State<ErrorDialogWidget>
 
   @override
   Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _scaleAnimation,
-      child: Container(
-        width: 320.0,
-        padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 20.0),
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          borderRadius: BorderRadius.circular(20.0),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              offset: Offset(0, 4),
-              blurRadius: 20.0,
+    final theme = FlutterFlowTheme.of(context);
+
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(
+        position: _offsetAnimation,
+        child: ScaleTransition(
+          scale: _scaleAnimation,
+          child: Dialog(
+            elevation: 10,
+            backgroundColor: theme.secondaryBackground,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
             ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [ 
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                AnimatedBuilder(
-                  animation: _circleAnimation,
-                  builder: (_, __) => Container(
-                    width: _circleAnimation.value,
-                    height: _circleAnimation.value,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.redAccent.withOpacity(0.2),
+            insetPadding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Botão de fechar
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: const Icon(Icons.close, size: 20),
                     ),
                   ),
-                ),
-                // Ícone de erro animado
-                ScaleTransition(
-                  scale: _iconScaleAnimation,
-                  child: Container(
+                  const SizedBox(height: 4),
+                  // Ícone de erro
+                  Container(
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.redAccent,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.red,
-                          blurRadius: 20,
-                          spreadRadius: 2,
-                        ),
-                      ],
                     ),
                     padding: const EdgeInsets.all(16),
                     child: const Icon(
@@ -108,40 +98,54 @@ class _ErrorDialogWidgetState extends State<ErrorDialogWidget>
                       size: 60.0,
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20.0),
-            Text(
-              widget.message,
-              textAlign: TextAlign.center,
-              style: FlutterFlowTheme.of(context).titleMedium.copyWith(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.w600,
-                    color: FlutterFlowTheme.of(context).primaryText,
-                  ),
-            ),
-            const SizedBox(height: 24.0),
-            FFButtonWidget(
-              onPressed: () {
-                if (widget.onOk != null) {
-                  widget.onOk!();
-                }
-              },
-              text: 'OK',
-              options: FFButtonOptions(
-                height: 50.0,
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                color: Colors.redAccent,
-                textStyle: FlutterFlowTheme.of(context).titleSmall.copyWith(
-                      fontSize: 16.0,
-                      color: Colors.white,
+                  const SizedBox(height: 16),
+                  Text(
+                    'Erro!',
+                    style: theme.titleLarge.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
                     ),
-                elevation: 5.0,
-                borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.message,
+                    textAlign: TextAlign.center,
+                    style: theme.bodyMedium.copyWith(
+                      fontSize: 16,
+                      color: theme.secondaryText,
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        widget.onOk?.call();
+                        Navigator.of(context).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        elevation: 3,
+                      ),
+                      child: const Text(
+                        'OK',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          letterSpacing: 0.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -7,8 +7,11 @@ import 'package:flutter_multi_formatter/formatters/phone_input_formatter.dart';
 import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warning00_campo_vazio_widget.dart';
 import 'package:projeto_game_quiz/core/api/services/account_service.dart';
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
+import 'package:projeto_game_quiz/core/models/requests/transaction_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/account_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
+import 'package:projeto_game_quiz/dialogs/error-dialog-widget.dart';
+import 'package:projeto_game_quiz/dialogs/success-dialog-widget.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_util.dart';
 
 class PaymentForm extends StatefulWidget {
@@ -73,39 +76,95 @@ class _PaymentFormState extends State<PaymentForm> {
   }
 
   Future<void> _submitForm() async {
-    print(userAccountInfo?.accountNumber);
-    if (!_formKey.currentState!.validate()) return;
+  if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+  setState(() => _isLoading = true);
+ 
+ print(userAccountInfo?.id);
+  final Map<String, dynamic> paymentData = {
+    'paymentMethod': widget.method,
+    if (_refController.text.isNotEmpty) 'Entidade': _refController.text,
+    if (_phoneController.text.isNotEmpty) 'phone': _phoneController.text,
+    if (_amountController.text.isNotEmpty) 'amount': _amountController.text,
+    if (_accountController.text.isNotEmpty) 'account': _accountController.text,
+    if (userAccountInfo?.id != null)
+      'id': userAccountInfo!.id,
+  };
 
-    final Map<String, dynamic> paymentData = {
-      'paymentMethod': widget.method,
-      if (_refController.text.isNotEmpty) 'Entidade': _refController.text,
-      if (_phoneController.text.isNotEmpty) 'phone': _phoneController.text,
-      if (_amountController.text.isNotEmpty) 'amount': _amountController.text,
-      if (_accountController.text.isNotEmpty)
-        'account': _accountController.text,
-      if (userAccountInfo?.accountNumber != null)
-        'accountNumber': userAccountInfo!.accountNumber,
-    };
+  final accountService = AccountService();
 
-    final String jsonPayload = jsonEncode(paymentData);
-    print('--- JSON PRONTO PARA ENVIO ---');
-    print(jsonPayload);
-    print('-------------------------------');
+  try {
+    final String type = paymentData['paymentMethod'] ?? 'unknown';
+    final String rawAmount = paymentData['amount']?.toString() ?? '0';
+    final double amount = double.tryParse(rawAmount) ?? 0.0;
+    final String accountId = paymentData['id'] ?? '';
 
-    await Future.delayed(const Duration(seconds: 2));
+    final transaction = TransactionRequest(
+      type: 'credit',
+      amount: amount,
+      account_id: accountId,
+    );
+    print(jsonEncode(transaction.toJson()));
+    final response = await accountService.createTransactionAsync(transaction);
 
+    if (response['isSuccess']) {
+      if (mounted) {
+        await showDialog(
+          context: context,
+          builder: (_) => Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.all(20),
+            child: SuccessDialogWidget(
+              message: 'Deposito feito com sucesso!',
+              onOk: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ),
+        );
+      }
+    } else {
+      final error = response['message'] ?? 'Erro ao criar transação.';
+      if (mounted) {
+        await showDialog(
+          context: context,
+          builder: (_) => Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.all(20),
+            child: ErrorDialogWidget(
+              message: error,
+              onOk: () {
+                Navigator.of(context).pop(); // Fecha o diálogo
+              },
+            ),
+          ),
+        );
+      }
+    }
+  } catch (e) {
+    print('Erro ao enviar transação: $e');
     if (mounted) {
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Dados enviados com sucesso!'),
-          backgroundColor: Colors.green,
+      await showDialog(
+        context: context,
+        builder: (_) => Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(20),
+          child: ErrorDialogWidget(
+            message: 'Ocorreu um erro inesperado.',
+            onOk: () {
+              Navigator.of(context).pop(); // Fecha o diálogo
+            },
+          ),
         ),
       );
     }
+  } finally {
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
   }
+}
+
 
   String? _validateRequired(String? value) {
     if (value == null || value.isEmpty) return 'Campo obrigatório';
@@ -299,19 +358,13 @@ class _PaymentFormState extends State<PaymentForm> {
     if (value == null || value.isEmpty) {
       return 'Por favor insira um número de telefone';
     }
-
-    // Remover qualquer formatação
     final clean = toNumericString(value);
-
-    // Verificar se o número tem exatamente 9 dígitos e começa com '9'
     if (clean.length != 9) {
       return 'O número de telefone deve ter exatamente 9 dígitos';
     }
-
     if (!clean.startsWith('9')) {
       return 'O número de telefone deve começar com 9';
     }
-
     return null;
   }
 
