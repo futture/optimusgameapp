@@ -1,6 +1,6 @@
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import '/flutter_flow/flutter_flow_theme.dart';
 
 class ErrorDialogWidget extends StatefulWidget {
   final String message;
@@ -13,15 +13,14 @@ class ErrorDialogWidget extends StatefulWidget {
   });
 
   @override
-  _ErrorDialogWidgetState createState() => _ErrorDialogWidgetState();
+  State<ErrorDialogWidget> createState() => _ErrorDialogWidgetState();
 }
 
 class _ErrorDialogWidgetState extends State<ErrorDialogWidget>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Offset> _offsetAnimation;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
+  late final AnimationController _controller;
+  late final Animation<double> _opacityAnimation;
+  late final Animation<double> _scaleAnimation;
 
   @override
   void initState() {
@@ -29,22 +28,15 @@ class _ErrorDialogWidgetState extends State<ErrorDialogWidget>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 700),
+      duration: const Duration(milliseconds: 400),
     )..forward();
 
-    _offsetAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.1),
-      end: Offset.zero,
-    ).animate(
+    _opacityAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
 
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
-    );
-
     _scaleAnimation = Tween<double>(begin: 0.95, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.decelerate),
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
     );
   }
 
@@ -57,92 +49,90 @@ class _ErrorDialogWidgetState extends State<ErrorDialogWidget>
   @override
   Widget build(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
+    const errorRed = Colors.redAccent; // Vermelho para erro
 
-    return FadeTransition(
-      opacity: _fadeAnimation,
-      child: SlideTransition(
-        position: _offsetAnimation,
+    return Center(
+      child: FadeTransition(
+        opacity: _opacityAnimation,
         child: ScaleTransition(
           scale: _scaleAnimation,
           child: Dialog(
-            elevation: 10,
-            backgroundColor: theme.secondaryBackground,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-            ),
-            insetPadding: const EdgeInsets.symmetric(horizontal: 40),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Botão de fechar
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: const Icon(Icons.close, size: 20),
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: theme.secondaryBackground.withOpacity(0.75),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: errorRed.withOpacity(0.2),
+                      width: 1,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  // Ícone de erro
-                  Container(
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.redAccent,
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    child: const Icon(
-                      Icons.error_outline_rounded,
-                      color: Colors.white,
-                      size: 60.0,
-                    ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 32,
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Erro!',
-                    style: theme.titleLarge.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    widget.message,
-                    textAlign: TextAlign.center,
-                    style: theme.bodyMedium.copyWith(
-                      fontSize: 16,
-                      color: theme.secondaryText,
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        widget.onOk?.call();
-                        Navigator.of(context).pop();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        elevation: 3,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.error_outline_rounded,
+                        size: 72,
+                        color: errorRed,
                       ),
-                      child: const Text(
-                        'OK',
-                        style: TextStyle(
-                          color: Colors.white,
+                      const SizedBox(height: 24),
+                      Text(
+                        'Erro!',
+                        style: theme.titleLarge.copyWith(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: theme.primaryText,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        widget.message,
+                        textAlign: TextAlign.center,
+                        style: theme.bodyMedium.copyWith(
                           fontSize: 16,
-                          letterSpacing: 0.5,
-                          fontWeight: FontWeight.w600,
+                          color: theme.secondaryText,
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            widget.onOk?.call();
+                            Navigator.of(context).pop();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: errorRed,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: const Text(
+                            'OK',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),

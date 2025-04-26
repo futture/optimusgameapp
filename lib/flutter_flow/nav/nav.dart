@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:projeto_game_quiz/Atualiza%C3%A7%C3%A3o/tela10_deposito/tela10_deposito_lista_widget.dart';
+import 'package:projeto_game_quiz/pages/deposit_history/deposit_history_widget.dart';
 import 'package:projeto_game_quiz/pages/tela12_vitoria_view/tela12_vitoria_view_widget.dart';
 import 'package:projeto_game_quiz/pages/tela14_fim_partida/tela14_fim_partida_widget.dart';
 import 'package:provider/provider.dart';
@@ -102,6 +103,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: Tela14FimPartidaViewWidget.routeName,
           path: Tela14FimPartidaViewWidget.routePath,
           builder: (context, params) => Tela14FimPartidaViewWidget(),
+        ),
+        FFRoute(
+          name: DepositHistoryScreenWidget.routeName,
+          path: DepositHistoryScreenWidget.routePath,
+          builder: (context, params) => DepositHistoryScreenWidget(),
         ),
         FFRoute(
           name: Tela10DepositoListaWidget.routeName,

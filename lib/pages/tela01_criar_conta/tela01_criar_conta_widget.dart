@@ -653,7 +653,7 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget> {
                                     email: email,
                                     phone_number: telefone.toString(),
                                     phone_number_mask: '+244',
-                                    role_id: 'e4b07eb4-8e39-48ea-aedc-0025b7f2d860',
+                                    role_id: "",
                                   );
                     
                                   var result = await UserService().createUser(user);

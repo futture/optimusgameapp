@@ -78,7 +78,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget> {
                 size: 24.0,
               ),
               onPressed: () async {
-                context.safePop();
+                Navigator.of(context).pop();
               },
             ),
           ),
@@ -484,41 +484,40 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget> {
   }
 
   AlertDialog _genericPaymentDialog(BuildContext context, String method) {
-  return AlertDialog(
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-    title: Row(
-      children: [
-        _getIconForMethod(method),
-        const SizedBox(width: 8),
-        Text(
-          method,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.deepPurple,
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      title: Row(
+        children: [
+          _getIconForMethod(method),
+          const SizedBox(width: 8),
+          Text(
+            method,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.deepPurple,
+            ),
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: 350,
+        child: PaymentForm(method: method), // único formulário reutilizável
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text(
+            'Fechar',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.deepPurple,
+            ),
           ),
         ),
       ],
-    ),
-    content: SizedBox(
-      width: 350,
-      child: PaymentForm(method: method), // único formulário reutilizável
-    ),
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.pop(context),
-        child: const Text(
-          'Fechar',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.deepPurple,
-          ),
-        ),
-      ),
-    ],
-  );
-}
-
+    );
+  }
 
   AlertDialog _multicaixaDialog(BuildContext context) {
     return AlertDialog(
@@ -657,7 +656,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget> {
       ),
       content: SizedBox(
         width: 350,
-        child: Tela10DepositoEXPRESSWidget(), // apenas o formulário
+        child: Tela10DepositoEXPRESSWidget(),
       ),
       actions: [
         TextButton(
@@ -707,72 +706,72 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget> {
   }
 
   void _showCommonDialog({
-  required BuildContext context,
-  required String method,
-  required Icon icon,
-  required Color color,
-  required Widget content,
-}) {
-  showDialog(
-    context: context,
-    builder: (_) => AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: Row(
-        children: [
-          icon,
-          const SizedBox(width: 8),
-          Text(
-            method,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: color,
+    required BuildContext context,
+    required String method,
+    required Icon icon,
+    required Color color,
+    required Widget content,
+  }) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            icon,
+            const SizedBox(width: 8),
+            Text(
+              method,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+        content: SizedBox(width: 350, child: content),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Fechar',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
             ),
           ),
         ],
       ),
-      content: SizedBox(width: 350, child: content),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(
-            'Fechar',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-void _showPaymentDialog(BuildContext context, String method) {
-  showDialog(
-    context: context,
-    builder: (_) {
-      if (method == 'Multicaixa') {
-        return _multicaixaDialog(context); 
-      } else {
-        return _genericPaymentDialog(context, method);
-      }
-    },
-  );
-}
-
-
-Icon _getIconForMethod(String method) {
-  switch (method) {
-    case 'Express':
-      return const Icon(Icons.flash_on, color: Colors.deepPurple);
-    case 'Unitel Money':
-    case 'Afrimoney':
-      return const Icon(Icons.phone_android, color: Colors.deepPurple);
-    case 'Pay Pay':
-      return const Icon(Icons.account_balance_wallet, color: Colors.deepPurple);
-    default:
-      return const Icon(Icons.warning, color: Colors.deepPurple);
+    );
   }
-}
 
+  void _showPaymentDialog(BuildContext context, String method) {
+    showDialog(
+      context: context,
+      builder: (_) {
+        if (method == 'Multicaixa') {
+          return _multicaixaDialog(context);
+        } else {
+          return _genericPaymentDialog(context, method);
+        }
+      },
+    );
+  }
+
+  Icon _getIconForMethod(String method) {
+    switch (method) {
+      case 'Express':
+        return const Icon(Icons.flash_on, color: Colors.deepPurple);
+      case 'Unitel Money':
+      case 'Afrimoney':
+        return const Icon(Icons.phone_android, color: Colors.deepPurple);
+      case 'Pay Pay':
+        return const Icon(Icons.account_balance_wallet,
+            color: Colors.deepPurple);
+      default:
+        return const Icon(Icons.warning, color: Colors.deepPurple);
+    }
+  }
 }

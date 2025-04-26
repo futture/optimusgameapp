@@ -13,6 +13,7 @@ import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 import 'package:projeto_game_quiz/dialogs/error-dialog-widget.dart';
 import 'package:projeto_game_quiz/dialogs/success-dialog-widget.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_util.dart';
+import 'package:projeto_game_quiz/index.dart';
 
 class PaymentForm extends StatefulWidget {
   final String method;
@@ -117,7 +118,7 @@ class _PaymentFormState extends State<PaymentForm> {
             child: SuccessDialogWidget(
               message: 'Deposito feito com sucesso!',
               onOk: () {
-                Navigator.of(context).pop();
+                context.pushNamed(Tela03PrincipalWidget.routeName);
               },
             ),
           ),
