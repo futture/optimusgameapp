@@ -455,7 +455,6 @@ class _Tela15SalaCustomizadaViewWidgetState
                   ),
                   child: Column(
                     children: [
-                      // Exibe as opções de usuários encontrados
                       Expanded(
                         child: ListView.builder(
                           padding: EdgeInsets.zero,
@@ -473,14 +472,12 @@ class _Tela15SalaCustomizadaViewWidgetState
                           },
                         ),
                       ),
-                      // Se não houver opções, exibe o ícone de adicionar
                       if (hasNoMatch) const SizedBox(height: 4.0),
                       if (hasNoMatch)
                         Center(
                           child: IconButton(
                             icon: const Icon(Icons.person_add),
                             onPressed: () {
-                              // Ação para adicionar o número
                               final id = model.idTextController?.text.trim();
                               if (id != null && id.isNotEmpty) {
                                 onUsuarioSelecionado(id);
