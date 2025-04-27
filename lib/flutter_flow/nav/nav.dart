@@ -1,6 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:projeto_game_quiz/Atualiza%C3%A7%C3%A3o/tela10_deposito/tela10_deposito_lista_widget.dart';
+import 'package:projeto_game_quiz/pages/deposit_history/deposit_history_widget.dart';
+import 'package:projeto_game_quiz/pages/tela12_vitoria_view/tela12_vitoria_view_widget.dart';
+import 'package:projeto_game_quiz/pages/tela14_fim_partida/tela14_fim_partida_widget.dart';
 import 'package:provider/provider.dart';
 
 import '/flutter_flow/flutter_flow_util.dart';
@@ -68,24 +72,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: Tela06SaladeJogoWidget.routeName,
           path: Tela06SaladeJogoWidget.routePath,
-          builder: (context, params) => Tela06SaladeJogoWidget(
-            respotaA: params.getParam(
-              'respotaA',
-              ParamType.bool,
-            ),
-            respostaB: params.getParam(
-              'respostaB',
-              ParamType.bool,
-            ),
-            respostaC: params.getParam(
-              'respostaC',
-              ParamType.bool,
-            ),
-            respostaD: params.getParam(
-              'respostaD',
-              ParamType.bool,
-            ),
-          ),
+          builder: (context, params) => Tela06SaladeJogoWidget(),
         ),
         FFRoute(
           name: Tela07EditarPerfilWidget.routeName,
@@ -108,9 +95,24 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => Tela09HistoricoJodosWidget(),
         ),
         FFRoute(
-          name: Tela10DepositoWidget.routeName,
-          path: Tela10DepositoWidget.routePath,
-          builder: (context, params) => Tela10DepositoWidget(),
+          name: Tela12VitoriaViewWidget.routeName,
+          path: Tela12VitoriaViewWidget.routePath,
+          builder: (context, params) => Tela12VitoriaViewWidget(),
+        ),
+        FFRoute(
+          name: Tela14FimPartidaViewWidget.routeName,
+          path: Tela14FimPartidaViewWidget.routePath,
+          builder: (context, params) => Tela14FimPartidaViewWidget(),
+        ),
+        FFRoute(
+          name: DepositHistoryScreenWidget.routeName,
+          path: DepositHistoryScreenWidget.routePath,
+          builder: (context, params) => DepositHistoryScreenWidget(),
+        ),
+        FFRoute(
+          name: Tela10DepositoListaWidget.routeName,
+          path: Tela10DepositoListaWidget.routePath,
+          builder: (context, params) => Tela10DepositoListaWidget(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );

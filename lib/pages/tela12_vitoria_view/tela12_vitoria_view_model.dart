@@ -1,20 +1,14 @@
 import '/flutter_flow/flutter_flow_util.dart';
-import 'tela10_deposito_widget.dart' show Tela10DepositoWidget;
+import 'tela12_vitoria_view_widget.dart' show Tela12VitoriaViewWidget;
 import 'package:flutter/material.dart';
 
-class Tela10DepositoModel extends FlutterFlowModel<Tela10DepositoWidget> {
+class Tela12VitoriaViewModel extends FlutterFlowModel<Tela12VitoriaViewWidget> {
   ///  State fields for stateful widgets in this page.
 
-  final formKey = GlobalKey<FormState>();
   // State field(s) for TabBar widget.
   TabController? tabBarController;
   int get tabBarCurrentIndex =>
       tabBarController != null ? tabBarController!.index : 0;
-
-  // State field(s) for TextField widget.
-  FocusNode? textFieldFocusNode;
-  TextEditingController? textController;
-  String? Function(BuildContext, String?)? textControllerValidator;
 
   @override
   void initState(BuildContext context) {}
@@ -22,7 +16,5 @@ class Tela10DepositoModel extends FlutterFlowModel<Tela10DepositoWidget> {
   @override
   void dispose() {
     tabBarController?.dispose();
-    textFieldFocusNode?.dispose();
-    textController?.dispose();
   }
 }

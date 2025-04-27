@@ -1,104 +1,179 @@
-import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
+import 'package:projeto_game_quiz/core/api/common/http_client_api.dart';
+import 'package:projeto_game_quiz/core/api/utils/error_util.dart';
+import 'package:projeto_game_quiz/core/api/utils/token_util.dart';
+import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
+import 'package:projeto_game_quiz/core/models/requests/user_request.dart';
+import 'package:projeto_game_quiz/core/models/responses/otp_code_response.dart';
+import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 
 class UserService {
-  final String baseUrl;
-  final storage = FlutterSecureStorage();
-  UserService({this.baseUrl = 'http://localhost:8000'}); 
-  Future<bool> createUser(Map<String, dynamic> userData) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/users/'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(userData),
-      );
+  ErrorUtil _errorUtil = ErrorUtil();
+  final httpService = HttpClientService();
 
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        print('Erro ao criar usuário: ${response.body}');
-        return false;
+  Future<List<Contact>> fetchContactsAsync() async {
+    if (!kIsWeb) {
+      bool permissionGranted = await FlutterContacts.requestPermission();
+
+      if (!permissionGranted) {
+        print("Permissão negada para acessar contatos");
+        return List.empty();
       }
+
+      final fetchedContacts =
+          await FlutterContacts.getContacts(withProperties: true);
+
+      return fetchedContacts;
+    }
+    return List.empty();
+  }
+
+  Future<Map<String, dynamic>> createFcmTokenAsync(
+      String userId, CreateFcmTokenRequest request) async {
+    try {
+      final result = await httpService.request(
+        '/users/$userId/divice-info',
+        method: 'POST',
+        body: request.toJson(),
+      );
+      return {"isSuccess": true, "data": result};
     } catch (e) {
-      print('Erro ao conectar com o servidor: $e');
-      return false;
+      return _errorUtil.handleError(e);
     }
   }
 
-  Future<bool> sendOtp(String email) async {
+  Future<dynamic> getPlayerByIdAsync(String playerId) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/send_otp/'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({'email': email}),
+      final successResult = await httpService.request<UserResponse>(
+        '/users/$playerId',
+        method: 'GET',
+        successParser: (json) => UserResponse.FromJson(json),
       );
-
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        print('Erro ao enviar OTP: ${response.body}');
-        return false;
-      }
+      return {"isSuccess": true, "data": successResult};
     } catch (e) {
-      print('Erro ao conectar com o servidor: $e');
-      return false;
+      return _errorUtil.handleError(e);
     }
   }
 
-  Future<bool> verifyOtp(String email, String otp) async {
+  Future<dynamic> getUserByPhoneNumbrAsync(String phoneNumber) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/verify_otp/'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({'email': email, 'otp': otp}),
+      final successResult = await httpService.request<UserResponse>(
+        '/users/phone-number/$phoneNumber',
+        method: 'GET',
+        successParser: (json) => UserResponse.FromJson(json),
       );
-
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        print('Erro ao verificar OTP: ${response.body}');
-        return false;
-      }
+      return {"isSuccess": true, "data": successResult};
     } catch (e) {
-      print('Erro ao conectar com o servidor: $e');
-      return false;
+      return _errorUtil.handleError(e);
     }
   }
 
-  Future<Map<String, dynamic>?> loginUser(String email, String password) async {
-    if (email.isEmpty || password.isEmpty) {
-      return null;
+  Future<dynamic> getUserInfoAsync() async {
+    try {
+      final successResult = await httpService.request<UserResponse>(
+        '/user/me',
+        method: 'GET',
+        successParser: (json) => UserResponse.FromJson(json),
+      );
+
+      UserUtil.saveUserInfoData(successResult);
+
+      return {"isSuccess": true, "data": successResult};
+    } catch (e) {
+      return _errorUtil.handleError(e);
     }
+  }
 
-    final Map<String, String> body = {
-      'email': email,
-      'password': password,
-    };
+  Future<dynamic> createUser(CreateUserRequest userRequest) async {
+    try {
+      final obj = userRequest.toJson();
+      print(obj);
+      final response = await httpService.request('/users/register',
+          method: 'POST', body: obj);
 
-    final response = await http.post(
-      Uri.parse('$baseUrl/api/v1/users/login/'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: json.encode(body),
-    );
+      if (response != null && response["id"] != null) {
+        final userResponse = UserResponse.FromJson(response);
+        return {"isSuccess": true, "data": userResponse};
+      } else {
+        return {"isSuccess": false, "message": "Erro ao criar usuário"};
+      }
+    } catch (e) {
+      return {"isSuccess": false, "message": e.toString()};
+    }
+  }
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body); 
-      final token = data['access_token'];
-      final expiresIn = data['expires_in']; 
+  Future<Map<String, dynamic>> sendOtp(String phone_number) async {
+    try {
+      final result = await httpService.request(
+        '/users/send-otp',
+        method: 'POST',
+        body: {'phone_number': phone_number},
+      );
+      return {"isSuccess": true, "data": result};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> verifyOtp(
+      String phone_number, String otp) async {
+    try {
+      final result = await httpService.request(
+        '/verify_otp',
+        method: 'post',
+        body: {'phone_number': phone_number, 'otp': otp},
+      );
+      return {"isSuccess": true, "data": result};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> validateOtp(String code) async {
+    try {
+      final result = await httpService.request<OtpCodeResponse>(
+        '/otp/$code',
+        method: 'GET',
+        successParser: (json) => OtpCodeResponse.fromJson(json),
+      );
+
+      return {"isSuccess": true, "data": result};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> loginUser(String email, String password) async {
+    try {
+      final result = await httpService.request(
+        '/users/login',
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: {
+          'grant_type': 'password',
+          'username': email,
+          'password': password,
+          'scope': '',
+          'client_id': 'string',
+          'client_secret': 'string',
+        },
+      );
+      await TokenUtil.removeToken();
+
+      await TokenUtil.saveToken(result['access_token'], result['expires_in']);
+
+      await getUserInfoAsync();
+
       return {
-        'access_token': token,
-        'expires_in': expiresIn,
+        "isSuccess": true,
+        "data": {
+          "access_token": result['access_token'],
+          "expires_in": result['expires_in'],
+        }
       };
-    } else {
-      final errorData = json.decode(response.body);
-      print('Erro: ${errorData['message']}');
-      return null;
+    } catch (e) {
+      return _errorUtil.handleError(e);
     }
-  }  
-  Future<String?> getToken() async {
-    return await storage.read(key: 'auth_token');
-  } 
+  }
 }

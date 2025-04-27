@@ -25,7 +25,14 @@ class HttpClientService {
 
     Map<String, String> defaultHeaders = {
       'Authorization': 'Bearer $userToken',
+      'Content-Type': 'application/json'
     };
+
+    if (headers?.keys.any((key) => key.toLowerCase() == 'content-type') ??
+        false) {
+      defaultHeaders
+          .removeWhere((key, _) => key.toLowerCase() == 'content-type');
+    }
 
     final combinedHeaders = {
       ...defaultHeaders,
@@ -75,8 +82,14 @@ class HttpClientService {
         response = await http.Response.fromStream(streamedResponse);
       } else {
         if (method == "POST") {
-          response = await http.post(url,
-              headers: combinedHeaders, body: jsonEncode(body));
+          if (combinedHeaders.containsKey('Content-Type') &&
+              combinedHeaders['Content-Type'] == 'application/json') {
+            response = await http.post(url,
+                headers: combinedHeaders, body: jsonEncode(body));
+          } else {
+            response =
+                await http.post(url, headers: combinedHeaders, body: body);
+          }
         } else if (method == "PUT") {
           response = await http.put(url,
               headers: combinedHeaders, body: jsonEncode(body));
@@ -100,7 +113,8 @@ class HttpClientService {
           }
         }
 
-        final jsonResponse = jsonDecode(response.body);
+        final decoded = utf8.decode(response.bodyBytes);
+        final jsonResponse = jsonDecode(decoded);
 
         if (successParser != null) {
           return successParser(jsonResponse);
@@ -108,7 +122,8 @@ class HttpClientService {
           return jsonResponse;
         }
       } else {
-        final errorResponse = ErrorResponse.fromJson(jsonDecode(response.body));
+        final decoded = utf8.decode(response.bodyBytes);
+        final errorResponse = DetailErrorResponse.fromJson(jsonDecode(decoded));
         throw errorResponse;
       }
     } catch (e) {

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "290076135744",
+    "project_id": "game-mobile-26ab5",
+    "storage_bucket": "game-mobile-26ab5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:290076135744:android:e236d9fb7ae9a88dc96aa5",
+        "android_client_info": {
+          "package_name": "com.mycompany.projetogamequiz"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnMJi5NT_vTC9Pd7vA0AaOIxNRHz6ksl0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

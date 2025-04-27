@@ -56,7 +56,7 @@ class _Tela09HistoricoJodosWidgetState
               fillColor: FlutterFlowTheme.of(context).primaryBackground,
               icon: Icon(
                 Icons.arrow_back,
-                color: Colors.black,
+                color: FlutterFlowTheme.of(context).primaryText,
                 size: 24.0,
               ),
               onPressed: () async {
