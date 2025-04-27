@@ -5,10 +5,12 @@ import 'package:projeto_game_quiz/core/api/services/account_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_web_socket_service.dart';
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
+import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/account_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 import 'package:projeto_game_quiz/dialogs/success-dialog-widget.dart';
+import 'package:projeto_game_quiz/pages/tela13_dados_de_partida/tela13_dados_de_partida_widget.dart';
 import '/flutter_flow/flutter_flow_timer.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/instant_timer.dart';
@@ -36,6 +38,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
   InstantTimer? instantTimer;
   bool isDialogStartScheduledMatchOpen = false;
   late BuildContext currentDialogStartScheduledMatchOpenContext;
+
   @override
   void initState(BuildContext context) {
     currentDialogStartScheduledMatchOpenContext = context;
@@ -74,7 +77,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
     }
   }
 
-  Future<void> checkPlayerAlreadyRegisteredMatchAsync(
+  Future<bool> checkPlayerAlreadyRegisteredMatchAsync(
       void Function(VoidCallback fn) setState, String matchId) async {
     var result = await matchService.checkPlayerAlreadyRegisteredMatchAsync(
         matchId, user!.id);
@@ -82,13 +85,16 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
       setState(() {
         isNotRegisteredMatch = false;
       });
+      return true;
     } else {
       if (result["error"].detail.code == "ERR_PLAYER_NOT_REGISTERED_MATCH") {
         setState(() {
           isNotRegisteredMatch = true;
         });
+        return false;
       }
     }
+    return false;
   }
 
   DateTime truncateToMinute(DateTime dt) {
@@ -100,11 +106,19 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
     setState(() {});
 
     try {
-      final response = await matchService.getAllMatchAsync(true, null);
+      var _dateTime = DateTime.now();
+      final response = await matchService.getAllMatchAsync(
+          true, Status.Pendente.name.toString(), _dateTime, null);
 
       if (response['isSuccess']) {
         final List<MatchResponse> matches = response['data'];
         setState(() => matchList = matches);
+
+        for (var match in matches) {
+          bool isRegistered =
+              await checkPlayerAlreadyRegisteredMatchAsync(setState, match.id);
+          match.isUserRegistered = isRegistered;
+        }
 
         final now = truncateToMinute(DateTime.now());
 
@@ -150,12 +164,25 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
         timerMilliseconds = remaining.inMilliseconds;
       });
 
-      if (remaining.inSeconds <= 7 && !alerted && remaining.inSeconds > 0) {
-        alerted = true;
-        await _callApiBeforeMatchStart(match.id);
-      }
-      if (remaining.inSeconds <= 0) {
-        //await startScheduledSatchAsync(setState, match);
+      // if (remaining.inSeconds <= 4 && !alerted && remaining.inSeconds > 0) {
+      //   alerted = true;
+      //   await _callApiBeforeMatchStart(match.id);
+      // }
+      if (remaining.inSeconds == 0) {
+        setState(() => alerted = false);
+        var isExist =
+            await checkPlayerAlreadyRegisteredMatchAsync(setState, match.id);
+        if (isExist) {
+          Navigator.of(context!).push(
+            MaterialPageRoute(
+              builder: (_) => Tela13DadosDePartidaWidget(
+                matchId: match.id,
+                notDisplayButton: true,
+              ),
+            ),
+          );
+          return;
+        }
       }
 
       if (remaining.isNegative) {
@@ -166,20 +193,20 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
     });
   }
 
-  Future<void> _callApiBeforeMatchStart(String matchId) async {
-    try {
-      var resultNotice = await matchService.getMatchStartNoticeAsync(matchId);
-      if (!resultNotice["isSuccess"]) {
-        Warning00ErrorUtil.showDialogMessageError(
-            context,
-            resultNotice["error"].detail.message,
-            resultNotice["error"].detail.details);
-      }
-      print('API chamada com sucesso para a partida $matchId');
-    } catch (e) {
-      print('Erro ao chamar API: $e');
-    }
-  }
+  // Future<void> _callApiBeforeMatchStart(String matchId) async {
+  //   try {
+  //     var resultNotice = await matchService.getMatchStartNoticeAsync(matchId);
+  //     if (!resultNotice["isSuccess"]) {
+  //       Warning00ErrorUtil.showDialogMessageError(
+  //           context,
+  //           resultNotice["error"].detail.message,
+  //           resultNotice["error"].detail.details);
+  //     }
+  //     print('API chamada com sucesso para a partida $matchId');
+  //   } catch (e) {
+  //     print('Erro ao chamar API: $e');
+  //   }
+  // }
 
   Future<void> startScheduledSatchAsync(
       Function setState, MatchResponse match) async {

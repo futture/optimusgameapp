@@ -28,6 +28,7 @@ class MatchResponse {
   final DateTime matchStartDate;
   final DateTime endDateOfMatch;
   final RoomResponse? room;
+  bool? isUserRegistered = false;
   final List<MatchPlayerResponse>? matchPlayers;
 
   MatchResponse(
@@ -37,7 +38,8 @@ class MatchResponse {
       required this.matchStartDate,
       required this.endDateOfMatch,
       required this.room,
-      required this.matchPlayers});
+      required this.matchPlayers,
+      this.isUserRegistered});
 
   factory MatchResponse.fromJson(Map<String, dynamic> json) {
     return MatchResponse(
@@ -224,8 +226,9 @@ class ScheduledMatchStartResponse {
 
   factory ScheduledMatchStartResponse.fromJson(Map<String, dynamic> json) {
     return ScheduledMatchStartResponse(
-      error:
-          json["error"] != null ? DetailErrorResponse.fromJson(json["error"]) : null,
+      error: json["error"] != null
+          ? DetailErrorResponse.fromJson(json["error"])
+          : null,
       match:
           json["match"] != null ? MatchResponse.fromJson(json["match"]) : null,
       nextQuestion: json["nextQuestion"] != null

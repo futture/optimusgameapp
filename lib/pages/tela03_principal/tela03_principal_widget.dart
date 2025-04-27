@@ -913,7 +913,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
               width: 350.0,
               height: 80.0,
               decoration: BoxDecoration(
-                color: Color(0xFFEC8D0D),
+                color: match.isUserRegistered! ? Color.fromARGB(255, 80, 104, 70)  :Color(0xFFEC8D0D),
                 boxShadow: [
                   BoxShadow(
                     blurRadius: 4.0,

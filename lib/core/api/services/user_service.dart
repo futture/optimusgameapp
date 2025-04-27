@@ -5,10 +5,26 @@ import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/user_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/otp_code_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
+import 'package:contacts_service/contacts_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class UserService {
   ErrorUtil _errorUtil = ErrorUtil();
   final httpService = HttpClientService();
+
+  Future<List<Contact>> fetchContactsAsync() async {
+    var status = await Permission.contacts.status;
+    if (!status.isGranted) {
+      status = await Permission.contacts.request();
+      if (!status.isGranted) {
+        print("Permissão negada para acessar contatos");
+        return List.empty();
+      }
+    }
+
+    Iterable<Contact> contacts = await ContactsService.getContacts();
+    return contacts.toList();
+  }
 
   Future<Map<String, dynamic>> createFcmTokenAsync(
       String userId, CreateFcmTokenRequest request) async {
@@ -24,7 +40,7 @@ class UserService {
     }
   }
 
-  Future<dynamic> getPlayerByIdAsync(String playerId)  async{
+  Future<dynamic> getPlayerByIdAsync(String playerId) async {
     try {
       final successResult = await httpService.request<UserResponse>(
         '/users/$playerId',
@@ -37,7 +53,7 @@ class UserService {
     }
   }
 
-  Future<dynamic> getUserByPhoneNumbrAsync(String phoneNumber)  async{
+  Future<dynamic> getUserByPhoneNumbrAsync(String phoneNumber) async {
     try {
       final successResult = await httpService.request<UserResponse>(
         '/users/phone-number/$phoneNumber',
@@ -49,7 +65,6 @@ class UserService {
       return _errorUtil.handleError(e);
     }
   }
-
 
   Future<dynamic> getUserInfoAsync() async {
     try {

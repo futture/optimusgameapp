@@ -14,8 +14,10 @@ export 'tela13_dados_de_partida_model.dart';
 class Tela13DadosDePartidaWidget extends StatefulWidget {
   final String? matchId;
   final bool? recebeuNotificaca;
+  final bool? notDisplayButton;
+
   const Tela13DadosDePartidaWidget(
-      {super.key, this.matchId, this.recebeuNotificaca});
+      {super.key, this.matchId, this.recebeuNotificaca, this.notDisplayButton});
 
   static String routeName = 'Tela13DadosDePartida';
   static String routePath = '/tela13DadosDePartida';
@@ -157,7 +159,9 @@ class _Tela13DadosDePartidaWidgetState
                                           ),
                                         ),
                                         Text(
-                                          'Partida de Trivia',
+                                          widget.notDisplayButton == true
+                                              ? 'SUPER PARTIDA'
+                                              : 'Partida de Trivia',
                                           style: FlutterFlowTheme.of(context)
                                               .headlineSmall
                                               .override(
@@ -165,6 +169,16 @@ class _Tela13DadosDePartidaWidgetState
                                                 letterSpacing: 0.0,
                                               ),
                                         ),
+                                        // if (widget.notDisplayButton == true)
+                                        //   Text(
+                                        //     'Estamos a preparar a partida, aguarde.',
+                                        //     style: FlutterFlowTheme.of(context)
+                                        //         .labelMedium
+                                        //         .override(
+                                        //           fontFamily: 'Inter Tight',
+                                        //           letterSpacing: 0.0,
+                                        //         ),
+                                        //   ),
                                       ]
                                           .divide(SizedBox(width: 10.0))
                                           .addToStart(SizedBox(width: 0.0))
@@ -352,49 +366,52 @@ class _Tela13DadosDePartidaWidgetState
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        FFButtonWidget(
-                                          onPressed: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (context) {
-                                                return Dialog(
-                                                  backgroundColor:
-                                                      Colors.transparent,
-                                                  insetPadding:
-                                                      EdgeInsets.all(24),
-                                                  child:
-                                                      Warning04ReducaoDeSaldoWidget(
-                                                          matchInfo: matchInfo,
-                                                          recebeuNotificaca:
-                                                              true),
-                                                );
-                                              },
-                                            );
-                                          },
-                                          text: 'Aceitar ',
-                                          options: FFButtonOptions(
-                                            width: 130.0,
-                                            height: 45.0,
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    16.0, 0.0, 16.0, 0.0),
-                                            iconPadding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 0.0, 0.0, 0.0),
-                                            color: Color(0xFF00C804),
-                                            textStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmall
-                                                    .override(
-                                                      fontFamily: 'Inter Tight',
-                                                      color: Colors.black,
-                                                      letterSpacing: 0.0,
-                                                    ),
-                                            elevation: 0.0,
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
+                                        if (widget.notDisplayButton == null ||
+                                            widget.notDisplayButton == false)
+                                          FFButtonWidget(
+                                            onPressed: () {
+                                              showDialog(
+                                                context: context,
+                                                builder: (context) {
+                                                  return Dialog(
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                    insetPadding:
+                                                        EdgeInsets.all(24),
+                                                    child:
+                                                        Warning04ReducaoDeSaldoWidget(
+                                                            matchInfo:
+                                                                matchInfo,
+                                                            recebeuNotificaca:
+                                                                true),
+                                                  );
+                                                },
+                                              );
+                                            },
+                                            text: 'Aceitar ',
+                                            options: FFButtonOptions(
+                                              width: 130.0,
+                                              height: 45.0,
+                                              padding: EdgeInsetsDirectional
+                                                  .fromSTEB(
+                                                      16.0, 0.0, 16.0, 0.0),
+                                              iconPadding: EdgeInsetsDirectional
+                                                  .fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                              color: Color(0xFF00C804),
+                                              textStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .titleSmall
+                                                      .override(
+                                                        fontFamily:
+                                                            'Inter Tight',
+                                                        color: Colors.black,
+                                                        letterSpacing: 0.0,
+                                                      ),
+                                              elevation: 0.0,
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0),
+                                            ),
                                           ),
-                                        ),
                                         FFButtonWidget(
                                           onPressed: () {
                                             Navigator.of(context)

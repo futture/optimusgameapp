@@ -54,7 +54,11 @@ class Tela15SalaCustomizadaViewModel
   MatchWebSocketService? _matchWebSocketService;
   List<String> playerIds = [];
 
+  List<String> phoneNumbers = [];
+
   VoidCallback? onWaitingPlayersCallback;
+
+  Map<String, String> listContacts = {};
 
   String? _validarCampo(BuildContext context, String? val, String campo) {
     if (val == null || val.isEmpty) {
@@ -342,6 +346,7 @@ class Tela15SalaCustomizadaViewModel
         actions: [
           TextButton(
             onPressed: () async {
+              Navigator.of(currentShowWaitingDialog).pop();
               await leaveTheMatchAsync(context);
               _matchWebSocketService?.disconnect();
               isShowWaitingDialogOpen = false;
@@ -354,6 +359,8 @@ class Tela15SalaCustomizadaViewModel
   }
 
   Future<void> addUser(String phoneNumber, setState) async {
+    phoneNumber = phoneNumber.replaceAll("+244", "");
+
     await getPlayerByPhoneNumberAsync(phoneNumber, setState);
     if (user == null) return;
     final nome = user?.name ?? 'Usuário Desconhecido';
@@ -369,5 +376,22 @@ class Tela15SalaCustomizadaViewModel
         "Numero de jogador atingido",
       );
     }
+  }
+
+  Future<void> fetchContactsAsync(Function setState) async {
+    var contacts = await userService.fetchContactsAsync();
+
+    for (var e in contacts) {
+      String phone = (e.phones?.isNotEmpty ?? false)
+          ? e.phones!.first.value!.replaceAll(RegExp(r'\s+|\-|\(|\)'), '')
+          : '';
+
+      String name = e.displayName ?? 'Sem Nome';
+
+      if (phone.isNotEmpty) {
+        listContacts[phone] = name;
+      }
+    }
+    setState(() {});
   }
 }

@@ -1,7 +1,4 @@
-import 'package:projeto_game_quiz/flutter_flow/flutter_flow_timer.dart';
 import 'package:projeto_game_quiz/pages/tela15_sala_customizada/tela15_sala_customizada_widget.dart';
-import 'package:stop_watch_timer/stop_watch_timer.dart';
-
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';

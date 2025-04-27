@@ -1,5 +1,7 @@
 enum TrofeuTipo { ouro, prata, bronze, perdedor }
 
+enum Status {Pendente}
+
 class CreateRoomRequest {
   final String nameRoom;
   final bool isCustomized;

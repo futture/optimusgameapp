@@ -6,6 +6,7 @@ import 'package:projeto_game_quiz/core/api/services/match_web_socket_service.dar
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
+import 'package:projeto_game_quiz/handlers/notification_handler.dart';
 import 'package:projeto_game_quiz/index.dart';
 
 import '/flutter_flow/flutter_flow_util.dart';
@@ -30,6 +31,7 @@ class Warning04ReducaoDeSaldoModel
   int numberOfPlayers = 0;
   bool isWaitingPlayers = false;
   VoidCallback? onStateUpdate;
+  final NotificationHandler _notificationHandler = NotificationHandler();
 
   @override
   void initState(BuildContext context) {
@@ -59,7 +61,11 @@ class Warning04ReducaoDeSaldoModel
     if (result["isSuccess"] && subscribe == null) {
       await getWebSocketWaitForPlayerAsync(recebeuNotificaca);
       onStateUpdate?.call();
-    } else {
+    } 
+    else if(result["isSuccess"] && subscribe == true){
+      await _notificationHandler.subscribeToMatchTopic("START_MATCH", matchInfo.id);
+    }
+    else {
       if (result.containsKey("error")) {
         Warning00ErrorUtil.showDialogMessageError(context,
             result["error"].detail.message, result["error"].detail.details);

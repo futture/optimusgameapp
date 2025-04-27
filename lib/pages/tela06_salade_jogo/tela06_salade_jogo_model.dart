@@ -33,6 +33,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   bool isLoading = true;
   bool hasStarted = false;
   int secondsRemaining = 10;
+  int elapsedSeconds = 0;
   bool isDialogOpen = false;
   bool gameFinished = false;
   bool isButtonDisabled = false;
@@ -40,6 +41,8 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   bool isBtnEndGameManually = false;
   int questionsAlreadyPresented = 0;
   int? playersConnected = 0;
+  int repeatedQuestionAttempts = 0;
+  final int maxRepeatedAttempts = 3;
   bool isDialogFinishingMatchOpen = false;
 
   String timerValue = StopWatchTimer.getDisplayTime(
@@ -57,7 +60,9 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   late QuestionResponse question;
 
   QuestionWebSocketService? _questionWebSocketService;
+  Timer? countupTimer;
   Timer? countdownTimer;
+  Set<String> shownQuestionIds = {};
   late BuildContext currentContext;
   late BuildContext currentDialogFinishingMatchOpenContext;
 
@@ -77,7 +82,10 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
     final timeToRespond =
         matchInfo?.room?.roomConfiguration?.timeToRespond ?? 10;
     secondsRemaining = timeToRespond;
+    elapsedSeconds = 0;
+
     countdownTimer?.cancel();
+    countupTimer?.cancel();
 
     countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
       if (--secondsRemaining == 0) {
@@ -85,6 +93,12 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
         await sendUserResponseAsync("", setState);
       }
       setState(() {});
+    });
+
+    countupTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (++elapsedSeconds == timeToRespond) {
+        timer.cancel();
+      }
     });
   }
 
@@ -103,7 +117,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
         matchId: matchInfo!.id,
         questionId: question.id,
         optionAnswerId: optionAnswerId,
-        responseTimeInSecond: secondsRemaining,
+        responseTimeInSecond: elapsedSeconds,
       ),
     );
 
@@ -114,12 +128,13 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
           result["error"].detail.message,
           result["error"].detail.details,
         );
-      }
-      else{
+      } else {
         //TODO logica para forçar a proxima questão.
-        var forceNextQuestion = await _questionService.nextQuestionMatchAsync(matchInfo!.id);
-        if(forceNextQuestion["isSuccess"]){
-          await fetchNextQuestionMatchAsync(setState, forceNextQuestion["data"]);
+        var forceNextQuestion =
+            await _questionService.nextQuestionMatchAsync(matchInfo!.id);
+        if (forceNextQuestion["isSuccess"]) {
+          await fetchNextQuestionMatchAsync(
+              setState, forceNextQuestion["data"]);
         }
       }
     } else {
@@ -132,6 +147,45 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
     QuestionResponse? nextQuestion,
   ) async {
     if (userId == null || userId == "") await getUserIdAsync(setState);
+
+    var numberTimesDisplayed =
+        shownQuestionIds.where((e) => e == nextQuestion!.id);
+    while (numberTimesDisplayed.length > 0) {
+      if (numberTimesDisplayed.length > 1) {
+        countdownTimer?.cancel();
+        _questionWebSocketService?.disconnect();
+
+        Warning00ErrorUtil.showDialogMessageError(
+          context,
+          "Erro ao carregar nova pergunta",
+          "Detectamos perguntas repetidas consecutivamente. A partida será finalizada.",
+        );
+
+        Navigator.of(context!).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => Tela03PrincipalWidget(),
+          ),
+        );
+        return;
+      }
+
+      var forceNextQuestion =
+          await _questionService.nextQuestionMatchAsync(matchInfo!.id);
+
+      if (!forceNextQuestion["isSuccess"]) {
+        // Warning00ErrorUtil.showDialogMessageError(
+        //   context,
+        //   forceNextQuestion["error"].detail.message,
+        //   forceNextQuestion["error"].detail.details,
+        // );
+        return;
+      }
+
+      nextQuestion = forceNextQuestion["data"];
+    }
+
+    repeatedQuestionAttempts = 0;
+    shownQuestionIds.add(nextQuestion!.id);
 
     setState(() {
       isLoading = true;
@@ -289,6 +343,8 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
       {dynamic gameResultFromBackend}) async {
     gameFinished = true;
     countdownTimer?.cancel();
+    countupTimer?.cancel();
+    shownQuestionIds.clear();
     closeDialogWaitingPlayer();
     _questionWebSocketService?.disconnect();
 
