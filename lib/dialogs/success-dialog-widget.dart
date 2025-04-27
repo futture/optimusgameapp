@@ -141,3 +141,34 @@ class _SuccessDialogWidgetState extends State<SuccessDialogWidget>
     );
   }
 }
+
+class SuccessDialogWidgetUtil {
+  static Future<void> showDialogMessageSuccess(
+      context, String title, String description, void Function()? func) async {
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          elevation: 0,
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          alignment: AlignmentDirectional(0.0, 0.0)
+              .resolve(Directionality.of(context)),
+          child: GestureDetector(
+            onTap: () {
+              FocusScope.of(dialogContext).unfocus();
+              FocusManager.instance.primaryFocus?.unfocus();
+            },
+            child: SuccessDialogWidget(
+              message: title,
+              onOk: () {
+                Navigator.of(dialogContext).pop();
+                func!();
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

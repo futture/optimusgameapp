@@ -12,6 +12,8 @@ import 'flutter_flow/internationalization.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
+  await FirebaseMessaging.instance.subscribeToTopic('START_MATCH');
+
   print('Handling a background message: ${message.messageId}');
 }
 
@@ -83,6 +85,7 @@ class _MyAppState extends State<MyApp> {
     _notificationHandler.setupNotificationHandler();
     _appStateNotifier = AppStateNotifier.instance;
     _router = createRouter(_appStateNotifier);
+
   }
 
   void setLocale(String language) {

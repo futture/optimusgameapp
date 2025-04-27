@@ -1,5 +1,3 @@
-import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
-
 import '/flutter_flow/flutter_flow_button_tabbar.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -24,7 +22,6 @@ class Tela12VitoriaViewWidget extends StatefulWidget {
 class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
     with TickerProviderStateMixin {
   late Tela12VitoriaViewModel _model;
-  late MatchResultResponse? _matchResultInfo;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -38,7 +35,6 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
       length: 3,
       initialIndex: 0,
     )..addListener(() => safeSetState(() {}));
-    _matchResultInfo = widget.gameResultInfo;
   }
 
   @override

@@ -234,6 +234,7 @@ class _Modal04ListadeSalaWidgetState extends State<Modal04ListadeSalaWidget> {
                   ),
                 ),
               ),
+              
               Align(
                 alignment: AlignmentDirectional(0.0, 0.0),
                 child: Container(
@@ -335,6 +336,7 @@ class _Modal04ListadeSalaWidgetState extends State<Modal04ListadeSalaWidget> {
                   ),
                 ),
               ),
+           
             ].divide(SizedBox(height: 5.0)).addToStart(SizedBox(height: 20.0)),
           ),
         ),

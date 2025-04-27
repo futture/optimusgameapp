@@ -22,7 +22,7 @@ class CreateUserRequest {
   final String email;
   final String phone_number;
   final String phone_number_mask;
-  final String role_id;
+  final RoleEnum role;
   final String password;
 
   CreateUserRequest({
@@ -30,16 +30,21 @@ class CreateUserRequest {
     required this.email,
     required this.phone_number,
     required this.phone_number_mask,
-    required this.role_id,
+    required this.role,
     required this.password,
-  });
-
+  }); 
   Map<String, dynamic> toJson() => {
         "name": name,
         "email": email,
         "phone_number": phone_number,
         "phone_number_mask": phone_number_mask,
-        "role_id": role_id,
-        "password": password
+        "role": role.name.toString(),
+        "password": password,
       };
 }
+
+enum RoleEnum {
+  JOGADOR,
+  ADMIN,
+}
+

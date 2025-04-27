@@ -1,6 +1,7 @@
 import 'package:projeto_game_quiz/components/warnings/warning04_reducao_de_saldo/warning04_reducao_de_saldo_widget.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
+import 'package:projeto_game_quiz/pages/tela03_principal/tela03_principal_widget.dart';
 
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -13,8 +14,10 @@ export 'tela13_dados_de_partida_model.dart';
 class Tela13DadosDePartidaWidget extends StatefulWidget {
   final String? matchId;
   final bool? recebeuNotificaca;
+  final bool? notDisplayButton;
+
   const Tela13DadosDePartidaWidget(
-      {super.key, this.matchId, this.recebeuNotificaca});
+      {super.key, this.matchId, this.recebeuNotificaca, this.notDisplayButton});
 
   static String routeName = 'Tela13DadosDePartida';
   static String routePath = '/tela13DadosDePartida';
@@ -156,7 +159,9 @@ class _Tela13DadosDePartidaWidgetState
                                           ),
                                         ),
                                         Text(
-                                          'Partida de Trivia',
+                                          widget.notDisplayButton == true
+                                              ? 'SUPER PARTIDA'
+                                              : 'Partida de Trivia',
                                           style: FlutterFlowTheme.of(context)
                                               .headlineSmall
                                               .override(
@@ -164,6 +169,16 @@ class _Tela13DadosDePartidaWidgetState
                                                 letterSpacing: 0.0,
                                               ),
                                         ),
+                                        // if (widget.notDisplayButton == true)
+                                        //   Text(
+                                        //     'Estamos a preparar a partida, aguarde.',
+                                        //     style: FlutterFlowTheme.of(context)
+                                        //         .labelMedium
+                                        //         .override(
+                                        //           fontFamily: 'Inter Tight',
+                                        //           letterSpacing: 0.0,
+                                        //         ),
+                                        //   ),
                                       ]
                                           .divide(SizedBox(width: 10.0))
                                           .addToStart(SizedBox(width: 0.0))
@@ -197,7 +212,7 @@ class _Tela13DadosDePartidaWidgetState
                                               ),
                                         ),
                                         Text(
-                                          '${matchInfo!.matchConfiguration!.numberOfPlayers}',
+                                          '${matchInfo!.room!.roomConfiguration!.numberOfPlayers}',
                                           style: FlutterFlowTheme.of(context)
                                               .bodyLarge
                                               .override(
@@ -238,7 +253,7 @@ class _Tela13DadosDePartidaWidgetState
                                               ),
                                         ),
                                         Text(
-                                          '${(matchInfo!.matchConfiguration!.minimumAmountToPlay * matchInfo!.matchConfiguration!.numberOfPlayers) * matchInfo!.matchConfiguration!.premiumRate}Kz',
+                                          '${(matchInfo!.room!.roomConfiguration!.minimumAmountToPlay * matchInfo!.room!.roomConfiguration!.numberOfPlayers) * matchInfo!.room!.roomConfiguration!.premiumRate}Kz',
                                           style: FlutterFlowTheme.of(context)
                                               .bodyLarge
                                               .override(
@@ -279,7 +294,7 @@ class _Tela13DadosDePartidaWidgetState
                                               ),
                                         ),
                                         Text(
-                                          '${matchInfo!.matchConfiguration!.minimumAmountToPlay}Kz',
+                                          '${matchInfo!.room!.roomConfiguration!.minimumAmountToPlay}Kz',
                                           style: FlutterFlowTheme.of(context)
                                               .bodyLarge
                                               .override(
@@ -320,7 +335,7 @@ class _Tela13DadosDePartidaWidgetState
                                               ),
                                         ),
                                         Text(
-                                          '${matchInfo!.matchConfiguration!.numberOfQuestions * matchInfo!.matchConfiguration!.timeToRespond}s',
+                                          '${matchInfo!.room!.roomConfiguration!.numberOfQuestions * matchInfo!.room!.roomConfiguration!.timeToRespond}s',
                                           style: FlutterFlowTheme.of(context)
                                               .bodyLarge
                                               .override(
@@ -351,52 +366,61 @@ class _Tela13DadosDePartidaWidgetState
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        FFButtonWidget(
-                                          onPressed: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (context) {
-                                                return Dialog(
-                                                  backgroundColor:
-                                                      Colors.transparent,
-                                                  insetPadding:
-                                                      EdgeInsets.all(24),
-                                                  child:
-                                                      Warning04ReducaoDeSaldoWidget(
-                                                          matchInfo: matchInfo,
-                                                          recebeuNotificaca:
-                                                              true),
-                                                );
-                                              },
-                                            );
-                                          },
-                                          text: 'Aceitar ',
-                                          options: FFButtonOptions(
-                                            width: 130.0,
-                                            height: 45.0,
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    16.0, 0.0, 16.0, 0.0),
-                                            iconPadding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 0.0, 0.0, 0.0),
-                                            color: Color(0xFF00C804),
-                                            textStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmall
-                                                    .override(
-                                                      fontFamily: 'Inter Tight',
-                                                      color: Colors.black,
-                                                      letterSpacing: 0.0,
-                                                    ),
-                                            elevation: 0.0,
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
+                                        if (widget.notDisplayButton == null ||
+                                            widget.notDisplayButton == false)
+                                          FFButtonWidget(
+                                            onPressed: () {
+                                              showDialog(
+                                                context: context,
+                                                builder: (context) {
+                                                  return Dialog(
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                    insetPadding:
+                                                        EdgeInsets.all(24),
+                                                    child:
+                                                        Warning04ReducaoDeSaldoWidget(
+                                                            matchInfo:
+                                                                matchInfo,
+                                                            recebeuNotificaca:
+                                                                true),
+                                                  );
+                                                },
+                                              );
+                                            },
+                                            text: 'Aceitar ',
+                                            options: FFButtonOptions(
+                                              width: 130.0,
+                                              height: 45.0,
+                                              padding: EdgeInsetsDirectional
+                                                  .fromSTEB(
+                                                      16.0, 0.0, 16.0, 0.0),
+                                              iconPadding: EdgeInsetsDirectional
+                                                  .fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                              color: Color(0xFF00C804),
+                                              textStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .titleSmall
+                                                      .override(
+                                                        fontFamily:
+                                                            'Inter Tight',
+                                                        color: Colors.black,
+                                                        letterSpacing: 0.0,
+                                                      ),
+                                              elevation: 0.0,
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0),
+                                            ),
                                           ),
-                                        ),
                                         FFButtonWidget(
                                           onPressed: () {
-                                            print('Button pressed ...');
+                                            Navigator.of(context)
+                                                .pushReplacement(
+                                              MaterialPageRoute(
+                                                builder: (_) =>
+                                                    Tela03PrincipalWidget(),
+                                              ),
+                                            );
                                           },
                                           text: 'Cancelar',
                                           options: FFButtonOptions(

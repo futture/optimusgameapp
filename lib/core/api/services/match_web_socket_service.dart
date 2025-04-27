@@ -1,35 +1,36 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:projeto_game_quiz/core/api/common/web_socket_api.dart';
-import 'package:projeto_game_quiz/core/api/services/match_service.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
-import 'package:projeto_game_quiz/pages/tela06_salade_jogo/tela06_salade_jogo_widget.dart';
 
 class MatchWebSocketService {
-  final String matchId;
-  final MatchResponse matchInfo;
+  final String? matchId;
+  final MatchResponse? matchInfo;
+  final String? userId;
   final BuildContext context;
 
   WebSocketService? _webSocketService;
-  late final MatchService _matchService = MatchService();
-
   void Function(MatchTotalNumberPlayerResponse matchInfo)? onMatchUpdate;
   void Function(dynamic error)? onError;
   void Function()? onDone;
-  void Function()? onOther;
+  void Function(MatchTotalNumberPlayerResponse matchInfo)? onOther;
+  void Function(MatchTotalNumberPlayerResponse)? onPlayersUpdate;
+  void Function(ScheduledMatchStartResponse)? onScheduledMatchUpdate;
 
   MatchWebSocketService(
-      {required this.matchId,
+      {this.matchId,
+      this.userId,
       required this.context,
-      required this.matchInfo,
+      this.matchInfo,
       this.onMatchUpdate,
       this.onError,
       this.onDone,
-      this.onOther});
+      this.onOther,
+      this.onPlayersUpdate,
+      this.onScheduledMatchUpdate});
 
   void connect() {
-    final url = '/wait-for-players/$matchId';
+    final url = '/wait-for-players/match/$matchId/user/$userId';
 
     _webSocketService = WebSocketService(
       url: url,
@@ -39,11 +40,10 @@ class MatchWebSocketService {
             MatchTotalNumberPlayerResponse.fromJson(decodedMessage);
 
         onMatchUpdate?.call(matchUpdate);
+        onPlayersUpdate?.call(matchUpdate);
 
-        if (matchUpdate.playersConnected >= matchUpdate.minPlayers) {
-          await startMatchAsync();
-
-          if (onOther != null) onOther!();
+        if (matchUpdate.isReady) {
+          if (onOther != null) onOther!(matchUpdate);
         }
       },
       onError: onError,
@@ -53,26 +53,24 @@ class MatchWebSocketService {
     _webSocketService?.connect();
   }
 
-  Future<void> startMatchAsync() async {
-    try {
-      final resultStartMatch =
-          await _matchService.startMatchAsync(matchInfo.id);
+  void connectStartScheduledSatch() {
+    final url = '/start-scheduled-match/match/$matchId/player/$userId';
 
-      if (resultStartMatch["isSuccess"]) {
-        if (!context.mounted) return;
-        Navigator.of(context, rootNavigator: true).pop();
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => Tela06SaladeJogoWidget(matchInfo: matchInfo),
-          ),
-        );
-        print("Partida iniciada com sucesso!");
-      } else {
-        print("Falha ao iniciar a partida: ${resultStartMatch["message"]}");
-      }
-    } catch (e) {
-      print("Erro ao iniciar a partida: $e");
-    }
+    _webSocketService = WebSocketService(
+      url: url,
+      onMessageReceived: (message) async {
+        var decodedMessage = jsonDecode(message);
+        var scheduledMatch =
+            ScheduledMatchStartResponse.fromJson(decodedMessage);
+
+        if (onScheduledMatchUpdate != null)
+          onScheduledMatchUpdate!(scheduledMatch);
+      },
+      onError: onError,
+      onDone: onDone,
+    );
+
+    _webSocketService?.connect();
   }
 
   void disconnect() {

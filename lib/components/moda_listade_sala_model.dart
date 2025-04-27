@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warning00_campo_vazio_widget.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_web_socket_service.dart';
@@ -16,6 +18,9 @@ import 'package:flutter/material.dart';
 class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
   bool isShowWaitingDialogOpen = false;
   late BuildContext currentShowWaitingDialog;
+  Timer? startTimeoutTimer;
+  bool isLoadingRooms = false;
+  final Duration timeoutDuration = Duration(seconds: 20);
 
   /// State fields
   final timerInitialTimeMs = 60000;
@@ -32,11 +37,12 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
   late BuildContext context;
   String userId = "";
   int minPlayers = 1;
+  int numberOfPlayers = 1;
   String matchId = "";
   MatchResponse? matchInfo;
   int playersConnected = 0;
   bool isWaitingPlayers = false;
-
+  List<RoomResponse> rooms = List.empty();
   MatchWebSocketService? _matchWebSocketService;
 
   /// Callbacks externos
@@ -50,6 +56,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
   @override
   void dispose() {
     timerController.dispose();
+    startTimeoutTimer?.cancel();
     _matchWebSocketService?.disconnect();
   }
 
@@ -58,42 +65,38 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
     callback?.call();
   }
 
-  Future<void> createMatch(
-      int numberOfPlayers, int numberOfQuestions, String nameRoom) async {
-    const int timeToRespond = 10;
+  Future<void> getRoomAsync(void Function(VoidCallback) setState) async {
+    setState(() {
+      isLoadingRooms = true;
+    });
+    final resultRoom = await roomService.getAllRoomAsync(false, false);
 
+    if (resultRoom["isSuccess"] == true) {
+      final fetchedRooms = resultRoom["data"];
+      setState(() {
+        rooms = fetchedRooms;
+        isLoadingRooms = false;
+      });
+    } else {
+      final error = resultRoom["error"].detail;
+      await Warning00ErrorUtil.showDialogMessageError(
+        context,
+        error.message,
+        error.details,
+      );
+    }
+  }
+
+  Future<void> createMatch(int numberOfPlayers, int numberOfQuestions,
+      int timeToRespond, String roomId) async {
     try {
-      final roomResult = await roomService.createRoomAsync(
-        CreateRoomRequest(nameRoom: nameRoom),
-      );
-
-      if (roomResult["isSuccess"] != true) {
-        await Warning00ErrorUtil.showDialogMessageError(
-          context,
-          roomResult["error"].detail.message,
-          roomResult["error"].detail.details,
-        );
-        return;
-      }
-
-      final String createdRoomId = roomResult["data"]["id"];
       final matchRequest = CreateMatchRequest(
-        isEvent: false,
-        isSingleWinner: true,
-        timeToRespond: timeToRespond,
-        numberOfPlayers: numberOfPlayers,
-        matchStartDate: DateTime.now(),
-        endDateOfMatch: DateTime.now()
-            .add(Duration(seconds: timeToRespond * numberOfQuestions)),
-        numberOfQuestions: numberOfQuestions,
-        numberOfAnswerOptions: 5,
-        minimumNumberOfPlayers: numberOfPlayers,
-        minimumAmountToPlay: 500,
-        premiumRate: 0.75,
-      );
+          matchStartDate: DateTime.now(),
+          endDateOfMatch: DateTime.now()
+              .add(Duration(seconds: timeToRespond * numberOfQuestions)));
 
       final matchResult =
-          await matchService.createMatchAsync(createdRoomId, matchRequest);
+          await matchService.createMatchAsync(roomId, matchRequest);
 
       if (matchResult["isSuccess"] != true) {
         await Warning00ErrorUtil.showDialogMessageError(
@@ -120,7 +123,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
         return;
       }
 
-      await getMatchByMatchIdAsyncdd(matchId);
+      await getMatchByMatchIdAsync();
       await getWebSocketWaitForPlayerAsync();
     } catch (e) {
       print("Erro inesperado ao criar partida: $e");
@@ -134,27 +137,13 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
     }
   }
 
-  Future<void> getMatchByMatchIdAsyncdd(matchId) async {
-    final resultMatch = await matchService.getMatchByMatchIdAsync(matchId);
-    if (resultMatch["isSuccess"]) {
-      matchInfo = resultMatch["data"];
-      // Navigator.of(context).push(
-      //   MaterialPageRoute(
-      //     builder: (_) => Tela06SaladeJogoWidget(
-      //       matchInfo: matchInfo,
-      //       recebeuNotificaca: false,
-      //     ),
-      //   ),
-      // );
-    }
-  }
-
   Future<void> getWebSocketWaitForPlayerAsync() async {
     _matchWebSocketService = MatchWebSocketService(
       matchId: matchId,
+      userId: userId,
       context: context,
       matchInfo: matchInfo!,
-      onOther: () {
+      onOther: (match) {
         if (!isWaitingPlayers) return;
 
         isWaitingPlayers = false;
@@ -174,6 +163,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
               builder: (_) => Tela06SaladeJogoWidget(
                 matchInfo: matchInfo,
                 recebeuNotificaca: false,
+                nextQuestion: match.nextQuestion,
               ),
             ),
           );
@@ -182,6 +172,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
       onMatchUpdate: (match) {
         playersConnected = match.playersConnected;
         minPlayers = match.minPlayers;
+        numberOfPlayers = match.numberOfPlayers;
         isWaitingPlayers = true;
         showWaitingDialog();
       },
@@ -190,6 +181,20 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
     );
 
     _matchWebSocketService?.connect();
+  }
+
+  Future<void> leaveTheMatchAsync(context) async {
+    var result = await matchService.leaveTheMatchAsync(matchId, userId);
+    if (result["isSuccess"]) {
+      Navigator.of(context).pop();
+      _matchWebSocketService?.disconnect();
+    } else {
+      await Warning00ErrorUtil.showDialogMessageError(
+        context,
+        result["error"].detail.message,
+        result["error"].detail.details,
+      );
+    }
   }
 
   void showWaitingDialog() {
@@ -209,14 +214,14 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
             CircularProgressIndicator(),
             SizedBox(height: 16),
             Text(
-              "Esperando participantes conectarem, Participante conectados: $playersConnected / $minPlayers",
+              "Esperando participantes conectarem, Participante conectados: $playersConnected / $numberOfPlayers",
             ),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
+            onPressed: () async {
+              await leaveTheMatchAsync(context);
               _matchWebSocketService?.disconnect();
               isShowWaitingDialogOpen = false;
             },

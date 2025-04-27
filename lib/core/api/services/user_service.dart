@@ -1,5 +1,5 @@
-import 'dart:convert';
-
+import 'package:flutter/foundation.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:projeto_game_quiz/core/api/common/http_client_api.dart';
 import 'package:projeto_game_quiz/core/api/utils/error_util.dart';
 import 'package:projeto_game_quiz/core/api/utils/token_util.dart';
@@ -12,6 +12,23 @@ class UserService {
   ErrorUtil _errorUtil = ErrorUtil();
   final httpService = HttpClientService();
 
+  Future<List<Contact>> fetchContactsAsync() async {
+    if (!kIsWeb) {
+      bool permissionGranted = await FlutterContacts.requestPermission();
+
+      if (!permissionGranted) {
+        print("Permissão negada para acessar contatos");
+        return List.empty();
+      }
+
+      final fetchedContacts =
+          await FlutterContacts.getContacts(withProperties: true);
+
+      return fetchedContacts;
+    }
+    return List.empty();
+  }
+
   Future<Map<String, dynamic>> createFcmTokenAsync(
       String userId, CreateFcmTokenRequest request) async {
     try {
@@ -21,6 +38,32 @@ class UserService {
         body: request.toJson(),
       );
       return {"isSuccess": true, "data": result};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
+  Future<dynamic> getPlayerByIdAsync(String playerId) async {
+    try {
+      final successResult = await httpService.request<UserResponse>(
+        '/users/$playerId',
+        method: 'GET',
+        successParser: (json) => UserResponse.FromJson(json),
+      );
+      return {"isSuccess": true, "data": successResult};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
+  Future<dynamic> getUserByPhoneNumbrAsync(String phoneNumber) async {
+    try {
+      final successResult = await httpService.request<UserResponse>(
+        '/users/phone-number/$phoneNumber',
+        method: 'GET',
+        successParser: (json) => UserResponse.FromJson(json),
+      );
+      return {"isSuccess": true, "data": successResult};
     } catch (e) {
       return _errorUtil.handleError(e);
     }
@@ -46,18 +89,15 @@ class UserService {
     try {
       final obj = userRequest.toJson();
       print(obj);
-      final response = await httpService.request(
-        '/users/register',
-        method: 'POST',
-        body: obj
-      );
-      
+      final response = await httpService.request('/users/register',
+          method: 'POST', body: obj);
+
       if (response != null && response["id"] != null) {
-      final userResponse = UserResponse.FromJson(response);
-      return {"isSuccess": true, "data": userResponse};
-    } else {
-      return {"isSuccess": false, "message": "Erro ao criar usuário"};
-    }
+        final userResponse = UserResponse.FromJson(response);
+        return {"isSuccess": true, "data": userResponse};
+      } else {
+        return {"isSuccess": false, "message": "Erro ao criar usuário"};
+      }
     } catch (e) {
       return {"isSuccess": false, "message": e.toString()};
     }

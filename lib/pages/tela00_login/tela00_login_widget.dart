@@ -1,5 +1,4 @@
-import 'package:projeto_game_quiz/pages/tela01_criar_conta/tela01_criar_conta_widget.dart'; 
-
+import 'package:projeto_game_quiz/pages/tela01_criar_conta/tela01_criar_conta_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart'; 

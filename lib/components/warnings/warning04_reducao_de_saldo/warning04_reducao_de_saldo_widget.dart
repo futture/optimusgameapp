@@ -9,9 +9,11 @@ class Warning04ReducaoDeSaldoWidget extends StatefulWidget {
   final bool? subscribe;
   final dynamic matchInfo;
   final bool? recebeuNotificaca;
+  final VoidCallback? onConfirmed;
+
 
   const Warning04ReducaoDeSaldoWidget(
-      {super.key, this.matchInfo, this.subscribe, this.recebeuNotificaca});
+      {super.key, this.matchInfo, this.subscribe, this.recebeuNotificaca, this.onConfirmed});
 
   @override
   State<Warning04ReducaoDeSaldoWidget> createState() =>
@@ -42,29 +44,6 @@ class _Warning04ReducaoDeSaldoWidgetState
 
   @override
   Widget build(BuildContext context) {
-    if (_model.isWaitingPlayers && widget.subscribe == null) {
-      Future.delayed(Duration.zero, () {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (_) => AlertDialog(
-            title: Text("Aguardando jogadores..."),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text(
-                  'Jogadores conectados: ${_model.playersConnected} / ${_model.minPlayers}',
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        );
-      });
-    }
-
     return Container(
       width: 280.0,
       height: 210.0,
@@ -93,7 +72,7 @@ class _Warning04ReducaoDeSaldoWidgetState
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.0),
             child: Text(
-              'Atenção: ao se inscrever nesta sala será reduzido do seu saldo a taxa de ${_model.matchInfo.matchConfiguration!.minimumAmountToPlay}Kz para poder jogar',
+              'Atenção: ao se inscrever nesta sala será reduzido do seu saldo a taxa de ${_model.matchInfo.room!.roomConfiguration!.minimumAmountToPlay}Kz para poder jogar',
               textAlign: TextAlign.center,
               style: FlutterFlowTheme.of(context).labelMedium.override(
                     fontFamily: 'Plus Jakarta Sans',
@@ -106,11 +85,10 @@ class _Warning04ReducaoDeSaldoWidgetState
             padding: EdgeInsets.fromLTRB(20.0, 0, 20.0, 20.0),
             child: FFButtonWidget(
               onPressed: () async {
-                setState(() {
-                  _model.isWaitingPlayers = true;
-                });
-
-                await _model.joinTheMatchAsync(widget.subscribe, widget.recebeuNotificaca);
+                if (widget.subscribe == null) _model.showWaitingDialog();
+                await _model.joinTheMatchAsync(
+                    widget.subscribe, widget.recebeuNotificaca);
+                    widget.onConfirmed?.call();
               },
               text: 'Confirmar Inscrição',
               options: FFButtonOptions(

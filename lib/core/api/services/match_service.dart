@@ -23,10 +23,9 @@ class MatchService {
 
   Future<dynamic> getMatchStartNoticeAsync(String matchId) async {
     try {
-      final successResult = await httpService.request<MatchResponse>(
+      final successResult = await httpService.request(
         '/match/$matchId/match-start-notice',
         method: 'GET',
-        successParser: (json) => MatchResponse.fromJson(json),
       );
       return {"isSuccess": true, "data": successResult};
     } catch (e) {
@@ -34,17 +33,25 @@ class MatchService {
     }
   }
 
-  Future<dynamic> getAllMatchAsync(bool? isEvent, String? status) async {
+  Future<dynamic> getAllMatchAsync(bool? isEvent, String? status, DateTime? startDate, DateTime? endDate) async {
     try {
-      String route = "/match";
+          final queryParams = <String, String>{};
 
-      if (isEvent != null) {
-        route += "?isEvent=${isEvent}";
-      } else if (status != null) {
-        route += "?status=$status";
-      } else if (isEvent != null && status != null) {
-        route += "?isEvent=${isEvent}&status=$status";
-      }
+          if (isEvent != null) {
+            queryParams['isEvent'] = isEvent.toString();
+          }
+          if (status != null) {
+            queryParams['status'] = status;
+          }
+          if (startDate != null) {
+            queryParams['startDate'] = startDate.toIso8601String();
+          }
+          if (endDate != null) {
+            queryParams['endDate'] = endDate.toString();
+          }
+          String queryString = Uri(queryParameters: queryParams).query;
+          
+         var route = queryString.isNotEmpty ? "/match?$queryString" : "/match";
 
       final successResult = await httpService.request<List<MatchResponse>>(
         route,
@@ -99,6 +106,17 @@ class MatchService {
     try {
       final result = await httpService.request('/match/$matchId',
           method: 'PATCH', body: request.toJson());
+
+      return {"isSuccess": true, "data": result};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
+  Future<dynamic> leaveTheMatchAsync(String matchId, String userId) async {
+    try {
+      final result = await httpService
+          .request('/match/$matchId/user/$userId', method: 'DELETE', body: {});
 
       return {"isSuccess": true, "data": result};
     } catch (e) {
