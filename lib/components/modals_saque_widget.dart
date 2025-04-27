@@ -27,7 +27,6 @@ class _ModalsSaqueWidgetState extends State<ModalsSaqueWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => ModalsSaqueModel());
-
     _model.textController ??= TextEditingController();
   }
 

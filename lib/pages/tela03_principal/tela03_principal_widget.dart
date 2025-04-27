@@ -4,6 +4,8 @@ import 'package:projeto_game_quiz/components/warnings/warning04_reducao_de_saldo
 import 'package:projeto_game_quiz/core/api/services/fcm_token_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
+import 'package:projeto_game_quiz/pages/payment_method/payment_selection_screen.dart';
+
 import '/components/moda_listade_sala_widget.dart';
 import '/components/moda_menu_pagian_inicial_widget.dart';
 import '/components/modals_deposito_widget.dart';
@@ -39,10 +41,10 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
   void initState() {
     super.initState();
     _fcmTokenService.initFirebaseMessaging(context);
+
     _model = createModel(context, () => Tela03PrincipalModel());
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
-
     _model.getUserInfoAndAccountInfoAsync(setState, context);
     _model.loadMatches(setState);
   }
@@ -913,7 +915,9 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
               width: 350.0,
               height: 80.0,
               decoration: BoxDecoration(
-                color: match.isUserRegistered! ? Color.fromARGB(255, 80, 104, 70)  :Color(0xFFEC8D0D),
+                color: match.isUserRegistered!
+                    ? Color.fromARGB(255, 80, 104, 70)
+                    : Color(0xFFEC8D0D),
                 boxShadow: [
                   BoxShadow(
                     blurRadius: 4.0,
@@ -1031,7 +1035,8 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                         );
                         if (result == true) {
                           setState(() {
-                            _model.getUserInfoAndAccountInfoAsync(setState, context);
+                            _model.getUserInfoAndAccountInfoAsync(
+                                setState, context);
                             _model.loadMatches(setState);
                           });
                         }

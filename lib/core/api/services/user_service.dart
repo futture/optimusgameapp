@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:projeto_game_quiz/core/api/common/http_client_api.dart';
 import 'package:projeto_game_quiz/core/api/utils/error_util.dart';
 import 'package:projeto_game_quiz/core/api/utils/token_util.dart';
@@ -5,25 +7,26 @@ import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/user_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/otp_code_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
-import 'package:contacts_service/contacts_service.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class UserService {
   ErrorUtil _errorUtil = ErrorUtil();
   final httpService = HttpClientService();
 
   Future<List<Contact>> fetchContactsAsync() async {
-    var status = await Permission.contacts.status;
-    if (!status.isGranted) {
-      status = await Permission.contacts.request();
-      if (!status.isGranted) {
+    if (!kIsWeb) {
+      bool permissionGranted = await FlutterContacts.requestPermission();
+
+      if (!permissionGranted) {
         print("Permissão negada para acessar contatos");
         return List.empty();
       }
-    }
 
-    Iterable<Contact> contacts = await ContactsService.getContacts();
-    return contacts.toList();
+      final fetchedContacts =
+          await FlutterContacts.getContacts(withProperties: true);
+
+      return fetchedContacts;
+    }
+    return List.empty();
   }
 
   Future<Map<String, dynamic>> createFcmTokenAsync(
