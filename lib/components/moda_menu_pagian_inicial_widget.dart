@@ -1,4 +1,5 @@
 import 'package:projeto_game_quiz/core/api/utils/token_util.dart';
+import 'package:projeto_game_quiz/pages/deposit_history/deposit_history_widget.dart';
 
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -421,6 +422,86 @@ class _ModaMenuPagianInicialWidgetState
                                   onPressed: () async {
                                     context.pushNamed(
                                         Tela09HistoricoJodosWidget.routeName);
+                                  },
+                                  text: 'Button',
+                                  options: FFButtonOptions(
+                                    width: 340.0,
+                                    height: 45.0,
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        16.0, 0.0, 16.0, 0.0),
+                                    iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                        0.0, 0.0, 0.0, 0.0),
+                                    color: Color(0x004B39EF),
+                                    textStyle: FlutterFlowTheme.of(context)
+                                        .titleSmall
+                                        .override(
+                                          fontFamily: 'Inter Tight',
+                                          color: Color(0x00FFFFFF),
+                                          letterSpacing: 0.0,
+                                        ),
+                                    elevation: 0.0,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 290.0,
+                        height: 45.0,
+                        decoration: BoxDecoration(
+                          color:
+                              FlutterFlowTheme.of(context).secondaryBackground,
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        child: Container(
+                          width: double.infinity,
+                          height: double.infinity,
+                          child: Stack(
+                            alignment: AlignmentDirectional(0.0, 0.0),
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    Icons.history_sharp,
+                                    color: FlutterFlowTheme.of(context)
+                                        .primaryText,
+                                    size: 20.0,
+                                  ),
+                                  Text(
+                                    'Histórico Depósito',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          fontFamily: 'Inter',
+                                          letterSpacing: 0.0,
+                                        ),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        85.0, 0.0, 0.0, 0.0),
+                                    child: Icon(
+                                      Icons.arrow_forward_ios,
+                                      color: FlutterFlowTheme.of(context)
+                                          .primaryText,
+                                      size: 19.0,
+                                    ),
+                                  ),
+                                ]
+                                    .divide(SizedBox(width: 11.0))
+                                    .addToStart(SizedBox(width: 10.0))
+                                    .addToEnd(SizedBox(width: 5.0)),
+                              ),
+                              Opacity(
+                                opacity: 0.0,
+                                child: FFButtonWidget(
+                                  onPressed: () async {
+                                    context.pushNamed(
+                                        DepositHistoryScreenWidget.routeName);
                                   },
                                   text: 'Button',
                                   options: FFButtonOptions(

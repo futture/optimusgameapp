@@ -379,19 +379,23 @@ class Tela15SalaCustomizadaViewModel
   }
 
   Future<void> fetchContactsAsync(Function setState) async {
-    var contacts = await userService.fetchContactsAsync();
+  var contacts = await userService.fetchContactsAsync();
 
-    for (var e in contacts) {
-      String phone = (e.phones?.isNotEmpty ?? false)
-          ? e.phones!.first.value!.replaceAll(RegExp(r'\s+|\-|\(|\)'), '')
-          : '';
+  listContacts.clear();
 
-      String name = e.displayName ?? 'Sem Nome';
+  for (var e in contacts) {
+    String phone = (e.phones.isNotEmpty)
+        ? e.phones.first.number.replaceAll(RegExp(r'\s+|\-|\(|\)'), '')
+        : '';
 
-      if (phone.isNotEmpty) {
-        listContacts[phone] = name;
-      }
+    String name = e.displayName.isNotEmpty ? e.displayName : 'Sem Nome';
+
+    if (phone.isNotEmpty) {
+      listContacts[phone] = name;
     }
-    setState(() {});
   }
+  
+  setState(() {});
+}
+
 }

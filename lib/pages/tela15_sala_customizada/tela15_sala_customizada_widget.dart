@@ -8,7 +8,6 @@ import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_util.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_widgets.dart';
 import 'package:projeto_game_quiz/pages/tela03_principal/tela03_principal_widget.dart';
-import 'package:projeto_game_quiz/pages/tela15_sala_customizada/phone_autocomplete_controller.dart';
 import 'package:projeto_game_quiz/pages/tela15_sala_customizada/tela15_sala_customizada_model.dart';
 
 class Tela15SalaCustomizadaViewWidget extends StatefulWidget {
@@ -27,7 +26,6 @@ class _Tela15SalaCustomizadaViewWidgetState
     with TickerProviderStateMixin {
   late Tela15SalaCustomizadaViewModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  late PhoneAutocompleteController phoneAutocompleteController;
 
   @override
   void initState() {
@@ -163,6 +161,23 @@ class _Tela15SalaCustomizadaViewWidgetState
                       });
                     },
                   ),
+
+                 if(_model.idTextController?.text.isEmpty?? false) ...[
+                    const SizedBox(height: 4.0),
+                    Center(
+                      child: IconButton(
+                        icon: const Icon(Icons.person_add),
+                        onPressed: () {
+                      
+                          final id = _model.idTextController?.text.trim();
+                          if (id != null && id.isNotEmpty) {
+                            _model.addUser(id, setState);
+                          }
+                        },
+                      ),
+                    )
+                 ],
+                
                   SizedBox(
                     width: 290.0,
                     child: Divider(
@@ -413,14 +428,13 @@ class _Tela15SalaCustomizadaViewWidgetState
             if (textEditingValue.text.isEmpty) {
               return const Iterable<String>.empty();
             }
-            // Filtra os usuários com base no texto digitado
             return usuarios.keys.where((id) =>
                 id.contains(textEditingValue.text) ||
                 usuarios[id]!
                     .toLowerCase()
                     .contains(textEditingValue.text.toLowerCase()));
           },
-          displayStringForOption: (option) => '${usuarios[option]}',
+          displayStringForOption: (option) => usuarios[option] ?? option,
           onSelected: (selectedOption) {
             model.idTextController.text = selectedOption;
             onUsuarioSelecionado(selectedOption);
@@ -441,16 +455,19 @@ class _Tela15SalaCustomizadaViewWidgetState
             );
           },
           optionsViewBuilder: (context, onSelected, options) {
-            final text = model.idTextController.text;
-            final hasNoMatch =
-                options.isEmpty && text.isNotEmpty && text.length >= 9;
+            final text = model.idTextController.text.trim();
+            final hasNoMatch = options.isEmpty && text.isNotEmpty;
+
+            print('Options: $options');
+            print('Has no match: $hasNoMatch');
+
             return Align(
               alignment: Alignment.topCenter,
               child: Material(
                 elevation: 4,
                 child: Container(
                   width: 300,
-                  constraints: BoxConstraints(
+                  constraints: const BoxConstraints(
                     maxHeight: 200,
                   ),
                   child: Column(
@@ -472,18 +489,15 @@ class _Tela15SalaCustomizadaViewWidgetState
                           },
                         ),
                       ),
-                      if (hasNoMatch) const SizedBox(height: 4.0),
+                      if (hasNoMatch) const Divider(),
                       if (hasNoMatch)
-                        Center(
-                          child: IconButton(
-                            icon: const Icon(Icons.person_add),
-                            onPressed: () {
-                              final id = model.idTextController?.text.trim();
-                              if (id != null && id.isNotEmpty) {
-                                onUsuarioSelecionado(id);
-                              }
-                            },
-                          ),
+                        ListTile(
+                          leading: const Icon(Icons.person_add),
+                          title: Text('Adicionar "$text"'),
+                          onTap: () {
+                            model.idTextController.text = text;
+                            onUsuarioSelecionado(text);
+                          },
                         ),
                     ],
                   ),

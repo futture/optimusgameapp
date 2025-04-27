@@ -1,4 +1,5 @@
 class AccountResponse {
+  final String id;
   final String iban;
   final double balance;
   final String accountNumber;
@@ -6,7 +7,9 @@ class AccountResponse {
   final double availableBalance;
 
   AccountResponse(
-      {required this.iban,
+      {
+      required this.id,
+      required this.iban,
       required this.balance,
       required this.availableBalance,
       required this.accountNumber,
@@ -14,6 +17,7 @@ class AccountResponse {
 
   factory AccountResponse.fromJson(Map<String, dynamic> json) =>
       AccountResponse(
+        id: json["id"],
         iban: json["iban"],
         balance: json["balance"],
         availableBalance: json["availableBalance"],

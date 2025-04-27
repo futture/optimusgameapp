@@ -1,6 +1,6 @@
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import '/flutter_flow/flutter_flow_theme.dart';
 
 class ErrorDialogWidget extends StatefulWidget {
   final String message;
@@ -13,35 +13,30 @@ class ErrorDialogWidget extends StatefulWidget {
   });
 
   @override
-  _ErrorDialogWidgetState createState() => _ErrorDialogWidgetState();
+  State<ErrorDialogWidget> createState() => _ErrorDialogWidgetState();
 }
 
 class _ErrorDialogWidgetState extends State<ErrorDialogWidget>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _iconScaleAnimation;
-  late Animation<double> _circleAnimation;
+  late final AnimationController _controller;
+  late final Animation<double> _opacityAnimation;
+  late final Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
 
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 800),
       vsync: this,
+      duration: const Duration(milliseconds: 400),
     )..forward();
 
-    _scaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
-
-    _iconScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
-    );
-
-    _circleAnimation = Tween<double>(begin: 0.0, end: 120.0).animate(
+    _opacityAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.95, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
     );
   }
 
@@ -53,95 +48,94 @@ class _ErrorDialogWidgetState extends State<ErrorDialogWidget>
 
   @override
   Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _scaleAnimation,
-      child: Container(
-        width: 320.0,
-        padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 20.0),
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          borderRadius: BorderRadius.circular(20.0),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              offset: Offset(0, 4),
-              blurRadius: 20.0,
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [ 
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                AnimatedBuilder(
-                  animation: _circleAnimation,
-                  builder: (_, __) => Container(
-                    width: _circleAnimation.value,
-                    height: _circleAnimation.value,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.redAccent.withOpacity(0.2),
+    final theme = FlutterFlowTheme.of(context);
+    const errorRed = Colors.redAccent; // Vermelho para erro
+
+    return Center(
+      child: FadeTransition(
+        opacity: _opacityAnimation,
+        child: ScaleTransition(
+          scale: _scaleAnimation,
+          child: Dialog(
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: theme.secondaryBackground.withOpacity(0.75),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: errorRed.withOpacity(0.2),
+                      width: 1,
                     ),
                   ),
-                ),
-                // Ícone de erro animado
-                ScaleTransition(
-                  scale: _iconScaleAnimation,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.redAccent,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.red,
-                          blurRadius: 20,
-                          spreadRadius: 2,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 32,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.error_outline_rounded,
+                        size: 72,
+                        color: errorRed,
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Erro!',
+                        style: theme.titleLarge.copyWith(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: theme.primaryText,
                         ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    child: const Icon(
-                      Icons.error_outline_rounded,
-                      color: Colors.white,
-                      size: 60.0,
-                    ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        widget.message,
+                        textAlign: TextAlign.center,
+                        style: theme.bodyMedium.copyWith(
+                          fontSize: 16,
+                          color: theme.secondaryText,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            widget.onOk?.call();
+                            Navigator.of(context).pop();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: errorRed,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: const Text(
+                            'OK',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 20.0),
-            Text(
-              widget.message,
-              textAlign: TextAlign.center,
-              style: FlutterFlowTheme.of(context).titleMedium.copyWith(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.w600,
-                    color: FlutterFlowTheme.of(context).primaryText,
-                  ),
-            ),
-            const SizedBox(height: 24.0),
-            FFButtonWidget(
-              onPressed: () {
-                if (widget.onOk != null) {
-                  widget.onOk!();
-                }
-              },
-              text: 'OK',
-              options: FFButtonOptions(
-                height: 50.0,
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                color: Colors.redAccent,
-                textStyle: FlutterFlowTheme.of(context).titleSmall.copyWith(
-                      fontSize: 16.0,
-                      color: Colors.white,
-                    ),
-                elevation: 5.0,
-                borderRadius: BorderRadius.circular(12.0),
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
