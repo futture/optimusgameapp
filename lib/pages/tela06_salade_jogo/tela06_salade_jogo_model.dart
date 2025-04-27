@@ -427,4 +427,16 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
       );
     }
   }
+
+  Future<void> inactivatePlayerInMatchAsync() async {
+    var result = await _matchService.inactivatePlayerInMatchAsync(
+        matchInfo!.id, userId!);
+
+    if(result["isSuccess"]){
+      
+    }
+    else{
+
+    }
+  }
 }

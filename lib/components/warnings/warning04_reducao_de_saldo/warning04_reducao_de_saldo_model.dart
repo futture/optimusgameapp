@@ -147,7 +147,7 @@ class Warning04ReducaoDeSaldoModel
                   const CircularProgressIndicator(),
                   const SizedBox(height: 16),
                   Text(
-                    "Esperando participantes conectarem,\nConectados: $playersConnected / $numberOfPlayers",
+                    "Esperando participantes conectarem",
                   ),
                 ],
               ),

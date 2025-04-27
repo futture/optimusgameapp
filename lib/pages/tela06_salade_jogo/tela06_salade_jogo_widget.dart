@@ -31,13 +31,14 @@ class Tela06SaladeJogoWidget extends StatefulWidget {
   State<Tela06SaladeJogoWidget> createState() => _Tela06SaladeJogoWidgetState();
 }
 
-class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
+class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>  with WidgetsBindingObserver {
   late Tela06SaladeJogoModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
+      WidgetsBinding.instance.addObserver(this);
 
     _model = createModel(context, () => Tela06SaladeJogoModel());
     _model.radioGroupValueController = FormFieldController<String>(null);
@@ -59,10 +60,24 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _model.dispose();
     super.dispose();
   }
 
+ @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    print('Mudança de ciclo de vida: $state');
+
+    if (state == AppLifecycleState.paused) {
+      print('App foi para segundo plano (hibernado)');
+      // Você pode chamar alguma função do seu modelo aqui, exemplo:
+    } else if (state == AppLifecycleState.resumed) {
+      print('App voltou para o primeiro plano');
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -802,4 +817,6 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget> {
           ),
         ));
   }
+
+  
 }

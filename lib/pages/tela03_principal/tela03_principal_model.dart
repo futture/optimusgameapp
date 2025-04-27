@@ -10,7 +10,6 @@ import 'package:projeto_game_quiz/core/models/responses/account_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 import 'package:projeto_game_quiz/dialogs/success-dialog-widget.dart';
-import 'package:projeto_game_quiz/pages/tela13_dados_de_partida/tela13_dados_de_partida_widget.dart';
 import '/flutter_flow/flutter_flow_timer.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/instant_timer.dart';
@@ -173,15 +172,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
         var isExist =
             await checkPlayerAlreadyRegisteredMatchAsync(setState, match.id);
         if (isExist) {
-          Navigator.of(context!).push(
-            MaterialPageRoute(
-              builder: (_) => Tela13DadosDePartidaWidget(
-                matchId: match.id,
-                notDisplayButton: true,
-              ),
-            ),
-          );
-          return;
+          
         }
       }
 

@@ -67,6 +67,17 @@ class NotificationHandler {
                 ),
               );
             }
+          } else if (data["action"] == "SCHEDULED_MATCH_WILL_BEGIN") {
+            if (context != null) {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => Tela13DadosDePartidaWidget(
+                    matchId: data["matchId"],
+                    notDisplayButton: true,
+                  ),
+                ),
+              );
+            }
           }
         }
       }
@@ -111,6 +122,17 @@ class NotificationHandler {
                   builder: (_) => Tela16ErroInformacaoPartidaViewWidget(
                     matchResponse: matchInfo["data"],
                     error: DetailErrorResponse.fromJson(decodedMessageErr),
+                  ),
+                ),
+              );
+            }
+          } else if (data["action"] == "SCHEDULED_MATCH_WILL_BEGIN") {
+            if (context != null) {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => Tela13DadosDePartidaWidget(
+                    matchId: data["matchId"],
+                    notDisplayButton: true,
                   ),
                 ),
               );
