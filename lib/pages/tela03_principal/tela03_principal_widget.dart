@@ -380,32 +380,11 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                         children: [
                                           FFButtonWidget(
                                             onPressed: () async {
-                                              await showModalBottomSheet(
-                                                isScrollControlled: true,
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                enableDrag: false,
-                                                context: context,
-                                                builder: (context) {
-                                                  return GestureDetector(
-                                                    onTap: () {
-                                                      FocusScope.of(context)
-                                                          .unfocus();
-                                                      FocusManager
-                                                          .instance.primaryFocus
-                                                          ?.unfocus();
-                                                    },
-                                                    child: Padding(
-                                                      padding: MediaQuery
-                                                          .viewInsetsOf(
-                                                              context),
-                                                      child:
-                                                          ModalsDepositoWidget(),
+                                              Navigator.of(context).push(
+                                                    MaterialPageRoute(
+                                                      builder: (_) => Tela10DepositoListaWidget(),
                                                     ),
                                                   );
-                                                },
-                                              ).then((value) =>
-                                                  safeSetState(() {}));
                                             },
                                             text: 'DEPOSITAR',
                                             icon: Icon(
