@@ -89,7 +89,7 @@ class Warning04ReducaoDeSaldoModel
           isShowWaitingDialogOpen = false;
         }
 
-        _matchWebSocketService?.disconnect();
+        //_matchWebSocketService?.disconnect();
 
         if (context.mounted) {
           Navigator.of(context).pushReplacement(

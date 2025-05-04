@@ -853,6 +853,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                     ],
                                   ),
                                 )
+                             
                               else
                                 ListView.builder(
                                   shrinkWrap: true,

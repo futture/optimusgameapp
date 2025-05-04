@@ -8,6 +8,7 @@ class WebSocketService {
   final void Function(Object)? onError;
   final void Function()? onDone;
   late final String _baseUrl = "ws://$BASE_URL/ws";
+
   WebSocketService({
     required this.url,
     required this.onMessageReceived,
@@ -18,7 +19,6 @@ class WebSocketService {
   void connect() {
     var uri = Uri.parse("$_baseUrl$url");
     _channel = WebSocketChannel.connect(uri);
-
     _channel.stream.listen((message) {
       onMessageReceived(message);
     }, onError: onError, onDone: onDone);

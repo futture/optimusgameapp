@@ -11,9 +11,12 @@ class Warning04ReducaoDeSaldoWidget extends StatefulWidget {
   final bool? recebeuNotificaca;
   final VoidCallback? onConfirmed;
 
-
   const Warning04ReducaoDeSaldoWidget(
-      {super.key, this.matchInfo, this.subscribe, this.recebeuNotificaca, this.onConfirmed});
+      {super.key,
+      this.matchInfo,
+      this.subscribe,
+      this.recebeuNotificaca,
+      this.onConfirmed});
 
   @override
   State<Warning04ReducaoDeSaldoWidget> createState() =>
@@ -72,7 +75,7 @@ class _Warning04ReducaoDeSaldoWidgetState
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.0),
             child: Text(
-              'Atenção: ao se inscrever nesta sala será reduzido do seu saldo a taxa de ${_model.matchInfo.room!.roomConfiguration!.minimumAmountToPlay}Kz para poder jogar',
+              'Atenção: ao se inscrever nesta sala será reduzido do seu saldo a taxa de ${_model.matchInfo.room!.roomConfiguration!.minimumAmountToPlay} Kz para poder jogar',
               textAlign: TextAlign.center,
               style: FlutterFlowTheme.of(context).labelMedium.override(
                     fontFamily: 'Plus Jakarta Sans',
@@ -81,6 +84,20 @@ class _Warning04ReducaoDeSaldoWidgetState
                   ),
             ),
           ),
+          SizedBox(width: 16.0),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.0),
+            child: Text(
+              'Premio: ${_model.matchInfo.room!.roomConfiguration!.numberOfPlayers * _model.matchInfo.room!.roomConfiguration!.minimumAmountToPlay} Kz',
+              textAlign: TextAlign.center,
+              style: FlutterFlowTheme.of(context).labelMedium.override(
+                    fontFamily: 'Plus Jakarta Sans',
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.w500,
+                  ),
+            ),
+          ),
+          SizedBox(width: 16.0),
           Padding(
             padding: EdgeInsets.fromLTRB(20.0, 0, 20.0, 20.0),
             child: FFButtonWidget(
@@ -88,7 +105,7 @@ class _Warning04ReducaoDeSaldoWidgetState
                 if (widget.subscribe == null) _model.showWaitingDialog();
                 await _model.joinTheMatchAsync(
                     widget.subscribe, widget.recebeuNotificaca);
-                    widget.onConfirmed?.call();
+                widget.onConfirmed?.call();
               },
               text: 'Confirmar Inscrição',
               options: FFButtonOptions(
