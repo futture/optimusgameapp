@@ -31,6 +31,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
   late MatchResultResponse? gameResultInfo;
   final scaffoldKey = GlobalKey<ScaffoldState>();
   List<JogadorResultado> resultados = List.empty();
+  late bool semVencedor;
 
   @override
   void initState() {
@@ -47,6 +48,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
     if (gameResultInfo != null) {
       resultados = _model.processarResultados(gameResultInfo);
     }
+    semVencedor = resultados.isEmpty || resultados.every((j) => j.pontos == 0);
   }
 
   @override
@@ -203,111 +205,121 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
           ),
         ));
   }
+Widget MatchCard({
+  required BuildContext context,
+  required JogadorResultado jogador,
+  required int posicao,
+}) {
+  final bool isPrimeiro = posicao == 0;
+  final bool isSegundo = posicao == 1;
+  final bool isTerceiro = posicao == 2;
 
-  Widget MatchCard({
-    required BuildContext context,
-    required JogadorResultado jogador,
-    required int posicao,
-  }) {
-    final bool isPrimeiro = posicao == 0;
-    final bool isSegundo = posicao == 1;
-    final bool isTerceiro = posicao == 2;
+  // Cores e ícones considerando "sem vencedor"
+  final Color corCard = semVencedor
+      ? Colors.red
+      : isPrimeiro
+          ? Colors.green
+          : isSegundo
+              ? Colors.deepPurple
+              : isTerceiro
+                  ? Colors.brown
+                  : Colors.grey;
 
-    final Color corCard = isPrimeiro
-        ? Colors.green
-        : isSegundo
-            ? Colors.deepPurple
-            : isTerceiro
-                ? Colors.brown
-                : Colors.grey;
+  final IconData? iconePosicao = semVencedor
+      ? null
+      : isPrimeiro
+          ? FontAwesomeIcons.trophy
+          : isSegundo
+              ? FontAwesomeIcons.medal
+              : isTerceiro
+                  ? FontAwesomeIcons.award
+                  : null;
 
-    final IconData iconePosicao = isPrimeiro
-        ? FontAwesomeIcons.trophy
-        : isSegundo
-            ? FontAwesomeIcons.medal
-            : FontAwesomeIcons.award;
+  final Color corIcone = semVencedor
+      ? Colors.transparent
+      : isPrimeiro
+          ? Colors.amber
+          : isSegundo
+              ? Colors.grey
+              : Colors.brown;
 
-    final Color corIcone = isPrimeiro
-        ? Colors.amber
-        : isSegundo
-            ? Colors.grey
-            : Colors.brown;
-
-    return Card(
-      color: corCard,
-      elevation: 4.0,
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
+  return Card(
+    color: corCard,
+    elevation: 4.0,
+    margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12.0),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              if (iconePosicao != null)
                 FaIcon(iconePosicao, color: corIcone, size: 24),
+              if (iconePosicao != null)
                 const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    jogador.nome,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    style: FlutterFlowTheme.of(context).titleLarge.override(
-                          fontFamily: 'Inter Tight',
-                          letterSpacing: 0.0,
-                          color: Colors.white,
-                        ),
-                  ),
+              Expanded(
+                child: Text(
+                  jogador.nome,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: FlutterFlowTheme.of(context).titleLarge.override(
+                        fontFamily: 'Inter Tight',
+                        letterSpacing: 0.0,
+                        color: Colors.white,
+                      ),
                 ),
-                const SizedBox(width: 8),
-                Icon(Icons.shield, color: Colors.black, size: 24),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.people, color: Colors.white, size: 20),
-                const SizedBox(width: 6),
-                Text(
-                  '${posicao + 1} º Posição',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
+              ),
+              const SizedBox(width: 8),
+              Icon(Icons.shield, color: Colors.black, size: 24),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(Icons.people, color: Colors.white, size: 20),
+              const SizedBox(width: 6),
+              Text(
+                '${posicao + 1} º Posição',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
                 ),
-                const Spacer(),
-                Icon(FontAwesomeIcons.coins, color: Colors.white, size: 20),
-                const SizedBox(width: 6),
-                Text(
-                  '${jogador.premio.toStringAsFixed(0)}KZ',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
+              ),
+              const Spacer(),
+              Icon(FontAwesomeIcons.coins, color: Colors.white, size: 20),
+              const SizedBox(width: 6),
+              Text(
+                '${jogador.premio.toStringAsFixed(0)}KZ',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.fitness_center, color: Colors.white, size: 20),
-                const SizedBox(width: 6),
-                Text(
-                  '${jogador.pontos} pts',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(Icons.fitness_center, color: Colors.white, size: 20),
+              const SizedBox(width: 6),
+              Text(
+                '${jogador.pontos} pts',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildTabelaExpandida(JogadorResultado jogador) {
     return Container(

@@ -4,7 +4,6 @@ import 'package:projeto_game_quiz/core/models/requests/question_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
 
 class QuestionService {
-  
   ErrorUtil _errorUtil = ErrorUtil();
 
   final httpService = HttpClientService();
@@ -38,7 +37,8 @@ class QuestionService {
     }
   }
 
-  Future<dynamic> answerQuestionAsync(String userId, PlayerAnswerRequest obj) async {
+  Future<dynamic> answerQuestionAsync(
+      String userId, PlayerAnswerRequest obj) async {
     try {
       final result = await httpService.request(
           '/question/user/$userId/answer-question',
@@ -51,4 +51,17 @@ class QuestionService {
     }
   }
 
+  Future<dynamic> removeQuestionForMatchAsync(
+      String matchId, String questionId) async {
+    try {
+      final result = await httpService.request(
+          '/question/$questionId/match/$matchId',
+          method: 'DELETE',
+          body: {});
+
+      return {"isSuccess": true, "data": result};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
 }

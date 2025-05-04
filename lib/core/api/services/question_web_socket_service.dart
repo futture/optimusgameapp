@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:projeto_game_quiz/core/api/common/web_socket_api.dart';
+import 'package:projeto_game_quiz/core/models/requests/question_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
 
@@ -45,7 +46,20 @@ class QuestionWebSocketService {
         if (questionStats.isReady == true) {
           onAllPlayersResponded?.call(questionStats);
         } else {
-          onWaitingForPlayersResponse?.call(questionStats);
+          Set<String?> allUserIds = {};
+
+          if (questionStats.hits != null) {
+            allUserIds.addAll(
+              questionStats.hits!.map((hit) => hit.playerId).toSet(),
+            );
+          }
+          if (questionStats.erros != null) {
+            allUserIds.addAll(
+              questionStats.erros!.map((erro) => erro.playerId).toSet(),
+            );
+          }
+          if (allUserIds.contains(userId))
+            onWaitingForPlayersResponse?.call(questionStats);
         }
       },
       onError: (e) {
@@ -60,6 +74,29 @@ class QuestionWebSocketService {
 
     _webSocketService.connect();
     _isConnected = true;
+  }
+
+  void sendAnswerToWebSocket(PlayerAnswerRequest obj) {
+    var strJson = jsonEncode(obj.toJson());
+    _webSocketService.sendMessage(strJson);
+  }
+
+  Future<void> tryReconnect(
+      {int retries = 3, Duration delay = const Duration(seconds: 2)}) async {
+    for (int i = 0; i < retries; i++) {
+      if (_isConnected) break;
+
+      try {
+        await Future.delayed(delay);
+        connect();
+        if (_isConnected) {
+          print('Reconectado com sucesso na tentativa ${i + 1}');
+          break;
+        }
+      } catch (e) {
+        print('Falha ao reconectar (tentativa ${i + 1}): $e');
+      }
+    }
   }
 
   void disconnect() {

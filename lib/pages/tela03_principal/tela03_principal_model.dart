@@ -38,6 +38,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
   InstantTimer? instantTimer;
   bool isDialogStartScheduledMatchOpen = false;
   late BuildContext currentDialogStartScheduledMatchOpenContext;
+  bool hasStartedMatch = false; // Adicione isso no começo da classe
 
   @override
   void initState(BuildContext context) {
@@ -168,8 +169,10 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
       //   alerted = true;
       //   await _callApiBeforeMatchStart(match.id);
       // }
-      if (remaining.inSeconds == 0) {
+      if (remaining.inSeconds == 0 && !hasStartedMatch) {
+        hasStartedMatch = true; // Impede chamadas repetidas
         setState(() => alerted = false);
+
         var isExist =
             await checkPlayerAlreadyRegisteredMatchAsync(setState, match.id);
         if (isExist) {
@@ -187,7 +190,10 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
 
       if (remaining.isNegative) {
         timer.cancel();
-        setState(() => alerted = false);
+        setState(() {
+          alerted = false;
+          hasStartedMatch = false; // resetar para o futuro
+        });
         loadMatches(setState);
       }
     });

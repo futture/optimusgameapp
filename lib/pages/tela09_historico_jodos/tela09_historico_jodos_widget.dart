@@ -1,5 +1,5 @@
-import '/flutter_flow/flutter_flow_icon_button.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
+import 'package:projeto_game_quiz/pages/tela03_principal/tela03_principal_widget.dart';
+
 import '/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'tela09_historico_jodos_model.dart';
@@ -18,20 +18,19 @@ class Tela09HistoricoJodosWidget extends StatefulWidget {
 
 class _Tela09HistoricoJodosWidgetState
     extends State<Tela09HistoricoJodosWidget> {
-  late Tela09HistoricoJodosModel _model;
-
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  late Tela09HistoricoJodosModel _model;
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => Tela09HistoricoJodosModel());
+    _model.load(setState);
   }
 
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
   }
 
@@ -40,236 +39,282 @@ class _Tela09HistoricoJodosWidgetState
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
-        FocusManager.instance.primaryFocus?.unfocus();
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+          backgroundColor: Colors.white,
           automaticallyImplyLeading: false,
           leading: Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(18.0, 0.0, 0.0, 0.0),
-            child: FlutterFlowIconButton(
-              borderRadius: 8.0,
-              buttonSize: 45.0,
-              fillColor: FlutterFlowTheme.of(context).primaryBackground,
-              icon: Icon(
-                Icons.arrow_back,
-                color: FlutterFlowTheme.of(context).primaryText,
-                size: 24.0,
-              ),
-              onPressed: () async {
-                context.safePop();
+            padding: const EdgeInsetsDirectional.only(start: 18.0),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => Tela03PrincipalWidget()),
+                );
               },
             ),
           ),
-          title: Text(
-            'HISTÓRICO DE JOGOS ',
-            style: FlutterFlowTheme.of(context).headlineSmall.override(
-                  fontFamily: 'Inter Tight',
-                  color: Color(0xFFEC8D0D),
-                  letterSpacing: 0.0,
-                ),
+          title: const Text(
+            'HISTÓRICO DE JOGOS',
+            style: TextStyle(
+              color: Color(0xFFEC8D0D),
+              fontSize: 20.0,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          actions: [],
           centerTitle: true,
           elevation: 4.0,
         ),
         body: SafeArea(
           top: true,
           child: Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(25.0, 0.0, 25.0, 0.0),
-            child: ListView(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              scrollDirection: Axis.vertical,
-              children: [
-                Container(
-                  width: 100.0,
-                  height: 50.0,
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).primaryBackground,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(0.0),
-                      bottomRight: Radius.circular(0.0),
-                      topLeft: Radius.circular(8.0),
-                      topRight: Radius.circular(8.0),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Sala',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              fontFamily: 'Inter',
-                              fontSize: 15.0,
-                              letterSpacing: 0.0,
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                      Text(
-                        'Ranking',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              fontFamily: 'Inter',
-                              fontSize: 15.0,
-                              letterSpacing: 0.0,
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                      Text(
-                        'Pontos',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              fontFamily: 'Inter',
-                              fontSize: 15.0,
-                              letterSpacing: 0.0,
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                    ]
-                        .divide(SizedBox(width: 90.0))
-                        .addToStart(SizedBox(width: 0.0))
-                        .addToEnd(SizedBox(width: 0.0)),
-                  ),
-                ),
-                Container(
-                  width: 100.0,
-                  height: 490.0,
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).primaryBackground,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(8.0),
-                      bottomRight: Radius.circular(8.0),
-                      topLeft: Radius.circular(0.0),
-                      topRight: Radius.circular(0.0),
-                    ),
-                  ),
-                  child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 25.0),
+            child: _model.rankings == null
+                ? const Center(child: CircularProgressIndicator())
+                : SingleChildScrollView(
                     child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
+                        // Cabeçalho
                         Container(
-                          width: double.infinity,
                           height: 50.0,
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                            borderRadius: BorderRadius.circular(8.0),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(8.0)),
                           ),
-                          child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                10.0, 0.0, 10.0, 0.0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Super 21h',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        fontSize: 15.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.normal,
-                                      ),
-                                ),
-                                Text(
-                                  '20',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        fontSize: 15.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.normal,
-                                      ),
-                                ),
-                                Text(
-                                  '3.000',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        fontSize: 15.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.normal,
-                                      ),
-                                ),
-                              ]
-                                  .divide(SizedBox(width: 90.0))
-                                  .addToStart(SizedBox(width: 0.0))
-                                  .addToEnd(SizedBox(width: 0.0)),
-                            ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: const [
+                              Expanded(
+                                flex: 2,
+                                child: Text('DATA',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w200,
+                                        color: Colors.black)),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Text('RESULTADO',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w200,
+                                        color: Colors.black)),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Text('TEMPO(s)',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w200,
+                                        color: Colors.black)),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: Text('PONTOS',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w200,
+                                        color: Colors.black)),
+                              ),
+                            ],
                           ),
                         ),
-                        Container(
-                          width: double.infinity,
-                          height: 50.0,
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                10.0, 0.0, 10.0, 0.0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Sala de  4',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        fontSize: 15.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.normal,
+
+                        ..._model.rankings!.asMap().entries.map((entry) {
+                          final jogo = entry.value;
+
+                          return Column(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    jogo.isExpanded = !jogo.isExpanded!;
+                                  });
+                                  if (jogo.isExpanded!) {
+                                    _model.historys = null;
+                                    _model.getHistoryUserdAsync(
+                                        setState, jogo.matchId);
+                                  }
+                                },
+                                child: Container(
+                                  height: 50.0,
+                                  margin: const EdgeInsets.only(top: 10),
+                                  decoration: BoxDecoration(
+                                    color: jogo.isWinner == true
+                                        ? Colors.greenAccent
+                                        : Colors.redAccent,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10.0),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 2,
+                                        child: Text('${jogo.createdAt}'),
                                       ),
-                                ),
-                                Text(
-                                  '20',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        fontSize: 15.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.normal,
+                                      Expanded(
+                                        flex: 2,
+                                        child: Text(jogo.isWinner == true
+                                            ? 'Vencedor'
+                                            : 'Perdedor'),
                                       ),
-                                ),
-                                Text(
-                                  '3.000',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        fontFamily: 'Inter',
-                                        fontSize: 15.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.normal,
+                                      Expanded(
+                                        flex: 2,
+                                        child: Text('${jogo.totalResponseTime}',
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.w600)),
                                       ),
+                                      // Expanded(
+                                      //   flex: 2,
+                                      //   child: Text('${jogo.totalWrongAnswer}',
+                                      //       overflow: TextOverflow.ellipsis,
+                                      //       maxLines: 1,
+                                      //       style: TextStyle(
+                                      //           fontWeight: FontWeight.w600)),
+                                      // ),
+                                      // Expanded(
+                                      //   flex: 2,
+                                      //   child: Text(
+                                      //       '${jogo.totalCorrectAnswer}',
+                                      //       overflow: TextOverflow.ellipsis,
+                                      //       maxLines: 1,
+                                      //       style: TextStyle(
+                                      //           fontWeight: FontWeight.w600)),
+                                      // ),
+                                      Expanded(
+                                        flex: 1,
+                                        child: Text('${jogo.totalScore}',
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.w600)),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ]
-                                  .divide(SizedBox(width: 90.0))
-                                  .addToStart(SizedBox(width: 0.0))
-                                  .addToEnd(SizedBox(width: 0.0)),
-                            ),
-                          ),
-                        ),
-                      ]
-                          .divide(SizedBox(height: 10.0))
-                          .addToStart(SizedBox(height: 10.0))
-                          .addToEnd(SizedBox(height: 10.0)),
+                              ),
+                              if (jogo.isExpanded!) ...[
+                                if (_model.historys == null)
+                                  const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Center(
+                                        child: CircularProgressIndicator()),
+                                  )
+                                else
+                                  Container(
+                                    margin: const EdgeInsets.only(
+                                        top: 6, bottom: 10),
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(
+                                          color: Colors.grey.shade300),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: (_model.historys ?? [])
+                                          .asMap()
+                                          .entries
+                                          .map((entry) {
+                                        final p = entry.value;
+
+                                        return GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              p.isExpanded = !p.isExpanded!;
+                                            });
+                                          },
+                                          child: Container(
+                                            margin: const EdgeInsets.symmetric(
+                                                vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  (p.optionAnswer?.isCorrect ??
+                                                          false)
+                                                      ? Colors.green[100]
+                                                      : Colors.red[100],
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                              border: Border.all(
+                                                  color: (p.optionAnswer
+                                                              ?.isCorrect ??
+                                                          false)
+                                                      ? Colors.green
+                                                      : Colors.red),
+                                            ),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 8,
+                                                      horizontal: 10),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Flexible(
+                                                        child: Text(
+                                                          p.question
+                                                                  ?.utterance ??
+                                                              '',
+                                                          style: const TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600),
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          maxLines: 1,
+                                                        ),
+                                                      ),
+                                                      Icon(p.isExpanded!
+                                                          ? Icons.expand_less
+                                                          : Icons.expand_more),
+                                                    ],
+                                                  ),
+                                                ),
+                                                if (p.isExpanded!)
+                                                  Container(
+                                                    width: double.infinity,
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 14,
+                                                        vertical: 8),
+                                                    color: Colors.grey,
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                            'Sua resposta: ${p.optionAnswer?.textOption ?? '---'}'),
+                                                        Text(
+                                                            'Tempo: ${p.responseTimeInSecond}s'),
+                                                      ],
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                              ],
+                            ],
+                          );
+                        }).toList(),
+                      ],
                     ),
                   ),
-                ),
-              ],
-            ),
           ),
         ),
       ),

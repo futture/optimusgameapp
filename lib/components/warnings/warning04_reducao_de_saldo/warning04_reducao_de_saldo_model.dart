@@ -89,7 +89,7 @@ class Warning04ReducaoDeSaldoModel
           isShowWaitingDialogOpen = false;
         }
 
-        _matchWebSocketService?.disconnect();
+        //_matchWebSocketService?.disconnect();
 
         if (context.mounted) {
           Navigator.of(context).pushReplacement(
@@ -147,7 +147,7 @@ class Warning04ReducaoDeSaldoModel
                   const CircularProgressIndicator(),
                   const SizedBox(height: 16),
                   Text(
-                    "Esperando participantes conectarem,\nConectados: $playersConnected / $numberOfPlayers",
+                    "Esperando participantes conectarem",
                   ),
                 ],
               ),

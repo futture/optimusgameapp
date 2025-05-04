@@ -153,7 +153,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
           isShowWaitingDialogOpen = false;
         }
 
-        _matchWebSocketService?.disconnect();
+        //_matchWebSocketService?.disconnect();
 
         onWaitingPlayersCallback?.call();
 

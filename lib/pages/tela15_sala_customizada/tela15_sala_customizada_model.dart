@@ -278,7 +278,7 @@ class Tela15SalaCustomizadaViewModel
           isShowWaitingDialogOpen = false;
         }
 
-        _matchWebSocketService?.disconnect();
+        //_matchWebSocketService?.disconnect();
 
         onWaitingPlayersCallback?.call();
 
@@ -379,23 +379,22 @@ class Tela15SalaCustomizadaViewModel
   }
 
   Future<void> fetchContactsAsync(Function setState) async {
-  var contacts = await userService.fetchContactsAsync();
+    var contacts = await userService.fetchContactsAsync();
 
-  listContacts.clear();
+    listContacts.clear();
 
-  for (var e in contacts) {
-    String phone = (e.phones.isNotEmpty)
-        ? e.phones.first.number.replaceAll(RegExp(r'\s+|\-|\(|\)'), '')
-        : '';
+    for (var e in contacts) {
+      String phone = (e.phones.isNotEmpty)
+          ? e.phones.first.number.replaceAll(RegExp(r'\s+|\-|\(|\)'), '')
+          : '';
 
-    String name = e.displayName.isNotEmpty ? e.displayName : 'Sem Nome';
+      String name = e.displayName.isNotEmpty ? e.displayName : 'Sem Nome';
 
-    if (phone.isNotEmpty) {
-      listContacts[phone] = name;
+      if (phone.isNotEmpty) {
+        listContacts[phone] = name;
+      }
     }
-  }
-  
-  setState(() {});
-}
 
+    setState(() {});
+  }
 }

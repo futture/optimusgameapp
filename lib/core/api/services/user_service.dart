@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:projeto_game_quiz/core/api/common/http_client_api.dart';
 import 'package:projeto_game_quiz/core/api/utils/error_util.dart';
 import 'package:projeto_game_quiz/core/api/utils/token_util.dart';
@@ -14,13 +15,12 @@ class UserService {
 
   Future<List<Contact>> fetchContactsAsync() async {
     if (!kIsWeb) {
-      bool permissionGranted = await FlutterContacts.requestPermission();
+      final status = await Permission.contacts.request();
 
-      if (!permissionGranted) {
+      if (!status.isGranted) {
         print("Permissão negada para acessar contatos");
         return List.empty();
       }
-
       final fetchedContacts =
           await FlutterContacts.getContacts(withProperties: true);
 
