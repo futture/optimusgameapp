@@ -74,7 +74,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
             ),
           ),
           title: Text(
-            'VITÓRIA',
+            'RANKINGS',
             style: FlutterFlowTheme.of(context).headlineSmall.override(
                   fontFamily: 'Inter Tight',
                   color: Color(0xFFEC8D0D),
