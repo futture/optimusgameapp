@@ -33,6 +33,7 @@ class _ModaMenuPagianInicialWidgetState
   void initState() {
     super.initState();
     _model = createModel(context, () => ModaMenuPagianInicialModel());
+    _model.getUserIdAsync();
   }
 
   @override
@@ -676,7 +677,7 @@ class _ModaMenuPagianInicialWidgetState
                                   backgroundColor: Colors.green,
                                 ),
                               );
-                              await Future.delayed(Duration(seconds: 1));
+                              await _model.logoutAsync();
                               context.pushNamed(Tela00LoginWidget.routeName);
                             } catch (e) {
                               print('Erro ao terminar sessão: $e');

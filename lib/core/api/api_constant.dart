@@ -1,4 +1,5 @@
-const BASE_URL = "192.168.184.26:8000/api/v1";
+const BASE_URL = "44.197.208.171:8000/api/v1";
+//"44.211.86.113:8000/api/v1";
 //"192.168.8.181:8000/api/v1";
 //glorious-enchantment-production-6b44.up.railway.app
 //"mathgamebackend-production.up.railway.app/api/v1";

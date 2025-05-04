@@ -176,4 +176,20 @@ class UserService {
       return _errorUtil.handleError(e);
     }
   }
+
+  Future<Map<String, dynamic>> logoutAsync(String userId) async {
+    try {
+      final result = await httpService.request(
+        '/users/${userId}/logout',
+        method: 'PATCH',
+        body: {},
+      );
+
+      await TokenUtil.removeToken();
+
+      return {"isSuccess": true, "data": result};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
 }

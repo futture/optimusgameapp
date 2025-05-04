@@ -1,6 +1,8 @@
 import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warning00_campo_vazio_widget.dart';
+import 'package:projeto_game_quiz/core/api/services/match_service.dart';
 import 'package:projeto_game_quiz/core/api/services/ranking_service.dart';
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
+import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/player_answers_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/ranking_response.dart';
 
@@ -12,8 +14,11 @@ class Tela09HistoricoJodosModel
     extends FlutterFlowModel<Tela09HistoricoJodosWidget> {
   String? userId = "";
   List<RankingResponse>? rankings;
+  MatchResponse? matchInfo;
   List<PlayerAnswersResponse>? historys;
+  MatchService _matchService = MatchService();
   RankingService _rankingService = RankingService();
+
   @override
   void initState(BuildContext context) {}
 
@@ -35,6 +40,9 @@ class Tela09HistoricoJodosModel
     if (result["isSuccess"]) {
       setState(() {
         rankings = result["data"];
+        rankings!.sort((a, b) => (b.createdAt ??
+                DateTime.fromMillisecondsSinceEpoch(0))
+            .compareTo(a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0)));
       });
     } else {
       Warning00ErrorUtil.showDialogMessageError(
@@ -46,11 +54,29 @@ class Tela09HistoricoJodosModel
   }
 
   Future<void> getHistoryUserdAsync(Function setState, matchId) async {
+    await getMatchByMatchIdAsync(setState, matchId);
+
     var result = await _rankingService.getHistoryUserdAsync(userId!, matchId);
 
     if (result["isSuccess"]) {
       setState(() {
         historys = result["data"];
+      });
+    } else {
+      Warning00ErrorUtil.showDialogMessageError(
+        context!,
+        result["error"].detail.message,
+        result["error"].detail.details,
+      );
+    }
+  }
+
+  Future<void> getMatchByMatchIdAsync(Function setState, matchId) async {
+    var result = await _matchService.getMatchByMatchIdAsync(matchId);
+
+    if (result["isSuccess"]) {
+      setState(() {
+        matchInfo = result["data"];
       });
     } else {
       Warning00ErrorUtil.showDialogMessageError(

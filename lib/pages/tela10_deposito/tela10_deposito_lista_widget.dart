@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'package:projeto_game_quiz/Atualiza%C3%A7%C3%A3o/tela10_deposito_e_x_p_r_e_s_s/tela10_deposito_e_x_p_r_e_s_s_widget.dart';
+//import 'package:projeto_game_quiz/Atualiza%C3%A7%C3%A3o/tela10_deposito_e_x_p_r_e_s_s/tela10_deposito_e_x_p_r_e_s_s_widget.dart';
 import 'package:projeto_game_quiz/pages/payment/payment_forms/payment_form.dart';
 
 import '/flutter_flow/flutter_flow_icon_button.dart';
@@ -637,115 +637,115 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget> {
     );
   }
 
-  AlertDialog _empressDialog(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: Row(
-        children: const [
-          Icon(Icons.flash_on, color: Colors.deepPurple),
-          SizedBox(width: 8),
-          Text(
-            'Express',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.deepPurple,
-            ),
-          ),
-        ],
-      ),
-      content: SizedBox(
-        width: 350,
-        child: Tela10DepositoEXPRESSWidget(),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text(
-            'Fechar',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.deepPurple,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  // AlertDialog _empressDialog(BuildContext context) {
+  //   return AlertDialog(
+  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+  //     title: Row(
+  //       children: const [
+  //         Icon(Icons.flash_on, color: Colors.deepPurple),
+  //         SizedBox(width: 8),
+  //         Text(
+  //           'Express',
+  //           style: TextStyle(
+  //             fontSize: 20,
+  //             fontWeight: FontWeight.bold,
+  //             color: Colors.deepPurple,
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //     content: SizedBox(
+  //       width: 350,
+  //       child: Tela10DepositoEXPRESSWidget(),
+  //     ),
+  //     actions: [
+  //       TextButton(
+  //         onPressed: () => Navigator.pop(context),
+  //         child: const Text(
+  //           'Fechar',
+  //           style: TextStyle(
+  //             fontWeight: FontWeight.bold,
+  //             color: Colors.deepPurple,
+  //           ),
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
-  AlertDialog _afrimoneyUnitelDialog(BuildContext context, String method) {
-    return AlertDialog(
-      title: Text(method,
-          style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.deepPurple)),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          TextField(
-              decoration: InputDecoration(
-                  labelText: 'Número de Telefone',
-                  labelStyle: TextStyle(color: Colors.deepPurple))),
-          SizedBox(height: 12),
-          TextField(
-              decoration: InputDecoration(
-                  labelText: 'Montante',
-                  labelStyle: TextStyle(color: Colors.deepPurple))),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text('Fechar',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold, color: Colors.deepPurple)),
-        ),
-      ],
-    );
-  }
+  // AlertDialog _afrimoneyUnitelDialog(BuildContext context, String method) {
+  //   return AlertDialog(
+  //     title: Text(method,
+  //         style: TextStyle(
+  //             fontSize: 20,
+  //             fontWeight: FontWeight.bold,
+  //             color: Colors.deepPurple)),
+  //     content: Column(
+  //       mainAxisSize: MainAxisSize.min,
+  //       children: const [
+  //         TextField(
+  //             decoration: InputDecoration(
+  //                 labelText: 'Número de Telefone',
+  //                 labelStyle: TextStyle(color: Colors.deepPurple))),
+  //         SizedBox(height: 12),
+  //         TextField(
+  //             decoration: InputDecoration(
+  //                 labelText: 'Montante',
+  //                 labelStyle: TextStyle(color: Colors.deepPurple))),
+  //       ],
+  //     ),
+  //     actions: [
+  //       TextButton(
+  //         onPressed: () => Navigator.pop(context),
+  //         child: Text('Fechar',
+  //             style: TextStyle(
+  //                 fontWeight: FontWeight.bold, color: Colors.deepPurple)),
+  //       ),
+  //     ],
+  //   );
+  // }
 
-  void _showCommonDialog({
-    required BuildContext context,
-    required String method,
-    required Icon icon,
-    required Color color,
-    required Widget content,
-  }) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            icon,
-            const SizedBox(width: 8),
-            Text(
-              method,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
-          ],
-        ),
-        content: SizedBox(width: 350, child: content),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Fechar',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // void _showCommonDialog({
+  //   required BuildContext context,
+  //   required String method,
+  //   required Icon icon,
+  //   required Color color,
+  //   required Widget content,
+  // }) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (_) => AlertDialog(
+  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+  //       title: Row(
+  //         children: [
+  //           icon,
+  //           const SizedBox(width: 8),
+  //           Text(
+  //             method,
+  //             style: TextStyle(
+  //               fontSize: 20,
+  //               fontWeight: FontWeight.bold,
+  //               color: color,
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //       content: SizedBox(width: 350, child: content),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.pop(context),
+  //           child: Text(
+  //             'Fechar',
+  //             style: TextStyle(
+  //               fontWeight: FontWeight.bold,
+  //               color: color,
+  //             ),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   void _showPaymentDialog(BuildContext context, String method) {
     showDialog(

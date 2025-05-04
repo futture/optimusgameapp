@@ -26,10 +26,13 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   int? playersConnected;
   int elapsedSeconds = 0;
   int secondsRemaining = 10;
+  int currentposition = 0;
   String answerOptionId = "";
   String? lastQuestionHandled;
   bool isButtonDisabled = false;
   int questionsAlreadyPresented = 0;
+  Map<String, double> totalScorePerPlayer = {};
+
   FormFieldController<String>? radioGroupValueController;
 
   MatchResponse? matchInfo;
@@ -56,6 +59,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   void cancelarTimers() {
     countdownTimer?.cancel();
     countupTimer?.cancel();
+    safetyTimeout?.cancel();
   }
 
   Future<void> getUserIdAsync() async {
@@ -101,12 +105,12 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
 
   Future<void> setupGame(
       Function setState, QuestionResponse? nextQuestion) async {
-    await fetchNextQuestionMatchAsync(setState, nextQuestion);
+    await fetchNextQuestionMatchAsync(setState, nextQuestion, 0);
     await getWebSocketEveryoneWhoRespondedAsync(setState);
   }
 
   Future<void> fetchNextQuestionMatchAsync(
-      Function setState, QuestionResponse? nextQuestion) async {
+      Function setState, QuestionResponse? nextQuestion, pts) async {
     if (userId == null || userId!.isEmpty) await getUserIdAsync();
 
     setState(() {
@@ -115,11 +119,15 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
       radioGroupValueController?.value = null;
     });
 
+    final _currentposition = getPlayerPosition(userId!, totalScorePerPlayer);
+
     if (nextQuestion != null) {
       setState(() {
         question = nextQuestion;
         isButtonDisabled = false;
         isLoading = false;
+        points += pts;
+        currentposition = _currentposition;
       });
       _startCountdownTimer(setState);
     }
@@ -160,6 +168,10 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
           closeDialogWaitingPlayer();
           showDialogWaitingPlayer(currentContext!);
 
+          if (safetyTimeout?.isActive ?? false) {
+              safetyTimeout?.cancel();
+            }
+            
           safetyTimeout = Timer(const Duration(seconds: 60), () {
             if (!gameFinished) {
               _questionWebSocketService?.disconnect();
@@ -191,11 +203,23 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
           lastQuestionHandled =
               stats.gameFinished! ? stats.questionId : stats.nextQuestion!.id;
 
-          setState(() {
-            points += stats.hits?.where((e) => e.playerId == userId).fold(
-                    0.0, (sum, e) => sum! + (e.score?.toDouble() ?? 0.0)) ??
-                0.0;
-          });
+          var pts = stats.hits
+                  ?.where((e) => e.playerId == userId)
+                  .fold(0.0, (sum, e) => sum + (e.score?.toDouble() ?? 0.0)) ??
+              0.0;
+
+          for (var hit in stats.hits ?? []) {
+            final playerId = hit.playerId;
+            final score = hit.score?.toDouble() ?? 0.0;
+
+            if (totalScorePerPlayer.containsKey(playerId)) {
+              totalScorePerPlayer[playerId] =
+                  totalScorePerPlayer[playerId]! + score;
+            } else {
+              totalScorePerPlayer[playerId] = score;
+            }
+          }
+
           closeDialogWaitingPlayer();
           questionsAlreadyPresented = stats.totalQuestionsResponded!;
 
@@ -204,7 +228,8 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
             await endGameFlow(setState,
                 gameResultFromBackend: stats.gameResult);
           } else if (stats.nextQuestion != null) {
-            await fetchNextQuestionMatchAsync(setState, stats.nextQuestion);
+            await fetchNextQuestionMatchAsync(
+                setState, stats.nextQuestion, pts);
           }
         },
         onError: (e) {
@@ -239,31 +264,34 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
     currentContext = context;
 
     showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        title: const Text("Aguardando jogadores..."),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text("Esperando todos responderem a pergunta..."),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              _questionWebSocketService?.disconnect();
-              Navigator.of(currentContext!).push(
-                MaterialPageRoute(builder: (_) => Tela03PrincipalWidget()),
-              );
-            },
-            child: const Text("Sair"),
-          ),
-        ],
-      ),
-    );
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => WillPopScope(
+              onWillPop: () async => false,
+              child: AlertDialog(
+                title: const Text("Aguardando jogadores..."),
+                content: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text("Esperando todos responderem a pergunta..."),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      _questionWebSocketService?.disconnect();
+                      Navigator.of(currentContext!).push(
+                        MaterialPageRoute(
+                            builder: (_) => Tela03PrincipalWidget()),
+                      );
+                    },
+                    child: const Text("Sair"),
+                  ),
+                ],
+              ),
+            ));
   }
 
   void closeDialogWaitingPlayer() {
@@ -301,23 +329,38 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
 
   void showDialogErrorAndExit(String title, String message) {
     showDialog(
-      context: currentContext!,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () {
-              _questionWebSocketService!.disconnect();
-              Navigator.of(currentContext!).push(
-                MaterialPageRoute(builder: (_) => Tela03PrincipalWidget()),
-              );
-            },
-            child: const Text("Voltar ao início"),
-          ),
-        ],
-      ),
-    );
+        context: currentContext!,
+        barrierDismissible: false,
+        builder: (_) => WillPopScope(
+              onWillPop: () async => false,
+              child: AlertDialog(
+                title: Text(title),
+                content: Text(message),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      _questionWebSocketService!.disconnect();
+                      Navigator.of(currentContext!).push(
+                        MaterialPageRoute(
+                            builder: (_) => Tela03PrincipalWidget()),
+                      );
+                    },
+                    child: const Text("Voltar ao início"),
+                  ),
+                ],
+              ),
+            ));
+  }
+
+  int getPlayerPosition(String userId, Map<String, double> ranking) {
+    final orderedList = ranking.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    for (int i = 0; i < orderedList.length; i++) {
+      if (orderedList[i].key == userId) {
+        return i + 1;
+      }
+    }
+    return -1;
   }
 }

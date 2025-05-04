@@ -1,7 +1,7 @@
 class RankingResponse {
   String? id;
-  int? totalScore;
-  String? createdAt;
+  double? totalScore;
+  DateTime? createdAt;
   int? totalCorrectAnswer;
   int? totalWrongAnswer;
   int? totalResponseTime;
@@ -23,7 +23,7 @@ class RankingResponse {
   RankingResponse.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     totalScore = json['totalScore'];
-    createdAt = json['createdAt'];
+    createdAt = DateTime.parse(json['createdAt']);
     totalCorrectAnswer = json['totalCorrectAnswer'];
     totalWrongAnswer = json['totalWrongAnswer'];
     totalResponseTime = json['totalResponseTime'];
@@ -36,7 +36,7 @@ class RankingResponse {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['totalScore'] = this.totalScore;
-    data['createdAt'] = this.createdAt;
+    data['createdAt'] = this.createdAt!.toIso8601String();
     data['totalCorrectAnswer'] = this.totalCorrectAnswer;
     data['totalWrongAnswer'] = this.totalWrongAnswer;
     data['totalResponseTime'] = this.totalResponseTime;

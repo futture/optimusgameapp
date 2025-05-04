@@ -4,8 +4,6 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'tela10_deposito_e_x_p_r_e_s_s_model.dart';
 export 'tela10_deposito_e_x_p_r_e_s_s_model.dart';
 

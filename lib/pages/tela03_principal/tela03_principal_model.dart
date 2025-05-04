@@ -165,12 +165,9 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
         timerMilliseconds = remaining.inMilliseconds;
       });
 
-      // if (remaining.inSeconds <= 4 && !alerted && remaining.inSeconds > 0) {
-      //   alerted = true;
-      //   await _callApiBeforeMatchStart(match.id);
-      // }
-      if (remaining.inSeconds == 0 && !hasStartedMatch) {
-        hasStartedMatch = true; // Impede chamadas repetidas
+
+      if (remaining.inSeconds >= 4 && remaining.inSeconds <=7  && !hasStartedMatch) {
+        hasStartedMatch = true; 
         setState(() => alerted = false);
 
         var isExist =

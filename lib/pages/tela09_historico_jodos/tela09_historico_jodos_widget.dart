@@ -151,7 +151,10 @@ class _Tela09HistoricoJodosWidgetState
                                     children: [
                                       Expanded(
                                         flex: 2,
-                                        child: Text('${jogo.createdAt}'),
+                                        child: Text(jogo.createdAt != null
+                                            ? DateFormat('dd/MM H:mm')
+                                                .format(jogo.createdAt!)
+                                            : ''),
                                       ),
                                       Expanded(
                                         flex: 2,
@@ -295,9 +298,11 @@ class _Tela09HistoricoJodosWidgetState
                                                               .start,
                                                       children: [
                                                         Text(
-                                                            'Sua resposta: ${p.optionAnswer?.textOption ?? '---'}'),
+                                                            'SUA RESPOSTA: ${p.optionAnswer?.textOption ?? '---'}'),
                                                         Text(
-                                                            'Tempo: ${p.responseTimeInSecond}s'),
+                                                            'TEMPO DE RESPOSTA: ${p.responseTimeInSecond}s'),
+                                                        Text(
+                                                            'PONTO: ${_model.matchInfo == null ? 0 : _model.matchInfo!.room!.roomConfiguration!.timeToRespond - p.responseTimeInSecond!}'),
                                                       ],
                                                     ),
                                                   ),

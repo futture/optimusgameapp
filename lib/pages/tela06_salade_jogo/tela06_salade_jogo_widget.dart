@@ -175,7 +175,12 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildInfoBox('POSIÇÃO:', '10'),
+          _buildInfoPositionBox(
+              'POSIÇÃO:',
+              _model.currentposition,
+              _model.matchInfo == null
+                  ? 1
+                  : _model.matchInfo!.room!.roomConfiguration!.numberOfPlayers),
           const SizedBox(width: 10.0),
           _buildInfoBox('PONTOS:', '${_model.points}'),
         ],
@@ -201,6 +206,45 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
             ),
             Text(
               value,
+              style: _getInfoTextStyle(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoPositionBox(String label, int value, int totalPlayers) {
+    Color getColorByRelativePosition(int pos, int total) {
+      if (pos == 1) return const Color(0xFF01BF01);
+      if (pos == 2) return const Color(0xFF7ED957);
+
+      final percentile = pos / total;
+      if (percentile <= 0.5) {
+        return const Color(0xFFFFA500);
+      } else {
+        return const Color(0xFFFF4C4C);
+      }
+    }
+
+    return Container(
+      width: 170.0,
+      height: 45.0,
+      decoration: BoxDecoration(
+        color: getColorByRelativePosition(value, totalPlayers),
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              label,
+              style: _getInfoTextStyle(),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              value.toString(),
               style: _getInfoTextStyle(),
             ),
           ],
