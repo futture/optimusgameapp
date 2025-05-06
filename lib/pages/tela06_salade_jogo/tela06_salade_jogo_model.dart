@@ -169,10 +169,10 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
           showDialogWaitingPlayer(currentContext!);
 
           if (safetyTimeout?.isActive ?? false) {
-              safetyTimeout?.cancel();
-            }
-            
-          safetyTimeout = Timer(const Duration(seconds: 60), () {
+            safetyTimeout?.cancel();
+          }
+
+          safetyTimeout = Timer(const Duration(seconds: 120), () {
             if (!gameFinished) {
               _questionWebSocketService?.disconnect();
               Navigator.of(currentContext!).push(
@@ -207,7 +207,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
                   ?.where((e) => e.playerId == userId)
                   .fold(0.0, (sum, e) => sum + (e.score?.toDouble() ?? 0.0)) ??
               0.0;
-
+          print("[INFO] - Pontos: ${pts}");
           for (var hit in stats.hits ?? []) {
             final playerId = hit.playerId;
             final score = hit.score?.toDouble() ?? 0.0;

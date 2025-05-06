@@ -123,6 +123,7 @@ class HttpClientService {
         }
       } else {
         final decoded = utf8.decode(response.bodyBytes);
+        
         final errorResponse = DetailErrorResponse.fromJson(jsonDecode(decoded));
         throw errorResponse;
       }
@@ -130,4 +131,6 @@ class HttpClientService {
       rethrow;
     }
   }
+
+  
 }

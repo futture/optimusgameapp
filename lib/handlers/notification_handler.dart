@@ -137,6 +137,17 @@ class NotificationHandler {
                 ),
               );
             }
+          } else if (data["action"] == "DISQUALIFIED_FROM_MATCH") {
+            if (context != null) {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => Tela13DadosDePartidaWidget(
+                      matchId: data["matchId"],
+                      notDisplayButton: true,
+                      isDesqualification: true),
+                ),
+              );
+            }
           }
         }
       }

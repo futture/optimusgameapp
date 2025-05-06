@@ -1,13 +1,16 @@
-import 'package:projeto_game_quiz/pages/tela03_principal/tela03_principal_widget.dart';
-
-import '/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
-import 'tela09_historico_jodos_model.dart';
-export 'tela09_historico_jodos_model.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:projeto_game_quiz/components/moda_menu_pagian_inicial_widget.dart';
+import 'package:projeto_game_quiz/core/models/responses/ranking_response.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_icon_button.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_model.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_util.dart';
+import 'package:projeto_game_quiz/pages/tela09_historico_jodos/tela09_historico_jodos_model.dart';
 
 class Tela09HistoricoJodosWidget extends StatefulWidget {
   const Tela09HistoricoJodosWidget({super.key});
-
   static String routeName = 'Tela09HistoricoJodos';
   static String routePath = '/tela09HistoricoJodos';
 
@@ -20,6 +23,7 @@ class _Tela09HistoricoJodosWidgetState
     extends State<Tela09HistoricoJodosWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   late Tela09HistoricoJodosModel _model;
+  bool _expandPremioInfo = false;
 
   @override
   void initState() {
@@ -36,292 +40,386 @@ class _Tela09HistoricoJodosWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-      },
-      child: Scaffold(
-        key: scaffoldKey,
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          automaticallyImplyLeading: false,
-          leading: Padding(
-            padding: const EdgeInsetsDirectional.only(start: 18.0),
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => Tela03PrincipalWidget()),
-                );
-              },
+    return Scaffold(
+      key: scaffoldKey,
+      resizeToAvoidBottomInset: true,
+      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+      appBar: AppBar(
+        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        automaticallyImplyLeading: false,
+        leading: Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(18.0, 0.0, 0.0, 0.0),
+          child: FlutterFlowIconButton(
+            borderRadius: 8.0,
+            buttonSize: 45.0,
+            fillColor: FlutterFlowTheme.of(context).primaryBackground,
+            icon: const FaIcon(
+              FontAwesomeIcons.bars,
+              color: Colors.black,
+              size: 24.0,
             ),
+            onPressed: () async {
+              await showModalBottomSheet(
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                enableDrag: false,
+                context: context,
+                builder: (context) {
+                  return GestureDetector(
+                    onTap: () => FocusScope.of(context).unfocus(),
+                    child: Padding(
+                      padding: MediaQuery.viewInsetsOf(context),
+                      child: ModaMenuPagianInicialWidget(),
+                    ),
+                  );
+                },
+              ).then((value) => safeSetState(() {}));
+            },
           ),
-          title: const Text(
-            'HISTÓRICO DE JOGOS',
-            style: TextStyle(
-              color: Color(0xFFEC8D0D),
-              fontSize: 20.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          centerTitle: true,
-          elevation: 4.0,
         ),
-        body: SafeArea(
-          top: true,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25.0),
-            child: _model.rankings == null
-                ? const Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
+        title: Text(
+          'GAME QUIZ',
+          style: FlutterFlowTheme.of(context).headlineSmall.override(
+                fontFamily: 'Inter Tight',
+                color: const Color(0xFFEC8D0D),
+                letterSpacing: 0.0,
+              ),
+        ),
+        centerTitle: true,
+        elevation: 4.0,
+      ),
+      body: _model.isLoadingRanking
+          ? const Center(child: CircularProgressIndicator())
+          : _model.rankings.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.videogame_asset_outlined,
+                          size: 48, color: Colors.grey),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Nenhum histórico de jogos encontrado',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      const SizedBox(height: 16),
+                      IconButton(
+                        icon: const Icon(Icons.refresh),
+                        onPressed: () => _model.load(setState),
+                      ),
+                    ],
+                  ),
+                )
+              : SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
-                        // Cabeçalho
-                        Container(
-                          height: 50.0,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(8.0)),
+                        Card(
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: const [
-                              Expanded(
-                                flex: 2,
-                                child: Text('DATA',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w200,
-                                        color: Colors.black)),
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: Text('RESULTADO',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w200,
-                                        color: Colors.black)),
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: Text('TEMPO(s)',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w200,
-                                        color: Colors.black)),
-                              ),
-                              Expanded(
-                                flex: 1,
-                                child: Text('PONTOS',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w200,
-                                        color: Colors.black)),
-                              ),
-                            ],
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _buildHeaderItem('DATA', flex: 1),
+                                _buildHeaderItem('RESULTADO', flex: 2),
+                                _buildHeaderItem('TEMPO', flex: 0),
+                                _buildHeaderItem('PONTO', flex: 1),
+                              ],
+                            ),
                           ),
                         ),
-
-                        ..._model.rankings!.asMap().entries.map((entry) {
-                          final jogo = entry.value;
-
-                          return Column(
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    jogo.isExpanded = !jogo.isExpanded!;
-                                  });
-                                  if (jogo.isExpanded!) {
-                                    _model.historys = null;
-                                    _model.getHistoryUserdAsync(
-                                        setState, jogo.matchId);
-                                  }
-                                },
-                                child: Container(
-                                  height: 50.0,
-                                  margin: const EdgeInsets.only(top: 10),
-                                  decoration: BoxDecoration(
-                                    color: jogo.isWinner == true
-                                        ? Colors.greenAccent
-                                        : Colors.redAccent,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10.0),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        flex: 2,
-                                        child: Text(jogo.createdAt != null
-                                            ? DateFormat('dd/MM H:mm')
-                                                .format(jogo.createdAt!)
-                                            : ''),
-                                      ),
-                                      Expanded(
-                                        flex: 2,
-                                        child: Text(jogo.isWinner == true
-                                            ? 'Vencedor'
-                                            : 'Perdedor'),
-                                      ),
-                                      Expanded(
-                                        flex: 2,
-                                        child: Text('${jogo.totalResponseTime}',
-                                            overflow: TextOverflow.ellipsis,
-                                            maxLines: 1,
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.w600)),
-                                      ),
-                                      // Expanded(
-                                      //   flex: 2,
-                                      //   child: Text('${jogo.totalWrongAnswer}',
-                                      //       overflow: TextOverflow.ellipsis,
-                                      //       maxLines: 1,
-                                      //       style: TextStyle(
-                                      //           fontWeight: FontWeight.w600)),
-                                      // ),
-                                      // Expanded(
-                                      //   flex: 2,
-                                      //   child: Text(
-                                      //       '${jogo.totalCorrectAnswer}',
-                                      //       overflow: TextOverflow.ellipsis,
-                                      //       maxLines: 1,
-                                      //       style: TextStyle(
-                                      //           fontWeight: FontWeight.w600)),
-                                      // ),
-                                      Expanded(
-                                        flex: 1,
-                                        child: Text('${jogo.totalScore}',
-                                            overflow: TextOverflow.ellipsis,
-                                            maxLines: 1,
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.w600)),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              if (jogo.isExpanded!) ...[
-                                if (_model.historys == null)
-                                  const Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Center(
-                                        child: CircularProgressIndicator()),
-                                  )
-                                else
-                                  Container(
-                                    margin: const EdgeInsets.only(
-                                        top: 6, bottom: 10),
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(
-                                          color: Colors.grey.shade300),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: (_model.historys ?? [])
-                                          .asMap()
-                                          .entries
-                                          .map((entry) {
-                                        final p = entry.value;
-
-                                        return GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              p.isExpanded = !p.isExpanded!;
-                                            });
-                                          },
-                                          child: Container(
-                                            margin: const EdgeInsets.symmetric(
-                                                vertical: 4),
-                                            decoration: BoxDecoration(
-                                              color:
-                                                  (p.optionAnswer?.isCorrect ??
-                                                          false)
-                                                      ? Colors.green[100]
-                                                      : Colors.red[100],
-                                              borderRadius:
-                                                  BorderRadius.circular(6),
-                                              border: Border.all(
-                                                  color: (p.optionAnswer
-                                                              ?.isCorrect ??
-                                                          false)
-                                                      ? Colors.green
-                                                      : Colors.red),
-                                            ),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Padding(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      vertical: 8,
-                                                      horizontal: 10),
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Flexible(
-                                                        child: Text(
-                                                          p.question
-                                                                  ?.utterance ??
-                                                              '',
-                                                          style: const TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600),
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          maxLines: 1,
-                                                        ),
-                                                      ),
-                                                      Icon(p.isExpanded!
-                                                          ? Icons.expand_less
-                                                          : Icons.expand_more),
-                                                    ],
-                                                  ),
-                                                ),
-                                                if (p.isExpanded!)
-                                                  Container(
-                                                    width: double.infinity,
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 14,
-                                                        vertical: 8),
-                                                    color: Colors.grey,
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                            'SUA RESPOSTA: ${p.optionAnswer?.textOption ?? '---'}'),
-                                                        Text(
-                                                            'TEMPO DE RESPOSTA: ${p.responseTimeInSecond}s'),
-                                                        Text(
-                                                            'PONTO: ${_model.matchInfo == null ? 0 : _model.matchInfo!.room!.roomConfiguration!.timeToRespond - p.responseTimeInSecond!}'),
-                                                      ],
-                                                    ),
-                                                  ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ),
-                              ],
-                            ],
-                          );
-                        }).toList(),
+                        const SizedBox(height: 12),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _model.rankings.length,
+                          itemBuilder: (context, index) {
+                            final ranking = _model.rankings[index];
+                            return _buildGameCard(ranking);
+                          },
+                        ),
                       ],
                     ),
                   ),
+                ),
+    );
+  }
+
+  Widget _buildGameCard(RankingResponse ranking) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        children: [
+          ListTile(
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    ranking.createdAt != null
+                        ? DateFormat('dd/MM HH:mm').format(ranking.createdAt!)
+                        : '--/-- --:--',
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: ranking.isWinner!
+                          ? Colors.green.withOpacity(0.2)
+                          : Colors.red.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      ranking.isWinner! ? 'Vitória' : 'Derrota',
+                      style: TextStyle(
+                        color: ranking.isWinner! ? Colors.green : Colors.red,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    '${ranking.totalResponseTime ?? 0} s',
+                    style: const TextStyle(fontSize: 14),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    '${ranking.totalScore ?? 0}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+            trailing: Icon(
+              ranking.isExpanded ?? false
+                  ? Icons.keyboard_arrow_up
+                  : Icons.keyboard_arrow_down,
+            ),
+            onTap: () {
+              setState(() {
+                ranking.isExpanded = !(ranking.isExpanded ?? false);
+              });
+              if (ranking.isExpanded ?? false) {
+                _model.getHistoryUserdAsync(setState, ranking.matchId);
+              }
+            },
+          ),
+          if (ranking.isExpanded ?? false) ...[
+            const Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  _buildPrizeInfoSection(ranking),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Detalhes das Perguntas',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildQuestionsList(),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrizeInfoSection(RankingResponse ranking) {
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _expandPremioInfo = !_expandPremioInfo;
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.blue[50],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.blue),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Detalhes do Prêmio',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
+                Icon(
+                  _expandPremioInfo ? Icons.expand_less : Icons.expand_more,
+                  color: Colors.blue,
+                ),
+              ],
+            ),
           ),
         ),
+        if (_expandPremioInfo && _model.matchInfo != null) ...[
+          const SizedBox(height: 12),
+          _buildDetailRow(
+            'Valor do Prêmio',
+            '${!ranking.isWinner! ? 0 : _model.matchInfo!.matchPrize?.totalGain ?? 0} AOA',
+          ),
+          _buildDetailRow(
+            'Taxa de Jogo',
+            '${(!ranking.isWinner! ? 0 : _model.matchInfo!.room?.roomConfiguration?.premiumRate ?? 0) * 100}%',
+          ),
+          _buildDetailRow(
+            'Ganho Líquido',
+            '${!ranking.isWinner! ? 0 : _model.matchInfo!.matchPrize?.netPremium ?? 0} AOA',
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildQuestionsList() {
+    if (_model.isLoadingHistory) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_model.historys.isEmpty) {
+      return const Center(
+        child: Text('Nenhuma pergunta encontrada'),
+      );
+    }
+
+    return Column(
+      children: _model.historys.map((history) {
+        return _buildQuestionItem(
+          history.question?.utterance ?? 'Pergunta não disponível',
+          history.optionAnswer?.textOption ?? 'Resposta não disponível',
+          history.optionAnswer?.isCorrect ?? false,
+          history.responseTimeInSecond ?? 0,
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildHeaderItem(String text, {int flex = 1}) {
+    return Expanded(
+      flex: flex,
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+          color: Colors.grey,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(color: Colors.grey),
+          ),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuestionItem(
+      String question, String answer, bool isCorrect, int time) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      elevation: 0,
+      color: isCorrect
+          ? Colors.green.withOpacity(0.1)
+          : Colors.red.withOpacity(0.1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: isCorrect ? Colors.green : Colors.red,
+          width: 1,
+        ),
+      ),
+      child: ExpansionTile(
+        title: Text(
+          question,
+          style: const TextStyle(fontSize: 14),
+        ),
+        trailing: Text(
+          '$time s',
+          style: TextStyle(
+            color: isCorrect ? Colors.green : Colors.red,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Sua resposta: $answer',
+                  style: TextStyle(
+                    color: isCorrect ? Colors.green : Colors.red,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Tempo de resposta: $time segundos',
+                  style: const TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Pontos: ${isCorrect ? (30 - time) : 0}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

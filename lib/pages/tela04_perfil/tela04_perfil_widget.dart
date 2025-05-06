@@ -1,4 +1,4 @@
-import 'package:projeto_game_quiz/pages/tela11_editar_perfil/tela11_editar_perfil_widget.dart';
+import 'package:projeto_game_quiz/pages/tela17_notificacao/tela17_notificacao_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -456,8 +456,13 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                         ),
                         FFButtonWidget(
                           onPressed: () async {
-                            context
-                                .pushNamed(Tela11EditarPerfilWidget.routeName);
+                            // Navigator.of(context).push(
+                            //   MaterialPageRoute(
+                            //     builder: (_) => Tela17NotificacaoViewWidget(),
+                            //   ),
+                            // );
+                            context.pushNamed(
+                                Tela17NotificacaoViewWidget.routeName);
                           },
                           text: '',
                           options: FFButtonOptions(

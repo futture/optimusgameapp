@@ -13,9 +13,11 @@ import 'package:flutter/material.dart';
 class Tela09HistoricoJodosModel
     extends FlutterFlowModel<Tela09HistoricoJodosWidget> {
   String? userId = "";
-  List<RankingResponse>? rankings;
   MatchResponse? matchInfo;
-  List<PlayerAnswersResponse>? historys;
+  bool isLoadingRanking = false;
+  bool isLoadingHistory = false;
+  List<RankingResponse> rankings = List.empty();
+  List<PlayerAnswersResponse> historys= List.empty();
   MatchService _matchService = MatchService();
   RankingService _rankingService = RankingService();
 
@@ -35,16 +37,24 @@ class Tela09HistoricoJodosModel
   }
 
   Future<void> getRankingByUserdAsync(Function setState) async {
+    setState(() {
+      isLoadingRanking = true;
+    });
     var result = await _rankingService.getRankingByUserdAsync(userId!);
 
     if (result["isSuccess"]) {
       setState(() {
         rankings = result["data"];
-        rankings!.sort((a, b) => (b.createdAt ??
+
+        rankings.sort((a, b) => (b.createdAt ??
                 DateTime.fromMillisecondsSinceEpoch(0))
             .compareTo(a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0)));
+        isLoadingRanking = false;
       });
     } else {
+      setState(() {
+        isLoadingRanking = false;
+      });
       Warning00ErrorUtil.showDialogMessageError(
         context!,
         result["error"].detail.message,
@@ -55,14 +65,20 @@ class Tela09HistoricoJodosModel
 
   Future<void> getHistoryUserdAsync(Function setState, matchId) async {
     await getMatchByMatchIdAsync(setState, matchId);
-
+    setState(() {
+      isLoadingHistory = true;
+    });
     var result = await _rankingService.getHistoryUserdAsync(userId!, matchId);
 
     if (result["isSuccess"]) {
       setState(() {
         historys = result["data"];
+        isLoadingHistory = false;
       });
     } else {
+      setState(() {
+        isLoadingHistory = false;
+      });
       Warning00ErrorUtil.showDialogMessageError(
         context!,
         result["error"].detail.message,

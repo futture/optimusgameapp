@@ -1,4 +1,5 @@
 import 'package:projeto_game_quiz/core/models/common/error_response.dart';
+import 'package:projeto_game_quiz/core/models/responses/match_prize_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 
@@ -28,6 +29,7 @@ class MatchResponse {
   final DateTime matchStartDate;
   final DateTime endDateOfMatch;
   final RoomResponse? room;
+  final MatchPrizeResponse? matchPrize;
   bool? isUserRegistered = false;
   final List<MatchPlayerResponse>? matchPlayers;
 
@@ -37,6 +39,7 @@ class MatchResponse {
       required this.statusMatch,
       required this.matchStartDate,
       required this.endDateOfMatch,
+      required this.matchPrize,
       required this.room,
       required this.matchPlayers,
       this.isUserRegistered});
@@ -49,6 +52,7 @@ class MatchResponse {
       endDateOfMatch: DateTime.parse(json["endDateOfMatch"]),
       createdAt: DateTime.parse(json["createdAt"]),
       room: RoomResponse.fromJson(json["room"]),
+      matchPrize: MatchPrizeResponse.fromJson(json["matchPrize"]),
       matchPlayers: (json["matchPlayers"] as List<dynamic>)
           .map((e) => MatchPlayerResponse.fromJson(e))
           .toList(),

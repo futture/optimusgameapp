@@ -1,23 +1,27 @@
-import 'package:projeto_game_quiz/components/warnings/warning04_reducao_de_saldo/warning04_reducao_de_saldo_widget.dart';
-import 'package:projeto_game_quiz/core/api/services/match_service.dart';
-import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
-import 'package:projeto_game_quiz/pages/tela03_principal/tela03_principal_widget.dart';
-
-import '/flutter_flow/flutter_flow_icon_button.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
-import 'tela13_dados_de_partida_model.dart';
-export 'tela13_dados_de_partida_model.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:projeto_game_quiz/components/moda_menu_pagian_inicial_widget.dart';
+import 'package:projeto_game_quiz/components/warnings/warning04_reducao_de_saldo/warning04_reducao_de_saldo_widget.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_icon_button.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_model.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_util.dart';
+import 'package:projeto_game_quiz/pages/tela03_principal/tela03_principal_widget.dart';
+import 'package:projeto_game_quiz/pages/tela13_dados_de_partida/tela13_dados_de_partida_model.dart';
 
 class Tela13DadosDePartidaWidget extends StatefulWidget {
   final String? matchId;
   final bool? recebeuNotificaca;
   final bool? notDisplayButton;
+  final bool? isDesqualification;
 
-  const Tela13DadosDePartidaWidget(
-      {super.key, this.matchId, this.recebeuNotificaca, this.notDisplayButton});
+  const Tela13DadosDePartidaWidget({
+    super.key,
+    this.matchId,
+    this.recebeuNotificaca,
+    this.notDisplayButton,
+    this.isDesqualification,
+  });
 
   static String routeName = 'Tela13DadosDePartida';
   static String routePath = '/tela13DadosDePartida';
@@ -29,443 +33,290 @@ class Tela13DadosDePartidaWidget extends StatefulWidget {
 
 class _Tela13DadosDePartidaWidgetState
     extends State<Tela13DadosDePartidaWidget> {
-  MatchResponse? matchInfo;
   late Tela13DadosDePartidaModel _model;
-  final matchService = MatchService();
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
-    fetchMatchById();
     _model = createModel(context, () => Tela13DadosDePartidaModel());
+    _model.fetchMatchById(setState, widget.matchId);
   }
 
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
-  }
-
-  Future<void> fetchMatchById() async {
-    final result = await matchService.getMatchByMatchIdAsync(widget.matchId!);
-    if (result["isSuccess"] == true) {
-      setState(() => matchInfo = result["data"]);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-        FocusManager.instance.primaryFocus?.unfocus();
-      },
-      child: Scaffold(
-        key: scaffoldKey,
+    return Scaffold(
+      key: scaffoldKey,
+      resizeToAvoidBottomInset: true,
+      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+      appBar: AppBar(
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-          automaticallyImplyLeading: false,
-          leading: Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(18.0, 0.0, 0.0, 0.0),
-            child: FlutterFlowIconButton(
-              borderRadius: 8.0,
-              buttonSize: 45.0,
-              fillColor: FlutterFlowTheme.of(context).primaryBackground,
-              icon: Icon(
-                Icons.arrow_back,
-                color: FlutterFlowTheme.of(context).primaryText,
-                size: 24.0,
-              ),
-              onPressed: () async {
-                context.safePop();
-              },
+        automaticallyImplyLeading: false,
+        leading: Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(18.0, 0.0, 0.0, 0.0),
+          child: FlutterFlowIconButton(
+            borderRadius: 8.0,
+            buttonSize: 45.0,
+            fillColor: FlutterFlowTheme.of(context).primaryBackground,
+            icon: const FaIcon(
+              FontAwesomeIcons.bars,
+              color: Colors.black,
+              size: 24.0,
             ),
-          ),
-          title: Text(
-            'DETALHES DA  PARTIDA',
-            style: FlutterFlowTheme.of(context).headlineSmall.override(
-                  fontFamily: 'Inter Tight',
-                  color: Color(0xFFEC8D0D),
-                  letterSpacing: 0.0,
-                ),
-          ),
-          actions: [],
-          centerTitle: true,
-          elevation: 4.0,
-        ),
-        body: SafeArea(
-          top: true,
-          child: Align(
-            alignment: AlignmentDirectional(0.0, 0.0),
-            child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 25.0, 0.0, 0.0),
-              child: Container(
-                width: 330.0,
-                height: 300.0,
-                decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).secondaryBackground,
-                  boxShadow: [
-                    BoxShadow(
-                      blurRadius: 4.0,
-                      color: Color(0x33000000),
-                      offset: Offset(
-                        0.0,
-                        2.0,
-                      ),
-                      spreadRadius: 4.0,
-                    )
-                  ],
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Align(
-                  alignment: AlignmentDirectional(0.0, -1.0),
-                  child: Padding(
-                    padding:
-                        EdgeInsetsDirectional.fromSTEB(25.0, 0.0, 25.0, 25.0),
-                    child: SingleChildScrollView(
-                      child: matchInfo == null
-                          ? CircularProgressIndicator()
-                          : Column(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Container(
-                                  width: double.infinity,
-                                  height: 50.0,
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryBackground,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        10.0, 0.0, 10.0, 0.0),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                          child: Image.asset(
-                                            'assets/images/png-transparent-trophy-trophy-image-file-formats-trophy-objects-thumbnail.png',
-                                            width: 30.0,
-                                            height: 30.0,
-                                            fit: BoxFit.contain,
-                                          ),
-                                        ),
-                                        Text(
-                                          widget.notDisplayButton == true
-                                              ? 'SUPER PARTIDA'
-                                              : 'Partida de Trivia',
-                                          style: FlutterFlowTheme.of(context)
-                                              .headlineSmall
-                                              .override(
-                                                fontFamily: 'Inter Tight',
-                                                letterSpacing: 0.0,
-                                              ),
-                                        ),
-                                        // if (widget.notDisplayButton == true)
-                                        //   Text(
-                                        //     'Estamos a preparar a partida, aguarde.',
-                                        //     style: FlutterFlowTheme.of(context)
-                                        //         .labelMedium
-                                        //         .override(
-                                        //           fontFamily: 'Inter Tight',
-                                        //           letterSpacing: 0.0,
-                                        //         ),
-                                        //   ),
-                                      ]
-                                          .divide(SizedBox(width: 10.0))
-                                          .addToStart(SizedBox(width: 0.0))
-                                          .addToEnd(SizedBox(width: 0.0)),
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  width: double.infinity,
-                                  height: 30.0,
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryBackground,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        10.0, 0.0, 10.0, 0.0),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'Jogadores:',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyLarge
-                                              .override(
-                                                fontFamily: 'Inter',
-                                                letterSpacing: 0.0,
-                                              ),
-                                        ),
-                                        Text(
-                                          '${matchInfo!.room!.roomConfiguration!.numberOfPlayers}',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyLarge
-                                              .override(
-                                                fontFamily: 'Inter',
-                                                letterSpacing: 0.0,
-                                              ),
-                                        ),
-                                      ]
-                                          .divide(SizedBox(width: 5.0))
-                                          .addToStart(SizedBox(width: 0.0))
-                                          .addToEnd(SizedBox(width: 0.0)),
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  width: double.infinity,
-                                  height: 30.0,
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryBackground,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        10.0, 0.0, 10.0, 0.0),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'Prêmio:',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyLarge
-                                              .override(
-                                                fontFamily: 'Inter',
-                                                letterSpacing: 0.0,
-                                              ),
-                                        ),
-                                        Text(
-                                          '${(matchInfo!.room!.roomConfiguration!.minimumAmountToPlay * matchInfo!.room!.roomConfiguration!.numberOfPlayers) * matchInfo!.room!.roomConfiguration!.premiumRate}Kz',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyLarge
-                                              .override(
-                                                fontFamily: 'Inter',
-                                                letterSpacing: 0.0,
-                                              ),
-                                        ),
-                                      ]
-                                          .divide(SizedBox(width: 5.0))
-                                          .addToStart(SizedBox(width: 0.0))
-                                          .addToEnd(SizedBox(width: 0.0)),
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  width: double.infinity,
-                                  height: 30.0,
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryBackground,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        10.0, 0.0, 10.0, 0.0),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'Taxa de entrada:',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyLarge
-                                              .override(
-                                                fontFamily: 'Inter',
-                                                letterSpacing: 0.0,
-                                              ),
-                                        ),
-                                        Text(
-                                          '${matchInfo!.room!.roomConfiguration!.minimumAmountToPlay}Kz',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyLarge
-                                              .override(
-                                                fontFamily: 'Inter',
-                                                letterSpacing: 0.0,
-                                              ),
-                                        ),
-                                      ]
-                                          .divide(SizedBox(width: 5.0))
-                                          .addToStart(SizedBox(width: 0.0))
-                                          .addToEnd(SizedBox(width: 0.0)),
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  width: double.infinity,
-                                  height: 30.0,
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryBackground,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        10.0, 0.0, 10.0, 0.0),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'Duração da partida',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyLarge
-                                              .override(
-                                                fontFamily: 'Inter',
-                                                letterSpacing: 0.0,
-                                              ),
-                                        ),
-                                        Text(
-                                          '${matchInfo!.room!.roomConfiguration!.numberOfQuestions * matchInfo!.room!.roomConfiguration!.timeToRespond}s',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyLarge
-                                              .override(
-                                                fontFamily: 'Inter',
-                                                letterSpacing: 0.0,
-                                              ),
-                                        ),
-                                      ]
-                                          .divide(SizedBox(width: 5.0))
-                                          .addToStart(SizedBox(width: 0.0))
-                                          .addToEnd(SizedBox(width: 0.0)),
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 10.0, 0.0, 0.0),
-                                  child: Container(
-                                    width: double.infinity,
-                                    height: 60.0,
-                                    decoration: BoxDecoration(
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondaryBackground,
-                                      borderRadius: BorderRadius.circular(8.0),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        if (widget.notDisplayButton == null ||
-                                            widget.notDisplayButton == false)
-                                          FFButtonWidget(
-                                            onPressed: () {
-                                              showDialog(
-                                                context: context,
-                                                builder: (context) {
-                                                  return Dialog(
-                                                    backgroundColor:
-                                                        Colors.transparent,
-                                                    insetPadding:
-                                                        EdgeInsets.all(24),
-                                                    child:
-                                                        Warning04ReducaoDeSaldoWidget(
-                                                            matchInfo:
-                                                                matchInfo,
-                                                            recebeuNotificaca:
-                                                                true),
-                                                  );
-                                                },
-                                              );
-                                            },
-                                            text: 'Aceitar ',
-                                            options: FFButtonOptions(
-                                              width: 130.0,
-                                              height: 45.0,
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(
-                                                      16.0, 0.0, 16.0, 0.0),
-                                              iconPadding: EdgeInsetsDirectional
-                                                  .fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                              color: Color(0xFF00C804),
-                                              textStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .titleSmall
-                                                      .override(
-                                                        fontFamily:
-                                                            'Inter Tight',
-                                                        color: Colors.black,
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                              elevation: 0.0,
-                                              borderRadius:
-                                                  BorderRadius.circular(8.0),
-                                            ),
-                                          ),
-                                        FFButtonWidget(
-                                          onPressed: () {
-                                            Navigator.of(context)
-                                                .pushReplacement(
-                                              MaterialPageRoute(
-                                                builder: (_) =>
-                                                    Tela03PrincipalWidget(),
-                                              ),
-                                            );
-                                          },
-                                          text: 'Cancelar',
-                                          options: FFButtonOptions(
-                                            width: 130.0,
-                                            height: 45.0,
-                                            padding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    16.0, 0.0, 16.0, 0.0),
-                                            iconPadding:
-                                                EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 0.0, 0.0, 0.0),
-                                            color: Color(0xFFFA080C),
-                                            textStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmall
-                                                    .override(
-                                                      fontFamily: 'Inter Tight',
-                                                      color: Colors.black,
-                                                      letterSpacing: 0.0,
-                                                    ),
-                                            elevation: 0.0,
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                          ),
-                                        ),
-                                      ]
-                                          .divide(SizedBox(width: 5.0))
-                                          .addToStart(SizedBox(width: 0.0))
-                                          .addToEnd(SizedBox(width: 0.0)),
-                                    ),
-                                  ),
-                                ),
-                              ]
-                                  .divide(SizedBox(height: 0.0))
-                                  .addToStart(SizedBox(height: 10.0))
-                                  .addToEnd(SizedBox(height: 10.0)),
-                            ),
+            onPressed: () async {
+              await showModalBottomSheet(
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                enableDrag: false,
+                context: context,
+                builder: (context) {
+                  return GestureDetector(
+                    onTap: () => FocusScope.of(context).unfocus(),
+                    child: Padding(
+                      padding: MediaQuery.viewInsetsOf(context),
+                      child: ModaMenuPagianInicialWidget(),
                     ),
-                  ),
-                ),
+                  );
+                },
+              ).then((value) => safeSetState(() {}));
+            },
+          ),
+        ),
+        title: Text(
+          'GAME QUIZ',
+          style: FlutterFlowTheme.of(context).headlineSmall.override(
+                fontFamily: 'Inter Tight',
+                color: const Color(0xFFEC8D0D),
+                letterSpacing: 0.0,
               ),
+        ),
+        centerTitle: true,
+        elevation: 4.0,
+      ),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: _buildContent(),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildContent() {
+    if (_model.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_model.matchInfo == null) {
+      return _buildEmptyState();
+    }
+
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildHeaderSection(),
+            const SizedBox(height: 20),
+            _buildMatchDetailsSection(),
+            const SizedBox(height: 20),
+            _buildActionButtons(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(Icons.videogame_asset_outlined,
+            size: 48, color: Colors.grey),
+        const SizedBox(height: 16),
+        const Text(
+          'Nenhuma partida encontrada',
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+        const SizedBox(height: 16),
+        IconButton(
+          icon: const Icon(Icons.refresh, size: 30),
+          onPressed: () => _model.fetchMatchById(setState, widget.matchId),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeaderSection() {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/png-transparent-trophy-trophy-image-file-formats-trophy-objects-thumbnail.png',
+              width: 40,
+              height: 40,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              widget.notDisplayButton == true
+                  ? widget.isDesqualification != null
+                      ? 'DESQUALIFICADO'
+                      : 'SUPER PARTIDA'
+                  : 'Partida de Trivia',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        widget.isDesqualification != null
+            ? const Text(
+                'Desqualificado por inatividade.',
+                style: TextStyle(color: Colors.grey),
+              )
+            : const Text(
+                'Estamos a preparar a partida, aguarde.',
+                style: TextStyle(color: Colors.grey),
+              ),
+        SizedBox(
+          width: 290.0,
+          child: Divider(
+            thickness: 2.0,
+            color: Colors.black,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMatchDetailsSection() {
+    return Column(
+      children: [
+        _buildDetailItem(
+          icon: Icons.people,
+          label: 'Jogadores',
+          value:
+              '${_model.matchInfo!.room!.roomConfiguration!.numberOfPlayers}',
+        ),
+        _buildDetailItem(
+          icon: Icons.emoji_events,
+          label: 'Prêmio',
+          value:
+              '${(_model.matchInfo!.room!.roomConfiguration!.minimumAmountToPlay * _model.matchInfo!.room!.roomConfiguration!.numberOfPlayers * _model.matchInfo!.room!.roomConfiguration!.premiumRate)} Kz',
+        ),
+        _buildDetailItem(
+          icon: Icons.attach_money,
+          label: 'Taxa de entrada',
+          value:
+              '${_model.matchInfo!.room!.roomConfiguration!.minimumAmountToPlay} Kz',
+        ),
+        _buildDetailItem(
+          icon: Icons.timer,
+          label: 'Duração',
+          value:
+              '${_model.matchInfo!.room!.roomConfiguration!.numberOfQuestions * _model.matchInfo!.room!.roomConfiguration!.timeToRespond} segundos',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailItem(
+      {required IconData icon, required String label, required String value}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.orange),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (widget.notDisplayButton == null || widget.notDisplayButton == false)
+          if (_model.matchInfo!.statusMatch == "PENDING")
+            ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => Dialog(
+                    backgroundColor: Colors.transparent,
+                    insetPadding: const EdgeInsets.all(24),
+                    child: Warning04ReducaoDeSaldoWidget(
+                      matchInfo: _model.matchInfo,
+                      recebeuNotificaca: true,
+                    ),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF00C804),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              child: const Text(
+                'Aceitar',
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+        const SizedBox(width: 10),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => Tela03PrincipalWidget(),
+              ),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFFA080C),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          ),
+          child: const Text(
+            'Cancelar',
+            style: TextStyle(color: Colors.black),
+          ),
+        ),
+      ],
     );
   }
 }

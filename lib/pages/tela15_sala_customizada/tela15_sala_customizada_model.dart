@@ -311,7 +311,6 @@ class Tela15SalaCustomizadaViewModel
   Future<void> leaveTheMatchAsync(context) async {
     var result = await matchService.leaveTheMatchAsync(matchId, userId);
     if (result["isSuccess"]) {
-      Navigator.of(context).pop();
       _matchWebSocketService?.disconnect();
     } else {
       await Warning00ErrorUtil.showDialogMessageError(
