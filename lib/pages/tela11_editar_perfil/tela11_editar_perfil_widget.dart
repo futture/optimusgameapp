@@ -19,32 +19,221 @@ class Tela11EditarPerfilWidget extends StatefulWidget {
 
 class _Tela11EditarPerfilWidgetState extends State<Tela11EditarPerfilWidget> {
   late Tela11EditarPerfilModel _model;
-
-  final scaffoldKey = GlobalKey<ScaffoldState>();
+  final scaffoldKey = GlobalKey<ScaffoldState>(); 
+  Map<String, dynamic> userData = {
+    'name': 'Januário Pinto',
+    'email': 'januario.pinto@email.com',
+    'phone': '+244 999 999 999',
+    'birthDate': '15/05/1990',
+    'twoFactorEnabled': false,
+    'lastPasswordChange': '3 meses atrás',
+  };
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => Tela11EditarPerfilModel());
 
-    _model.textController1 ??= TextEditingController();
+    _model.textController1 ??=
+        TextEditingController(text: 'https://picsum.photos/seed/55/600');
     _model.textFieldFocusNode1 ??= FocusNode();
 
-    _model.textController2 ??= TextEditingController();
+    _model.textController2 ??= TextEditingController(text: userData['name']);
     _model.textFieldFocusNode2 ??= FocusNode();
 
-    _model.textController3 ??= TextEditingController();
+    _model.textController3 ??= TextEditingController(text: userData['email']);
     _model.textFieldFocusNode3 ??= FocusNode();
 
-    _model.textController4 ??= TextEditingController();
+    _model.textController4 ??= TextEditingController(text: userData['phone']);
     _model.textFieldFocusNode4 ??= FocusNode();
   }
 
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
+  }
+
+  Future<void> _verifyPhoneNumber(String newPhone) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => CustomDialog(
+        title: 'Verificar Número',
+        content: Text('Enviaremos um código OTP para $newPhone'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          const SizedBox(width: 8),
+          FFButtonWidget(
+            onPressed: () => Navigator.pop(context, true),
+            text: 'Enviar Código',
+            options: FFButtonOptions(
+              height: 40,
+              padding: const EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final otpVerified = await _showOtpDialog(newPhone);
+      if (otpVerified == true) {
+        setState(() {
+          userData['phone'] = newPhone;
+          _model.textController4.text = newPhone;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Número atualizado com sucesso!')),
+        );
+      }
+    }
+  }
+
+  Future<bool> _showOtpDialog(String phone) async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => OtpVerificationDialog(phoneNumber: phone),
+        ) ??
+        false;
+  }
+
+  Future<void> _showEditDialog(String field, String currentValue) async {
+    final controller = TextEditingController(text: currentValue);
+
+    await showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: const EdgeInsets.all(20),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: 300,
+            maxWidth: 500,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Título com a cor laranja
+                Text(
+                  'Editar $field',
+                  style: TextStyle(
+                    color: Color(0xFFEC8D0D), // Cor laranja para o título
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Campo de texto com borda laranja e foco destacado
+                TextFormField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                    labelText: field,
+                    labelStyle: TextStyle(
+                      color: Colors.black54, // Cor para o label
+                    ),
+                    border: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: Color(0xFFEC8D0D)), // Borda laranja
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Color(0xFFEC8D0D),
+                          width: 2), // Borda laranja quando em foco
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Color(0xFFEC8D0D)), // Borda laranja padrão
+                    ),
+                  ),
+                  autofocus: true,
+                  keyboardType: field == 'Email'
+                      ? TextInputType.emailAddress
+                      : field == 'Telefone'
+                          ? TextInputType.phone
+                          : TextInputType.text,
+                ),
+                const SizedBox(height: 24),
+
+                // Ações do dialog com botões estilizados
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    // Botão Cancelar com texto em laranja
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'Cancelar',
+                        style: TextStyle(
+                          color: Color(0xFFEC8D0D), // Texto laranja
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+
+                    // Botão Salvar com fundo laranja e texto branco
+                    FFButtonWidget(
+                      onPressed: () {
+                        if (controller.text.trim().isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content:
+                                    Text('Por favor, insira um valor válido')),
+                          );
+                          return;
+                        }
+                        Navigator.pop(context, {
+                          'field': field,
+                          'value': controller.text.trim(),
+                        });
+                      },
+                      text: 'Salvar',
+                      options: FFButtonOptions(
+                        height: 40,
+                        padding:
+                            const EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
+                        color: Color(0xFFEC8D0D), // Fundo laranja
+                        textStyle: TextStyle(
+                          color: Colors.white, // Texto branco no botão
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ).then((result) async {
+      if (result != null && result['value'] != currentValue) {
+        if (field == 'Telefone') {
+          await _verifyPhoneNumber(result['value']!);
+        } else {
+          setState(() {
+            userData[field.toLowerCase()] = result['value'];
+            switch (field) {
+              case 'Nome':
+                _model.textController2.text = result['value']!;
+                break;
+              case 'Email':
+                _model.textController3.text = result['value']!;
+                break;
+            }
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('$field atualizado com sucesso!')),
+          );
+        }
+      }
+    });
   }
 
   @override
@@ -90,587 +279,40 @@ class _Tela11EditarPerfilWidgetState extends State<Tela11EditarPerfilWidget> {
         ),
         body: SafeArea(
           top: true,
-          child: Align(
-            alignment: AlignmentDirectional(0.0, -1.0),
-            child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              constraints: BoxConstraints(
-                minWidth: 300.0,
-                minHeight: 852.0,
-                maxWidth: 500.0,
-                maxHeight: 1000.0,
-              ),
-              decoration: BoxDecoration(
-                color: FlutterFlowTheme.of(context).primaryBackground,
-              ),
-              child: Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
+          child: SingleChildScrollView(
+            child: Align(
+              alignment: AlignmentDirectional(0.0, -1.0),
+              child: Container(
+                width: double.infinity,
+                constraints: BoxConstraints(
+                  minWidth: 300.0,
+                  maxWidth: 500.0,
+                ),
+                decoration: BoxDecoration(
+                  color: FlutterFlowTheme.of(context).primaryBackground,
+                ),
                 child: Padding(
-                  padding: EdgeInsets.all(30.0),
-                  child: Container(
-                    width: 345.0,
-                    child: Form(
-                      key: _model.formKey,
-                      autovalidateMode: AutovalidateMode.disabled,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            height: 180.0,
-                            decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context)
-                                  .primaryBackground,
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(150.0),
-                                  child: Image.network(
-                                    'https://picsum.photos/seed/55/600',
-                                    width: 130.0,
-                                    height: 130.0,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                Container(
-                                  width: double.infinity,
-                                  child: TextFormField(
-                                    controller: _model.textController1,
-                                    focusNode: _model.textFieldFocusNode1,
-                                    autofocus: false,
-                                    obscureText: false,
-                                    decoration: InputDecoration(
-                                      isDense: true,
-                                      labelStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .override(
-                                            fontFamily: 'Inter',
-                                            letterSpacing: 0.0,
-                                          ),
-                                      hintStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .override(
-                                            fontFamily: 'Inter',
-                                            letterSpacing: 0.0,
-                                          ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Color(0x00000000),
-                                          width: 1.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Color(0x00000000),
-                                          width: 1.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                      errorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .error,
-                                          width: 1.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                      focusedErrorBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
-                                              .error,
-                                          width: 1.0,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                      filled: true,
-                                      fillColor: FlutterFlowTheme.of(context)
-                                          .secondaryBackground,
-                                      prefixIcon: Icon(
-                                        Icons.photo_sharp,
-                                      ),
-                                    ),
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          fontFamily: 'Inter',
-                                          letterSpacing: 0.0,
-                                        ),
-                                    keyboardType: TextInputType.url,
-                                    cursorColor: FlutterFlowTheme.of(context)
-                                        .primaryText,
-                                    validator: _model.textController1Validator
-                                        .asValidator(context),
-                                  ),
-                                ),
-                              ].divide(SizedBox(height: 10.0)),
-                            ),
-                          ),
-                          Align(
-                            alignment: AlignmentDirectional(0.0, 0.0),
-                            child: Container(
-                              width: double.infinity,
-                              height: 320.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context)
-                                    .primaryBackground,
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Align(
-                                    alignment: AlignmentDirectional(0.0, 0.0),
-                                    child: Container(
-                                      width: double.infinity,
-                                      height: 70.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .primaryBackground,
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Align(
-                                            alignment: AlignmentDirectional(
-                                                -1.0, -1.0),
-                                            child: Text(
-                                              'Nome Completo',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        fontFamily: 'Inter',
-                                                        fontSize: 15.0,
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                            ),
-                                          ),
-                                          Align(
-                                            alignment:
-                                                AlignmentDirectional(-1.0, 0.0),
-                                            child: Container(
-                                              width: double.infinity,
-                                              child: TextFormField(
-                                                controller:
-                                                    _model.textController2,
-                                                focusNode:
-                                                    _model.textFieldFocusNode2,
-                                                autofocus: false,
-                                                obscureText: false,
-                                                decoration: InputDecoration(
-                                                  isDense: true,
-                                                  labelStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .labelMedium
-                                                          .override(
-                                                            fontFamily: 'Inter',
-                                                            letterSpacing: 0.0,
-                                                          ),
-                                                  hintText: 'Januário Pinto',
-                                                  hintStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .labelMedium
-                                                          .override(
-                                                            fontFamily: 'Inter',
-                                                            fontSize: 15.0,
-                                                            letterSpacing: 0.0,
-                                                          ),
-                                                  enabledBorder:
-                                                      OutlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                      color: Color(0x00000000),
-                                                      width: 1.0,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                  focusedBorder:
-                                                      OutlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                      color: Color(0x00000000),
-                                                      width: 1.0,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                  errorBorder:
-                                                      OutlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                      color:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .error,
-                                                      width: 1.0,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                  focusedErrorBorder:
-                                                      OutlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                      color:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .error,
-                                                      width: 1.0,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                  filled: true,
-                                                  fillColor:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .secondaryBackground,
-                                                ),
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                cursorColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primaryText,
-                                                validator: _model
-                                                    .textController2Validator
-                                                    .asValidator(context),
-                                              ),
-                                            ),
-                                          ),
-                                        ].divide(SizedBox(height: 5.0)),
-                                      ),
-                                    ),
-                                  ),
-                                  Align(
-                                    alignment: AlignmentDirectional(0.0, 0.0),
-                                    child: Container(
-                                      width: double.infinity,
-                                      height: 70.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .primaryBackground,
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Align(
-                                            alignment: AlignmentDirectional(
-                                                -1.0, -1.0),
-                                            child: Text(
-                                              'Email',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        fontFamily: 'Inter',
-                                                        fontSize: 15.0,
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                            ),
-                                          ),
-                                          Align(
-                                            alignment:
-                                                AlignmentDirectional(-1.0, 0.0),
-                                            child: Container(
-                                              width: double.infinity,
-                                              child: TextFormField(
-                                                controller:
-                                                    _model.textController3,
-                                                focusNode:
-                                                    _model.textFieldFocusNode3,
-                                                autofocus: false,
-                                                obscureText: false,
-                                                decoration: InputDecoration(
-                                                  isDense: true,
-                                                  labelStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .labelMedium
-                                                          .override(
-                                                            fontFamily: 'Inter',
-                                                            letterSpacing: 0.0,
-                                                          ),
-                                                  hintText: 'abc012@gmail.com',
-                                                  hintStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .labelMedium
-                                                          .override(
-                                                            fontFamily: 'Inter',
-                                                            fontSize: 15.0,
-                                                            letterSpacing: 0.0,
-                                                          ),
-                                                  enabledBorder:
-                                                      OutlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                      color: Color(0x00000000),
-                                                      width: 1.0,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                  focusedBorder:
-                                                      OutlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                      color: Color(0x00000000),
-                                                      width: 1.0,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                  errorBorder:
-                                                      OutlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                      color:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .error,
-                                                      width: 1.0,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                  focusedErrorBorder:
-                                                      OutlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                      color:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .error,
-                                                      width: 1.0,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                  filled: true,
-                                                  fillColor:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .secondaryBackground,
-                                                ),
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                keyboardType:
-                                                    TextInputType.emailAddress,
-                                                cursorColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primaryText,
-                                                validator: _model
-                                                    .textController3Validator
-                                                    .asValidator(context),
-                                              ),
-                                            ),
-                                          ),
-                                        ].divide(SizedBox(height: 5.0)),
-                                      ),
-                                    ),
-                                  ),
-                                  Align(
-                                    alignment: AlignmentDirectional(0.0, 0.0),
-                                    child: Container(
-                                      width: double.infinity,
-                                      height: 70.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .primaryBackground,
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Align(
-                                            alignment: AlignmentDirectional(
-                                                -1.0, -1.0),
-                                            child: Text(
-                                              'Telefone',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        fontFamily: 'Inter',
-                                                        fontSize: 15.0,
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                            ),
-                                          ),
-                                          Align(
-                                            alignment:
-                                                AlignmentDirectional(-1.0, 0.0),
-                                            child: Container(
-                                              width: double.infinity,
-                                              child: TextFormField(
-                                                controller:
-                                                    _model.textController4,
-                                                focusNode:
-                                                    _model.textFieldFocusNode4,
-                                                autofocus: false,
-                                                obscureText: false,
-                                                decoration: InputDecoration(
-                                                  isDense: true,
-                                                  labelStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .labelMedium
-                                                          .override(
-                                                            fontFamily: 'Inter',
-                                                            letterSpacing: 0.0,
-                                                          ),
-                                                  hintText: '999-999-999',
-                                                  hintStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .labelMedium
-                                                          .override(
-                                                            fontFamily: 'Inter',
-                                                            fontSize: 15.0,
-                                                            letterSpacing: 0.0,
-                                                          ),
-                                                  enabledBorder:
-                                                      OutlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                      color: Color(0x00000000),
-                                                      width: 1.0,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                  focusedBorder:
-                                                      OutlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                      color: Color(0x00000000),
-                                                      width: 1.0,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                  errorBorder:
-                                                      OutlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                      color:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .error,
-                                                      width: 1.0,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                  focusedErrorBorder:
-                                                      OutlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                      color:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .error,
-                                                      width: 1.0,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                  filled: true,
-                                                  fillColor:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .secondaryBackground,
-                                                  prefixIcon: Icon(
-                                                    Icons.call,
-                                                  ),
-                                                ),
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                keyboardType:
-                                                    TextInputType.number,
-                                                cursorColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primaryText,
-                                                validator: _model
-                                                    .textController4Validator
-                                                    .asValidator(context),
-                                              ),
-                                            ),
-                                          ),
-                                        ].divide(SizedBox(height: 5.0)),
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 30.0, 0.0, 0.0),
-                                    child: FFButtonWidget(
-                                      onPressed: () {
-                                        print('SalvarInformacao pressed ...');
-                                      },
-                                      text: 'SALVAR',
-                                      options: FFButtonOptions(
-                                        width: double.infinity,
-                                        height: 45.0,
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            16.0, 0.0, 16.0, 0.0),
-                                        iconPadding:
-                                            EdgeInsetsDirectional.fromSTEB(
-                                                0.0, 0.0, 0.0, 0.0),
-                                        color: Color(0xFFEC8D0D),
-                                        textStyle: FlutterFlowTheme.of(context)
-                                            .titleSmall
-                                            .override(
-                                              fontFamily: 'Inter Tight',
-                                              color: Colors.black,
-                                              fontSize: 14.0,
-                                              letterSpacing: 0.0,
-                                            ),
-                                        elevation: 0.0,
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                    ),
-                                  ),
-                                ].divide(SizedBox(height: 10.0)),
-                              ),
-                            ),
-                          ),
-                        ].divide(SizedBox(height: 50.0)),
-                      ),
-                    ),
+                  padding: EdgeInsets.all(24.0),
+                  child: Column(
+                    children: [
+                      // Seção de Foto de Perfil
+                      _buildProfileSection(context),
+
+                      SizedBox(height: 32.0),
+
+                      // Seção de Informações Pessoais
+                      _buildPersonalInfoSection(context),
+
+                      SizedBox(height: 24.0),
+
+                      // Seção de Segurança
+                      _buildSecuritySection(context),
+
+                      SizedBox(height: 24.0),
+
+                      // Botão de Logout
+                      _buildLogoutButton(context),
+                    ],
                   ),
                 ),
               ),
@@ -679,5 +321,689 @@ class _Tela11EditarPerfilWidgetState extends State<Tela11EditarPerfilWidget> {
         ),
       ),
     );
+  }
+
+  Widget _buildProfileSection(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Stack(
+            alignment: Alignment.bottomRight,
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 120.0,
+                height: 120.0,
+                constraints: BoxConstraints(
+                  minWidth: 120.0,
+                  maxWidth: 120.0,
+                  minHeight: 120.0,
+                  maxHeight: 120.0,
+                ),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: FlutterFlowTheme.of(context).secondaryText,
+                    width: 2.0,
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(60.0),
+                  child: Image.network(
+                    _model.textController1.text,
+                    width: 120.0,
+                    height: 120.0,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Icon(
+                      Icons.person,
+                      size: 60.0,
+                      color: FlutterFlowTheme.of(context).secondaryText,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                right: -5,
+                bottom: -5,
+                child: FlutterFlowIconButton(
+                  borderColor: Colors.transparent,
+                  borderRadius: 20.0,
+                  borderWidth: 1.0,
+                  buttonSize: 40.0,
+                  fillColor: FlutterFlowTheme.of(context).secondaryBackground,
+                  icon: Icon(
+                    Icons.camera_alt,
+                    color: FlutterFlowTheme.of(context).primaryText,
+                    size: 20.0,
+                  ),
+                  onPressed: () async {
+                    await _showEditDialog('Foto', _model.textController1.text);
+                  },
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16.0),
+          Text(
+            userData['name'],
+            style: FlutterFlowTheme.of(context).titleLarge.override(
+                  fontFamily: 'Inter Tight',
+                  letterSpacing: 0.0,
+                ),
+          ),
+          Text(
+            'Premium Member',
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  fontFamily: 'Inter',
+                  color: Color(0xFFEC8D0D),
+                  letterSpacing: 0.0,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPersonalInfoSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'INFORMAÇÕES PESSOAIS',
+          style: FlutterFlowTheme.of(context).labelMedium.override(
+                fontFamily: 'Inter',
+                color: FlutterFlowTheme.of(context).secondaryText,
+                letterSpacing: 0.0,
+              ),
+        ),
+        SizedBox(height: 12.0),
+
+        // Nome
+        _buildEditableField(
+          context,
+          label: 'Nome Completo',
+          value: _model.textController2.text,
+          icon: Icons.person,
+          onTap: () => _showEditDialog('Nome', _model.textController2.text),
+        ),
+
+        // Email
+        _buildEditableField(
+          context,
+          label: 'Email',
+          value: _model.textController3.text,
+          icon: Icons.email,
+          onTap: () => _showEditDialog('Email', _model.textController3.text),
+        ),
+
+        // Telefone
+        _buildEditableField(
+          context,
+          label: 'Telefone',
+          value: _model.textController4.text,
+          icon: Icons.phone,
+          onTap: () => _showEditDialog('Telefone', _model.textController4.text),
+        ),
+
+        // Data de Nascimento
+        _buildEditableField(
+          context,
+          label: 'Data de Nascimento',
+          value: userData['birthDate'],
+          icon: Icons.calendar_today,
+          onTap: () =>
+              _showEditDialog('Data de Nascimento', userData['birthDate']),
+        ),
+
+        SizedBox(height: 16.0),
+        FFButtonWidget(
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Alterações salvas com sucesso!')),
+            );
+          },
+          text: 'SALVAR ALTERAÇÕES',
+          options: FFButtonOptions(
+            width: double.infinity,
+            height: 45.0,
+            padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+            iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+            color: Color(0xFFEC8D0D),
+            textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                  fontFamily: 'Inter Tight',
+                  color: Colors.black,
+                  fontSize: 14.0,
+                  letterSpacing: 0.0,
+                ),
+            elevation: 0.0,
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSecuritySection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'SEGURANÇA',
+          style: FlutterFlowTheme.of(context).labelMedium.override(
+                fontFamily: 'Inter',
+                color: FlutterFlowTheme.of(context).secondaryText,
+                letterSpacing: 0.0,
+              ),
+        ),
+        SizedBox(height: 12.0),
+
+        // Alterar Senha
+        InkWell(
+          onTap: () {
+            context.pushNamed('ChangePasswordScreen');
+          },
+          borderRadius: BorderRadius.circular(8.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: FlutterFlowTheme.of(context).secondaryBackground,
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            padding: EdgeInsets.all(12.0),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.lock,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                ),
+                SizedBox(width: 12.0),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Alterar Senha',
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              fontFamily: 'Inter',
+                              letterSpacing: 0.0,
+                            ),
+                      ),
+                      Text(
+                        'Última alteração: ${userData['lastPasswordChange']}',
+                        style: FlutterFlowTheme.of(context).bodySmall.override(
+                              fontFamily: 'Inter',
+                              color: FlutterFlowTheme.of(context).secondaryText,
+                              letterSpacing: 0.0,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: FlutterFlowTheme.of(context).secondaryText,
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        SizedBox(height: 8.0),
+        InkWell(
+          onTap: () {
+            setState(() {
+              userData['twoFactorEnabled'] = !userData['twoFactorEnabled'];
+            });
+          },
+          borderRadius: BorderRadius.circular(8.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: FlutterFlowTheme.of(context).secondaryBackground,
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            padding: EdgeInsets.all(12.0),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.security,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                ),
+                SizedBox(width: 12.0),
+                Expanded(
+                  child: Text(
+                    'Autenticação de Dois Fatores',
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          fontFamily: 'Inter',
+                          letterSpacing: 0.0,
+                        ),
+                  ),
+                ),
+                Switch(
+                  value: userData['twoFactorEnabled'],
+                  onChanged: (value) {
+                    setState(() {
+                      userData['twoFactorEnabled'] = value;
+                    });
+                  },
+                  activeColor: Color(0xFFEC8D0D),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLogoutButton(BuildContext context) {
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 0.0),
+      child: FFButtonWidget(
+        onPressed: () async {
+          final confirmed = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Confirmar Saída'),
+              content: Text('Tem certeza que deseja sair da sua conta?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text('Cancelar'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: Text('Sair'),
+                ),
+              ],
+            ),
+          );
+
+          if (confirmed == true) {
+            context.pushNamed('LoginScreen');
+          }
+        },
+        text: 'SAIR DA CONTA',
+        options: FFButtonOptions(
+          width: double.infinity,
+          height: 45.0,
+          padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+          iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+          color: FlutterFlowTheme.of(context).error,
+          textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                fontFamily: 'Inter Tight',
+                color: Colors.white,
+                fontSize: 14.0,
+                letterSpacing: 0.0,
+              ),
+          elevation: 0.0,
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEditableField(
+    BuildContext context, {
+    required String label,
+    required String value,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 16.0),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: 60.0,
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8.0),
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(12.0),
+            decoration: BoxDecoration(
+              color: FlutterFlowTheme.of(context).secondaryBackground,
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: FlutterFlowTheme.of(context).bodySmall.override(
+                        fontFamily: 'Inter',
+                        letterSpacing: 0.0,
+                      ),
+                ),
+                SizedBox(height: 4.0),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      icon,
+                      size: 20.0,
+                      color: FlutterFlowTheme.of(context).secondaryText,
+                    ),
+                    SizedBox(width: 12.0),
+                    Expanded(
+                      child: Text(
+                        value,
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              fontFamily: 'Inter',
+                              letterSpacing: 0.0,
+                            ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.edit,
+                      size: 18.0,
+                      color: FlutterFlowTheme.of(context).secondaryText,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class OtpVerificationDialog extends StatefulWidget {
+  final String phoneNumber;
+
+  const OtpVerificationDialog({required this.phoneNumber});
+
+  @override
+  State<OtpVerificationDialog> createState() => _OtpVerificationDialogState();
+}
+
+class PhoneVerificationDialog extends StatefulWidget {
+  final String phoneNumber;
+
+  const PhoneVerificationDialog({required this.phoneNumber});
+
+  @override
+  _PhoneVerificationDialogState createState() =>
+      _PhoneVerificationDialogState();
+}
+
+class _PhoneVerificationDialogState extends State<PhoneVerificationDialog> {
+  final List<TextEditingController> _controllers =
+      List.generate(6, (i) => TextEditingController());
+  final List<FocusNode> _focusNodes = List.generate(6, (i) => FocusNode());
+  final String _correctCode = '123456'; // Código de exemplo
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        minWidth: 300,
+        maxWidth: 500,
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Verificação de Telefone',
+              style: FlutterFlowTheme.of(context).headlineSmall,
+            ),
+            SizedBox(height: 16),
+            Text(
+                'Insira o código de 6 dígitos enviado para ${widget.phoneNumber}'),
+            SizedBox(height: 20),
+
+            // Campos OTP
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: List.generate(6, (index) {
+                return SizedBox(
+                  width: 40,
+                  child: TextField(
+                    controller: _controllers[index],
+                    focusNode: _focusNodes[index],
+                    textAlign: TextAlign.center,
+                    keyboardType: TextInputType.number,
+                    maxLength: 1,
+                    decoration: InputDecoration(
+                      counterText: '',
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      if (value.length == 1 && index < 5) {
+                        _focusNodes[index + 1].requestFocus();
+                      } else if (value.isEmpty && index > 0) {
+                        _focusNodes[index - 1].requestFocus();
+                      }
+                    },
+                  ),
+                );
+              }),
+            ),
+            SizedBox(height: 20),
+
+            // Botões
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text('Cancelar'),
+                ),
+                SizedBox(width: 8),
+                FFButtonWidget(
+                  onPressed: _verifyCode,
+                  text: 'Verificar',
+                  options: FFButtonOptions(
+                    height: 40,
+                    padding: EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _verifyCode() {
+    final enteredCode = _controllers.map((c) => c.text).join();
+    if (enteredCode == _correctCode) {
+      Navigator.pop(context, true);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Código incorreto. Tente novamente.')),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    for (var node in _focusNodes) {
+      node.dispose();
+    }
+    super.dispose();
+  }
+}
+
+class CustomDialog extends StatelessWidget {
+  final String title;
+  final Widget content;
+  final List<Widget> actions;
+
+  const CustomDialog({
+    super.key,
+    required this.title,
+    required this.content,
+    required this.actions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      insetPadding: const EdgeInsets.all(20),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minWidth: 300,
+          maxWidth: 500,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Título com cor laranja
+              Text(
+                title,
+                style: TextStyle(
+                  color: Color(0xFFEC8D0D), // Cor laranja no título
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 16),
+              content,
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: actions.map((action) {
+                  // Se for um TextButton, aplicamos a cor laranja no texto
+                  if (action is TextButton) {
+                    return TextButton(
+                      onPressed: action.onPressed,
+                      child: action.child != null
+                          ? Text(
+                              (action.child as Text).data ??
+                                  '', // Acessa o texto do TextButton
+                              style: TextStyle(
+                                color: Color(0xFFEC8D0D), // Texto laranja
+                              ),
+                            )
+                          : Container(), // Caso não haja texto no botão
+                    );
+                  }
+
+                  // Se for o FFButtonWidget, aplicamos a cor laranja no fundo e no texto
+                  if (action is FFButtonWidget) {
+                    return FFButtonWidget(
+                      onPressed: action.onPressed,
+                      text: action.text,
+                      options: FFButtonOptions(
+                        height: 40,
+                        padding:
+                            const EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
+                        color: Color(0xFFEC8D0D), // Cor de fundo laranja
+                        textStyle: TextStyle(
+                          color: Colors.white, // Texto branco no botão
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    );
+                  }
+
+                  return action;
+                }).toList(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
+  final List<TextEditingController> _controllers =
+      List.generate(6, (i) => TextEditingController());
+  final List<FocusNode> _focusNodes = List.generate(6, (i) => FocusNode());
+  final String _correctCode = '123456';
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomDialog(
+      title: 'Verificação de Telefone',
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+              'Insira o código de 6 dígitos enviado para ${widget.phoneNumber}'),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List.generate(6, (index) {
+              return SizedBox(
+                width: 40,
+                child: TextField(
+                  controller: _controllers[index],
+                  focusNode: _focusNodes[index],
+                  textAlign: TextAlign.center,
+                  keyboardType: TextInputType.number,
+                  maxLength: 1,
+                  decoration: const InputDecoration(
+                    counterText: '',
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (value) {
+                    if (value.length == 1 && index < 5) {
+                      _focusNodes[index + 1].requestFocus();
+                    } else if (value.isEmpty && index > 0) {
+                      _focusNodes[index - 1].requestFocus();
+                    }
+                  },
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancelar'),
+        ),
+        const SizedBox(width: 8),
+        FFButtonWidget(
+          onPressed: _verifyCode,
+          text: 'Verificar',
+          options: FFButtonOptions(
+            height: 40,
+            padding: const EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _verifyCode() {
+    final enteredCode = _controllers.map((c) => c.text).join();
+    if (enteredCode == _correctCode) {
+      Navigator.pop(context, true);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Código incorreto. Tente novamente.')),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    for (var node in _focusNodes) {
+      node.dispose();
+    }
+    super.dispose();
   }
 }
