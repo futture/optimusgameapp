@@ -1,12 +1,9 @@
 import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
-import 'package:projeto_game_quiz/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
-import '/flutter_flow/flutter_flow_radio_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/form_field_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'tela06_salade_jogo_model.dart';
 export 'tela06_salade_jogo_model.dart';
 
@@ -116,97 +113,96 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
         borderRadius: 30.0,
         borderWidth: 1.0,
         buttonSize: 60.0,
-        icon: FaIcon(
-          FontAwesomeIcons.bars,
+        icon: Icon(
+          Icons.menu,
           color: FlutterFlowTheme.of(context).primaryText,
-          size: 25.0,
+          size: 30.0,
         ),
-        onPressed: () => print('IconButton pressed ...'),
+        onPressed: () => print('Menu pressed'),
       ),
       title: Text(
         'GAME QUIZ',
-        style: FlutterFlowTheme.of(context).headlineSmall.override(
+        style: FlutterFlowTheme.of(context).headlineMedium.override(
               fontFamily: 'Inter Tight',
               color: const Color(0xFFEC8D0D),
               letterSpacing: 0.0,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.bold,
             ),
       ),
       centerTitle: true,
-      elevation: 4.0,
+      elevation: 2.0,
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 16.0),
+          child: Center(
+            child: _buildTimer(),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildGameContent() {
-    return Align(
-      alignment: AlignmentDirectional.center,
-      child: Container(
-        constraints: const BoxConstraints(
-          minWidth: 350.0,
-          minHeight: 350.0,
-          maxWidth: 1024.0,
-          maxHeight: 1360.0,
-        ),
-        child: Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 24.0),
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                _buildScoreInfo(),
-                _buildQuestionCard(),
-                _buildTimer(),
-                _buildAnswerOptions(),
-              ].divide(const SizedBox(height: 10.0)),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        children: [
+          _buildScoreInfo(),
+          const SizedBox(height: 24.0),
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                children: [
+                  _buildQuestionCard(),
+                  const SizedBox(height: 24.0),
+                  _buildAnswerOptions(),
+                ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildScoreInfo() {
-    return Container(
-      width: 350.0,
-      height: 60.0,
-      alignment: AlignmentDirectional.center,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildInfoPositionBox(
-              'POSIÇÃO:',
-              _model.currentposition,
-              _model.matchInfo == null
-                  ? 1
-                  : _model.matchInfo!.room!.roomConfiguration!.numberOfPlayers),
-          const SizedBox(width: 10.0),
-          _buildInfoBox('PONTOS:', '${_model.points}'),
-        ],
+    return Card(
+      elevation: 4.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
       ),
-    );
-  }
-
-  Widget _buildInfoBox(String label, String value) {
-    return Container(
-      width: 170.0,
-      height: 45.0,
-      decoration: BoxDecoration(
-        color: const Color(0xFF01BF01),
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      child: Center(
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFF01BF01),
+              FlutterFlowTheme.of(context).secondary,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16.0),
+        ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Text(
-              label,
-              style: _getInfoTextStyle(),
+            _buildInfoItem(
+              'POSIÇÃO',
+              '${_model.currentposition}',
+              Icons.emoji_events,
             ),
-            Text(
-              value,
-              style: _getInfoTextStyle(),
+            _buildInfoItem(
+              'PONTOS',
+              '${_model.points}',
+              Icons.star,
+            ),
+            _buildInfoItem(
+              'JOGADORES',
+              '${_model.matchInfo!.matchPlayers!.length}',
+              Icons.people,
             ),
           ],
         ),
@@ -214,159 +210,137 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
     );
   }
 
-  Widget _buildInfoPositionBox(String label, int value, int totalPlayers) {
-    Color getColorByRelativePosition(int pos, int total) {
-      if (pos == 1) return const Color(0xFF01BF01);
-      if (pos == 2) return const Color(0xFF7ED957);
-
-      final percentile = pos / total;
-      if (percentile <= 0.5) {
-        return const Color(0xFFFFA500);
-      } else {
-        return const Color(0xFFFF4C4C);
-      }
-    }
-
-    return Container(
-      width: 170.0,
-      height: 45.0,
-      decoration: BoxDecoration(
-        color: getColorByRelativePosition(value, totalPlayers),
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              label,
-              style: _getInfoTextStyle(),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              value.toString(),
-              style: _getInfoTextStyle(),
-            ),
-          ],
+  Widget _buildInfoItem(String label, String value, IconData icon) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: Colors.white, size: 24.0),
+        const SizedBox(height: 4.0),
+        Text(
+          label,
+          style: FlutterFlowTheme.of(context).bodySmall.override(
+                fontFamily: 'Inter',
+                color: Colors.white,
+                fontSize: 12.0,
+                letterSpacing: 0.0,
+              ),
         ),
-      ),
+        Text(
+          value,
+          style: FlutterFlowTheme.of(context).titleMedium.override(
+                fontFamily: 'Inter Tight',
+                color: Colors.white,
+                fontSize: 18.0,
+                letterSpacing: 0.0,
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+      ],
     );
-  }
-
-  TextStyle _getInfoTextStyle() {
-    return FlutterFlowTheme.of(context).bodyMedium.override(
-          fontFamily: 'Inter',
-          color: Colors.black,
-          fontSize: 16.0,
-          letterSpacing: 0.0,
-        );
   }
 
   Widget _buildQuestionCard() {
-    return Container(
-      width: 350.0,
-      height: 130.0,
-      constraints: const BoxConstraints(
-        minWidth: 300.0,
-        minHeight: 130.0,
-        maxWidth: 900.0,
-        maxHeight: 250.0,
+    return Card(
+      elevation: 4.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
       ),
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).primaryBackground,
-        boxShadow: const [
-          BoxShadow(
-            blurRadius: 4.0,
-            color: Color(0x33000000),
-            offset: Offset(0.0, 2.0),
-            spreadRadius: 5.0,
-          )
-        ],
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      child: Column(
-        children: [
-          _buildQuestionCounter(),
-          _buildQuestionText(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuestionCounter() {
-    return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
       child: Container(
-        width: 320.0,
-        height: 25.0,
-        child: Row(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: FlutterFlowTheme.of(context).secondaryBackground,
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.quiz, size: 18.0),
-            const SizedBox(width: 5.0),
-            Text(
-              '${_model.questionsAlreadyPresented}',
-              style: _getBoldTextStyle(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Pergunta ${_model.questionsAlreadyPresented}',
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        fontFamily: 'Inter',
+                        color: FlutterFlowTheme.of(context).secondaryText,
+                        fontSize: 14.0,
+                        letterSpacing: 0.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                Text(
+                  '${_model.matchInfo?.room?.roomConfiguration?.numberOfQuestions ?? 0}',
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        fontFamily: 'Inter',
+                        color: FlutterFlowTheme.of(context).secondaryText,
+                        fontSize: 14.0,
+                        letterSpacing: 0.0,
+                      ),
+                ),
+              ],
             ),
-            Text('/', style: _getBoldTextStyle()),
-            Text(
-              '${_model.matchInfo!.room!.roomConfiguration!.numberOfQuestions}',
-              style: _getBoldTextStyle(),
+            const SizedBox(height: 8.0),
+            LinearProgressIndicator(
+              value: _model.questionsAlreadyPresented /
+                  (_model.matchInfo?.room?.roomConfiguration
+                          ?.numberOfQuestions ??
+                      1),
+              backgroundColor: FlutterFlowTheme.of(context).alternate,
+              color: const Color(0xFF01BF01),
+              minHeight: 8.0,
+              borderRadius: BorderRadius.circular(4.0),
+            ),
+            const SizedBox(height: 16.0),
+            Container(
+              padding: const EdgeInsets.all(12.0),
+              decoration: BoxDecoration(
+                color: FlutterFlowTheme.of(context).primaryBackground,
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Center(
+                child: _model.isLoading
+                    ? const CircularProgressIndicator()
+                    : Text(
+                        '${_model.question?.utterance}',
+                        style: FlutterFlowTheme.of(context).titleLarge.override(
+                              fontFamily: 'Inter Tight',
+                              fontSize: 20.0,
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+              ),
             ),
           ],
         ),
       ),
     );
-  }
-
-  Widget _buildQuestionText() {
-    return Expanded(
-      child: Container(
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(10.0),
-            bottomRight: Radius.circular(10.0),
-          ),
-        ),
-        child: Center(
-          child: _model.isLoading
-              ? const CircularProgressIndicator()
-              : Text(
-                  '${_model.question!.utterance}',
-                  style: FlutterFlowTheme.of(context).titleMedium.override(
-                        fontFamily: 'Inter Tight',
-                        letterSpacing: 0.0,
-                      ),
-                ),
-        ),
-      ),
-    );
-  }
-
-  TextStyle _getBoldTextStyle() {
-    return FlutterFlowTheme.of(context).bodyMedium.override(
-          fontFamily: 'Inter',
-          color: FlutterFlowTheme.of(context).primaryText,
-          fontSize: 16.0,
-          letterSpacing: 0.0,
-          fontWeight: FontWeight.bold,
-        );
   }
 
   Widget _buildTimer() {
     return Container(
-      width: 40.0,
-      height: 40.0,
+      width: 50.0,
+      height: 50.0,
       decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(40.0),
-        border: Border.all(color: const Color(0xFFFF0505)),
+        color: _model.secondsRemaining <= 5
+            ? Colors.red[400]
+            : FlutterFlowTheme.of(context).secondaryBackground,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 6.0,
+            offset: const Offset(0, 3),
+          )
+        ],
       ),
       child: Center(
         child: Text(
-          '${_model.secondsRemaining}s',
+          '${_model.secondsRemaining}',
           style: TextStyle(
-            fontSize: 20,
-            color: _model.secondsRemaining <= 3 ? Colors.red : Colors.black,
+            fontSize: 20.0,
+            color: _model.secondsRemaining <= 5 ? Colors.white : Colors.black,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -375,139 +349,154 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
   }
 
   Widget _buildAnswerOptions() {
-    return Container(
-      width: 390.0,
-      height: 420.0,
-      child: Form(
-        key: _model.formKey,
-        child: Column(
-          children: [
-            if (_model.isLoading)
-              const CircularProgressIndicator()
-            else if (_model.question!.optionAnswers != null)
-              ..._buildAnswerOptionList(),
-            _buildValidateButton(),
-          ].divide(const SizedBox(height: 20.0)),
-        ),
-      ),
+    return Column(
+      children: [
+        if (_model.isLoading)
+          const CircularProgressIndicator()
+        else if (_model.question?.optionAnswers != null)
+          ..._buildAnswerOptionList(),
+        const SizedBox(height: 16.0),
+        _buildValidateButton(),
+      ],
     );
   }
 
   List<Widget> _buildAnswerOptionList() {
     return _model.question!.optionAnswers!
-        .map((e) => _buildAnswerOption(e))
+        .map((e) => Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: _buildAnswerOption(e),
+            ))
         .toList();
   }
 
   Widget _buildAnswerOption(OptionAnswersResponse e) {
-    return Container(
-      width: 350.0,
-      height: 45.0,
-      constraints: const BoxConstraints(
-        minWidth: 350.0,
-        minHeight: 45.0,
-        maxWidth: 900.0,
-        maxHeight: 100.0,
-      ),
-      decoration: BoxDecoration(
-        color: const Color(0xFFEC8D0D),
-        boxShadow: const [
-          BoxShadow(
-            blurRadius: 4.0,
-            color: Color(0x33000000),
-            offset: Offset(0.0, 2.0),
-            spreadRadius: 5.0,
-          )
-        ],
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      child: Stack(
-        alignment: AlignmentDirectional.center,
-        children: [
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 0.0, 0.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(e.codeOption, style: _getOptionCodeStyle()),
-                Text(e.textOption, style: _getOptionTextStyle()),
-                const Opacity(
-                  opacity: 0.0,
-                  child: FaIcon(FontAwesomeIcons.font, size: 24.0),
-                ),
-              ],
-            ),
-          ),
-          _buildRadioButton(e),
-        ],
-      ),
-    );
-  }
-
-  TextStyle _getOptionCodeStyle() {
-    return FlutterFlowTheme.of(context).headlineSmall.override(
-          fontFamily: 'Inter Tight',
-          color: Colors.black,
-          letterSpacing: 0.0,
-        );
-  }
-
-  TextStyle _getOptionTextStyle() {
-    return FlutterFlowTheme.of(context).titleLarge.override(
-          fontFamily: 'Inter Tight',
-          color: Colors.black,
-          letterSpacing: 0.0,
-        );
-  }
-
-  Widget _buildRadioButton(OptionAnswersResponse e) {
-    return FlutterFlowRadioButton(
-      options: [e.codeOption],
-      onChanged: (val) {
-        if (e.codeOption == val) {
-          setState(() => _model.answerOptionId = e.id);
-        }
-        safeSetState(() {});
+    return InkWell(
+      onTap: () {
+        setState(() => _model.answerOptionId = e.id);
+        _model.radioGroupValueController?.value = e.codeOption;
       },
-      controller: _model.radioGroupValueController!,
-      optionHeight: 60.0,
-      optionWidth: 350.0,
-      textStyle: FlutterFlowTheme.of(context).labelMedium.override(
-            fontFamily: 'Inter',
-            letterSpacing: 0.0,
+      borderRadius: BorderRadius.circular(12.0),
+      child: Container(
+        width: double.infinity,
+        constraints: const BoxConstraints(minHeight: 60.0),
+        decoration: BoxDecoration(
+          color: _model.answerOptionId == e.id
+              ? const Color(0xFF00B80E)
+              : Color(0xFFEC8D0D),
+          borderRadius: BorderRadius.circular(12.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 4.0,
+              offset: const Offset(0, 2),
+            )
+          ],
+          border: Border.all(
+            color: _model.answerOptionId == e.id
+                ? FlutterFlowTheme.of(context).primary
+                : Colors.transparent,
+            width: 2.0,
           ),
-      selectedTextStyle: FlutterFlowTheme.of(context).bodyMedium.override(
-            fontFamily: 'Inter',
-            color: const Color(0x0014181B),
-            fontSize: 16.0,
-            letterSpacing: 0.0,
-          ),
-      textPadding: const EdgeInsetsDirectional.fromSTEB(250.0, 0.0, 0.0, 0.0),
-      buttonPosition: RadioButtonPosition.right,
-      radioButtonColor: const Color(0xFF00C90C),
-      inactiveRadioButtonColor: const Color(0xFF14181B),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        child: Row(
+          children: [
+            Container(
+              width: 30.0,
+              height: 30.0,
+              decoration: BoxDecoration(
+                color: _model.answerOptionId == e.id
+                    ? Colors.white
+                    : FlutterFlowTheme.of(context).primaryBackground,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  e.codeOption,
+                  style: TextStyle(
+                    color: _model.answerOptionId == e.id
+                        ? FlutterFlowTheme.of(context).primary
+                        : FlutterFlowTheme.of(context).secondaryText,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16.0),
+            Expanded(
+              child: Text(
+                e.textOption,
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      fontFamily: 'Inter',
+                      color: _model.answerOptionId == e.id
+                          ? Colors.white
+                          : FlutterFlowTheme.of(context).secondaryText,
+                      fontSize: 16.0,
+                      letterSpacing: 0.0,
+                    ),
+              ),
+            ),
+            Radio<String>(
+              value: e.codeOption,
+              groupValue: _model.radioGroupValueController?.value,
+              onChanged: (val) {
+                setState(() => _model.answerOptionId = e.id);
+                _model.radioGroupValueController?.value = val;
+              },
+              activeColor: Colors.white,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildValidateButton() {
-    return FFButtonWidget(
-      onPressed: _model.isButtonDisabled ? null : _handleValidation,
-      text: _model.isLoading ? 'Validando...' : 'Validar',
-      icon: _model.isLoading
-          ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-          : null,
-      options: FFButtonOptions(
-        width: 350.0,
-        height: 45.0,
-        padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-        color: const Color(0xFF01BF01),
-        textStyle: FlutterFlowTheme.of(context).titleMedium.override(
-              fontFamily: 'Inter Tight',
-              color: Colors.black,
-              letterSpacing: 0.0,
-              fontWeight: FontWeight.normal,
-            ),
-        borderRadius: BorderRadius.circular(8.0),
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: _model.isButtonDisabled || _model.answerOptionId.isEmpty
+            ? null
+            : _handleValidation,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF01BF01),
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          elevation: 4.0,
+        ),
+        child: _model.isLoading
+            ? const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 20.0,
+                    height: 20.0,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2.0,
+                    ),
+                  ),
+                  SizedBox(width: 12.0),
+                  Text(
+                    'Validando...',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              )
+            : const Text(
+                'VALIDAR RESPOSTA',
+                style: TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
       ),
     );
   }

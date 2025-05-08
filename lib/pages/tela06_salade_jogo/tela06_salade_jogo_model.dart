@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_model.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
 import 'package:projeto_game_quiz/pages/tela03_principal/tela03_principal_widget.dart';
 import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warning00_campo_vazio_widget.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
@@ -264,34 +265,147 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
     currentContext = context;
 
     showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => WillPopScope(
-              onWillPop: () async => false,
-              child: AlertDialog(
-                title: const Text("Aguardando jogadores..."),
-                content: const Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text("Esperando todos responderem a pergunta..."),
-                  ],
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      _questionWebSocketService?.disconnect();
-                      Navigator.of(currentContext!).push(
-                        MaterialPageRoute(
-                            builder: (_) => Tela03PrincipalWidget()),
-                      );
-                    },
-                    child: const Text("Sair"),
-                  ),
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black54,
+      builder: (_) => WillPopScope(
+        onWillPop: () async => false,
+        child: Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          insetPadding: const EdgeInsets.all(40),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color(0xFF01BF01),
+                  FlutterFlowTheme.of(context).secondary,
                 ],
               ),
-            ));
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 20,
+                  spreadRadius: 2,
+                )
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 80,
+                  width: 80,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        strokeWidth: 8,
+                      ),
+                      Icon(
+                        Icons.people_alt_rounded,
+                        size: 36,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.95, end: 1.05),
+                  duration: const Duration(seconds: 1),
+                  //repeat: true,
+                  curve: Curves.easeInOut,
+                  builder: (context, value, child) {
+                    return Transform.scale(
+                      scale: value,
+                      child: Text(
+                        "Aguardando Jogadores",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildAnimatedDot(0),
+                    _buildAnimatedDot(1),
+                    _buildAnimatedDot(2),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  "Esperando todos responderem...",
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton(
+                  onPressed: () {
+                    _questionWebSocketService?.disconnect();
+                    Navigator.of(currentContext!).push(
+                      MaterialPageRoute(
+                          builder: (_) => Tela03PrincipalWidget()),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side: BorderSide(color: Colors.white),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    "SAIR DA PARTIDA",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnimatedDot(int index) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: Duration(milliseconds: 600 + (index * 200)),
+        builder: (context, value, child) {
+          return Opacity(
+            opacity: value,
+            child: Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   void closeDialogWaitingPlayer() {

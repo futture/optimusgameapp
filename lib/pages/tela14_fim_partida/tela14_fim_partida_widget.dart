@@ -7,7 +7,6 @@ import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_util.dart';
-import 'package:projeto_game_quiz/flutter_flow/flutter_flow_widgets.dart';
 import 'package:projeto_game_quiz/pages/tela03_principal/tela03_principal_widget.dart';
 import 'package:projeto_game_quiz/pages/tela14_fim_partida/tela14_fim_partida_model.dart';
 
@@ -440,58 +439,103 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
   }
 
   Widget _buildGameRoomButton() {
-    return Card(
-      elevation: 4.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.amber.withOpacity(0.2),
+            Colors.amber.withOpacity(0.1),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(
+          color: Colors.amber.withOpacity(0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          )
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Clique para escolher sala de jogo',
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
+            Row(
+              children: [
+                Icon(
+                  Icons.videogame_asset_rounded,
+                  color: Colors.amber[300],
+                  size: 24,
+                ),
+                SizedBox(width: 10),
+                Text(
+                  'Pronto para outra partida?',
+                  style: TextStyle(
                     fontFamily: 'Inter',
-                    fontSize: 16.0,
-                    letterSpacing: 0.0,
+                    fontSize: 18,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            FFButtonWidget(
-              onPressed: () async {
-                await showModalBottomSheet(
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  enableDrag: false,
-                  context: context,
-                  builder: (context) => GestureDetector(
-                    onTap: () => FocusScope.of(context).unfocus(),
-                    child: Padding(
-                      padding: MediaQuery.viewInsetsOf(context),
-                      child: const ModaListadeSalaWidget(),
+            SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () async {
+                  await showModalBottomSheet(
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    enableDrag: false,
+                    context: context,
+                    builder: (context) => GestureDetector(
+                      onTap: () => FocusScope.of(context).unfocus(),
+                      child: Padding(
+                        padding: MediaQuery.viewInsetsOf(context),
+                        child: const ModaListadeSalaWidget(),
+                      ),
                     ),
+                  );
+                  safeSetState(() {});
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.amber[700],
+                  foregroundColor: Colors.white,
+                  elevation: 5,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                );
-                safeSetState(() {});
-              },
-              text: 'PARTIDAS',
-              icon: const FaIcon(FontAwesomeIcons.gamepad, size: 20.0),
-              options: FFButtonOptions(
-                width: double.infinity,
-                height: 50.0,
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                color: const Color(0xFF00B80E),
-                textStyle: FlutterFlowTheme.of(context).titleMedium.override(
-                      fontFamily: 'Inter Tight',
-                      color: Colors.white,
-                      fontSize: 16.0,
-                      letterSpacing: 0.0,
-                      fontWeight: FontWeight.bold,
+                  padding: EdgeInsets.symmetric(horizontal: 24),
+                  shadowColor: Colors.amber.withOpacity(0.5),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      FontAwesomeIcons.gamepad,
+                      size: 20,
                     ),
-                elevation: 2.0,
-                borderRadius: BorderRadius.circular(8.0),
+                    SizedBox(width: 12),
+                    Text(
+                      'CRIAR NOVA PARTIDA',
+                      style: TextStyle(
+                        fontFamily: 'Inter Tight',
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
