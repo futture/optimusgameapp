@@ -8,6 +8,7 @@ class RankingResponse {
   bool? isWinner;
   String? matchId;
   bool? isExpanded;
+  bool? isCompleted;
 
   RankingResponse(
       {this.id,
@@ -30,6 +31,7 @@ class RankingResponse {
     isWinner = json['isWinner'];
     matchId = json['matchId'];
     isExpanded = false;
+    isCompleted = true;
   }
 
   Map<String, dynamic> toJson() {

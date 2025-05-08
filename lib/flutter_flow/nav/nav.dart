@@ -113,6 +113,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: Tela10DepositoListaWidget.routeName,
           path: Tela10DepositoListaWidget.routePath,
           builder: (context, params) => Tela10DepositoListaWidget(),
+        ),
+        FFRoute(
+          name: Tela17NotificacaoViewWidget.routeName,
+          path: Tela17NotificacaoViewWidget.routePath,
+          builder: (context, params) => Tela17NotificacaoViewWidget(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );

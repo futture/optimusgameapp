@@ -19,23 +19,42 @@ class Tela09HistoricoJodosWidget extends StatefulWidget {
       _Tela09HistoricoJodosWidgetState();
 }
 
-class _Tela09HistoricoJodosWidgetState
-    extends State<Tela09HistoricoJodosWidget> {
+class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
+    with TickerProviderStateMixin {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   late Tela09HistoricoJodosModel _model;
   bool _expandPremioInfo = false;
+  late TabController _tabController;
+  String _filterResult = 'all'; // 'all', 'winner', 'loser'
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => Tela09HistoricoJodosModel());
+    _tabController = TabController(length: 2, vsync: this);
     _model.load(setState);
   }
 
   @override
   void dispose() {
+    _tabController.dispose();
     _model.dispose();
     super.dispose();
+  }
+
+  List<RankingResponse> _getFilteredRankings(bool isCompleted) {
+    List<RankingResponse> rankings = isCompleted
+        ? _model.rankings.where((r) => r.isCompleted == true).toList()
+        : _model.rankings.where((r) => r.isCompleted != true).toList();
+
+    if (isCompleted) {
+      if (_filterResult == 'winner') {
+        return rankings.where((r) => r.isWinner == true).toList();
+      } else if (_filterResult == 'loser') {
+        return rankings.where((r) => r.isWinner == false).toList();
+      }
+    }
+    return rankings;
   }
 
   @override
@@ -87,6 +106,16 @@ class _Tela09HistoricoJodosWidgetState
         ),
         centerTitle: true,
         elevation: 4.0,
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Partidas Concluídas'),
+            Tab(text: 'Partidas Pendentes'),
+          ],
+          labelColor: FlutterFlowTheme.of(context).primaryText,
+          unselectedLabelColor: FlutterFlowTheme.of(context).secondaryText,
+          indicatorColor: FlutterFlowTheme.of(context).primary,
+        ),
       ),
       body: _model.isLoadingRanking
           ? const Center(child: CircularProgressIndicator())
@@ -110,43 +139,125 @@ class _Tela09HistoricoJodosWidgetState
                     ],
                   ),
                 )
-              : SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        Card(
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                _buildHeaderItem('DATA', flex: 1),
-                                _buildHeaderItem('RESULTADO', flex: 2),
-                                _buildHeaderItem('TEMPO', flex: 0),
-                                _buildHeaderItem('PONTO', flex: 1),
-                              ],
+              : Column(
+                  children: [
+                    // Mostra os filtros apenas na aba de partidas concluídas
+                    if (_tabController.index == 0)
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            FilterChip(
+                              label: const Text('Todas'),
+                              selected: _filterResult == 'all',
+                              onSelected: (bool selected) {
+                                setState(() {
+                                  _filterResult =
+                                      selected ? 'all' : _filterResult;
+                                });
+                              },
                             ),
-                          ),
+                            FilterChip(
+                              label: const Text('Vitórias'),
+                              selected: _filterResult == 'winner',
+                              onSelected: (bool selected) {
+                                setState(() {
+                                  _filterResult =
+                                      selected ? 'winner' : _filterResult;
+                                });
+                              },
+                            ),
+                            FilterChip(
+                              label: const Text('Derrotas'),
+                              selected: _filterResult == 'loser',
+                              onSelected: (bool selected) {
+                                setState(() {
+                                  _filterResult =
+                                      selected ? 'loser' : _filterResult;
+                                });
+                              },
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 12),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: _model.rankings.length,
-                          itemBuilder: (context, index) {
-                            final ranking = _model.rankings[index];
-                            return _buildGameCard(ranking);
-                          },
-                        ),
-                      ],
+                      ),
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          // Tab de partidas concluídas
+                          _buildGamesList(true),
+                          // Tab de partidas pendentes
+                          _buildGamesList(false),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
+    );
+  }
+
+  Widget _buildGamesList(bool isCompleted) {
+    final filteredRankings = _getFilteredRankings(isCompleted);
+
+    if (filteredRankings.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isCompleted ? Icons.emoji_events : Icons.hourglass_empty,
+              size: 48,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              isCompleted
+                  ? 'Nenhuma partida concluída encontrada'
+                  : 'Nenhuma partida pendente encontrada',
+              style: const TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildHeaderItem('DATA', flex: 1),
+                    _buildHeaderItem('RESULTADO', flex: 2),
+                    _buildHeaderItem('TEMPO', flex: 0),
+                    _buildHeaderItem('PONTO', flex: 1),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: filteredRankings.length,
+              itemBuilder: (context, index) {
+                final ranking = filteredRankings[index];
+                return _buildGameCard(ranking);
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -413,7 +524,7 @@ class _Tela09HistoricoJodosWidgetState
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Pontos: ${isCorrect ? (30 - time) : 0}',
+                  'Pontos: ${isCorrect ? (_model.matchInfo!.room!.roomConfiguration!.timeToRespond - time) : 0}',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ],

@@ -56,6 +56,20 @@ class UserService {
     }
   }
 
+  
+  Future<dynamic> getPlayerByMatchIdAsync(String matchId) async {
+    try {
+      final successResult = await httpService.request<List<UserResponse>>(
+        '/users/match/$matchId',
+        method: 'GET',
+        successParser: (json) => (json as List).map((item) => UserResponse.FromJson(item)).toList(),
+      );
+      return {"isSuccess": true, "data": successResult};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
   Future<dynamic> getUserByPhoneNumbrAsync(String phoneNumber) async {
     try {
       final successResult = await httpService.request<UserResponse>(

@@ -6,6 +6,7 @@ import 'package:projeto_game_quiz/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_model.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_util.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_widgets.dart';
 import 'package:projeto_game_quiz/pages/tela13_dados_de_partida/tela13_dados_de_partida_widget.dart';
 import 'package:projeto_game_quiz/pages/tela17_notificacao/tela17_notificacao_model.dart';
 
@@ -139,36 +140,7 @@ class _Tela17NotificacaoViewWidgetState
               ),
             );
           } else if (_model.pushNotifications.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/images/empty_notifications.png',
-                    width: 150,
-                    height: 150,
-                    color: Colors.grey.shade400,
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Nenhuma notificação encontrada',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Quando você receber notificações,\nelas aparecerão aqui.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade500,
-                    ),
-                  ),
-                ],
-              ),
-            );
+            return Center(child: _buildEmptyNotificationState());
           } else {
             return RefreshIndicator(
               onRefresh: () => _model.loadAsync(setState),
@@ -273,6 +245,57 @@ class _Tela17NotificacaoViewWidgetState
             );
           }
         },
+      ),
+    );
+  }
+
+  Widget _buildEmptyNotificationState() {
+    return Card(
+      elevation: 4.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.videogame_asset_outlined,
+              size: 48,
+              color: Colors.grey.shade400,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Nenhuma notificação disponível no momento',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey.shade600,
+              ),
+            ),
+            const SizedBox(height: 16),
+            FFButtonWidget(
+              onPressed: () async {
+                await _model.loadAsync(setState);
+              },
+              text: 'Recarregar',
+              icon: const Icon(Icons.refresh, size: 20),
+              options: FFButtonOptions(
+                width: 150,
+                height: 40,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                color: FlutterFlowTheme.of(context).secondaryBackground,
+                textStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+                      fontFamily: 'Inter',
+                      fontSize: 14,
+                      letterSpacing: 0.0,
+                    ),
+                elevation: 1,
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

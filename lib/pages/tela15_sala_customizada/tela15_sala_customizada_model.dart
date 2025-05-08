@@ -7,6 +7,9 @@ import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
+import 'package:projeto_game_quiz/dialogs/common_dialog_widget.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_widgets.dart';
 import 'package:projeto_game_quiz/pages/tela06_salade_jogo/tela06_salade_jogo_widget.dart';
 import 'package:projeto_game_quiz/pages/tela15_sala_customizada/tela15_sala_customizada_widget.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -21,21 +24,18 @@ class Tela15SalaCustomizadaViewModel
 
   final formKey = GlobalKey<FormState>();
   List<Map<String, String>> addedUsers = [];
+  late TextEditingController idTextController;
+  late TextEditingController numberPlayerTextController;
+  late TextEditingController numberQuestionTextController;
+  late TextEditingController numberOptionAnswerTextController;
+  late TextEditingController montanteTextController;
 
-  TextEditingController? idTextController;
-  FocusNode? idFocusNode;
-
-  TextEditingController? numberPlayerTextController;
-  FocusNode? numberPlayerFocusNode;
-
-  TextEditingController? numberQuestionTextController;
-  FocusNode? numberQuestionFocusNode;
-
-  TextEditingController? numberOptionAnswerTextController;
-  FocusNode? numberOptionAnswerFocusNode;
-
-  TextEditingController? montanteTextController;
-  FocusNode? montanteFocusNode;
+  // Initialize focus nodes with non-null values
+  late FocusNode idFocusNode;
+  late FocusNode numberPlayerFocusNode;
+  late FocusNode numberQuestionFocusNode;
+  late FocusNode numberOptionAnswerFocusNode;
+  late FocusNode montanteFocusNode;
 
   bool isShowWaitingDialogOpen = false;
   late BuildContext currentShowWaitingDialog;
@@ -47,6 +47,7 @@ class Tela15SalaCustomizadaViewModel
   int minPlayers = 1;
   int numberOfPlayers = 1;
   String matchId = "";
+  UserResponse? currentUser;
   MatchResponse? matchInfo;
   int playersConnected = 0;
   bool isWaitingPlayers = false;
@@ -88,18 +89,20 @@ class Tela15SalaCustomizadaViewModel
 
   @override
   void dispose() {
-    idTextController?.dispose();
-    numberPlayerTextController?.dispose();
-    numberQuestionTextController?.dispose();
-    numberOptionAnswerTextController?.dispose();
-    montanteTextController?.dispose();
+    idTextController.dispose();
+    numberPlayerTextController.dispose();
+    numberQuestionTextController.dispose();
+    numberOptionAnswerTextController.dispose();
+    montanteTextController.dispose();
 
-    idFocusNode?.dispose();
-    numberPlayerFocusNode?.dispose();
-    numberQuestionFocusNode?.dispose();
-    numberOptionAnswerFocusNode?.dispose();
-    montanteFocusNode?.dispose();
+    // Dispose focus nodes
+    idFocusNode.dispose();
+    numberPlayerFocusNode.dispose();
+    numberQuestionFocusNode.dispose();
+    numberOptionAnswerFocusNode.dispose();
+    montanteFocusNode.dispose();
     _matchWebSocketService?.disconnect();
+    //_isInitialized = true;
   }
 
   String? validateId(BuildContext context, String? val) {
@@ -156,6 +159,7 @@ class Tela15SalaCustomizadaViewModel
 
   Future<void> getUserIdAsync(VoidCallback? callback) async {
     userId = await UserUtil.getUserId() ?? "";
+    currentUser = await UserUtil.getUserInfo();
     callback?.call();
   }
 
@@ -196,7 +200,7 @@ class Tela15SalaCustomizadaViewModel
                 int.parse(numberOptionAnswerTextController.text),
             minimumNumberOfPlayers: int.parse(numberPlayerTextController.text),
             minimumAmountToPlay: double.parse(montanteTextController.text),
-            premiumRate: 0.1)));
+            premiumRate: 0.9)));
     if (result["isSuccess"]) {
       return result["data"]["id"];
     } else {
@@ -299,7 +303,7 @@ class Tela15SalaCustomizadaViewModel
         minPlayers = match.minPlayers;
         numberOfPlayers = match.numberOfPlayers;
         isWaitingPlayers = true;
-        showWaitingDialog();
+        showMatchParticipantsDialog();
       },
       onError: (error) => print("Erro no WebSocket: $error"),
       onDone: () => print("Conexão WebSocket encerrada."),
@@ -366,7 +370,7 @@ class Tela15SalaCustomizadaViewModel
     if (addedUsers.length < int.parse(numberPlayerTextController.text) - 1) {
       setState(() {
         addedUsers.add({'id': user!.id, 'nome': nome});
-        idTextController?.clear();
+        idTextController.clear();
       });
     } else {
       await Warning00ErrorUtil.showDialogMessageError(
@@ -396,4 +400,128 @@ class Tela15SalaCustomizadaViewModel
 
     setState(() {});
   }
+
+// In the Tela15SalaCustomizadaViewModel class, replace the showWaitingDialog method with:
+
+  void showMatchParticipantsDialog() {
+    if (isShowWaitingDialogOpen) return;
+
+    isShowWaitingDialogOpen = true;
+    currentShowWaitingDialog = context;
+    final participants = addedUsers
+        .map((user) => UserResponse(
+            id: user['id']!,
+            name: user['nome']!,
+            email: "",
+            phone_number: "",
+            phone_number_mask: ""))
+        .toList();
+
+    if (currentUser != null) {
+      participants.insert(0, currentUser!);
+    }
+    final minimumAmount =
+        matchInfo!.room?.roomConfiguration?.minimumAmountToPlay ?? 0;
+    var infos = [
+      {
+        'title': 'Inscrição',
+        'icon': Icons.attach_money,
+        'value': '${minimumAmount}KZ',
+      },
+      {
+        'title': 'Prêmio',
+        'icon': Icons.wine_bar_rounded,
+        'value': '${matchInfo!.matchPrize?.totalGain ?? 0} KZ',
+      },
+      {
+        'title': 'Nº Questões',
+        'icon': Icons.numbers,
+        'value': numberQuestionTextController.text,
+      },
+      {
+        'title': 'Vagas',
+        'icon': Icons.people,
+        'value':
+            '${matchInfo!.matchPlayers?.length ?? 0}/${matchInfo!.room?.roomConfiguration?.numberOfPlayers ?? 0}',
+      },
+    ];
+    CommonDialogWidget.showMatchParticipantsDialog(
+      context,
+      infos,
+      "Partida entre amigos",
+      matchInfo!,
+      participants,
+      currentUser,
+      _buildDialogActions(),
+    );
+  }
+
+  Widget _buildDialogActions() {
+    return Column(
+      children: [
+        if (isWaitingPlayers) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              children: [
+                const CircularProgressIndicator(
+                  color: Color(0xFFEC8D0D),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Aguardando participantes...',
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        fontFamily: 'Inter',
+                        color: const Color(0xFFEC8D0D),
+                        fontSize: 14,
+                        letterSpacing: 0,
+                      ),
+                ),
+                Text(
+                  'Participantes conectados: $playersConnected/$numberOfPlayers',
+                  style: FlutterFlowTheme.of(context).bodySmall.override(
+                        fontFamily: 'Inter',
+                        letterSpacing: 0,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            FFButtonWidget(
+              onPressed: () async {
+                Navigator.of(currentShowWaitingDialog).pop();
+                await leaveTheMatchAsync(context);
+                _matchWebSocketService?.disconnect();
+                isShowWaitingDialogOpen = false;
+              },
+              text: 'Cancelar',
+              options: FFButtonOptions(
+                height: 40,
+                padding: const EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
+                color: FlutterFlowTheme.of(context).error,
+                textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                      fontFamily: 'Inter',
+                      color: Colors.white,
+                      letterSpacing: 0,
+                    ),
+                elevation: 3,
+                borderSide: const BorderSide(
+                  color: Colors.transparent,
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
 }

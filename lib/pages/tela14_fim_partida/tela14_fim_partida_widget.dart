@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:projeto_game_quiz/components/moda_listade_sala_widget.dart';
 import 'package:projeto_game_quiz/components/moda_menu_pagian_inicial_widget.dart';
 import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_util.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_widgets.dart';
 import 'package:projeto_game_quiz/pages/tela03_principal/tela03_principal_widget.dart';
 import 'package:projeto_game_quiz/pages/tela14_fim_partida/tela14_fim_partida_model.dart';
 
@@ -226,33 +228,10 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
 
                           // Bottom Button
                           const SizedBox(height: 20),
-                          // Container(
-                          //   width: double.infinity,
-                          //   padding: EdgeInsets.symmetric(horizontal: 40),
-                          //   child: ElevatedButton.icon(
-                          //     onPressed: () {
-                          //       Navigator.of(context).pushReplacement(
-                          //         MaterialPageRoute(
-                          //           builder: (_) => Tela03PrincipalWidget(),
-                          //         ),
-                          //       );
-                          //     },
-                          //     icon: Icon(Icons.home, color: Colors.white),
-                          //     label: Text(
-                          //       "Menu Inicial",
-                          //       style: TextStyle(color: Colors.white),
-                          //     ),
-                          //     style: ElevatedButton.styleFrom(
-                          //       backgroundColor: Colors.orange[800],
-                          //       padding: EdgeInsets.symmetric(vertical: 15),
-                          //       shape: RoundedRectangleBorder(
-                          //         borderRadius: BorderRadius.circular(12),
-                          //       ),
-                          //       elevation: 5,
-                          //       shadowColor: Colors.orange.withOpacity(0.5),
-                          //     ),
-                          //   ),
-                          // ),
+                          Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(horizontal: 40),
+                              child: _buildGameRoomButton()),
                         ],
                       ),
                     ),
@@ -456,6 +435,67 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildGameRoomButton() {
+    return Card(
+      elevation: 4.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Clique para escolher sala de jogo',
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    fontFamily: 'Inter',
+                    fontSize: 16.0,
+                    letterSpacing: 0.0,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            FFButtonWidget(
+              onPressed: () async {
+                await showModalBottomSheet(
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  enableDrag: false,
+                  context: context,
+                  builder: (context) => GestureDetector(
+                    onTap: () => FocusScope.of(context).unfocus(),
+                    child: Padding(
+                      padding: MediaQuery.viewInsetsOf(context),
+                      child: const ModaListadeSalaWidget(),
+                    ),
+                  ),
+                );
+                safeSetState(() {});
+              },
+              text: 'PARTIDAS',
+              icon: const FaIcon(FontAwesomeIcons.gamepad, size: 20.0),
+              options: FFButtonOptions(
+                width: double.infinity,
+                height: 50.0,
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                color: const Color(0xFF00B80E),
+                textStyle: FlutterFlowTheme.of(context).titleMedium.override(
+                      fontFamily: 'Inter Tight',
+                      color: Colors.white,
+                      fontSize: 16.0,
+                      letterSpacing: 0.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                elevation: 2.0,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

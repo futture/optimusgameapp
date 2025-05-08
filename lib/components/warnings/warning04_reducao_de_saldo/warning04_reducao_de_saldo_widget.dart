@@ -11,12 +11,13 @@ class Warning04ReducaoDeSaldoWidget extends StatefulWidget {
   final bool? recebeuNotificaca;
   final VoidCallback? onConfirmed;
 
-  const Warning04ReducaoDeSaldoWidget(
-      {super.key,
-      this.matchInfo,
-      this.subscribe,
-      this.recebeuNotificaca,
-      this.onConfirmed});
+  const Warning04ReducaoDeSaldoWidget({
+    super.key,
+    this.matchInfo,
+    this.subscribe,
+    this.recebeuNotificaca,
+    this.onConfirmed,
+  });
 
   @override
   State<Warning04ReducaoDeSaldoWidget> createState() =>
@@ -32,7 +33,7 @@ class _Warning04ReducaoDeSaldoWidgetState
     super.initState();
     _model = createModel(context, () => Warning04ReducaoDeSaldoModel());
 
-    _model.getUserIdAsync(() => setState(() {}));
+    _model.getUserIdAsync(() => setState(() {}), setState);
     _model.onStateUpdate = () => setState(() {});
     _model.matchInfo = widget.matchInfo;
     _model.initState(context);
@@ -48,81 +49,88 @@ class _Warning04ReducaoDeSaldoWidgetState
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 280.0,
-      height: 210.0,
+      width: MediaQuery.of(context).size.width * 0.85,
       constraints: BoxConstraints(
-        minWidth: 280.0,
-        minHeight: 200.0,
-        maxWidth: 400.0,
-        maxHeight: 250.0,
+        maxWidth: 400.0, 
+        minHeight: 240.0,
       ),
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: BorderRadius.circular(12.0),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(0.0, 7.0, 0.0, 0.0),
-            child: Icon(
-              Icons.warning_amber,
-              color: Color(0xFFFF0000),
-              size: 60.0,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.0),
-            child: Text(
-              'Atenção: ao se inscrever nesta sala será reduzido do seu saldo a taxa de ${_model.matchInfo.room!.roomConfiguration!.minimumAmountToPlay} Kz para poder jogar',
-              textAlign: TextAlign.center,
-              style: FlutterFlowTheme.of(context).labelMedium.override(
-                    fontFamily: 'Plus Jakarta Sans',
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.w500,
-                  ),
-            ),
-          ),
-          SizedBox(width: 16.0),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.0),
-            child: Text(
-              'Premio: ${_model.matchInfo.room!.roomConfiguration!.numberOfPlayers * _model.matchInfo.room!.roomConfiguration!.minimumAmountToPlay} Kz',
-              textAlign: TextAlign.center,
-              style: FlutterFlowTheme.of(context).labelMedium.override(
-                    fontFamily: 'Plus Jakarta Sans',
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.w500,
-                  ),
-            ),
-          ),
-          SizedBox(width: 16.0),
-          Padding(
-            padding: EdgeInsets.fromLTRB(20.0, 0, 20.0, 20.0),
-            child: FFButtonWidget(
-              onPressed: () async {
-                if (widget.subscribe == null) _model.showWaitingDialog();
-                await _model.joinTheMatchAsync(
-                    widget.subscribe, widget.recebeuNotificaca);
-                widget.onConfirmed?.call();
-              },
-              text: 'Confirmar Inscrição',
-              options: FFButtonOptions(
-                height: 45.0,
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                color: Color(0xFF00C804),
-                textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                      fontFamily: 'Inter Tight',
-                      color: Colors.black,
-                      fontSize: 14.0,
-                    ),
-                elevation: 0.0,
-                borderRadius: BorderRadius.circular(8.0),
+      padding: const EdgeInsets.all(16.0),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Icon(
+                Icons.warning_rounded,
+                color: const Color(0xFFFF3B30),
+                size: 48.0,
               ),
             ),
-          ),
-        ],
+
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Text(
+                'Atenção',
+                style: FlutterFlowTheme.of(context).headlineSmall.override(
+                      fontFamily: 'Plus Jakarta Sans',
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFFFF3B30),
+                    ),
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(
+                'Ao se inscrever nesta sala será debitado do seu saldo a taxa de ${_model.matchInfo.room!.roomConfiguration!.minimumAmountToPlay} Kz para poder jogar.',
+                textAlign: TextAlign.center,
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      fontFamily: 'Plus Jakarta Sans',
+                      fontSize: 14.0,
+                    ),
+                softWrap: true, 
+                maxLines: 4, 
+                overflow: TextOverflow
+                    .ellipsis, 
+              ),
+            ),
+
+            const SizedBox(height: 20.0),
+
+            SizedBox(
+              width: double.infinity,
+              child: FFButtonWidget(
+                onPressed: () async {
+                  if (widget.subscribe == null) _model.showMatchParticipantsDialog();
+                  await _model.joinTheMatchAsync(
+                      widget.subscribe, widget.recebeuNotificaca);
+                  widget.onConfirmed?.call();
+                },
+                text: 'CONFIRMAR INSCRIÇÃO',
+                options: FFButtonOptions(
+                  height: 48.0,
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  color: const Color(0xFF34C759),
+                  textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                        fontFamily: 'Inter Tight',
+                        color: Colors.white,
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w600,
+                      ),
+                  elevation: 0.0,
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

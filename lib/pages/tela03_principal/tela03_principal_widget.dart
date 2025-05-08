@@ -4,6 +4,7 @@ import 'package:projeto_game_quiz/components/warnings/warning04_reducao_de_saldo
 import 'package:projeto_game_quiz/core/api/services/fcm_token_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
+import 'package:projeto_game_quiz/dialogs/common_dialog_widget.dart';
 import '/components/moda_listade_sala_widget.dart';
 import '/components/moda_menu_pagian_inicial_widget.dart';
 import '/components/modals_saque_widget.dart';
@@ -31,6 +32,7 @@ class Tela03PrincipalWidget extends StatefulWidget {
 class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
   late Tela03PrincipalModel _model;
   final matchService = MatchService();
+  bool _isLoadingMatchDetails = false;
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final FcmTokenService _fcmTokenService = FcmTokenService();
 
@@ -561,7 +563,38 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
     final isRegistered = match.isUserRegistered ?? false;
 
     return InkWell(
-      onTap: () => _handleMatchTap(match),
+      onTap: () async {
+        if (_isLoadingMatchDetails) return;
+
+        setState(() => _isLoadingMatchDetails = true);
+
+        try {
+          await _model.getUsersByMatchId(setState, match.id);
+          CommonDialogWidget.showMatchParticipantsDialog(
+              context,
+              List.empty(),
+              null,
+              match,
+              _model.users,
+              _model.user,
+              buildMatchButton(
+                isRegistered: isRegistered,
+                match: match,
+                onJoin: (m) => _handleMatchTap(m as MatchResponse),
+                onLeave: (m) => _leaveMatch(m as MatchResponse),
+                context: context,
+              ));
+        } catch (e) {
+          Warning00ErrorUtil.showDialogMessageError(
+            context,
+            "Erro ao carregar partida",
+            "Ocorreu um erro ao carregar os detalhes da partida.",
+          );
+        } finally {
+          setState(() => _isLoadingMatchDetails = false);
+        }
+        //_handleMatchTap(match);
+      },
       borderRadius: BorderRadius.circular(12.0),
       child: Card(
         elevation: 4.0,
@@ -646,6 +679,21 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                         ),
                       ),
                     ),
+                  if (_isLoadingMatchDetails)
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: const Center(
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ],
@@ -675,6 +723,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
     await _model.checkPlayerAlreadyRegisteredMatchAsync(setState, match.id);
 
     if (!_model.isNotRegisteredMatch) {
+      Navigator.pop(context);
       Warning00ErrorUtil.showDialogMessageError(
         context,
         "Falha ao se increver na partida",
@@ -697,6 +746,8 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
       );
 
       if (result == true) {
+        Navigator.pop(context);
+
         setState(() {
           _model.getUserInfoAndAccountInfoAsync(setState, context);
           _model.loadMatches(setState);
@@ -725,5 +776,62 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
     } else {
       return '${duration.inSeconds}s';
     }
+  }
+
+
+  Future<void> _leaveMatch(MatchResponse match) async {
+    try {
+      Navigator.pop(context);
+      await _model.leaveMatchAsync(match.id);
+      setState(() {
+        _model.getUserInfoAndAccountInfoAsync(setState, context);
+        _model.loadMatches(setState);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Você saiu da partida com sucesso')),
+      );
+    } catch (e) {
+      Warning00ErrorUtil.showDialogMessageError(
+        context,
+        "Erro ao sair da partida",
+        "Ocorreu um erro ao tentar sair da partida. Tente novamente.",
+      );
+    }
+  }
+  Widget buildMatchButton({
+    required bool isRegistered,
+    required dynamic match,
+    required Future<void> Function(dynamic) onJoin,
+    required Future<void> Function(dynamic) onLeave,
+    required BuildContext context,
+  }) {
+    return FFButtonWidget(
+      onPressed: () async {
+        if (isRegistered) {
+          await onLeave(match);
+        } else {
+          await onJoin(match);
+        }
+      },
+      text: isRegistered ? 'SAIR DA PARTIDA' : 'INSCREVER-SE',
+      icon: Icon(
+        isRegistered ? Icons.logout : Icons.login,
+        size: 20,
+      ),
+      options: FFButtonOptions(
+        width: double.infinity,
+        height: 50,
+        color: isRegistered ? Colors.redAccent : const Color(0xFF00B80E),
+        textStyle: FlutterFlowTheme.of(context).titleMedium.override(
+              fontFamily: 'Inter Tight',
+              color: Colors.white,
+              fontSize: 16,
+              letterSpacing: 0,
+              fontWeight: FontWeight.bold,
+            ),
+        elevation: 2,
+        borderRadius: BorderRadius.circular(8),
+      ),
+    );
   }
 }
