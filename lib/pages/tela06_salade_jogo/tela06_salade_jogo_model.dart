@@ -263,127 +263,289 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
 
     isDialogOpen = true;
     currentContext = context;
+    bool isChecked = false; // Esta variável não será usada diretamente
 
     showDialog(
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.black54,
-      builder: (_) => WillPopScope(
-        onWillPop: () async => false,
-        child: Dialog(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          insetPadding: const EdgeInsets.all(40),
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  const Color(0xFF01BF01),
-                  FlutterFlowTheme.of(context).secondary,
-                ],
-              ),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 20,
-                  spreadRadius: 2,
-                )
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  height: 80,
-                  width: 80,
-                  child: Stack(
-                    alignment: Alignment.center,
+      builder: (_) {
+        // Usando StatefulBuilder no nível mais alto para compartilhar o estado
+        return StatefulBuilder(
+          builder: (dialogContext, setState) {
+            return WillPopScope(
+              onWillPop: () async => false,
+              child: Dialog(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                insetPadding: const EdgeInsets.all(40),
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xFF01BF01),
+                        FlutterFlowTheme.of(context).secondary,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 20,
+                        spreadRadius: 2,
+                      )
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        strokeWidth: 8,
+                      SizedBox(
+                        height: 80,
+                        width: 80,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                              strokeWidth: 8,
+                            ),
+                            Icon(
+                              Icons.people_alt_rounded,
+                              size: 36,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
                       ),
-                      Icon(
-                        Icons.people_alt_rounded,
-                        size: 36,
-                        color: Colors.white,
+                      const SizedBox(height: 24),
+                      TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.95, end: 1.05),
+                        duration: const Duration(seconds: 1),
+                        curve: Curves.easeInOut,
+                        builder: (context, value, child) {
+                          return Transform.scale(
+                            scale: value,
+                            child: Text(
+                              "Aguardando Jogadores",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildAnimatedDot(0),
+                          _buildAnimatedDot(1),
+                          _buildAnimatedDot(2),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        "Esperando todos responderem...",
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Checkbox(
+                            value: isChecked,
+                            onChanged: (value) {
+                              setState(() {
+                                isChecked = value ?? false;
+                              });
+                            },
+                            activeColor: Colors.white,
+                            checkColor: Colors.green,
+                          ),
+                          Text(
+                            "Confirmo que desejo sair",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      OutlinedButton(
+                        onPressed: isChecked
+                            ? () {
+                                _questionWebSocketService?.disconnect();
+                                Navigator.of(currentContext!).push(
+                                  MaterialPageRoute(
+                                      builder: (_) => Tela03PrincipalWidget()),
+                                );
+                              }
+                            : null,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: BorderSide(color: Colors.white),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          disabledForegroundColor:
+                              Colors.white.withOpacity(0.5),
+                          disabledBackgroundColor: Colors.transparent,
+                        ),
+                        child: Text(
+                          "SAIR DA PARTIDA",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
-                TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.95, end: 1.05),
-                  duration: const Duration(seconds: 1),
-                  //repeat: true,
-                  curve: Curves.easeInOut,
-                  builder: (context, value, child) {
-                    return Transform.scale(
-                      scale: value,
-                      child: Text(
-                        "Aguardando Jogadores",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildAnimatedDot(0),
-                    _buildAnimatedDot(1),
-                    _buildAnimatedDot(2),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  "Esperando todos responderem...",
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                OutlinedButton(
-                  onPressed: () {
-                    _questionWebSocketService?.disconnect();
-                    Navigator.of(currentContext!).push(
-                      MaterialPageRoute(
-                          builder: (_) => Tela03PrincipalWidget()),
-                    );
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: BorderSide(color: Colors.white),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    "SAIR DA PARTIDA",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
+  // void showDialogWaitingPlayer(BuildContext context) {
+  //   if (isDialogOpen) return;
+
+  //   isDialogOpen = true;
+  //   currentContext = context;
+
+  //   showDialog(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     barrierColor: Colors.black54,
+  //     builder: (_) => WillPopScope(
+  //       onWillPop: () async => false,
+  //       child: Dialog(
+  //         backgroundColor: Colors.transparent,
+  //         elevation: 0,
+  //         insetPadding: const EdgeInsets.all(40),
+  //         child: Container(
+  //           padding: const EdgeInsets.all(24),
+  //           decoration: BoxDecoration(
+  //             gradient: LinearGradient(
+  //               begin: Alignment.topLeft,
+  //               end: Alignment.bottomRight,
+  //               colors: [
+  //                 const Color(0xFF01BF01),
+  //                 FlutterFlowTheme.of(context).secondary,
+  //               ],
+  //             ),
+  //             borderRadius: BorderRadius.circular(20),
+  //             boxShadow: [
+  //               BoxShadow(
+  //                 color: Colors.black.withOpacity(0.3),
+  //                 blurRadius: 20,
+  //                 spreadRadius: 2,
+  //               )
+  //             ],
+  //           ),
+  //           child: Column(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               SizedBox(
+  //                 height: 80,
+  //                 width: 80,
+  //                 child: Stack(
+  //                   alignment: Alignment.center,
+  //                   children: [
+  //                     CircularProgressIndicator(
+  //                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+  //                       strokeWidth: 8,
+  //                     ),
+  //                     Icon(
+  //                       Icons.people_alt_rounded,
+  //                       size: 36,
+  //                       color: Colors.white,
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //               const SizedBox(height: 24),
+  //               TweenAnimationBuilder<double>(
+  //                 tween: Tween(begin: 0.95, end: 1.05),
+  //                 duration: const Duration(seconds: 1),
+  //                 //repeat: true,
+  //                 curve: Curves.easeInOut,
+  //                 builder: (context, value, child) {
+  //                   return Transform.scale(
+  //                     scale: value,
+  //                     child: Text(
+  //                       "Aguardando Jogadores",
+  //                       style: TextStyle(
+  //                         fontSize: 20,
+  //                         fontWeight: FontWeight.bold,
+  //                         color: Colors.white,
+  //                       ),
+  //                     ),
+  //                   );
+  //                 },
+  //               ),
+  //               const SizedBox(height: 16),
+  //               Row(
+  //                 mainAxisAlignment: MainAxisAlignment.center,
+  //                 children: [
+  //                   _buildAnimatedDot(0),
+  //                   _buildAnimatedDot(1),
+  //                   _buildAnimatedDot(2),
+  //                 ],
+  //               ),
+  //               const SizedBox(height: 24),
+  //               Text(
+  //                 "Esperando todos responderem...",
+  //                 style: TextStyle(
+  //                   color: Colors.white.withOpacity(0.8),
+  //                   fontSize: 14,
+  //                 ),
+  //               ),
+  //               const SizedBox(height: 16),
+  //               OutlinedButton(
+  //                 onPressed: () {
+  //                   _questionWebSocketService?.disconnect();
+  //                   Navigator.of(currentContext!).push(
+  //                     MaterialPageRoute(
+  //                         builder: (_) => Tela03PrincipalWidget()),
+  //                   );
+  //                 },
+  //                 style: OutlinedButton.styleFrom(
+  //                   foregroundColor: Colors.white,
+  //                   side: BorderSide(color: Colors.white),
+  //                   padding: const EdgeInsets.symmetric(
+  //                       horizontal: 24, vertical: 12),
+  //                   shape: RoundedRectangleBorder(
+  //                     borderRadius: BorderRadius.circular(12),
+  //                   ),
+  //                 ),
+  //                 child: Text(
+  //                   "SAIR DA PARTIDA",
+  //                   style: TextStyle(
+  //                     fontWeight: FontWeight.bold,
+  //                   ),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildAnimatedDot(int index) {
     return Padding(
@@ -443,27 +605,93 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
 
   void showDialogErrorAndExit(String title, String message) {
     showDialog(
-        context: currentContext!,
-        barrierDismissible: false,
-        builder: (_) => WillPopScope(
-              onWillPop: () async => false,
-              child: AlertDialog(
-                title: Text(title),
-                content: Text(message),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      _questionWebSocketService!.disconnect();
-                      Navigator.of(currentContext!).push(
-                        MaterialPageRoute(
-                            builder: (_) => Tela03PrincipalWidget()),
-                      );
-                    },
-                    child: const Text("Voltar ao início"),
-                  ),
+      context: currentContext!,
+      barrierDismissible: false,
+      barrierColor: Colors.black54,
+      builder: (_) => WillPopScope(
+        onWillPop: () async => false,
+        child: Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          insetPadding: const EdgeInsets.all(40),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color(0xFFE53935), // Vermelho para erro
+                  FlutterFlowTheme.of(currentContext!).error,
                 ],
               ),
-            ));
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 20,
+                  spreadRadius: 2,
+                )
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 60,
+                  color: Colors.white,
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  message,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                OutlinedButton(
+                  onPressed: () {
+                    _questionWebSocketService?.disconnect();
+                    Navigator.of(currentContext!).push(
+                      MaterialPageRoute(
+                          builder: (_) => Tela03PrincipalWidget()),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side: BorderSide(color: Colors.white),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    "VOLTAR AO INÍCIO",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   int getPlayerPosition(String userId, Map<String, double> ranking) {

@@ -56,41 +56,41 @@ class NotificationHandler {
           } else if (data["action"] == "TO_JOIN_THE_MATCH") {
             if (context != null) {
               DadosDaPartidaUtils.showMatchParticipantsDialog(
-                context,
-                currentUser,
-                matchInfo["data"],
-                parts,
-                matchInfo["data"]!.statusMatch == "PENDING"
-                    ? null
-                    : Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 8),
-                            Text(
-                              'Partida terminada...',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'Inter',
-                                    color: const Color(0xFFEC8D0D),
-                                    fontSize: 14,
-                                    letterSpacing: 0,
-                                  ),
-                            ),
-                            Text(
-                              'Partida ja fechada',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodySmall
-                                  .override(
-                                    fontFamily: 'Inter',
-                                    letterSpacing: 0,
-                                  ),
-                            ),
-                          ],
+                  context,
+                  currentUser,
+                  matchInfo["data"],
+                  parts,
+                  matchInfo["data"]!.statusMatch == "PENDING"
+                      ? null
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 8),
+                              Text(
+                                'Partida terminada...',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      fontFamily: 'Inter',
+                                      color: const Color(0xFFEC8D0D),
+                                      fontSize: 14,
+                                      letterSpacing: 0,
+                                    ),
+                              ),
+                              Text(
+                                'Partida ja fechada',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodySmall
+                                    .override(
+                                      fontFamily: 'Inter',
+                                      letterSpacing: 0,
+                                    ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-              );
+                  null);
 
               // Navigator.of(context).push(
               //   MaterialPageRoute(
@@ -114,14 +114,38 @@ class NotificationHandler {
             }
           } else if (data["action"] == "SCHEDULED_MATCH_WILL_BEGIN") {
             if (context != null) {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => Tela13DadosDePartidaWidget(
-                    matchId: data["matchId"],
-                    notDisplayButton: true,
+              DadosDaPartidaUtils.showMatchParticipantsDialog(
+                  context,
+                  currentUser,
+                  matchInfo["data"],
+                  parts,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 8),
+                        Text(
+                          'Partida comera em breve...',
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    fontFamily: 'Inter',
+                                    color: const Color(0xFFEC8D0D),
+                                    fontSize: 14,
+                                    letterSpacing: 0,
+                                  ),
+                        ),
+                        Text(
+                          'Ficar atento para não perder',
+                          style:
+                              FlutterFlowTheme.of(context).bodySmall.override(
+                                    fontFamily: 'Inter',
+                                    letterSpacing: 0,
+                                  ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
+                  true);
             }
           }
         }
@@ -154,41 +178,41 @@ class NotificationHandler {
           } else if (data["action"] == "TO_JOIN_THE_MATCH") {
             if (context != null) {
               DadosDaPartidaUtils.showMatchParticipantsDialog(
-                context,
-                currentUser,
-                matchInfo["data"],
-                parts,
-                matchInfo["data"]!.statusMatch == "PENDING"
-                    ? null
-                    : Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 8),
-                            Text(
-                              'Partida terminada...',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'Inter',
-                                    color: const Color(0xFFEC8D0D),
-                                    fontSize: 14,
-                                    letterSpacing: 0,
-                                  ),
-                            ),
-                            Text(
-                              'Partida ja fechada',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodySmall
-                                  .override(
-                                    fontFamily: 'Inter',
-                                    letterSpacing: 0,
-                                  ),
-                            ),
-                          ],
+                  context,
+                  currentUser,
+                  matchInfo["data"],
+                  parts,
+                  matchInfo["data"]!.statusMatch == "PENDING"
+                      ? null
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 8),
+                              Text(
+                                'Partida terminada...',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      fontFamily: 'Inter',
+                                      color: const Color(0xFFEC8D0D),
+                                      fontSize: 14,
+                                      letterSpacing: 0,
+                                    ),
+                              ),
+                              Text(
+                                'Partida ja fechada',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodySmall
+                                    .override(
+                                      fontFamily: 'Inter',
+                                      letterSpacing: 0,
+                                    ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-              );
+                  null);
             }
           } else if (data["action"] == "ERR_START_TO_MATCH_SCHEDULED") {
             final decodedMessageErr = jsonDecode(data["error"]);
@@ -205,14 +229,38 @@ class NotificationHandler {
             }
           } else if (data["action"] == "SCHEDULED_MATCH_WILL_BEGIN") {
             if (context != null) {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => Tela13DadosDePartidaWidget(
-                    matchId: data["matchId"],
-                    notDisplayButton: true,
+              DadosDaPartidaUtils.showMatchParticipantsDialog(
+                  context,
+                  currentUser,
+                  matchInfo["data"],
+                  parts,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 8),
+                        Text(
+                          'Partida comera em breve...',
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    fontFamily: 'Inter',
+                                    color: const Color(0xFFEC8D0D),
+                                    fontSize: 14,
+                                    letterSpacing: 0,
+                                  ),
+                        ),
+                        Text(
+                          'Ficar atento para não perder',
+                          style:
+                              FlutterFlowTheme.of(context).bodySmall.override(
+                                    fontFamily: 'Inter',
+                                    letterSpacing: 0,
+                                  ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
+                  true);
             }
           } else if (data["action"] == "DISQUALIFIED_FROM_MATCH") {
             if (context != null) {
@@ -220,35 +268,37 @@ class NotificationHandler {
                   await matchService.getMatchByMatchIdAsync(data["matchId"]);
               var parts = await getPlayerByMatchIdAsync(data["matchId"]);
               DadosDaPartidaUtils.showMatchParticipantsDialog(
-                context,
-                currentUser,
-                matchInfo["data"]!,
-                parts,
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 8),
-                      Text(
-                        'Jogador desqualificado...',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              fontFamily: 'Inter',
-                              color: const Color(0xFFEC8D0D),
-                              fontSize: 14,
-                              letterSpacing: 0,
-                            ),
-                      ),
-                      Text(
-                        'Jogador desqualificado por inatividade',
-                        style: FlutterFlowTheme.of(context).bodySmall.override(
-                              fontFamily: 'Inter',
-                              letterSpacing: 0,
-                            ),
-                      ),
-                    ],
+                  context,
+                  currentUser,
+                  matchInfo["data"]!,
+                  parts,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 8),
+                        Text(
+                          'Jogador desqualificado...',
+                          style:
+                              FlutterFlowTheme.of(context).bodyMedium.override(
+                                    fontFamily: 'Inter',
+                                    color: const Color(0xFFEC8D0D),
+                                    fontSize: 14,
+                                    letterSpacing: 0,
+                                  ),
+                        ),
+                        Text(
+                          'Jogador desqualificado por inatividade',
+                          style:
+                              FlutterFlowTheme.of(context).bodySmall.override(
+                                    fontFamily: 'Inter',
+                                    letterSpacing: 0,
+                                  ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
+                  null);
             }
           }
         }

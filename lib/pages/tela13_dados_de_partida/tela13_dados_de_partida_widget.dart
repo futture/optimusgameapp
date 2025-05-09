@@ -325,10 +325,14 @@ class _Tela13DadosDePartidaWidgetState
   }
 }
 
-
-class DadosDaPartidaUtils{
-    static void showMatchParticipantsDialog(BuildContext ctx, UserResponse? currentUser, MatchResponse matchInfo,
-      List<UserResponse> participants, Widget? widget) {
+class DadosDaPartidaUtils {
+  static void showMatchParticipantsDialog(
+      BuildContext ctx,
+      UserResponse? currentUser,
+      MatchResponse matchInfo,
+      List<UserResponse> participants,
+      Widget? widget,
+      bool? doNotDisplayButton) {
     // if (currentUser != null) {
     //   participants.insert(0, currentUser!);
     // }
@@ -365,13 +369,17 @@ class DadosDaPartidaUtils{
       matchInfo,
       participants,
       currentUser,
-      _buildDialogActions(ctx, matchInfo, participants, widget),
+      _buildDialogActions(
+          ctx, matchInfo, participants, widget, doNotDisplayButton),
     );
   }
 
- static Widget _buildDialogActions(BuildContext ctx, MatchResponse matchInfo,
-
-      List<UserResponse> participants, Widget? widget) {
+  static Widget _buildDialogActions(
+      BuildContext ctx,
+      MatchResponse matchInfo,
+      List<UserResponse> participants,
+      Widget? widget,
+      bool? doNotDisplayButton) {
     return Column(
       children: [
         if (widget != null) widget,
@@ -380,43 +388,44 @@ class DadosDaPartidaUtils{
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             if (matchInfo.statusMatch == "PENDING")
-              FFButtonWidget(
-                onPressed: () async {
-                  showDialog(
-                    context: ctx,
-                    builder: (context) => Dialog(
-                      backgroundColor: Colors.transparent,
-                      insetPadding: const EdgeInsets.all(24),
-                      child: Warning04ReducaoDeSaldoWidget(
-                        matchInfo: matchInfo,
-                        recebeuNotificaca: true,
+              if (doNotDisplayButton == null)
+                FFButtonWidget(
+                  onPressed: () async {
+                    showDialog(
+                      context: ctx,
+                      builder: (context) => Dialog(
+                        backgroundColor: Colors.transparent,
+                        insetPadding: const EdgeInsets.all(24),
+                        child: Warning04ReducaoDeSaldoWidget(
+                          matchInfo: matchInfo,
+                          recebeuNotificaca: true,
+                        ),
                       ),
+                    );
+                  },
+                  text: 'Aceitar',
+                  options: FFButtonOptions(
+                    height: 40,
+                    padding: const EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
+                    color: const Color(0xFF00B80E),
+                    textStyle: FlutterFlowTheme.of(ctx).titleSmall.override(
+                          fontFamily: 'Inter',
+                          color: Colors.white,
+                          letterSpacing: 0,
+                        ),
+                    elevation: 3,
+                    borderSide: const BorderSide(
+                      color: Colors.transparent,
+                      width: 1,
                     ),
-                  );
-                },
-                text: 'Aceitar',
-                options: FFButtonOptions(
-                  height: 40,
-                  padding: const EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
-                  color: const Color(0xFF00B80E),
-                  textStyle: FlutterFlowTheme.of(ctx).titleSmall.override(
-                        fontFamily: 'Inter',
-                        color: Colors.white,
-                        letterSpacing: 0,
-                      ),
-                  elevation: 3,
-                  borderSide: const BorderSide(
-                    color: Colors.transparent,
-                    width: 1,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  borderRadius: BorderRadius.circular(8),
                 ),
-              ),
             FFButtonWidget(
               onPressed: () async {
                 Navigator.of(ctx).pop();
               },
-              text: 'Negar',
+              text: 'Fechar',
               options: FFButtonOptions(
                 height: 40,
                 padding: const EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
@@ -439,5 +448,4 @@ class DadosDaPartidaUtils{
       ],
     );
   }
-
 }
