@@ -30,6 +30,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
   dynamic rankingData;
   RankingPeriod _selectedPeriod = RankingPeriod.daily;
   RankingWithTopWinnersResponse? _rankingResponse;
+  List<RankingItem> fullRankingList = [];
   bool isLoading = false;
   String firstPlaceName = '';
   String firstPlacePoints = '';
@@ -81,62 +82,74 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
   }
 
   Future<void> _fetchRanking(RankingPeriod period) async {
-    setState(() {
-      isLoading = true;
-      rankingData = 'Carregando...';
+  setState(() {
+    isLoading = true;
+    rankingData = 'Carregando...';
+  });
+
+  final service = RankingService();
+  final response = await service.getRankingByPeriodAsync(period);
+
+  // Verificando se a resposta foi bem-sucedida
+  if (response['isSuccess']) {
+    final rankingResponse = response['data'] as RankingWithTopWinnersResponse;
+
+    // Exibir os dados no formato esperado
+    print('Top 3:');
+    rankingResponse.top3.forEach((item) {
+      print(
+          'Top 3 - Nome: ${item.user.name}, Posição: ${item.position}, Pontuação: ${item.totalScore}');
     });
 
-    final service = RankingService();
-    final response = await service.getRankingByPeriodAsync(period);
+    print('Todos os rankings:');
+    rankingResponse.allRankings.forEach((item) {
+      print(
+          'Ranking - Nome: ${item.user.name}, Posição: ${item.position}, Pontuação: ${item.totalScore}');
+    });
 
-    // Verificando se a resposta foi bem-sucedida
-    if (response['isSuccess']) {
-      final rankingResponse = response['data'] as RankingWithTopWinnersResponse;
+    // Preencher as variáveis globais com os dados do top 3
+    setState(() {
+      final top3 = rankingResponse.top3;
+      if (top3.isNotEmpty) {
+        if (top3.length > 0) {
+          firstPlaceName = top3[0].user.name;
+          firstPlacePoints = top3[0].totalScore.toString();
+          firstPlacePosition = top3[0].position;
+        }
 
-      // Exibir os dados no formato esperado
-      print('Top 3:');
-      rankingResponse.top3.forEach((item) {
-        print(
-            'Top 3 - Nome: ${item.user.name}, Posição: ${item.position}, Pontuação: ${item.totalScore}');
-      });
+        if (top3.length > 1) {
+          secondPlaceName = top3[1].user.name;
+          secondPlacePoints = top3[1].totalScore.toString();
+          secondPlacePosition = top3[1].position;
+        }
 
-      print('Todos os rankings:');
-      rankingResponse.allRankings.forEach((item) {
-        print(
-            'Ranking - Nome: ${item.user.name}, Posição: ${item.position}, Pontuação: ${item.totalScore}');
-      });
+        if (top3.length > 2) {
+          thirdPlaceName = top3[2].user.name;
+          thirdPlacePoints = top3[2].totalScore.toString();
+          thirdPlacePosition = top3[2].position;
+        }
+      }
 
-      // Preencher as variáveis globais com os dados do top 3
-      setState(() {
-        // Top 1
-        firstPlaceName = rankingResponse.top3[0].user.name;
-        firstPlacePoints = rankingResponse.top3[0].totalScore.toString();
-        firstPlacePosition = rankingResponse.top3[0].position;
+      // Atualizar a lista completa de rankings e ordená-la
+      fullRankingList = rankingResponse.allRankings
+        ..sort((a, b) => b.totalScore.compareTo(a.totalScore));
 
-        // Top 2
-        secondPlaceName = rankingResponse.top3[1].user.name;
-        secondPlacePosition = rankingResponse.top3[1].position;
-        secondPlacePoints = rankingResponse.top3[1].totalScore.toString();
+      // Gerar a string para exibição do ranking completo
+      rankingData = fullRankingList
+          .map((e) =>
+              'ID: ${e.id}, Nome: ${e.user.name}, Posição: ${e.position}, Pontuação: ${e.totalScore}')
+          .join('\n');
 
-        // Top 3
-        thirdPlaceName = rankingResponse.top3[2].user.name;
-        thirdPlacePosition = rankingResponse.top3[2].position;
-        thirdPlacePoints = rankingResponse.top3[2].totalScore.toString();
-        print(thirdPlaceName);
-        // Atualizar o estado com os dados do ranking
-        rankingData = rankingResponse.allRankings
-            .map((e) =>
-                'ID: ${e.id}, Nome: ${e.user.name}, Posição: ${e.position}, Pontuação: ${e.totalScore}')
-            .join('\n'); // Exemplo de formatação para exibição
-        isLoading = false;
-      });
-    } else {
-      setState(() {
-        rankingData = 'Erro ao buscar ranking'; // Caso ocorra erro
-        isLoading = false;
-      });
-    }
+      isLoading = false;
+    });
+  } else {
+    setState(() {
+      rankingData = 'Erro ao buscar ranking'; // Caso ocorra erro
+      isLoading = false;
+    });
   }
+}
+
 
   void _handleTabChange() {
     switch (_model.tabBarController?.index) {
@@ -296,11 +309,18 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
   }
 
   Widget _buildRankingList() {
+    if (fullRankingList == null || fullRankingList.length <= 3) {
+      return const Center(child: Text('Sem dados de ranking para exibir.'));
+    }
+
+    // Pega os jogadores a partir da posição 4 (ignora top 3)
+    final otherRankings = fullRankingList.skip(3).toList();
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          children: List.generate(10, (index) {
+          children: otherRankings.map((ranking) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Container(
@@ -328,7 +348,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                     ),
                     child: Center(
                       child: Text(
-                        (index + 4).toString(),
+                        ranking.position.toString(),
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Color(0xFFEC8D0D),
@@ -336,25 +356,12 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                       ),
                     ),
                   ),
-                  title: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: Colors.grey[200],
-                        backgroundImage: NetworkImage(
-                            'https://picsum.photos/seed/${index + 100}/600'),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Usuário ${index + 1}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+                  title: Text(
+                    ranking.user?.name ?? 'Nome não disponível',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                   trailing: Container(
                     padding:
@@ -368,7 +375,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      '${(10000 - index * 1000)}',
+                      ranking.totalScore.toString(),
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -379,7 +386,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                 ),
               ),
             );
-          }),
+          }).toList(),
         ),
       ),
     );
