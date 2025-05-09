@@ -82,74 +82,52 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
   }
 
   Future<void> _fetchRanking(RankingPeriod period) async {
-  setState(() {
-    isLoading = true;
-    rankingData = 'Carregando...';
-  });
-
-  final service = RankingService();
-  final response = await service.getRankingByPeriodAsync(period);
-
-  // Verificando se a resposta foi bem-sucedida
-  if (response['isSuccess']) {
-    final rankingResponse = response['data'] as RankingWithTopWinnersResponse;
-
-    // Exibir os dados no formato esperado
-    print('Top 3:');
-    rankingResponse.top3.forEach((item) {
-      print(
-          'Top 3 - Nome: ${item.user.name}, Posição: ${item.position}, Pontuação: ${item.totalScore}');
-    });
-
-    print('Todos os rankings:');
-    rankingResponse.allRankings.forEach((item) {
-      print(
-          'Ranking - Nome: ${item.user.name}, Posição: ${item.position}, Pontuação: ${item.totalScore}');
-    });
-
-    // Preencher as variáveis globais com os dados do top 3
     setState(() {
-      final top3 = rankingResponse.top3;
-      if (top3.isNotEmpty) {
-        if (top3.length > 0) {
-          firstPlaceName = top3[0].user.name;
-          firstPlacePoints = top3[0].totalScore.toString();
-          firstPlacePosition = top3[0].position;
-        }
-
-        if (top3.length > 1) {
-          secondPlaceName = top3[1].user.name;
-          secondPlacePoints = top3[1].totalScore.toString();
-          secondPlacePosition = top3[1].position;
-        }
-
-        if (top3.length > 2) {
-          thirdPlaceName = top3[2].user.name;
-          thirdPlacePoints = top3[2].totalScore.toString();
-          thirdPlacePosition = top3[2].position;
-        }
-      }
-
-      // Atualizar a lista completa de rankings e ordená-la
-      fullRankingList = rankingResponse.allRankings
-        ..sort((a, b) => b.totalScore.compareTo(a.totalScore));
-
-      // Gerar a string para exibição do ranking completo
-      rankingData = fullRankingList
-          .map((e) =>
-              'ID: ${e.id}, Nome: ${e.user.name}, Posição: ${e.position}, Pontuação: ${e.totalScore}')
-          .join('\n');
-
-      isLoading = false;
+      isLoading = true;
+      rankingData = 'Carregando...';
     });
-  } else {
-    setState(() {
-      rankingData = 'Erro ao buscar ranking'; // Caso ocorra erro
-      isLoading = false;
-    });
+
+    final service = RankingService();
+    final response = await service.getRankingByPeriodAsync(period);
+    if (response['isSuccess']) {
+      final rankingResponse = response['data'] as RankingWithTopWinnersResponse;
+      setState(() {
+        final top3 = rankingResponse.top3;
+        if (top3.isNotEmpty) {
+          if (top3.length > 0) {
+            firstPlaceName = top3[0].user.name;
+            firstPlacePoints = top3[0].totalScore.toString();
+            firstPlacePosition = top3[0].position;
+          }
+
+          if (top3.length > 1) {
+            secondPlaceName = top3[1].user.name;
+            secondPlacePoints = top3[1].totalScore.toString();
+            secondPlacePosition = top3[1].position;
+          }
+
+          if (top3.length > 2) {
+            thirdPlaceName = top3[2].user.name;
+            thirdPlacePoints = top3[2].totalScore.toString();
+            thirdPlacePosition = top3[2].position;
+          }
+        }
+        fullRankingList = rankingResponse.allRankings
+          ..sort((a, b) => b.totalScore.compareTo(a.totalScore));
+        rankingData = fullRankingList
+            .map((e) =>
+                'ID: ${e.id}, Nome: ${e.user.name}, Posição: ${e.position}, Pontuação: ${e.totalScore}')
+            .join('\n');
+
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        rankingData = 'Erro ao buscar ranking';
+        isLoading = false;
+      });
+    }
   }
-}
-
 
   void _handleTabChange() {
     switch (_model.tabBarController?.index) {
@@ -170,11 +148,11 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
   Color _getPositionColor(int position) {
     switch (position) {
       case 1:
-        return const Color(0xFFFFD700); // Ouro
+        return const Color(0xFFFFD700);
       case 2:
-        return const Color(0xFFC0C0C0); // Prata
+        return const Color(0xFFC0C0C0);
       case 3:
-        return const Color(0xFFCD7F32); // Bronze
+        return const Color(0xFFCD7F32);
       default:
         return const Color(0xFFEC8D0D);
     }
@@ -233,7 +211,6 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Número da posição
               Container(
                 width: 28,
                 height: 28,
@@ -253,7 +230,6 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                 ),
               ),
               const SizedBox(height: 10),
-              // Avatar
               Container(
                 decoration: isFirst
                     ? BoxDecoration(
@@ -277,7 +253,6 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                 ),
               ),
               const SizedBox(height: 10),
-              // Nome
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Text(
@@ -309,18 +284,35 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
   }
 
   Widget _buildRankingList() {
-    if (fullRankingList == null || fullRankingList.length <= 3) {
-      return const Center(child: Text('Sem dados de ranking para exibir.'));
+    if (isLoading) {
+      return Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFFEC8D0D)),
+        ),
+      );
     }
-
-    // Pega os jogadores a partir da posição 4 (ignora top 3)
-    final otherRankings = fullRankingList.skip(3).toList();
+    if (fullRankingList.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            'Não há mais jogadores além do Top 3 para exibir.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: const Color(0xFFEC8D0D),
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      );
+    }
 
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          children: otherRankings.map((ranking) {
+          children: fullRankingList.map((ranking) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Container(
@@ -332,7 +324,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                       color: Colors.black.withOpacity(0.05),
                       blurRadius: 6,
                       offset: const Offset(0, 3),
-                    )
+                    ),
                   ],
                 ),
                 child: ListTile(
@@ -357,7 +349,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                     ),
                   ),
                   title: Text(
-                    ranking.user?.name ?? 'Nome não disponível',
+                    ranking.user.name,
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                     ),
@@ -426,7 +418,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
             style: FlutterFlowTheme.of(context).headlineSmall.override(
                   fontFamily: 'Inter Tight',
                   color: const Color(0xFFEC8D0D),
-                  fontSize: 24,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.5,
                 ),
@@ -517,7 +509,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                           color: Colors.black.withOpacity(0.1),
                           blurRadius: 12,
                           offset: const Offset(0, 6),
-                        )
+                        ),
                       ],
                     ),
                     child: Stack(
@@ -537,52 +529,70 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                           ),
                         ),
 
-                        // Posição 2 (esquerda)
-                        Positioned(
-                          left: 20,
-                          bottom: 50,
-                          child: _buildPodiumUser(
-                            position: secondPlacePosition,
-                            name: secondPlaceName,
-                            points: secondPlacePoints,
-                            avatarUrl: 'https://picsum.photos/seed/380/600',
-                            height: 150,
+                        // Exibir se não houver dados de pódio
+                        if (firstPlaceName.isEmpty &&
+                            secondPlaceName.isEmpty &&
+                            thirdPlaceName.isEmpty)
+                          Center(
+                            child: Text(
+                              'Nenhum classificado',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    Colors.grey, // Cor neutra para a mensagem
+                              ),
+                            ),
                           ),
-                        ),
+
+                        // Posição 2 (esquerda)
+                        if (secondPlaceName.isNotEmpty)
+                          Positioned(
+                            left: 20,
+                            bottom: 50,
+                            child: _buildPodiumUser(
+                              position: secondPlacePosition,
+                              name: secondPlaceName,
+                              points: secondPlacePoints,
+                              avatarUrl: 'https://picsum.photos/seed/380/600',
+                              height: 150,
+                            ),
+                          ),
 
                         // Posição 1 (centro)
-                        Positioned(
-                          left: MediaQuery.of(context).size.width / 2 - 60,
-                          bottom: 30,
-                          child: _buildPodiumUser(
-                            position: firstPlacePosition,
-                            name: firstPlaceName,
-                            points: firstPlacePoints,
-                            avatarUrl:
-                                'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
-                            height: 177,
-                            isFirst: true,
+                        if (firstPlaceName.isNotEmpty)
+                          Positioned(
+                            left: MediaQuery.of(context).size.width / 2 - 60,
+                            bottom: 30,
+                            child: _buildPodiumUser(
+                              position: firstPlacePosition,
+                              name: firstPlaceName,
+                              points: firstPlacePoints,
+                              avatarUrl:
+                                  'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
+                              height: 177,
+                              isFirst: true,
+                            ),
                           ),
-                        ),
 
                         // Posição 3 (direita)
-                        Positioned(
-                          right: 20,
-                          bottom: 40,
-                          child: _buildPodiumUser(
-                            position: thirdPlacePosition,
-                            name: thirdPlaceName,
-                            points: thirdPlacePoints,
-                            avatarUrl:
-                                'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
-                            height: 140,
+                        if (thirdPlaceName.isNotEmpty)
+                          Positioned(
+                            right: 20,
+                            bottom: 40,
+                            child: _buildPodiumUser(
+                              position: thirdPlacePosition,
+                              name: thirdPlaceName,
+                              points: thirdPlacePoints,
+                              avatarUrl:
+                                  'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
+                              height: 140,
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),
-
-                  // Loading sobreposto
+                  // Exibição do indicador de carregamento
                   if (isLoading)
                     Positioned.fill(
                       child: Container(
@@ -607,8 +617,6 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                     ),
                 ],
               ),
-
-              // Lista de rankings
               Expanded(
                 child: Container(
                   margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -620,15 +628,34 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                         color: Colors.black.withOpacity(0.1),
                         blurRadius: 12,
                         offset: const Offset(0, 6),
-                      )
+                      ),
                     ],
                   ),
-                  child: TabBarView(
-                    controller: _model.tabBarController,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildRankingList(),
-                      _buildRankingList(),
-                      _buildRankingList(),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 16, top: 16, bottom: 12),
+                        child: Text(
+                          'Classificados fora do top 3',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFFEC8D0D),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: TabBarView(
+                          controller: _model.tabBarController,
+                          children: [
+                            _buildRankingList(),
+                            _buildRankingList(),
+                            _buildRankingList(),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
