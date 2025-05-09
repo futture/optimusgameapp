@@ -201,7 +201,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
             ),
             _buildInfoItem(
               'JOGADORES',
-              '${_model.matchInfo!.matchPlayers!.length}',
+              '${_model.matchInfo!.room!.roomConfiguration!.numberOfPlayers}',
               Icons.people,
             ),
           ],
@@ -381,9 +381,19 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
         width: double.infinity,
         constraints: const BoxConstraints(minHeight: 60.0),
         decoration: BoxDecoration(
-          color: _model.answerOptionId == e.id
-              ? const Color(0xFF00B80E)
-              : Color(0xFFEC8D0D),
+          gradient: LinearGradient(
+            colors: _model.answerOptionId == e.id
+                ? [
+                    const Color(0xFF00B80E),
+                    FlutterFlowTheme.of(context).secondary
+                  ]
+                : [
+                    const Color(0xFFEC8D0D),
+                    FlutterFlowTheme.of(context).secondary
+                  ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(12.0),
           boxShadow: [
             BoxShadow(
@@ -431,7 +441,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
                       fontFamily: 'Inter',
                       color: _model.answerOptionId == e.id
                           ? Colors.white
-                          : FlutterFlowTheme.of(context).secondaryText,
+                          : Colors.black,
                       fontSize: 16.0,
                       letterSpacing: 0.0,
                     ),

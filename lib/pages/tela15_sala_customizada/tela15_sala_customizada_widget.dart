@@ -521,40 +521,65 @@ class _Tela15SalaCustomizadaViewWidgetState
       width: double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFFEC8D0D),
+          backgroundColor: const Color(0xFFEC8D0D),
           padding: const EdgeInsets.symmetric(vertical: 16),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           elevation: 2,
         ),
-        onPressed: () async {
-          final isValid = _model.formKey.currentState?.validate() ?? false;
-          if (!isValid) return;
+        onPressed: _model.isLoadingStartMatch
+            ? null
+            : () async {
+                final isValid =
+                    _model.formKey.currentState?.validate() ?? false;
+                if (!isValid) return;
 
-          _model.playerIds = [];
-          _model.addedUsers.forEach((action) {
-            _model.playerIds.add(action['id']!);
-          });
+                _model.playerIds = [];
+                _model.addedUsers.forEach((action) {
+                  _model.playerIds.add(action['id']!);
+                });
 
-          if (_model.playerIds.isEmpty) {
-            await Warning00ErrorUtil.showDialogMessageError(
-              context,
-              "Falha ao iniciar partida",
-              "Você precisa adicionar pelo menos um jogador.",
-            );
-            return;
-          }
+                if (_model.playerIds.isEmpty) {
+                  await Warning00ErrorUtil.showDialogMessageError(
+                    context,
+                    "Falha ao iniciar partida",
+                    "Você precisa adicionar pelo menos um jogador.",
+                  );
+                  return;
+                }
 
-          await _model.createMatchAsync();
-        },
-        child: Text(
-          'INICIAR PARTIDA',
-          style: FlutterFlowTheme.of(context).titleMedium.override(
-                fontFamily: 'Inter Tight',
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+                setState(() {
+                  _model.isLoadingStartMatch = true;
+                });
+
+                try {
+                  await _model.createMatchAsync(setState);
+                } finally {
+                  if (mounted) {
+                    setState(() {
+                      _model.isLoadingStartMatch = false;
+                    });
+                  }
+                }
+              },
+        child: _model.isLoadingStartMatch
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : Text(
+                'INICIAR PARTIDA',
+                style: FlutterFlowTheme.of(context).titleMedium.override(
+                      fontFamily: 'Inter Tight',
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
-        ),
       ),
     );
   }

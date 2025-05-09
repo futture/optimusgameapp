@@ -250,39 +250,20 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
     required int posicao,
     bool isExpanded = false,
   }) {
-    final bool isPrimeiro = posicao == 0;
-    final bool isSegundo = posicao == 1;
-    final bool isTerceiro = posicao == 2;
+    // Definindo cores e ícones baseados no isWinner
+    final bool isWinner = jogador.isWinner ?? false;
 
-    final Color corCard = semVencedor
-        ? Colors.red[800]!
-        : isPrimeiro
-            ? Color(0xFF2E7D32)
-            : isSegundo
-                ? Color(0xFF4527A0)
-                : isTerceiro
-                    ? Color(0xFF5D4037)
-                    : Color(0xFF424242);
+    final Color corCard = isWinner
+        ? _getWinnerColor(posicao) // Verde gradiente para vencedores
+        : Colors.red[800]!; // Vermelho para perdedores
 
-    final IconData? iconePosicao = semVencedor
-        ? FontAwesomeIcons.skull
-        : isPrimeiro
-            ? FontAwesomeIcons.trophy
-            : isSegundo
-                ? FontAwesomeIcons.medal
-                : isTerceiro
-                    ? FontAwesomeIcons.award
-                    : FontAwesomeIcons.user;
+    final IconData iconePosicao = isWinner
+        ? _getWinnerIcon(posicao) // Ícone de troféu/medalha para vencedores
+        : FontAwesomeIcons.sadTear; // Ícone de cara triste para perdedores
 
-    final Color corIcone = semVencedor
-        ? Colors.black
-        : isPrimeiro
-            ? Colors.amber
-            : isSegundo
-                ? Colors.grey[300]!
-                : isTerceiro
-                    ? Color(0xFFD7CCC8)
-                    : Colors.grey[400]!;
+    final Color corIcone = isWinner
+        ? _getWinnerIconColor(posicao) // Cor do ícone para vencedores
+        : Colors.white; // Branco para perdedores
 
     return Card(
       color: corCard,
@@ -291,84 +272,160 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.black.withOpacity(0.2),
-                  ),
-                  padding: EdgeInsets.all(8),
-                  child: FaIcon(
-                    iconePosicao,
-                    color: corIcone,
-                    size: 24,
-                  ),
+      child: Container(
+        decoration: isWinner
+            ? BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    _getWinnerGradientStart(posicao),
+                    _getWinnerGradientEnd(posicao),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    jogador.nome,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    style: TextStyle(
-                      fontFamily: 'Inter Tight',
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+                borderRadius: BorderRadius.circular(12.0),
+              )
+            : BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.red[900]!,
+                    Colors.red[700]!,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                Container(
-                  decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.black.withOpacity(0.3)),
-                  padding: EdgeInsets.all(8),
-                  child: Text(
-                    '${posicao + 1}',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      color: Colors.black.withOpacity(0.2),
+                    ),
+                    padding: EdgeInsets.all(8),
+                    child: FaIcon(
+                      iconePosicao,
+                      color: corIcone,
+                      size: 24,
                     ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildStatItem(
-                  icon: FontAwesomeIcons.coins,
-                  value: '${jogador.premio.toStringAsFixed(0)}KZ',
-                  color: Colors.amber,
-                ),
-                _buildStatItem(
-                  icon: Icons.star,
-                  value: '${jogador.pontos} pts',
-                  color: Colors.blue[200]!,
-                ),
-                _buildStatItem(
-                  icon: Icons.check_circle,
-                  value: '${jogador.perguntasCertas} certas',
-                  color: Colors.green[300]!,
-                ),
-              ],
-            ),
-            if (isExpanded) ...[
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      jogador.nome,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      style: TextStyle(
+                        fontFamily: 'Inter Tight',
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.black.withOpacity(0.3)),
+                    padding: EdgeInsets.all(8),
+                    child: Text(
+                      '${posicao + 1}',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               SizedBox(height: 12),
-              _buildTabelaExpandida(jogador),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildStatItem(
+                    icon: FontAwesomeIcons.coins,
+                    value: '${jogador.premio.toStringAsFixed(0)}KZ',
+                    color: Colors.amber,
+                  ),
+                  _buildStatItem(
+                    icon: Icons.star,
+                    value: '${jogador.pontos} pts',
+                    color: Colors.blue[200]!,
+                  ),
+                  _buildStatItem(
+                    icon: Icons.check_circle,
+                    value: '${jogador.perguntasCertas} certas',
+                    color: Colors.green[300]!,
+                  ),
+                ],
+              ),
+              if (isExpanded) ...[
+                SizedBox(height: 12),
+                _buildTabelaExpandida(jogador),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
+  }
+
+// Funções auxiliares para definir cores e ícones baseados na posição
+  Color _getWinnerColor(int posicao) {
+    return posicao == 0
+        ? Color(0xFF2E7D32) // 1º lugar - Verde mais escuro
+        : posicao == 1
+            ? Color(0xFF4527A0) // 2º lugar - Roxo
+            : posicao == 2
+                ? Color(0xFF5D4037) // 3º lugar - Marrom
+                : Color(0xFF424242); // Outros - Cinza escuro
+  }
+
+  IconData _getWinnerIcon(int posicao) {
+    return posicao == 0
+        ? FontAwesomeIcons.trophy // 1º lugar - Troféu
+        : posicao == 1
+            ? FontAwesomeIcons.medal // 2º lugar - Medalha
+            : posicao == 2
+                ? FontAwesomeIcons.award // 3º lugar - Prêmio
+                : FontAwesomeIcons.smile; // Outros - Smile
+  }
+
+  Color _getWinnerIconColor(int posicao) {
+    return posicao == 0
+        ? Colors.amber // 1º lugar - Dourado
+        : posicao == 1
+            ? Colors.grey[300]! // 2º lugar - Prata
+            : posicao == 2
+                ? Color(0xFFD7CCC8) // 3º lugar - Bronze
+                : Colors.grey[400]!; // Outros - Cinza
+  }
+
+  Color _getWinnerGradientStart(int posicao) {
+    return posicao == 0
+        ? Color(0xFF1B5E20) // Verde escuro
+        : posicao == 1
+            ? Color(0xFF311B92) // Roxo escuro
+            : posicao == 2
+                ? Color(0xFF3E2723) // Marrom escuro
+                : Color(0xFF212121); // Cinza escuro
+  }
+
+  Color _getWinnerGradientEnd(int posicao) {
+    return posicao == 0
+        ? Color(0xFF4CAF50) // Verde claro
+        : posicao == 1
+            ? Color(0xFF7C4DFF) 
+            : posicao == 2
+                ? Color(0xFF8D6E63) // Marrom claro
+                : Color(0xFF616161); // Cinza médio
   }
 
   Widget _buildStatItem({
@@ -476,7 +533,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                 ),
                 SizedBox(width: 10),
                 Text(
-                  'Pronto para outra partida?',
+                  'Pronto para outra?',
                   style: TextStyle(
                     fontFamily: 'Inter',
                     fontSize: 18,
@@ -526,7 +583,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                     ),
                     SizedBox(width: 12),
                     Text(
-                      'CRIAR NOVA PARTIDA',
+                      'NOVA PARTIDA',
                       style: TextStyle(
                         fontFamily: 'Inter Tight',
                         fontSize: 16,

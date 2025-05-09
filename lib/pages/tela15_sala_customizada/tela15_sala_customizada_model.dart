@@ -21,7 +21,7 @@ class Tela15SalaCustomizadaViewModel
   UserResponse? user;
   bool isSimpleQuestion = true;
   bool onlyOneWinner = true;
-
+  bool isLoadingStartMatch = false;
   final formKey = GlobalKey<FormState>();
   List<Map<String, String>> addedUsers = [];
   late TextEditingController idTextController;
@@ -213,8 +213,11 @@ class Tela15SalaCustomizadaViewModel
     }
   }
 
-  Future<void> createMatchAsync() async {
+  Future<void> createMatchAsync(Function setState) async {
     try {
+      setState(() {
+        isLoadingStartMatch = true;
+      });
       final roomResult = await createRoomAsync();
       if (roomResult != null) {
         final matchRequest = CreateMatchRequest(
@@ -227,6 +230,9 @@ class Tela15SalaCustomizadaViewModel
             await matchService.createMatchAsync(roomResult, matchRequest);
 
         if (matchResult["isSuccess"] != true) {
+          setState(() {
+            isLoadingStartMatch = false;
+          });
           await Warning00ErrorUtil.showDialogMessageError(
             context,
             matchResult["error"].detail.message,
@@ -243,6 +249,9 @@ class Tela15SalaCustomizadaViewModel
         );
 
         if (playerResult["isSuccess"] != true) {
+          setState(() {
+            isLoadingStartMatch = false;
+          });
           await Warning00ErrorUtil.showDialogMessageError(
             context,
             playerResult["error"].detail.message,
@@ -252,6 +261,9 @@ class Tela15SalaCustomizadaViewModel
         }
 
         await getMatchByMatchIdAsync();
+        setState(() {
+          isLoadingStartMatch = false;
+        });
         await getWebSocketWaitForPlayerAsync();
       }
     } catch (e) {
@@ -523,5 +535,4 @@ class Tela15SalaCustomizadaViewModel
       ],
     );
   }
-
 }
