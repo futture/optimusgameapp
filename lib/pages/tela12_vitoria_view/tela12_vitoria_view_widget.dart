@@ -1,3 +1,7 @@
+import 'package:projeto_game_quiz/core/api/services/ranking_service.dart';
+import 'package:projeto_game_quiz/core/enum/ranking.dart';
+import 'package:projeto_game_quiz/core/models/responses/ranking_response.dart';
+
 import '/flutter_flow/flutter_flow_button_tabbar.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -23,6 +27,24 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
     with TickerProviderStateMixin {
   late Tela12VitoriaViewModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  dynamic rankingData;
+  RankingPeriod _selectedPeriod = RankingPeriod.daily;
+  RankingWithTopWinnersResponse? _rankingResponse;
+  bool isLoading = false;
+  String firstPlaceName = '';
+  String firstPlacePoints = '';
+  int firstPlacePosition = 0;
+  String firstPlaceAvatarUrl = '';
+
+  String secondPlaceName = '';
+  String secondPlacePoints = '';
+  int secondPlacePosition = 0;
+  String secondPlaceAvatarUrl = '';
+
+  String thirdPlaceName = '';
+  String thirdPlacePoints = '';
+  int thirdPlacePosition = 0;
+  String thirdPlaceAvatarUrl = '';
 
   @override
   void initState() {
@@ -32,13 +54,104 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
       vsync: this,
       length: 3,
       initialIndex: 0,
-    )..addListener(() => safeSetState(() {}));
+    )..addListener(() => safeSetState(() {
+          _handleTabChange();
+        }));
+    _fetchRanking(_selectedPeriod);
+    print(rankingData);
   }
 
   @override
   void dispose() {
     _model.dispose();
     super.dispose();
+  }
+
+  RankingPeriod getRankingPeriodFromString(String periodStr) {
+    switch (periodStr.toLowerCase()) {
+      case 'daily':
+        return RankingPeriod.daily;
+      case 'weekly':
+        return RankingPeriod.weekly;
+      case 'monthly':
+        return RankingPeriod.monthly;
+      default:
+        throw Exception('Período desconhecido');
+    }
+  }
+
+  Future<void> _fetchRanking(RankingPeriod period) async {
+    setState(() {
+      isLoading = true;
+      rankingData = 'Carregando...';
+    });
+
+    final service = RankingService();
+    final response = await service.getRankingByPeriodAsync(period);
+
+    // Verificando se a resposta foi bem-sucedida
+    if (response['isSuccess']) {
+      final rankingResponse = response['data'] as RankingWithTopWinnersResponse;
+
+      // Exibir os dados no formato esperado
+      print('Top 3:');
+      rankingResponse.top3.forEach((item) {
+        print(
+            'Top 3 - Nome: ${item.user.name}, Posição: ${item.position}, Pontuação: ${item.totalScore}');
+      });
+
+      print('Todos os rankings:');
+      rankingResponse.allRankings.forEach((item) {
+        print(
+            'Ranking - Nome: ${item.user.name}, Posição: ${item.position}, Pontuação: ${item.totalScore}');
+      });
+
+      // Preencher as variáveis globais com os dados do top 3
+      setState(() {
+        // Top 1
+        firstPlaceName = rankingResponse.top3[0].user.name;
+        firstPlacePoints = rankingResponse.top3[0].totalScore.toString();
+        firstPlacePosition = rankingResponse.top3[0].position;
+
+        // Top 2
+        secondPlaceName = rankingResponse.top3[1].user.name;
+        secondPlacePosition = rankingResponse.top3[1].position;
+        secondPlacePoints = rankingResponse.top3[1].totalScore.toString();
+
+        // Top 3
+        thirdPlaceName = rankingResponse.top3[2].user.name;
+        thirdPlacePosition = rankingResponse.top3[2].position;
+        thirdPlacePoints = rankingResponse.top3[2].totalScore.toString();
+        print(thirdPlaceName);
+        // Atualizar o estado com os dados do ranking
+        rankingData = rankingResponse.allRankings
+            .map((e) =>
+                'ID: ${e.id}, Nome: ${e.user.name}, Posição: ${e.position}, Pontuação: ${e.totalScore}')
+            .join('\n'); // Exemplo de formatação para exibição
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        rankingData = 'Erro ao buscar ranking'; // Caso ocorra erro
+        isLoading = false;
+      });
+    }
+  }
+
+  void _handleTabChange() {
+    switch (_model.tabBarController?.index) {
+      case 0:
+        _fetchRanking(RankingPeriod.daily);
+        break;
+      case 1:
+        _fetchRanking(RankingPeriod.weekly);
+        break;
+      case 2:
+        _fetchRanking(RankingPeriod.monthly);
+        break;
+      default:
+        _fetchRanking(RankingPeriod.daily);
+    }
   }
 
   Color _getPositionColor(int position) {
@@ -375,88 +488,117 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                       ),
                     ],
                     controller: _model.tabBarController,
-                    onTap: (i) async {
-                      [() async {}, () async {}, () async {}][i]();
+                    onTap: (i) {
+                      _handleTabChange(); // Chama a função que lida com a mudança de aba
                     },
                   ),
                 ),
               ),
 
               // Pódio de vencedores
-              Container(
-                height: 260,
-                margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 12,
-                      offset: const Offset(0, 6),
-                    )
-                  ],
-                ),
-                child: Stack(
-                  children: [
-                    // Base do pódio
-                    Align(
-                      alignment: Alignment.bottomCenter,
+              Stack(
+                children: [
+                  // Seu container de pódio
+                  Container(
+                    height: 260,
+                    margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        )
+                      ],
+                    ),
+                    child: Stack(
+                      children: [
+                        // Base do pódio
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Container(
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEC8D0D).withOpacity(0.1),
+                              borderRadius: const BorderRadius.only(
+                                bottomLeft: Radius.circular(16),
+                                bottomRight: Radius.circular(16),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // Posição 2 (esquerda)
+                        Positioned(
+                          left: 20,
+                          bottom: 50,
+                          child: _buildPodiumUser(
+                            position: secondPlacePosition,
+                            name: secondPlaceName,
+                            points: secondPlacePoints,
+                            avatarUrl: 'https://picsum.photos/seed/380/600',
+                            height: 150,
+                          ),
+                        ),
+
+                        // Posição 1 (centro)
+                        Positioned(
+                          left: MediaQuery.of(context).size.width / 2 - 60,
+                          bottom: 30,
+                          child: _buildPodiumUser(
+                            position: firstPlacePosition,
+                            name: firstPlaceName,
+                            points: firstPlacePoints,
+                            avatarUrl:
+                                'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
+                            height: 177,
+                            isFirst: true,
+                          ),
+                        ),
+
+                        // Posição 3 (direita)
+                        Positioned(
+                          right: 20,
+                          bottom: 40,
+                          child: _buildPodiumUser(
+                            position: thirdPlacePosition,
+                            name: thirdPlaceName,
+                            points: thirdPlacePoints,
+                            avatarUrl:
+                                'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
+                            height: 140,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Loading sobreposto
+                  if (isLoading)
+                    Positioned.fill(
                       child: Container(
-                        height: 80,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEC8D0D).withOpacity(0.1),
-                          borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(16),
-                            bottomRight: Radius.circular(16),
+                          color: const Color(0xFFEC8D0D).withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                              color: Colors.white.withOpacity(0.1), width: 1),
+                        ),
+                        child: const Center(
+                          child: SizedBox(
+                            width: 36,
+                            height: 36,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 3,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  Color(0xFFEC8D0D)),
+                            ),
                           ),
                         ),
                       ),
                     ),
-
-                    // Posição 2 (esquerda)
-                    Positioned(
-                      left: 20,
-                      bottom: 50,
-                      child: _buildPodiumUser(
-                        position: 2,
-                        name: 'João Seba',
-                        points: '200.245',
-                        avatarUrl: 'https://picsum.photos/seed/380/600',
-                        height: 150,
-                      ),
-                    ),
-
-                    // Posição 1 (centro) - com coroa
-                    Positioned(
-                      left: MediaQuery.of(context).size.width / 2 - 60,
-                      bottom: 30,
-                      child: _buildPodiumUser(
-                        position: 1,
-                        name: 'Paulo Pinto',
-                        points: '200.245',
-                        avatarUrl:
-                            'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
-                        height: 177,
-                        isFirst: true,
-                      ),
-                    ),
-
-                    // Posição 3 (direita)
-                    Positioned(
-                      right: 20,
-                      bottom: 40,
-                      child: _buildPodiumUser(
-                        position: 3,
-                        name: 'Pedro Sampaio',
-                        points: '200.245',
-                        avatarUrl:
-                            'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
-                        height: 140,
-                      ),
-                    ),
-                  ],
-                ),
+                ],
               ),
 
               // Lista de rankings
