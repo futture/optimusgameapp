@@ -97,12 +97,38 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
           backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
           appBar: _buildAppBar(),
           body: SafeArea(
-            child: _buildGameContent(),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Adiciona padding extra apenas para dispositivos pequenos
+                final bottomPadding = constraints.maxHeight < 600 ? 16.0 : 0.0;
+                return Padding(
+                  padding: EdgeInsets.only(bottom: bottomPadding),
+                  child: _buildGameContent(),
+                );
+              },
+            ),
           ),
         ),
       ),
     );
   }
+  // @override
+  // Widget build(BuildContext context) {
+  //   return WillPopScope(
+  //     onWillPop: () async => false,
+  //     child: GestureDetector(
+  //       onTap: () => FocusScope.of(context).unfocus(),
+  //       child: Scaffold(
+  //         key: scaffoldKey,
+  //         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+  //         appBar: _buildAppBar(),
+  //         body: SafeArea(
+  //           child: _buildGameContent(),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   AppBar _buildAppBar() {
     return AppBar(
@@ -142,29 +168,29 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
     );
   }
 
-  Widget _buildGameContent() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        children: [
-          _buildScoreInfo(),
-          const SizedBox(height: 24.0),
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                children: [
-                  _buildQuestionCard(),
-                  const SizedBox(height: 24.0),
-                  _buildAnswerOptions(),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildGameContent() {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(horizontal: 16.0),
+  //     child: Column(
+  //       children: [
+  //         _buildScoreInfo(),
+  //         const SizedBox(height: 24.0),
+  //         Expanded(
+  //           child: SingleChildScrollView(
+  //             physics: const BouncingScrollPhysics(),
+  //             child: Column(
+  //               children: [
+  //                 _buildQuestionCard(),
+  //                 const SizedBox(height: 24.0),
+  //                 _buildAnswerOptions(),
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildScoreInfo() {
     return Card(
@@ -348,23 +374,114 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
     );
   }
 
-  Widget _buildAnswerOptions() {
-    return Column(
-      children: [
-        if (_model.isLoading)
-          const CircularProgressIndicator()
-        else if (_model.question?.optionAnswers != null)
-          ..._buildAnswerOptionList(),
-        const SizedBox(height: 16.0),
-        _buildValidateButton(),
-      ],
+  Widget _buildGameContent() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        children: [
+          _buildScoreInfo(),
+          const SizedBox(height: 16.0),
+          _buildQuestionCard(),
+          const SizedBox(height: 16.0),
+          // Área de respostas com scroll
+          Expanded(
+            child: _buildAnswerOptionsWithScroll(),
+          ),
+          // Botão fixo na parte inferior
+          _buildValidateButton(),
+          const SizedBox(height: 16.0), // Espaço extra no final
+        ],
+      ),
     );
   }
+
+  // Widget _buildGameContent() {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(horizontal: 16.0),
+  //     child: Column(
+  //       children: [
+  //         _buildScoreInfo(),
+  //         const SizedBox(height: 24.0),
+  //         Column(
+  //           children: [
+  //             _buildQuestionCard(),
+  //             const SizedBox(height: 24.0),
+  //             _buildAnswerOptions(),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  // Widget _buildAnswerOptions() {
+  //   return Column(
+  //     children: [
+  //       if (_model.isLoading)
+  //         const Center(child: CircularProgressIndicator())
+  //       else if (_model.question?.optionAnswers != null)
+  //         ..._buildAnswerOptionList(),
+  //     ],
+  //   );
+  // }
+
+  // Widget _buildAnswerOptionsWithScroll() {
+  //   return SingleChildScrollView(
+  //     physics: const BouncingScrollPhysics(),
+  //      padding: const EdgeInsets.symmetric(vertical: 8.0), // Adicionado padding vertical
+
+  //     child: Column(
+  //       children: [
+  //         if (_model.isLoading)
+  //           const Center(child: CircularProgressIndicator())
+  //         else if (_model.question?.optionAnswers != null)
+  //           ..._buildAnswerOptionList(),
+  //       ],
+  //     ),
+  //   );
+  // }
+  Widget _buildAnswerOptionsWithScroll() {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            vertical: 8.0), // Adicionado padding vertical
+        child: Column(
+          children: [
+            if (_model.isLoading)
+              const Center(child: CircularProgressIndicator())
+            else if (_model.question?.optionAnswers != null)
+              ..._buildAnswerOptionList(),
+          ],
+        ),
+      ),
+    );
+  }
+  // Widget _buildAnswerOptions() {
+  //   return Column(
+  //     children: [
+  //       if (_model.isLoading)
+  //         const CircularProgressIndicator()
+  //       else if (_model.question?.optionAnswers != null)
+  //         Container(
+  //           height: MediaQuery.of(context).size.height * 0.5,
+  //           child: SingleChildScrollView(
+  //             physics: const BouncingScrollPhysics(),
+  //             child: Column(
+  //               children: _buildAnswerOptionList(),
+  //             ),
+  //           ),
+  //         ),
+  //       const SizedBox(height: 16.0),
+  //       _buildValidateButton(),
+  //     ],
+  //   );
+  // }
 
   List<Widget> _buildAnswerOptionList() {
     return _model.question!.optionAnswers!
         .map((e) => Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
+              padding: const EdgeInsets.only(bottom: 8.0),
               child: _buildAnswerOption(e),
             ))
         .toList();
@@ -378,8 +495,8 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
       },
       borderRadius: BorderRadius.circular(12.0),
       child: Container(
-        width: double.infinity,
-        constraints: const BoxConstraints(minHeight: 60.0),
+        constraints:
+            const BoxConstraints(minHeight: 48.0), // Reduzido de 60.0 para 48.0
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: _model.answerOptionId == e.id
@@ -391,17 +508,8 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
                     const Color(0xFFEC8D0D),
                     FlutterFlowTheme.of(context).secondary
                   ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(12.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 4.0,
-              offset: const Offset(0, 2),
-            )
-          ],
           border: Border.all(
             color: _model.answerOptionId == e.id
                 ? FlutterFlowTheme.of(context).primary
@@ -409,12 +517,13 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
             width: 2.0,
           ),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        padding: const EdgeInsets.symmetric(
+            horizontal: 12.0, vertical: 8.0), // Reduzido o padding
         child: Row(
           children: [
             Container(
-              width: 30.0,
-              height: 30.0,
+              width: 24.0, // Reduzido de 30.0
+              height: 24.0, // Reduzido de 30.0
               decoration: BoxDecoration(
                 color: _model.answerOptionId == e.id
                     ? Colors.white
@@ -428,12 +537,13 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
                     color: _model.answerOptionId == e.id
                         ? FlutterFlowTheme.of(context).primary
                         : FlutterFlowTheme.of(context).secondaryText,
+                    fontSize: 12.0, // Reduzido o tamanho da fonte
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: 16.0),
+            const SizedBox(width: 12.0), // Reduzido de 16.0
             Expanded(
               child: Text(
                 e.textOption,
@@ -442,7 +552,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
                       color: _model.answerOptionId == e.id
                           ? Colors.white
                           : Colors.black,
-                      fontSize: 16.0,
+                      fontSize: 14.0, // Reduzido de 16.0
                       letterSpacing: 0.0,
                     ),
               ),
@@ -454,13 +564,107 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
                 setState(() => _model.answerOptionId = e.id);
                 _model.radioGroupValueController?.value = val;
               },
-              activeColor: Colors.white,
+              visualDensity:
+                  VisualDensity.compact, // Adicionado para reduzir tamanho
+              materialTapTargetSize: MaterialTapTargetSize
+                  .shrinkWrap, // Adicionado para reduzir área de toque
             ),
           ],
         ),
       ),
     );
   }
+  // Widget _buildAnswerOption(OptionAnswersResponse e) {
+  //   return InkWell(
+  //     onTap: () {
+  //       setState(() => _model.answerOptionId = e.id);
+  //       _model.radioGroupValueController?.value = e.codeOption;
+  //     },
+  //     borderRadius: BorderRadius.circular(12.0),
+  //     child: Container(
+  //       width: double.infinity,
+  //       constraints: const BoxConstraints(minHeight: 60.0),
+  //       decoration: BoxDecoration(
+  //         gradient: LinearGradient(
+  //           colors: _model.answerOptionId == e.id
+  //               ? [
+  //                   const Color(0xFF00B80E),
+  //                   FlutterFlowTheme.of(context).secondary
+  //                 ]
+  //               : [
+  //                   const Color(0xFFEC8D0D),
+  //                   FlutterFlowTheme.of(context).secondary
+  //                 ],
+  //           begin: Alignment.topLeft,
+  //           end: Alignment.bottomRight,
+  //         ),
+  //         borderRadius: BorderRadius.circular(12.0),
+  //         boxShadow: [
+  //           BoxShadow(
+  //             color: Colors.black.withOpacity(0.1),
+  //             blurRadius: 4.0,
+  //             offset: const Offset(0, 2),
+  //           )
+  //         ],
+  //         border: Border.all(
+  //           color: _model.answerOptionId == e.id
+  //               ? FlutterFlowTheme.of(context).primary
+  //               : Colors.transparent,
+  //           width: 2.0,
+  //         ),
+  //       ),
+  //       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+  //       child: Row(
+  //         children: [
+  //           Container(
+  //             width: 30.0,
+  //             height: 30.0,
+  //             decoration: BoxDecoration(
+  //               color: _model.answerOptionId == e.id
+  //                   ? Colors.white
+  //                   : FlutterFlowTheme.of(context).primaryBackground,
+  //               shape: BoxShape.circle,
+  //             ),
+  //             child: Center(
+  //               child: Text(
+  //                 e.codeOption,
+  //                 style: TextStyle(
+  //                   color: _model.answerOptionId == e.id
+  //                       ? FlutterFlowTheme.of(context).primary
+  //                       : FlutterFlowTheme.of(context).secondaryText,
+  //                   fontWeight: FontWeight.bold,
+  //                 ),
+  //               ),
+  //             ),
+  //           ),
+  //           const SizedBox(width: 16.0),
+  //           Expanded(
+  //             child: Text(
+  //               e.textOption,
+  //               style: FlutterFlowTheme.of(context).bodyMedium.override(
+  //                     fontFamily: 'Inter',
+  //                     color: _model.answerOptionId == e.id
+  //                         ? Colors.white
+  //                         : Colors.black,
+  //                     fontSize: 16.0,
+  //                     letterSpacing: 0.0,
+  //                   ),
+  //             ),
+  //           ),
+  //           Radio<String>(
+  //             value: e.codeOption,
+  //             groupValue: _model.radioGroupValueController?.value,
+  //             onChanged: (val) {
+  //               setState(() => _model.answerOptionId = e.id);
+  //               _model.radioGroupValueController?.value = val;
+  //             },
+  //             activeColor: Colors.white,
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildValidateButton() {
     return SizedBox(
@@ -510,6 +714,54 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
       ),
     );
   }
+  // Widget _buildValidateButton() {
+  //   return SizedBox(
+  //     width: double.infinity,
+  //     child: ElevatedButton(
+  //       onPressed: _model.isButtonDisabled || _model.answerOptionId.isEmpty
+  //           ? null
+  //           : _handleValidation,
+  //       style: ElevatedButton.styleFrom(
+  //         backgroundColor: const Color(0xFF01BF01),
+  //         padding: const EdgeInsets.symmetric(vertical: 16.0),
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(12.0),
+  //         ),
+  //         elevation: 4.0,
+  //       ),
+  //       child: _model.isLoading
+  //           ? const Row(
+  //               mainAxisAlignment: MainAxisAlignment.center,
+  //               children: [
+  //                 SizedBox(
+  //                   width: 20.0,
+  //                   height: 20.0,
+  //                   child: CircularProgressIndicator(
+  //                     color: Colors.white,
+  //                     strokeWidth: 2.0,
+  //                   ),
+  //                 ),
+  //                 SizedBox(width: 12.0),
+  //                 Text(
+  //                   'Validando...',
+  //                   style: TextStyle(
+  //                     fontSize: 16.0,
+  //                     fontWeight: FontWeight.bold,
+  //                   ),
+  //                 ),
+  //               ],
+  //             )
+  //           : const Text(
+  //               'VALIDAR RESPOSTA',
+  //               style: TextStyle(
+  //                 fontSize: 16.0,
+  //                 fontWeight: FontWeight.bold,
+  //                 color: Colors.white,
+  //               ),
+  //             ),
+  //     ),
+  //   );
+  // }
 
   Future<void> _handleValidation() async {
     if (_model.answerOptionId.isEmpty) return;

@@ -443,7 +443,7 @@ class Tela15SalaCustomizadaViewModel
       {
         'title': 'Prêmio',
         'icon': Icons.wine_bar_rounded,
-        'value': '${matchInfo!.matchPrize?.totalGain ?? 0} KZ',
+        'value': '${matchInfo!.room!.roomConfiguration!.minimumAmountToPlay * participants.length } KZ',
       },
       {
         'title': 'Nº Questões',
