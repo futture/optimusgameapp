@@ -5,6 +5,8 @@ import 'package:path/path.dart';
 import 'package:projeto_game_quiz/core/api/api_constant.dart';
 import 'package:projeto_game_quiz/core/api/utils/token_util.dart';
 import 'package:projeto_game_quiz/core/models/common/error_response.dart';
+import 'package:projeto_game_quiz/flutter_flow/nav/nav.dart';
+import 'package:projeto_game_quiz/pages/tela00_login/tela00_login_widget.dart';
 
 class HttpClientService {
   final String baseUrl = "http://$BASE_URL";
@@ -122,8 +124,12 @@ class HttpClientService {
           return jsonResponse;
         }
       } else {
+        if (response.statusCode == 401) {
+          _redirectToLogin();
+          return;
+        }
         final decoded = utf8.decode(response.bodyBytes);
-        
+
         final errorResponse = DetailErrorResponse.fromJson(jsonDecode(decoded));
         throw errorResponse;
       }
@@ -132,5 +138,13 @@ class HttpClientService {
     }
   }
 
-  
+  void _redirectToLogin() {
+    final context = appNavigatorKey.currentContext;
+
+    if (context != null) {
+      TokenUtil.removeToken();
+      context.pushNamed(Tela00LoginWidget.routeName);
+      return;
+    }
+  }
 }

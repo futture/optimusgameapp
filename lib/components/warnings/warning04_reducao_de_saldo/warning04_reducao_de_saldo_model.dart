@@ -8,9 +8,6 @@ import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
-import 'package:projeto_game_quiz/dialogs/common_dialog_widget.dart';
-import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
-import 'package:projeto_game_quiz/flutter_flow/flutter_flow_widgets.dart';
 import 'package:projeto_game_quiz/handlers/notification_handler.dart';
 import 'package:projeto_game_quiz/index.dart';
 
@@ -115,7 +112,7 @@ class Warning04ReducaoDeSaldoModel
         playersConnected = match.playersConnected;
         minPlayers = match.minPlayers;
         numberOfPlayers = match.numberOfPlayers;
-        showMatchParticipantsDialog();
+        showWaitingDialog();
         onStateUpdate?.call();
       },
       onError: (error) => print("Erro no WebSocket: $error"),
@@ -186,45 +183,197 @@ class Warning04ReducaoDeSaldoModel
   //   );
   // }
 
-  // void showWaitingDialog() {
-  //   if (isShowWaitingDialogOpen) return;
+  void showWaitingDialog() {
+    if (isShowWaitingDialogOpen) return;
 
-  //   isShowWaitingDialogOpen = true;
-  //   currentShowWaitingDialog = context;
+    isShowWaitingDialogOpen = true;
+    currentShowWaitingDialog = context;
 
-  //   showDialog(
-  //     context: context,
-  //     barrierDismissible: false,
-  //     builder: (_) => AlertDialog(
-  //       title: const Text("Aguardando jogadores..."),
-  //       content: Column(
-  //         mainAxisSize: MainAxisSize.min,
-  //         children: [
-  //           CircularProgressIndicator(),
-  //           SizedBox(height: 16),
-  //           Text(
-  //             "Esperando participantes conectarem, Participante conectados: $playersConnected / $numberOfPlayers",
-  //           ),
-  //         ],
-  //       ),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () async {
-  //             await leaveTheMatchAsync(context);
-  //             _matchWebSocketService?.disconnect();
-  //             isShowWaitingDialogOpen = false;
-  //             Navigator.of(context).pushReplacement(
-  //               MaterialPageRoute(
-  //                 builder: (_) => Tela03PrincipalWidget(),
-  //               ),
-  //             );
-  //           },
-  //           child: const Text("Fechar"),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black54,
+      builder: (_) {
+        final AnimationController progressController = AnimationController(
+          duration: const Duration(seconds: 2),
+          vsync: Navigator.of(context),
+        )..repeat();
+
+        return WillPopScope(
+          onWillPop: () async => false,
+          child: Dialog(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            insetPadding: const EdgeInsets.all(40),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFF01BF01),
+                    Theme.of(context).colorScheme.secondary,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 20,
+                    spreadRadius: 2,
+                  )
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    height: 80,
+                    width: 80,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        RotationTransition(
+                          turns: Tween(begin: 0.0, end: 1.0)
+                              .animate(progressController),
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            strokeWidth: 8,
+                          ),
+                        ),
+                        Icon(
+                          Icons.people_alt_rounded,
+                          size: 36,
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Título com animação de pulsação
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0.95, end: 1.05),
+                    duration: const Duration(seconds: 1),
+                    curve: Curves.easeInOut,
+                    builder: (context, value, child) {
+                      return Transform.scale(
+                        scale: value,
+                        child: Text(
+                          "Aguardando Jogadores",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Contador de jogadores com animação
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: Container(
+                      key: ValueKey(participants.length),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        "${participants.length} / ${matchInfo.room!.roomConfiguration!.numberOfPlayers} conectados",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children:
+                        List.generate(3, (index) => _buildAnimatedDot(index)),
+                  ),
+
+                  const SizedBox(height: 24),
+                  Text(
+                    "Esperando participantes conectarem...",
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 14,
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+                  OutlinedButton(
+                    onPressed: () async {
+                      progressController.dispose();
+                      await leaveTheMatchAsync(context);
+                      _matchWebSocketService?.disconnect();
+                      isShowWaitingDialogOpen = false;
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (_) => Tela03PrincipalWidget(),
+                        ),
+                      );
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: Colors.white),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      "SAIR DA PARTIDA",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAnimatedDot(int index) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: Duration(milliseconds: 600 + (index * 200)),
+        builder: (context, value, child) {
+          return Opacity(
+            opacity: value,
+            child: Container(
+              width: 10,
+              height: 10,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 
   Future<void> leaveTheMatchAsync(context) async {
     var result = await _matchService.leaveTheMatchAsync(matchInfo.id, userId);
@@ -240,116 +389,116 @@ class Warning04ReducaoDeSaldoModel
     }
   }
 
-  void showMatchParticipantsDialog() {
-    if (isShowWaitingDialogOpen) return;
+  // void showMatchParticipantsDialog() {
+  //   if (isShowWaitingDialogOpen) return;
 
-    isShowWaitingDialogOpen = true;
-    currentShowWaitingDialog = context;
+  //   isShowWaitingDialogOpen = true;
+  //   currentShowWaitingDialog = context;
 
-    if (currentUser != null) {
-      participants.insert(0, currentUser!);
-    }
-    final minimumAmount =
-        matchInfo.room?.roomConfiguration?.minimumAmountToPlay ?? 0;
-    var infos = [
-      {
-        'title': 'Inscrição',
-        'icon': Icons.attach_money,
-        'value': '${minimumAmount}KZ',
-      },
-      {
-        'title': 'Prêmio',
-        'icon': Icons.wine_bar_rounded,
-        'value': '${matchInfo.matchPrize?.totalGain ?? 0} KZ',
-      },
-      {
-        'title': 'Nº Questões',
-        'icon': Icons.numbers,
-        'value': '${matchInfo.room!.roomConfiguration!.numberOfQuestions}',
-      },
-      {
-        'title': 'Vagas',
-        'icon': Icons.people,
-        'value':
-            '${matchInfo.matchPlayers?.length ?? 0}/${matchInfo.room?.roomConfiguration?.numberOfPlayers ?? 0}',
-      },
-    ];
+  //   if (currentUser != null) {
+  //     participants.insert(0, currentUser!);
+  //   }
+  //   final minimumAmount =
+  //       matchInfo.room?.roomConfiguration?.minimumAmountToPlay ?? 0;
+  //   var infos = [
+  //     {
+  //       'title': 'Inscrição',
+  //       'icon': Icons.attach_money,
+  //       'value': '${minimumAmount}KZ',
+  //     },
+  //     {
+  //       'title': 'Prêmio',
+  //       'icon': Icons.wine_bar_rounded,
+  //       'value': '${matchInfo.matchPrize?.totalGain ?? 0} KZ',
+  //     },
+  //     {
+  //       'title': 'Nº Questões',
+  //       'icon': Icons.numbers,
+  //       'value': '${matchInfo.room!.roomConfiguration!.numberOfQuestions}',
+  //     },
+  //     {
+  //       'title': 'Vagas',
+  //       'icon': Icons.people,
+  //       'value':
+  //           '${matchInfo.matchPlayers?.length ?? 0}/${matchInfo.room?.roomConfiguration?.numberOfPlayers ?? 0}',
+  //     },
+  //   ];
 
-    CommonDialogWidget.showMatchParticipantsDialog(
-      context,
-      infos,
-      "Desafio",
-      matchInfo,
-      participants,
-      currentUser,
-      _buildDialogActions(),
-    );
-  }
+  //   CommonDialogWidget.showMatchParticipantsDialog(
+  //     context,
+  //     infos,
+  //     "Desafio",
+  //     matchInfo,
+  //     participants,
+  //     currentUser,
+  //     _buildDialogActions(),
+  //   );
+  // }
 
-  Widget _buildDialogActions() {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Column(
-            children: [
-              const CircularProgressIndicator(
-                color: Color(0xFFEC8D0D),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Aguardando participantes...',
-                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      fontFamily: 'Inter',
-                      color: const Color(0xFFEC8D0D),
-                      fontSize: 14,
-                      letterSpacing: 0,
-                    ),
-              ),
-              Text(
-                'Participantes conectados: ${participants.length}/${matchInfo.room!.roomConfiguration!.numberOfPlayers}',
-                style: FlutterFlowTheme.of(context).bodySmall.override(
-                      fontFamily: 'Inter',
-                      letterSpacing: 0,
-                    ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            FFButtonWidget(
-              onPressed: () async {
-                Navigator.of(currentShowWaitingDialog).pop();
-                await leaveTheMatchAsync(context);
-                _matchWebSocketService?.disconnect();
-                isShowWaitingDialogOpen = false;
-              },
-              text: 'Cancelar',
-              options: FFButtonOptions(
-                height: 40,
-                padding: const EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
-                color: FlutterFlowTheme.of(context).error,
-                textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                      fontFamily: 'Inter',
-                      color: Colors.white,
-                      letterSpacing: 0,
-                    ),
-                elevation: 3,
-                borderSide: const BorderSide(
-                  color: Colors.transparent,
-                  width: 1,
-                ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+  // Widget _buildDialogActions() {
+  //   return Column(
+  //     children: [
+  //       Padding(
+  //         padding: const EdgeInsets.symmetric(vertical: 16),
+  //         child: Column(
+  //           children: [
+  //             const CircularProgressIndicator(
+  //               color: Color(0xFFEC8D0D),
+  //             ),
+  //             const SizedBox(height: 8),
+  //             Text(
+  //               'Aguardando participantes...',
+  //               style: FlutterFlowTheme.of(context).bodyMedium.override(
+  //                     fontFamily: 'Inter',
+  //                     color: const Color(0xFFEC8D0D),
+  //                     fontSize: 14,
+  //                     letterSpacing: 0,
+  //                   ),
+  //             ),
+  //             Text(
+  //               'Participantes conectados: ${participants.length}/${matchInfo.room!.roomConfiguration!.numberOfPlayers}',
+  //               style: FlutterFlowTheme.of(context).bodySmall.override(
+  //                     fontFamily: 'Inter',
+  //                     letterSpacing: 0,
+  //                   ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //       const SizedBox(height: 16),
+  //       Row(
+  //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  //         children: [
+  //           FFButtonWidget(
+  //             onPressed: () async {
+  //               Navigator.of(currentShowWaitingDialog).pop();
+  //               await leaveTheMatchAsync(context);
+  //               _matchWebSocketService?.disconnect();
+  //               isShowWaitingDialogOpen = false;
+  //             },
+  //             text: 'Cancelar',
+  //             options: FFButtonOptions(
+  //               height: 40,
+  //               padding: const EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
+  //               color: FlutterFlowTheme.of(context).error,
+  //               textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+  //                     fontFamily: 'Inter',
+  //                     color: Colors.white,
+  //                     letterSpacing: 0,
+  //                   ),
+  //               elevation: 3,
+  //               borderSide: const BorderSide(
+  //                 color: Colors.transparent,
+  //                 width: 1,
+  //               ),
+  //               borderRadius: BorderRadius.circular(8),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Future<void> getUsersByMatchId(Function setState, matchId) async {
     var result = await userService.getPlayerByMatchIdAsync(matchId);

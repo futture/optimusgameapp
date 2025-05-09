@@ -465,12 +465,16 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
 
   Widget _buildDialogActions(
       List<UserResponse> parts, MatchResponse matchInfo) {
-    return Column(
-      children: [
-        ...[
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment:
+                  CrossAxisAlignment.center, 
               children: [
                 const CircularProgressIndicator(
                   color: Color(0xFFEC8D0D),
@@ -478,7 +482,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
                 const SizedBox(height: 8),
                 Text(
                   'Aguardando participantes...',
-                  textAlign: TextAlign.center,
+                  textAlign: TextAlign.center, 
                   style: FlutterFlowTheme.of(
                           currentDialogStartScheduledMatchOpenContext)
                       .bodyMedium
@@ -489,9 +493,10 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
                         letterSpacing: 0,
                       ),
                 ),
+                const SizedBox(height: 4),
                 Text(
-                  textAlign: TextAlign.center,
                   'Participantes conectados: ${parts.length}/${matchInfo.room!.roomConfiguration!.numberOfPlayers}',
+                  textAlign: TextAlign.center, 
                   style: FlutterFlowTheme.of(
                           currentDialogStartScheduledMatchOpenContext)
                       .bodySmall
@@ -503,44 +508,8 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
               ],
             ),
           ),
-        ]
-        // const SizedBox(height: 16),
-        // Row(
-        //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        //   children: [
-        //     FFButtonWidget(
-        //       onPressed: () async {
-        //         Navigator.of(currentDialogStartScheduledMatchOpenContext).pop();
-        //         await leaveTheMatchAsync(context);
-        //         _matchWebSocketService?.disconnect();
-        //         isDialogStartScheduledMatchOpen = false;
-        //       },
-        //       text: 'Cancelar',
-        //       options: FFButtonOptions(
-        //         height: 40,
-        //         padding: const EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
-        //         color: FlutterFlowTheme.of(
-        //                 currentDialogStartScheduledMatchOpenContext)
-        //             .error,
-        //         textStyle: FlutterFlowTheme.of(
-        //                 currentDialogStartScheduledMatchOpenContext)
-        //             .titleSmall
-        //             .override(
-        //               fontFamily: 'Inter',
-        //               color: Colors.white,
-        //               letterSpacing: 0,
-        //             ),
-        //         elevation: 3,
-        //         borderSide: const BorderSide(
-        //           color: Colors.transparent,
-        //           width: 1,
-        //         ),
-        //         borderRadius: BorderRadius.circular(8),
-        //       ),
-        //     ),
-        //   ],
-        // ),
-      ],
+        ],
+      ),
     );
   }
 }

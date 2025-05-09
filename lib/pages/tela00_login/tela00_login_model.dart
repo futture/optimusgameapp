@@ -9,7 +9,7 @@ class Tela00LoginModel extends FlutterFlowModel<Tela00LoginWidget> {
   UserService userService = UserService();
 
   final formKey = GlobalKey<FormState>();
-  // State field(s) for inputEmail widget.
+  bool isLoggingIn = false;
   FocusNode? inputEmailFocusNode;
   TextEditingController? inputEmailTextController;
   String? Function(BuildContext, String?)? inputEmailTextControllerValidator;
@@ -55,24 +55,39 @@ class Tela00LoginModel extends FlutterFlowModel<Tela00LoginWidget> {
     inputSenhaTextController?.dispose();
   }
 
-  Future<void> signInAsync() async {
+  Future<void> signInAsync(Function setState) async {
+    setState(() {
+      isLoggingIn = true;
+    });
     final email = inputEmailTextController.text;
     final password = inputSenhaTextController.text;
     if (email.isEmpty) {
+      setState(() {
+        isLoggingIn = false;
+      });
       Warning00ErrorUtil.showDialogMessageError(
           context, "Falha ao efetuar o login", "Preencha o campo email");
       return;
     }
     if (password.isEmpty) {
+      setState(() {
+        isLoggingIn = false;
+      });
       Warning00ErrorUtil.showDialogMessageError(
           context, "Falha ao efetuar o login", "Preencha o campo senha");
       return;
     }
-    final resultToken = await userService.loginUser(email, password); 
+    final resultToken = await userService.loginUser(email, password);
     if (resultToken["isSuccess"]) {
+      setState(() {
+        isLoggingIn = false;
+      });
       await Future.delayed(Duration(seconds: 1));
       context!.pushNamed(Tela03PrincipalWidget.routeName);
     } else {
+      setState(() {
+        isLoggingIn = false;
+      });
       Warning00ErrorUtil.showDialogMessageError(
           context,
           resultToken["error"].detail.message,

@@ -108,7 +108,7 @@ class _Warning04ReducaoDeSaldoWidgetState
               width: double.infinity,
               child: FFButtonWidget(
                 onPressed: () async {
-                  if (widget.subscribe == null) _model.showMatchParticipantsDialog();
+                  if (widget.subscribe == null) _model.showWaitingDialog();
                   await _model.joinTheMatchAsync(
                       widget.subscribe, widget.recebeuNotificaca);
                   widget.onConfirmed?.call();

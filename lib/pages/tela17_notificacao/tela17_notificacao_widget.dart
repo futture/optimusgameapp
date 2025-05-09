@@ -25,6 +25,7 @@ class _Tela17NotificacaoViewWidgetState
     extends State<Tela17NotificacaoViewWidget> {
   late Tela17NotificacaoModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  int? _loadingNotificationIndex;
 
   @override
   void initState() {
@@ -148,9 +149,12 @@ class _Tela17NotificacaoViewWidgetState
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 itemCount: _model.pushNotifications.length,
                 separatorBuilder: (context, index) => const Divider(height: 1),
+
+// Modifique o itemBuilder do ListView
                 itemBuilder: (context, index) {
                   final item = _model.pushNotifications[index];
                   final isNew = item.isNew ?? false;
+                  final isLoading = _loadingNotificationIndex == index;
 
                   return Container(
                     color: _getNotificationColor(item.code, isNew),
@@ -159,22 +163,37 @@ class _Tela17NotificacaoViewWidgetState
                         horizontal: 16,
                         vertical: 8,
                       ),
-                      leading: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: isNew
-                              ? Theme.of(context).primaryColor.withOpacity(0.2)
-                              : Colors.grey.shade200,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          _getNotificationIcon(item.code),
-                          color: isNew
-                              ? Theme.of(context).primaryColor
-                              : Colors.grey.shade600,
-                        ),
-                      ),
+                      leading: isLoading
+                          ? SizedBox(
+                              width: 40,
+                              height: 40,
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 3,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Theme.of(context).primaryColor,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: isNew
+                                    ? Theme.of(context)
+                                        .primaryColor
+                                        .withOpacity(0.2)
+                                    : Colors.grey.shade200,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                _getNotificationIcon(item.code),
+                                color: isNew
+                                    ? Theme.of(context).primaryColor
+                                    : Colors.grey.shade600,
+                              ),
+                            ),
                       title: Text(
                         item.subject ?? 'Sem assunto',
                         style: TextStyle(
@@ -205,7 +224,7 @@ class _Tela17NotificacaoViewWidgetState
                           ),
                         ],
                       ),
-                      trailing: isNew
+                      trailing: isNew && !isLoading
                           ? Container(
                               width: 8,
                               height: 8,
@@ -215,27 +234,124 @@ class _Tela17NotificacaoViewWidgetState
                               ),
                             )
                           : null,
-                      onTap: () {
-                        if (item.code == "Desafio") {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (_) => Tela13DadosDePartidaWidget(
-                                matchId: item.metaData,
-                                recebeuNotificaca: true,
+                      onTap: () async {
+                        if (isLoading) return; // Evitar múltiplos cliques
+
+                        setState(() {
+                          _loadingNotificationIndex = index;
+                        });
+
+                        try {
+                          if (item.code == "Desafio") {
+                            await _model.getPlayerByMatchIdAsync(
+                                setState, item.metaData!);
+                            await _model.getMatchByMatchIdAsync(
+                                setState, item.metaData!);
+
+                            if (mounted) {
+                              DadosDaPartidaUtils.showMatchParticipantsDialog(
+                                context,
+                                _model.currentUser,
+                                _model.match!,
+                                _model.players,
+                                _model.match!.statusMatch == "PENDING"
+                                    ? null
+                                    : Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16),
+                                        child: Column(
+                                          children: [
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              'Partida terminada...',
+                                              style: FlutterFlowTheme.of(
+                                                      context)
+                                                  .bodyMedium
+                                                  .override(
+                                                    fontFamily: 'Inter',
+                                                    color:
+                                                        const Color(0xFFEC8D0D),
+                                                    fontSize: 14,
+                                                    letterSpacing: 0,
+                                                  ),
+                                            ),
+                                            Text(
+                                              'Partida ja fechada',
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodySmall
+                                                      .override(
+                                                        fontFamily: 'Inter',
+                                                        letterSpacing: 0,
+                                                      ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                              );
+                            }
+                          }
+
+                          if (item.code == "Desqualificação") {
+                            await _model.getPlayerByMatchIdAsync(
+                                setState, item.metaData!);
+                            await _model.getMatchByMatchIdAsync(
+                                setState, item.metaData!);
+
+                            if (mounted) {
+                              DadosDaPartidaUtils.showMatchParticipantsDialog(
+                                context,
+                                _model.currentUser,
+                                _model.match!,
+                                _model.players,
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
+                                  child: Column(
+                                    children: [
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Jogador desqualificado...',
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .override(
+                                              fontFamily: 'Inter',
+                                              color: const Color(0xFFEC8D0D),
+                                              fontSize: 14,
+                                              letterSpacing: 0,
+                                            ),
+                                      ),
+                                      Text(
+                                        'Jogador desqualificado por inatividade',
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodySmall
+                                            .override(
+                                              fontFamily: 'Inter',
+                                              letterSpacing: 0,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content:
+                                    Text('Erro ao carregar: ${e.toString()}'),
+                                backgroundColor: Colors.red,
                               ),
-                            ),
-                          );
-                        }
-                        if (item.code == "Desqualificação") {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (_) => Tela13DadosDePartidaWidget(
-                                matchId: item.metaData,
-                                notDisplayButton: true,
-                                isDesqualification: true,
-                              ),
-                            ),
-                          );
+                            );
+                          }
+                        } finally {
+                          if (mounted) {
+                            setState(() {
+                              _loadingNotificationIndex = null;
+                            });
+                          }
                         }
                       },
                     ),

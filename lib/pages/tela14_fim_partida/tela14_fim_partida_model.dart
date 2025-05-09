@@ -22,6 +22,7 @@ class Tela14FimPartidaViewModel
       MatchResultResponse? gameResultInfo) {
     final resultados = gameResultInfo?.generalRanking.map((ranking) {
           return JogadorResultado(
+            id: ranking.playerId,
             nome: ranking.playerName,
             pontos: ranking.points,
             premio: ranking.prize,

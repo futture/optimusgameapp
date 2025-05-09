@@ -1,6 +1,6 @@
 enum TrofeuTipo { ouro, prata, bronze, perdedor }
 
-enum Status {Pendente}
+enum Status { Pendente }
 
 class CreateRoomRequest {
   final String nameRoom;
@@ -114,6 +114,7 @@ class CreateRoomConfigurationRequest {
 }
 
 class JogadorResultado {
+  final String id;
   final String nome;
   final int pontos;
   final double premio;
@@ -125,6 +126,7 @@ class JogadorResultado {
   TrofeuTipo trofeu;
 
   JogadorResultado({
+    required this.id,
     required this.nome,
     required this.pontos,
     required this.premio,
