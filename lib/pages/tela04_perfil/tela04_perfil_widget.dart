@@ -1,3 +1,4 @@
+import 'package:projeto_game_quiz/pages/support/support_screen.dart';
 import 'package:projeto_game_quiz/pages/tela11_editar_perfil/tela11_editar_perfil_widget.dart';
 import 'package:projeto_game_quiz/pages/tela12_vitoria_view/tela12_vitoria_view_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
@@ -566,10 +567,35 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                               size: 18.0,
                             ),
                           ),
+                          FFButtonWidget(
+                          onPressed: () async {
+                            context.pushNamed(TelaSuporteWidget.routeName);
+                          },
+                          text: '',
+                          options: FFButtonOptions(
+                            width: 360.0,
+                            height: 60.0,
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                16.0, 0.0, 16.0, 0.0),
+                            iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                0.0, 0.0, 0.0, 0.0),
+                            color: Color(0x001D2428),
+                            textStyle: FlutterFlowTheme.of(context)
+                                .titleSmall
+                                .override(
+                                  fontFamily: 'Inter Tight',
+                                  color: Colors.white,
+                                  letterSpacing: 0.0,
+                                ),
+                            elevation: 0.0,
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
                         ],
                       ),
                     ),
                   ),
+                  
                 ),
                 Padding(
                   padding:

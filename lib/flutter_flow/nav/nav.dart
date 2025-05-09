@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:projeto_game_quiz/Atualiza%C3%A7%C3%A3o/tela10_deposito/tela10_deposito_lista_widget.dart';
 import 'package:projeto_game_quiz/pages/deposit_history/deposit_history_widget.dart';
+import 'package:projeto_game_quiz/pages/support/support_screen.dart';
 import 'package:projeto_game_quiz/pages/tela12_vitoria_view/tela12_vitoria_view_widget.dart';
 import 'package:projeto_game_quiz/pages/tela14_fim_partida/tela14_fim_partida_widget.dart';
 import 'package:provider/provider.dart';
@@ -113,6 +114,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: Tela10DepositoListaWidget.routeName,
           path: Tela10DepositoListaWidget.routePath,
           builder: (context, params) => Tela10DepositoListaWidget(),
+        ),
+        FFRoute(
+          name: TelaSuporteWidget.routeName,
+          path: TelaSuporteWidget.routePath,
+          builder: (context, params) => TelaSuporteWidget(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
