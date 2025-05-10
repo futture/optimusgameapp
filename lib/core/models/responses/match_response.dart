@@ -32,6 +32,7 @@ class MatchResponse {
   final MatchPrizeResponse? matchPrize;
   bool? isUserRegistered = false;
   final List<MatchPlayerResponse>? matchPlayers;
+  bool? isExpanded = false;
 
   MatchResponse(
       {required this.id,
@@ -42,7 +43,8 @@ class MatchResponse {
       required this.matchPrize,
       required this.room,
       required this.matchPlayers,
-      this.isUserRegistered});
+      this.isUserRegistered,
+      this.isExpanded});
 
   factory MatchResponse.fromJson(Map<String, dynamic> json) {
     return MatchResponse(
@@ -163,7 +165,7 @@ class PlayerRankingResponse {
   final int errors;
   final int totalResponseTime;
   final int timesInTop3;
-  final int points;
+  final double points;
   final double prize;
   final bool winner;
   final int position;
@@ -188,7 +190,9 @@ class PlayerRankingResponse {
           errors: json["errors"],
           totalResponseTime: json["totalResponseTime"].round(),
           timesInTop3: json["timesInTop3"],
-          points: json["points"],
+          points: json["points"] is String
+              ? double.parse(json["points"])
+              : (json["points"] as num).toDouble(),
           prize: json["prize"] is String
               ? double.parse(json["prize"])
               : (json["prize"] as num).toDouble(),

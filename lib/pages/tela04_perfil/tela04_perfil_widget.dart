@@ -1,5 +1,3 @@
-import 'package:projeto_game_quiz/pages/support/support_screen.dart';
-import 'package:projeto_game_quiz/pages/tela11_editar_perfil/tela11_editar_perfil_widget.dart';
 import 'package:projeto_game_quiz/pages/tela12_vitoria_view/tela12_vitoria_view_widget.dart';
 import 'package:projeto_game_quiz/pages/tela17_notificacao/tela17_notificacao_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';

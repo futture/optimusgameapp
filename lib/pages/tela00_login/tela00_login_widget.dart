@@ -54,7 +54,6 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Logo/Imagem
                 Hero(
                   tag: 'app_logo',
                   child: Container(
@@ -80,7 +79,7 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget> {
                   ),
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
 
                 // Título
                 Text(
@@ -103,7 +102,7 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget> {
                       ),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 20),
 
                 // Formulário
                 Form(
@@ -135,8 +134,6 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget> {
                       ),
 
                       const SizedBox(height: 16),
-
-                      // Campo Senha
                       Text(
                         'Senha',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -208,7 +205,7 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget> {
                         ],
                       ),
 
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
 
                       FilledButton(
                         onPressed: () async {
@@ -262,7 +259,7 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget> {
                               ),
                       ),
 
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 14),
                       Row(
                         children: [
                           const Expanded(child: Divider()),
@@ -277,7 +274,7 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget> {
                         ],
                       ),
 
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
                       OutlinedButton(
                         onPressed: () {
                           context.pushNamed(Tela01CriarContaWidget.routeName);

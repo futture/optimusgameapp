@@ -194,6 +194,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
           ),
           const SizedBox(height: 16),
           Text(
+            textAlign: TextAlign.center,
             semVencedor
                 ? 'Partida encerrada!'
                 : (matchInfo?.room?.roomConfiguration?.isSingleWinner ?? false)

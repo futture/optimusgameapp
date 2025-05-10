@@ -116,7 +116,7 @@ class CreateRoomConfigurationRequest {
 class JogadorResultado {
   final String id;
   final String nome;
-  final int pontos;
+  final double pontos;
   final double premio;
   final int perguntasCertas;
   final int perguntasErradas;

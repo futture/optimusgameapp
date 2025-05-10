@@ -19,22 +19,22 @@ class ModalsDepositoWidget extends StatefulWidget {
 }
 
 class _ModalsDepositoWidgetState extends State<ModalsDepositoWidget> {
-  final List<Map<String, dynamic>> _options = [
-    {
-      'label': 'Multicaixa Express',
-      'icon': Icons.credit_card,
-    },
-    {
-      'label': 'Unitel Money',
-      'icon': Icons.account_balance_wallet,
-    },
-    {
-      'label': 'Outro',
-      'icon': Icons.money,
-    },
-  ];
+  // final List<Map<String, dynamic>> _options = [
+  //   {
+  //     'label': 'Multicaixa Express',
+  //     'icon': Icons.credit_card,
+  //   },
+  //   {
+  //     'label': 'Unitel Money',
+  //     'icon': Icons.account_balance_wallet,
+  //   },
+  //   {
+  //     'label': 'Outro',
+  //     'icon': Icons.money,
+  //   },
+  // ];
   late ModalsDepositoModel _model;
-  String? _selectedOption;
+  // String? _selectedOption;
 
   @override
   void setState(VoidCallback callback) {
@@ -733,8 +733,7 @@ class _ModalsDepositoWidgetState extends State<ModalsDepositoWidget> {
                                                             fontFamily: 'Inter',
                                                             letterSpacing: 0.0,
                                                           ),
-                                                  hintText:
-                                                      '999 999 999',
+                                                  hintText: '999 999 999',
                                                   hintStyle:
                                                       FlutterFlowTheme.of(
                                                               context)

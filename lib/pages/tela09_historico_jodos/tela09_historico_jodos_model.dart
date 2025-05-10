@@ -5,19 +5,31 @@ import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/player_answers_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/ranking_response.dart';
+import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 
 import '/flutter_flow/flutter_flow_util.dart';
 import 'tela09_historico_jodos_widget.dart' show Tela09HistoricoJodosWidget;
 import 'package:flutter/material.dart';
 
+class Param {
+  bool? isEvent;
+  String? status;
+  DateTime? startDate;
+  DateTime? endDate;
+  Param({this.isEvent, this.status, this.endDate, this.startDate});
+}
+
 class Tela09HistoricoJodosModel
     extends FlutterFlowModel<Tela09HistoricoJodosWidget> {
+  Param param = Param();
   String? userId = "";
   MatchResponse? matchInfo;
+  UserResponse? currentUser;
   bool isLoadingRanking = false;
   bool isLoadingHistory = false;
+  List<MatchResponse> matches = List.empty();
   List<RankingResponse> rankings = List.empty();
-  List<PlayerAnswersResponse> historys= List.empty();
+  List<PlayerAnswersResponse> historys = List.empty();
   MatchService _matchService = MatchService();
   RankingService _rankingService = RankingService();
 
@@ -29,10 +41,12 @@ class Tela09HistoricoJodosModel
 
   Future<void> getUserIdAsync() async {
     userId = await UserUtil.getUserId();
+    currentUser = await UserUtil.getUserInfo();
   }
 
   Future<void> load(Function setState) async {
     await getUserIdAsync();
+    await getMatchByUserIdAsync(setState, userId!);
     await getRankingByUserdAsync(setState);
   }
 
@@ -93,6 +107,28 @@ class Tela09HistoricoJodosModel
     if (result["isSuccess"]) {
       setState(() {
         matchInfo = result["data"];
+      });
+    } else {
+      Warning00ErrorUtil.showDialogMessageError(
+        context!,
+        result["error"].detail.message,
+        result["error"].detail.details,
+      );
+    }
+  }
+
+  Future<void> getMatchByUserIdAsync(Function setState, matchId) async {
+    var result = await _matchService.getMatchByUserIdAsync(userId!,
+        endDate: param.endDate,
+        isEvent: param.isEvent,
+        startDate: param.startDate,
+        status: param.status);
+
+    if (result["isSuccess"]) {
+      setState(() {
+        matches = result["data"];
+
+        matches.sort((a, b) => (b.matchStartDate).compareTo(a.matchStartDate));
       });
     } else {
       Warning00ErrorUtil.showDialogMessageError(

@@ -33,25 +33,64 @@ class MatchService {
     }
   }
 
-  Future<dynamic> getAllMatchAsync(bool? isEvent, String? status, DateTime? startDate, DateTime? endDate) async {
+  Future<dynamic> getAllMatchAsync(bool? isEvent, String? status,
+      DateTime? startDate, DateTime? endDate) async {
     try {
-          final queryParams = <String, String>{};
+      final queryParams = <String, String>{};
 
-          if (isEvent != null) {
-            queryParams['isEvent'] = isEvent.toString();
-          }
-          if (status != null) {
-            queryParams['status'] = status;
-          }
-          if (startDate != null) {
-            queryParams['startDate'] = startDate.toIso8601String();
-          }
-          if (endDate != null) {
-            queryParams['endDate'] = endDate.toString();
-          }
-          String queryString = Uri(queryParameters: queryParams).query;
-          
-         var route = queryString.isNotEmpty ? "/match?$queryString" : "/match";
+      if (isEvent != null) {
+        queryParams['isEvent'] = isEvent.toString();
+      }
+      if (status != null) {
+        queryParams['status'] = status;
+      }
+      if (startDate != null) {
+        queryParams['startDate'] = startDate.toIso8601String();
+      }
+      if (endDate != null) {
+        queryParams['endDate'] = endDate.toString();
+      }
+      String queryString = Uri(queryParameters: queryParams).query;
+
+      var route = queryString.isNotEmpty ? "/match?$queryString" : "/match";
+
+      final successResult = await httpService.request<List<MatchResponse>>(
+        route,
+        method: 'GET',
+        successParser: (json) =>
+            (json as List).map((item) => MatchResponse.fromJson(item)).toList(),
+      );
+      return {"isSuccess": true, "data": successResult};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
+  Future<dynamic> getMatchByUserIdAsync(String userId,
+      {bool? isEvent,
+      String? status,
+      DateTime? startDate,
+      DateTime? endDate}) async {
+    try {
+      final queryParams = <String, String>{};
+
+      if (isEvent != null) {
+        queryParams['isEvent'] = isEvent.toString();
+      }
+      if (status != null) {
+        queryParams['status'] = status;
+      }
+      if (startDate != null) {
+        queryParams['startDate'] = startDate.toIso8601String();
+      }
+      if (endDate != null) {
+        queryParams['endDate'] = endDate.toString();
+      }
+      String queryString = Uri(queryParameters: queryParams).query;
+
+      var route = queryString.isNotEmpty
+          ? "/user/${userId}/match?$queryString"
+          : "/user/${userId}/match";
 
       final successResult = await httpService.request<List<MatchResponse>>(
         route,
@@ -149,7 +188,8 @@ class MatchService {
     }
   }
 
-  Future<dynamic> inactivatePlayerInMatchAsync(String matchId, String userId) async {
+  Future<dynamic> inactivatePlayerInMatchAsync(
+      String matchId, String userId) async {
     try {
       final result = await httpService.request<MatchResultResponse>(
           '/match/${matchId}/user/${userId}/inactivate-player',

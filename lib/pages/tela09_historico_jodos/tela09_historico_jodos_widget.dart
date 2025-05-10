@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:projeto_game_quiz/components/moda_menu_pagian_inicial_widget.dart';
+import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/ranking_response.dart';
+import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_model.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
@@ -25,7 +27,12 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
   late Tela09HistoricoJodosModel _model;
   bool _expandPremioInfo = false;
   late TabController _tabController;
+
   String _filterResult = 'all'; // 'all', 'winner', 'loser'
+  String _filterStatus = 'all'; // 'all', 'pending', 'in_progress'
+  DateTimeRange? _dateRange;
+  int _currentIndex = 0;
+  final List<String> _statusOptions = ['PENDING', 'IN_PROGRESS'];
 
   @override
   void initState() {
@@ -33,6 +40,13 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
     _model = createModel(context, () => Tela09HistoricoJodosModel());
     _tabController = TabController(length: 2, vsync: this);
     _model.load(setState);
+
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging) return;
+      setState(() {
+        _currentIndex = _tabController.index;
+      });
+    });
   }
 
   @override
@@ -55,6 +69,37 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
       }
     }
     return rankings;
+  }
+
+  List<MatchResponse> _getFilteredMatches() {
+    List<MatchResponse> matches = _model.matches;
+
+    if (_filterStatus != 'all') {
+      matches = matches.where((m) => m.statusMatch == _filterStatus).toList();
+    }
+
+    if (_dateRange != null) {
+      matches = matches.where((m) {
+        return m.matchStartDate.isAfter(_dateRange!.start) &&
+            m.matchStartDate.isBefore(_dateRange!.end);
+      }).toList();
+    }
+
+    return matches;
+  }
+
+  Future<void> _selectDateRange(BuildContext context) async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      initialDateRange: _dateRange,
+    );
+    if (picked != null) {
+      setState(() {
+        _dateRange = picked;
+      });
+    }
   }
 
   @override
@@ -119,7 +164,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
       ),
       body: _model.isLoadingRanking
           ? const Center(child: CircularProgressIndicator())
-          : _model.rankings.isEmpty
+          : _model.rankings.isEmpty && _model.matches.isEmpty
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -141,8 +186,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                 )
               : Column(
                   children: [
-                    // Mostra os filtros apenas na aba de partidas concluídas
-                    if (_tabController.index == 0)
+                    if (_currentIndex == 0) ...[
                       Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Row(
@@ -181,20 +225,104 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                           ],
                         ),
                       ),
+                    ] else ...[
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  FilterChip(
+                                    label: const Text('Todas'),
+                                    selected: _filterStatus == 'all',
+                                    onSelected: (bool selected) {
+                                      setState(() {
+                                        _filterStatus =
+                                            selected ? 'all' : _filterStatus;
+                                      });
+                                    },
+                                  ),
+                                  const SizedBox(width: 8),
+                                  ..._statusOptions.map((status) {
+                                    return Padding(
+                                      padding:
+                                          const EdgeInsets.only(right: 8.0),
+                                      child: FilterChip(
+                                        label: Text(_getStatusLabel(status)),
+                                        selected: _filterStatus == status,
+                                        onSelected: (bool selected) {
+                                          setState(() {
+                                            _filterStatus = selected
+                                                ? status
+                                                : _filterStatus;
+                                          });
+                                        },
+                                      ),
+                                    );
+                                  }).toList(),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    icon: const Icon(Icons.calendar_today,
+                                        size: 16),
+                                    label: Text(
+                                      _dateRange == null
+                                          ? 'Filtrar por data'
+                                          : '${DateFormat('dd/MM/yyyy').format(_dateRange!.start)} - ${DateFormat('dd/MM/yyyy').format(_dateRange!.end)}',
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 12),
+                                    ),
+                                    onPressed: () => _selectDateRange(context),
+                                  ),
+                                ),
+                                if (_dateRange != null)
+                                  IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () {
+                                      setState(() {
+                                        _dateRange = null;
+                                      });
+                                    },
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     Expanded(
                       child: TabBarView(
                         controller: _tabController,
                         children: [
-                          // Tab de partidas concluídas
                           _buildGamesList(true),
-                          // Tab de partidas pendentes
-                          _buildGamesList(false),
+                          _buildMatchesList(),
                         ],
                       ),
                     ),
                   ],
                 ),
     );
+  }
+
+  String _getStatusLabel(String status) {
+    switch (status) {
+      case 'PENDING':
+        return 'Pendentes';
+      case 'IN_PROGRESS':
+        return 'Em Andamento';
+      default:
+        return status;
+    }
   }
 
   Widget _buildGamesList(bool isCompleted) {
@@ -258,6 +386,215 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildMatchesList() {
+    final filteredMatches = _getFilteredMatches();
+
+    if (filteredMatches.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.hourglass_empty, size: 48, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text(
+              'Nenhuma partida encontrada com os filtros atuais',
+              style: const TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _filterStatus = 'all';
+                  _dateRange = null;
+                });
+              },
+              child: const Text('Limpar filtros'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: filteredMatches.length,
+              itemBuilder: (context, index) {
+                final match = filteredMatches[index];
+                return _buildPendingMatchCard(match);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPendingMatchCard(MatchResponse match) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          setState(() {
+            match.isExpanded = !(match.isExpanded ?? false);
+          });
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        DateFormat('dd/MM/yyyy').format(match.matchStartDate),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        DateFormat('HH:mm').format(match.matchStartDate),
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color:
+                          _getStatusColor(match.statusMatch).withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      _getStatusLabel(match.statusMatch),
+                      style: TextStyle(
+                        color: _getStatusColor(match.statusMatch),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              _buildMatchInfoRow(
+                icon: Icons.people,
+                label: 'Jogadores',
+                value:
+                    '${match.matchPlayers?.length ?? 0}/${match.room?.roomConfiguration?.numberOfPlayers ?? 0}',
+              ),
+              const SizedBox(height: 8),
+              _buildMatchInfoRow(
+                icon: Icons.emoji_events,
+                label: 'Prêmio',
+                value:
+                    '${match.matchPrize?.totalGain?.toStringAsFixed(2) ?? '0.00'} AOA',
+              ),
+              if (match.isExpanded ?? false) ...[
+                const SizedBox(height: 16),
+                const Divider(height: 1),
+                const SizedBox(height: 12),
+                if (match.matchPlayers != null &&
+                    match.matchPlayers!.isNotEmpty) ...[
+                  const Text(
+                    'Jogadores:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ...match.matchPlayers!.map((player) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: _buildPlayerTile(player.userResponse,
+                          currentUser: _model.currentUser!),
+                    );
+                  }).toList(),
+                ],
+                if (match.statusMatch == 'PENDING' &&
+                    match.matchStartDate >= DateTime.now()) ...[
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFEC8D0D),
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Sair da Partida',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+              Align(
+                alignment: Alignment.center,
+                child: Icon(
+                  match.isExpanded ?? false
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMatchInfoRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: Colors.grey[600]),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.grey[600],
+          ),
+        ),
+        const Spacer(),
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 
@@ -533,5 +870,89 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
         ],
       ),
     );
+  }
+
+  Widget _buildPlayerTile(UserResponse? player,
+      {required UserResponse currentUser}) {
+    final isCurrentUser = player?.id == currentUser.id;
+
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(vertical: 4),
+      leading: Stack(
+        children: [
+          CircleAvatar(
+            backgroundColor:
+                isCurrentUser ? Colors.grey[600] : Colors.grey[200],
+            child: Text(
+              player?.name != null && player!.name.isNotEmpty
+                  ? player.name[0].toUpperCase()
+                  : '?',
+              style: TextStyle(
+                color: isCurrentUser ? Colors.white : Colors.grey[800],
+              ),
+            ),
+          ),
+          if (isCurrentUser)
+            const Positioned(
+              right: 0,
+              bottom: 0,
+              child: Icon(
+                Icons.circle,
+                size: 14,
+                color: Colors.green,
+              ),
+            ),
+        ],
+      ),
+      title: Row(
+        children: [
+          Text(
+            player?.name ?? 'Jogador sem nome',
+            style: TextStyle(
+                fontWeight: isCurrentUser ? FontWeight.bold : FontWeight.normal,
+                color: isCurrentUser
+                    ? Colors.grey[800]
+                    : FlutterFlowTheme.of(context).primaryText),
+          ),
+          if (isCurrentUser)
+            Padding(
+              padding: EdgeInsets.only(left: 6.0),
+              child: Text(
+                '(você)',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 12,
+                ),
+              ),
+            ),
+        ],
+      ),
+      subtitle: Text(
+        player?.email ?? '',
+        style: TextStyle(
+          color: Colors.grey[600],
+          fontSize: 12,
+        ),
+      ),
+      tileColor: isCurrentUser ? Colors.grey[100] : null,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: isCurrentUser ? Colors.grey[300]! : Colors.transparent,
+          width: 1,
+        ),
+      ),
+    );
+  }
+
+  Color _getStatusColor(String? status) {
+    switch (status) {
+      case 'PENDING':
+        return Colors.orange;
+      case 'IN_PROGRESS':
+        return Colors.blue;
+      default:
+        return Colors.grey;
+    }
   }
 }

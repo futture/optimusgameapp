@@ -387,7 +387,7 @@ class DadosDaPartidaUtils {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             if (matchInfo.statusMatch == "PENDING")
-              if (doNotDisplayButton == null)
+              if (doNotDisplayButton == false)
                 FFButtonWidget(
                   onPressed: () async {
                     showDialog(

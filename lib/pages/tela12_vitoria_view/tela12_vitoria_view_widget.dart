@@ -29,7 +29,6 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
   final scaffoldKey = GlobalKey<ScaffoldState>();
   dynamic rankingData;
   RankingPeriod _selectedPeriod = RankingPeriod.daily;
-  RankingWithTopWinnersResponse? _rankingResponse;
   List<RankingItem> fullRankingList = [];
   bool isLoading = false;
   String firstPlaceName = '';
