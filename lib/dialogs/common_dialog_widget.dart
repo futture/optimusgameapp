@@ -11,10 +11,10 @@ class CommonDialogWidget {
       MatchResponse match,
       List<UserResponse> participants,
       UserResponse? currentUser,
-      Widget widget) {
+      Widget widget,
+      {bool? isError}) {
     if (currentUser == null) return;
 
-    //final isRegistered = match.isUserRegistered ?? false;
     final minimumAmount =
         match.room?.roomConfiguration?.minimumAmountToPlay ?? 0;
 
@@ -73,7 +73,9 @@ class CommonDialogWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEC8D0D),
+                    color: isError == true
+                        ? Colors.red // Vermelho para erro
+                        : const Color(0xFFEC8D0D),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(16),
                       topRight: Radius.circular(16),
@@ -82,6 +84,15 @@ class CommonDialogWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      // if (isError == true)
+                      //   Padding(
+                      //     padding: const EdgeInsets.only(right: 8),
+                      //     child: Icon(
+                      //       Icons.error_outline,
+                      //       color: Colors.white,
+                      //       size: 24,
+                      //     ),
+                      //   ),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,

@@ -327,15 +327,14 @@ class _Tela13DadosDePartidaWidgetState
 
 class DadosDaPartidaUtils {
   static void showMatchParticipantsDialog(
-      BuildContext ctx,
+      {required BuildContext ctx,
       UserResponse? currentUser,
-      MatchResponse matchInfo,
-      List<UserResponse> participants,
+      required MatchResponse matchInfo,
+      required List<UserResponse> participants,
       Widget? widget,
-      bool? doNotDisplayButton) {
-    // if (currentUser != null) {
-    //   participants.insert(0, currentUser!);
-    // }
+      bool doNotDisplayButton = false,
+      String title = "Desafio",
+      bool isError = false}) {
     final minimumAmount =
         matchInfo.room?.roomConfiguration?.minimumAmountToPlay ?? 0;
     var infos = [
@@ -363,15 +362,15 @@ class DadosDaPartidaUtils {
     ];
 
     CommonDialogWidget.showMatchParticipantsDialog(
-      ctx,
-      infos,
-      "Desafio",
-      matchInfo,
-      participants,
-      currentUser,
-      _buildDialogActions(
-          ctx, matchInfo, participants, widget, doNotDisplayButton),
-    );
+        ctx,
+        infos,
+        title,
+        matchInfo,
+        participants,
+        currentUser,
+        _buildDialogActions(
+            ctx, matchInfo, participants, widget, doNotDisplayButton),
+        isError: isError);
   }
 
   static Widget _buildDialogActions(

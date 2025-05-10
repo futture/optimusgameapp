@@ -253,7 +253,10 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
         handleWebSocketFailureIfNeeded(() => {});
         debugPrint("Erro no WebSocket: $e");
       },
-      onDone: () => debugPrint("Conexão WebSocket encerrada."),
+      onDone: () {
+        Navigator.of(context!).pop();
+        debugPrint("Conexão WebSocket encerrada.");
+      },
     );
 
     _matchWebSocketService?.connectStartScheduledSatch();
@@ -473,8 +476,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment:
-                  CrossAxisAlignment.center, 
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const CircularProgressIndicator(
                   color: Color(0xFFEC8D0D),
@@ -482,7 +484,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
                 const SizedBox(height: 8),
                 Text(
                   'Aguardando participantes...',
-                  textAlign: TextAlign.center, 
+                  textAlign: TextAlign.center,
                   style: FlutterFlowTheme.of(
                           currentDialogStartScheduledMatchOpenContext)
                       .bodyMedium
@@ -496,7 +498,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
                 const SizedBox(height: 4),
                 Text(
                   'Participantes conectados: ${parts.length}/${matchInfo.room!.roomConfiguration!.numberOfPlayers}',
-                  textAlign: TextAlign.center, 
+                  textAlign: TextAlign.center,
                   style: FlutterFlowTheme.of(
                           currentDialogStartScheduledMatchOpenContext)
                       .bodySmall
