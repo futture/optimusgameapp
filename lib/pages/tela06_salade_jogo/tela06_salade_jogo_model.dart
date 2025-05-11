@@ -33,7 +33,8 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   bool isButtonDisabled = false;
   int questionsAlreadyPresented = 0;
   Map<String, double> totalScorePerPlayer = {};
-
+  int reconnectAttempts = 0; // Contador de tentativas de reconexão
+  final int maxReconnectAttempts = 2; // Número máximo de tentativas
   FormFieldController<String>? radioGroupValueController;
 
   MatchResponse? matchInfo;
@@ -46,6 +47,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   bool isDialogOpen = false;
   bool gameFinished = false;
   BuildContext? currentContext;
+  bool serverAllowedExit = false;
 
   void initState(BuildContext context) {
     currentContext = context;
@@ -82,9 +84,12 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
     if (!result["isSuccess"] &&
         result["error"].detail.code != "ERR_QUESTION_NOTFOUND") {
       if (result["error"].detail.code == "ERR_MATCH_PLAYER_INATIVE") {
-        Navigator.of(currentContext!).push(
-          MaterialPageRoute(builder: (_) => Tela03PrincipalWidget()),
-        );
+        _questionWebSocketService?.disconnect();
+        if (serverAllowedExit) {
+          Navigator.of(currentContext!).push(
+            MaterialPageRoute(builder: (_) => Tela03PrincipalWidget()),
+          );
+        }
         return;
       }
       Warning00ErrorUtil.showDialogMessageError(
@@ -160,7 +165,6 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   }
 
   Future<void> getWebSocketEveryoneWhoRespondedAsync(Function setState) async {
-    //_questionWebSocketService?.disconnect();
     _questionWebSocketService = QuestionWebSocketService(
         matchInfo: matchInfo!,
         question: question!,
@@ -244,14 +248,45 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
           print("Conexão WebSocket encerrada.");
 
           if (!gameFinished) {
-            await _questionWebSocketService?.tryReconnect();
-            if (!_questionWebSocketService!.isConnected) {
-              closeDialogWaitingPlayer();
-              showDialogErrorAndExit(
-                "Conexão encerrada",
-                "O servidor foi desconectado e não foi possível reconectar.",
-              );
-            }
+            // if (reconnectAttempts < maxReconnectAttempts) {
+            //   reconnectAttempts++;
+            //   safetyTimeout?.cancel();
+
+            //   print(
+            //       "Tentando reconectar (tentativa $reconnectAttempts/$maxReconnectAttempts)...");
+            //   closeDialogWaitingPlayer();
+            //   showDialog(
+            //     context: currentContext!,
+            //     barrierDismissible: false,
+            //     builder: (context) => AlertDialog(
+            //       title: Text("Reconectando..."),
+            //       content: Text(
+            //           "Tentativa $reconnectAttempts de $maxReconnectAttempts"),
+            //     ),
+            //   );
+
+            //   await Future.delayed(Duration(seconds: 2));
+
+            //   if (Navigator.canPop(currentContext!)) {
+            //     Navigator.of(currentContext!).pop();
+            //   }
+            //   var resultTryReconnect =
+            //       await _questionWebSocketService?.tryReconnect();
+
+            //   if (resultTryReconnect!) {
+            //     await _matchService.activatePlayerInMatchAsync(
+            //         matchInfo!.id, userId!);
+            //     reconnectAttempts = 0;
+            //     return;
+            //   }
+            // }
+
+            //if (!_questionWebSocketService!.isConnected) {
+            closeDialogWaitingPlayer();
+            showDialogErrorAndExit("Conexão encerrada",
+                "Não foi possível reconectar ao servidor após $maxReconnectAttempts tentativas.",
+                showBackButton: true);
+            //}
           }
         });
 
@@ -263,14 +298,13 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
 
     isDialogOpen = true;
     currentContext = context;
-    bool isChecked = false; // Esta variável não será usada diretamente
+    bool isChecked = false;
 
     showDialog(
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.black54,
       builder: (_) {
-        // Usando StatefulBuilder no nível mais alto para compartilhar o estado
         return StatefulBuilder(
           builder: (dialogContext, setState) {
             return WillPopScope(
@@ -385,10 +419,13 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
                         onPressed: isChecked
                             ? () {
                                 _questionWebSocketService?.disconnect();
-                                Navigator.of(currentContext!).push(
-                                  MaterialPageRoute(
-                                      builder: (_) => Tela03PrincipalWidget()),
-                                );
+                                if (serverAllowedExit) {
+                                  Navigator.of(currentContext!).push(
+                                    MaterialPageRoute(
+                                        builder: (_) =>
+                                            Tela03PrincipalWidget()),
+                                  );
+                                }
                               }
                             : null,
                         style: OutlinedButton.styleFrom(
@@ -420,132 +457,6 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
       },
     );
   }
-  // void showDialogWaitingPlayer(BuildContext context) {
-  //   if (isDialogOpen) return;
-
-  //   isDialogOpen = true;
-  //   currentContext = context;
-
-  //   showDialog(
-  //     context: context,
-  //     barrierDismissible: false,
-  //     barrierColor: Colors.black54,
-  //     builder: (_) => WillPopScope(
-  //       onWillPop: () async => false,
-  //       child: Dialog(
-  //         backgroundColor: Colors.transparent,
-  //         elevation: 0,
-  //         insetPadding: const EdgeInsets.all(40),
-  //         child: Container(
-  //           padding: const EdgeInsets.all(24),
-  //           decoration: BoxDecoration(
-  //             gradient: LinearGradient(
-  //               begin: Alignment.topLeft,
-  //               end: Alignment.bottomRight,
-  //               colors: [
-  //                 const Color(0xFF01BF01),
-  //                 FlutterFlowTheme.of(context).secondary,
-  //               ],
-  //             ),
-  //             borderRadius: BorderRadius.circular(20),
-  //             boxShadow: [
-  //               BoxShadow(
-  //                 color: Colors.black.withOpacity(0.3),
-  //                 blurRadius: 20,
-  //                 spreadRadius: 2,
-  //               )
-  //             ],
-  //           ),
-  //           child: Column(
-  //             mainAxisSize: MainAxisSize.min,
-  //             children: [
-  //               SizedBox(
-  //                 height: 80,
-  //                 width: 80,
-  //                 child: Stack(
-  //                   alignment: Alignment.center,
-  //                   children: [
-  //                     CircularProgressIndicator(
-  //                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-  //                       strokeWidth: 8,
-  //                     ),
-  //                     Icon(
-  //                       Icons.people_alt_rounded,
-  //                       size: 36,
-  //                       color: Colors.white,
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //               const SizedBox(height: 24),
-  //               TweenAnimationBuilder<double>(
-  //                 tween: Tween(begin: 0.95, end: 1.05),
-  //                 duration: const Duration(seconds: 1),
-  //                 //repeat: true,
-  //                 curve: Curves.easeInOut,
-  //                 builder: (context, value, child) {
-  //                   return Transform.scale(
-  //                     scale: value,
-  //                     child: Text(
-  //                       "Aguardando Jogadores",
-  //                       style: TextStyle(
-  //                         fontSize: 20,
-  //                         fontWeight: FontWeight.bold,
-  //                         color: Colors.white,
-  //                       ),
-  //                     ),
-  //                   );
-  //                 },
-  //               ),
-  //               const SizedBox(height: 16),
-  //               Row(
-  //                 mainAxisAlignment: MainAxisAlignment.center,
-  //                 children: [
-  //                   _buildAnimatedDot(0),
-  //                   _buildAnimatedDot(1),
-  //                   _buildAnimatedDot(2),
-  //                 ],
-  //               ),
-  //               const SizedBox(height: 24),
-  //               Text(
-  //                 "Esperando todos responderem...",
-  //                 style: TextStyle(
-  //                   color: Colors.white.withOpacity(0.8),
-  //                   fontSize: 14,
-  //                 ),
-  //               ),
-  //               const SizedBox(height: 16),
-  //               OutlinedButton(
-  //                 onPressed: () {
-  //                   _questionWebSocketService?.disconnect();
-  //                   Navigator.of(currentContext!).push(
-  //                     MaterialPageRoute(
-  //                         builder: (_) => Tela03PrincipalWidget()),
-  //                   );
-  //                 },
-  //                 style: OutlinedButton.styleFrom(
-  //                   foregroundColor: Colors.white,
-  //                   side: BorderSide(color: Colors.white),
-  //                   padding: const EdgeInsets.symmetric(
-  //                       horizontal: 24, vertical: 12),
-  //                   shape: RoundedRectangleBorder(
-  //                     borderRadius: BorderRadius.circular(12),
-  //                   ),
-  //                 ),
-  //                 child: Text(
-  //                   "SAIR DA PARTIDA",
-  //                   style: TextStyle(
-  //                     fontWeight: FontWeight.bold,
-  //                   ),
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Widget _buildAnimatedDot(int index) {
     return Padding(
@@ -603,7 +514,8 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
     await _matchService.inactivatePlayerInMatchAsync(matchInfo!.id, userId!);
   }
 
-  void showDialogErrorAndExit(String title, String message) {
+  void showDialogErrorAndExit(String title, String message,
+      {bool showBackButton = false}) {
     showDialog(
       context: currentContext!,
       barrierDismissible: false,
@@ -621,7 +533,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  const Color(0xFFE53935), // Vermelho para erro
+                  const Color(0xFFE53935),
                   FlutterFlowTheme.of(currentContext!).error,
                 ],
               ),
@@ -662,36 +574,123 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
-                OutlinedButton(
-                  onPressed: () {
-                    _questionWebSocketService?.disconnect();
-                    Navigator.of(currentContext!).push(
-                      MaterialPageRoute(
-                          builder: (_) => Tela03PrincipalWidget()),
-                    );
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: BorderSide(color: Colors.white),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                if (showBackButton) ...[
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Navigator.of(currentContext!).pop();
+                        safetyTimeout?.cancel();
+                        await _tryReconnectWithFeedback();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFFE53935),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        "VOLTAR À PARTIDA",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
                   ),
-                  child: Text(
-                    "VOLTAR AO INÍCIO",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      onPressed: () {
+                        _questionWebSocketService?.disconnect();
+                        Navigator.of(currentContext!).pushReplacement(
+                          MaterialPageRoute(
+                              builder: (_) => Tela03PrincipalWidget()),
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: Text(
+                        "Voltar ao início",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ] else ...[
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _questionWebSocketService?.disconnect();
+                        Navigator.of(currentContext!).pushReplacement(
+                          MaterialPageRoute(
+                              builder: (_) => Tela03PrincipalWidget()),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFFE53935),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        "VOLTAR AO INÍCIO",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _tryReconnectWithFeedback() async {
+    showDialog(
+      context: currentContext!,
+      barrierDismissible: false,
+      builder: (context) => Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    bool reconnectSuccess = false;
+    try {
+      var result = await _questionWebSocketService?.tryReconnect();
+      if (result!) {
+        reconnectSuccess = true;
+        await _matchService.activatePlayerInMatchAsync(matchInfo!.id, userId!);
+      }
+    } catch (e) {
+      print("Erro ao reconectar: $e");
+    }
+
+    Navigator.of(currentContext!).pop();
+
+    if (!reconnectSuccess) {
+      showDialogErrorAndExit(
+        "Falha na reconexão",
+        "Não foi possível reconectar à partida. Tente novamente mais tarde.",
+        showBackButton: true,
+      );
+    }
   }
 
   int getPlayerPosition(String userId, Map<String, double> ranking) {

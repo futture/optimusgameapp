@@ -16,7 +16,7 @@ class QuestionWebSocketService {
   final void Function()? onDone;
   bool _isConnected = false;
   bool get isConnected => _isConnected;
-  late final WebSocketService _webSocketService;
+  WebSocketService? _webSocketService;
 
   QuestionWebSocketService({
     required this.matchInfo,
@@ -72,35 +72,37 @@ class QuestionWebSocketService {
       },
     );
 
-    _webSocketService.connect();
+    _webSocketService?.connect();
     _isConnected = true;
   }
 
   void sendAnswerToWebSocket(PlayerAnswerRequest obj) {
     var strJson = jsonEncode(obj.toJson());
-    _webSocketService.sendMessage(strJson);
+    _webSocketService?.sendMessage(strJson);
   }
 
-  Future<void> tryReconnect(
+  Future<bool> tryReconnect(
       {int retries = 3, Duration delay = const Duration(seconds: 2)}) async {
     for (int i = 0; i < retries; i++) {
-      if (_isConnected) break;
+      if (_isConnected) return true;
 
       try {
         await Future.delayed(delay);
         connect();
         if (_isConnected) {
           print('Reconectado com sucesso na tentativa ${i + 1}');
-          break;
+          return _isConnected;
         }
       } catch (e) {
         print('Falha ao reconectar (tentativa ${i + 1}): $e');
+        return false;
       }
     }
+    return false;
   }
 
   void disconnect() {
     if (!_isConnected) return;
-    _webSocketService.disconnect();
+    _webSocketService?.disconnect();
   }
 }

@@ -379,7 +379,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                             ),
                             SizedBox(height: 4),
                             Text(
-                              '${jogador.pontos} pontos',
+                              'Taxa de Eficácia: ${jogador.pontos}%  ',
                               style: TextStyle(
                                 color: Colors.white70,
                                 fontSize: 14,
@@ -388,13 +388,11 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                           ],
                         ),
                       ),
-
-                      // Ícone de status
                       FaIcon(
                         isWinner
                             ? _getWinnerIcon(index)
                             : FontAwesomeIcons
-                                .sadTear, // Ícone triste para perdedores
+                                .sadTear, 
                         color: isWinner
                             ? _getWinnerIconColor(index)
                             : Colors.white70,
@@ -402,8 +400,6 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                       ),
                     ],
                   ),
-
-                  // Seção expandida
                   if (isExpanded) ...[
                     SizedBox(height: 16),
                     Divider(color: Colors.white24),
@@ -555,14 +551,14 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
           children: [
             _buildStatTile(
               icon: FontAwesomeIcons.coins,
-              value: '${jogador.premio.toStringAsFixed(0)}KZ',
+              value: '${jogador.premio.toStringAsFixed(0)}AOA',
               label: 'Prêmio',
               color: Colors.amber,
             ),
             _buildStatTile(
               icon: Icons.star,
-              value: '${jogador.pontos}',
-              label: 'Pontos',
+              value: '${jogador.pontos}%',
+              label: 'Taxa de Eficácia',
               color: Colors.blue[200]!,
             ),
             _buildStatTile(
@@ -622,11 +618,17 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
           1: FlexColumnWidth(1),
         },
         children: [
-          _buildTableRow('Perguntas Certas', '${jogador.perguntasCertas}'),
-          _buildTableRow('Perguntas Erradas', '${jogador.perguntasErradas}'),
-          _buildTableRow('Taxa de Acerto',
-              '${(jogador.perguntasCertas / (jogador.perguntasCertas + jogador.perguntasErradas) * 100).toStringAsFixed(1)}%'),
-          _buildTableRow('Top 3 vezes', '${jogador.top3vezes ?? 0}'),
+          _buildTableRow('Respostas certas', '${jogador.perguntasCertas}'),
+          _buildTableRow('Respostas Erradas', '${jogador.perguntasErradas}'),
+          _buildTableRow('Taxa de acerto',
+              '${(jogador.accuracyRate * 100).toStringAsFixed(1)}%'),
+          _buildTableRow('Desempenho por tempo de resposta',
+              '${(jogador.timeRate * 100).toStringAsFixed(1)}%'),
+          // _buildTableRow('Peso da taxa de acerto',
+          //     '${(jogador.hitRateWeight * 100).toStringAsFixed(1)}%'),
+          // _buildTableRow('Peso do desempenho por tempo',
+          //     '${(jogador.timeRateWeight * 100).toStringAsFixed(1)}%'),
+          _buildTableRow('Presenças no Top 3', '${jogador.top3vezes ?? 0}'),
         ],
       ),
     );

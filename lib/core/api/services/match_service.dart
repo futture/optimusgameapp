@@ -202,4 +202,18 @@ class MatchService {
       return _errorUtil.handleError(e);
     }
   }
+    Future<dynamic> activatePlayerInMatchAsync(
+      String matchId, String userId) async {
+    try {
+      final result = await httpService.request<MatchResultResponse>(
+          '/match/${matchId}/user/${userId}/activate-player',
+          method: 'PATCH',
+          body: {},
+          successParser: (json) => MatchResultResponse.fromJson(json));
+
+      return {"isSuccess": true, "data": result};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
 }

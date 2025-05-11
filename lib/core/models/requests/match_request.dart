@@ -124,6 +124,10 @@ class JogadorResultado {
   final int posicao;
   final bool isWinner;
   TrofeuTipo trofeu;
+  final double accuracyRate;
+  final double timeRate;
+  final double hitRateWeight;
+  final double timeRateWeight;
 
   JogadorResultado({
     required this.id,
@@ -135,6 +139,11 @@ class JogadorResultado {
     required this.top3vezes,
     required this.posicao,
     required this.isWinner,
+    required this.accuracyRate,
+    required this.timeRate,
+    required this.hitRateWeight,
+    required this.timeRateWeight,
     this.trofeu = TrofeuTipo.perdedor,
+    
   });
 }

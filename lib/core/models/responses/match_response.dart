@@ -169,6 +169,10 @@ class PlayerRankingResponse {
   final double prize;
   final bool winner;
   final int position;
+  final double accuracyRate;
+  final double timeRate;
+  final double hitRateWeight;
+  final double timeRateWeight;
 
   PlayerRankingResponse(
       {required this.playerName,
@@ -180,7 +184,11 @@ class PlayerRankingResponse {
       required this.points,
       required this.prize,
       required this.winner,
-      required this.position});
+      required this.position,
+      required this.accuracyRate,
+      required this.timeRate,
+      required this.hitRateWeight,
+      required this.timeRateWeight,});
 
   factory PlayerRankingResponse.fromJson(Map<String, dynamic> json) =>
       PlayerRankingResponse(
@@ -193,6 +201,18 @@ class PlayerRankingResponse {
           points: json["points"] is String
               ? double.parse(json["points"])
               : (json["points"] as num).toDouble(),
+          accuracyRate: json["accuracyRate"] is String
+              ? double.parse(json["accuracyRate"])
+              : (json["accuracyRate"] as num).toDouble(),
+          timeRate: json["timeRate"] is String
+              ? double.parse(json["timeRate"])
+              : (json["timeRate"] as num).toDouble(),
+          hitRateWeight: json["hitRateWeight"] is String
+              ? double.parse(json["hitRateWeight"])
+              : (json["hitRateWeight"] as num).toDouble(),
+          timeRateWeight: json["timeRateWeight"] is String
+              ? double.parse(json["timeRateWeight"])
+              : (json["timeRateWeight"] as num).toDouble(),                
           prize: json["prize"] is String
               ? double.parse(json["prize"])
               : (json["prize"] as num).toDouble(),

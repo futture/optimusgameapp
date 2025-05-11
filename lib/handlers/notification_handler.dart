@@ -101,8 +101,10 @@ class NotificationHandler {
               context, currentUser, matchInfo, participants);
           break;
         case 'DISQUALIFIED_FROM_MATCH':
-          await _handleDisqualification(
-              context, currentUser, matchInfo, participants);
+          if (isBackground) {
+            await _handleDisqualification(
+                context, currentUser, matchInfo, participants);
+          }
           break;
         default:
           debugPrint('Unknown notification action: $action');

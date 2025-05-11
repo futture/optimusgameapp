@@ -236,6 +236,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
           final isUserInMatch = stats.players?.contains(user!.id);
 
           if (isUserInMatch!) {
+            Navigator.of(context!).pop();
             Navigator.of(context!).push(
               MaterialPageRoute(
                 builder: (_) => Tela06SaladeJogoWidget(
@@ -254,7 +255,6 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
         debugPrint("Erro no WebSocket: $e");
       },
       onDone: () {
-        Navigator.of(context!).pop();
         debugPrint("Conexão WebSocket encerrada.");
       },
     );

@@ -30,6 +30,10 @@ class Tela14FimPartidaViewModel
             perguntasErradas: ranking.errors,
             top3vezes: ranking.timesInTop3,
             posicao: ranking.position,
+            accuracyRate: ranking.accuracyRate,
+            hitRateWeight: ranking.hitRateWeight,
+            timeRate: ranking.timeRate,
+            timeRateWeight: ranking.timeRateWeight,
             isWinner: ranking.winner == true,
           );
         }).toList() ??
