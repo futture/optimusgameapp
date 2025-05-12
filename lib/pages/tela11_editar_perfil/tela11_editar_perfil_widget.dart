@@ -1,3 +1,10 @@
+import 'package:projeto_game_quiz/core/api/services/user_service.dart';
+import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
+import 'package:projeto_game_quiz/core/models/requests/user_request.dart';
+import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
+import 'package:projeto_game_quiz/dialogs/success-dialog-widget.dart';
+import 'package:projeto_game_quiz/pages/password_change/password_change.dart';
+
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -19,15 +26,9 @@ class Tela11EditarPerfilWidget extends StatefulWidget {
 
 class _Tela11EditarPerfilWidgetState extends State<Tela11EditarPerfilWidget> {
   late Tela11EditarPerfilModel _model;
-  final scaffoldKey = GlobalKey<ScaffoldState>(); 
-  Map<String, dynamic> userData = {
-    'name': 'Januário Pinto',
-    'email': 'januario.pinto@email.com',
-    'phone': '+244 999 999 999',
-    'birthDate': '15/05/1990',
-    'twoFactorEnabled': false,
-    'lastPasswordChange': '3 meses atrás',
-  };
+  UserResponse? user;
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+  Map<String, dynamic> userData = {};
 
   @override
   void initState() {
@@ -38,20 +39,112 @@ class _Tela11EditarPerfilWidgetState extends State<Tela11EditarPerfilWidget> {
         TextEditingController(text: 'https://picsum.photos/seed/55/600');
     _model.textFieldFocusNode1 ??= FocusNode();
 
-    _model.textController2 ??= TextEditingController(text: userData['name']);
+    _model.textController2 ??= TextEditingController();
     _model.textFieldFocusNode2 ??= FocusNode();
 
-    _model.textController3 ??= TextEditingController(text: userData['email']);
+    _model.textController3 ??= TextEditingController();
     _model.textFieldFocusNode3 ??= FocusNode();
 
-    _model.textController4 ??= TextEditingController(text: userData['phone']);
+    _model.textController4 ??= TextEditingController();
     _model.textFieldFocusNode4 ??= FocusNode();
+    getUserInfo();
   }
 
   @override
   void dispose() {
     _model.dispose();
     super.dispose();
+  }
+
+  Future<void> _saveChanges() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(
+        child: CircularProgressIndicator(color: Color(0xFFEC8D0D)),
+      ),
+    );
+
+    try {
+      final updatedData = UpdateUserRequest(
+        name: _model.textController2.text,
+        email: _model.textController3.text,
+        phone_number: _model.textController4.text,
+      );
+      print(updatedData);
+      final result =
+          await UserService().updateUser(userData['id'], updatedData);
+      Navigator.pop(context);
+
+      if (result['isSuccess']) {
+        final updatedUser = await UserUtil.getUserInfo();
+        setState(() {
+          userData = {
+            'id': updatedUser!.id,
+            'name': updatedUser.name,
+            'email': updatedUser.email,
+            'phone': updatedUser.phone_number,
+            'birthDate': 'N/A', //userData['birthDate'],
+            'twoFactorEnabled': userData['twoFactorEnabled'] ?? false,
+          };
+        });
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => SuccessDialogWidget(
+            message: 'Perfil atualizado com sucesso!',
+            onOk: () {
+              Navigator.pop(context);
+              Future.delayed(Duration(seconds: 3), () {
+                if (mounted) {
+                  context.pop();
+                }
+              });
+            },
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao atualizar perfil: ${result['error']}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ocorreu um erro ao salvar as alterações'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      print("Erro ao salvar alterações: $e");
+    }
+  }
+
+  Future<void> getUserInfo() async {
+    try {
+      final UserResponse? user = await UserUtil.getUserInfo();
+      if (user != null) {
+        setState(() {
+          userData = {
+            'id': user.id,
+            'name': user.name,
+            'email': user.email,
+            'phone': user.phone_number,
+            'birthDate': 'N/A',
+            'twoFactorEnabled': false,
+            'lastPasswordChange': 'N/A',
+          };
+        });
+        _model.textController2 = TextEditingController(text: userData['name']);
+        _model.textController3 = TextEditingController(text: userData['email']);
+        _model.textController4 = TextEditingController(text: userData['phone']);
+      }
+    } catch (e) {
+      print("Erro ao carregar usuário: $e");
+    }
   }
 
   Future<void> _verifyPhoneNumber(String newPhone) async {
@@ -79,15 +172,64 @@ class _Tela11EditarPerfilWidgetState extends State<Tela11EditarPerfilWidget> {
     );
 
     if (confirmed == true) {
-      final otpVerified = await _showOtpDialog(newPhone);
-      if (otpVerified == true) {
-        setState(() {
-          userData['phone'] = newPhone;
-          _model.textController4.text = newPhone;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Número atualizado com sucesso!')),
-        );
+      final phoneNumber = '+244${newPhone.replaceAll(RegExp(r'[^\d+]'), '')}';
+
+      // Mostra loading durante o envio
+      bool sendSuccess = false;
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return FutureBuilder(
+            future: UserService().sendOtp(phoneNumber),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.hasError) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    Navigator.pop(context); // Fecha o loading
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content:
+                              Text('Falha ao enviar OTP: ${snapshot.error}')),
+                    );
+                  });
+                  return const SizedBox(); // Retorna widget vazio
+                }
+
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  sendSuccess = true;
+                  Navigator.pop(context); // Fecha o loading
+                });
+              }
+
+              return AlertDialog(
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Enviando código para $phoneNumber...'),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      );
+
+      // Só mostra o OTP dialog se o envio foi bem-sucedido
+      if (sendSuccess) {
+        final otpVerified = await _showOtpDialog(phoneNumber);
+
+        if (otpVerified == true) {
+          setState(() {
+            userData['phone'] = newPhone;
+            _model.textController4.text = newPhone;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Número atualizado com sucesso!')),
+          );
+        }
       }
     }
   }
@@ -118,8 +260,7 @@ class _Tela11EditarPerfilWidgetState extends State<Tela11EditarPerfilWidget> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Título com a cor laranja
+              children: [ 
                 Text(
                   'Editar $field',
                   style: TextStyle(
@@ -129,27 +270,22 @@ class _Tela11EditarPerfilWidgetState extends State<Tela11EditarPerfilWidget> {
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // Campo de texto com borda laranja e foco destacado
                 TextFormField(
                   controller: controller,
                   decoration: InputDecoration(
                     labelText: field,
                     labelStyle: TextStyle(
-                      color: Colors.black54, // Cor para o label
+                      color: Colors.black54,
                     ),
                     border: OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Color(0xFFEC8D0D)), // Borda laranja
+                      borderSide: BorderSide(color: Color(0xFFEC8D0D)),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Color(0xFFEC8D0D),
-                          width: 2), // Borda laranja quando em foco
+                      borderSide:
+                          BorderSide(color: Color(0xFFEC8D0D), width: 2),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Color(0xFFEC8D0D)), // Borda laranja padrão
+                      borderSide: BorderSide(color: Color(0xFFEC8D0D)),
                     ),
                   ),
                   autofocus: true,
@@ -228,9 +364,9 @@ class _Tela11EditarPerfilWidgetState extends State<Tela11EditarPerfilWidget> {
                 break;
             }
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('$field atualizado com sucesso!')),
-          );
+          /*ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('$field atualizado, sal!')),
+          );*/
         }
       }
     });
@@ -459,11 +595,7 @@ class _Tela11EditarPerfilWidgetState extends State<Tela11EditarPerfilWidget> {
 
         SizedBox(height: 16.0),
         FFButtonWidget(
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Alterações salvas com sucesso!')),
-            );
-          },
+          onPressed: _saveChanges,
           text: 'SALVAR ALTERAÇÕES',
           options: FFButtonOptions(
             width: double.infinity,
@@ -502,7 +634,7 @@ class _Tela11EditarPerfilWidgetState extends State<Tela11EditarPerfilWidget> {
         // Alterar Senha
         InkWell(
           onTap: () {
-            context.pushNamed('ChangePasswordScreen');
+            context.pushNamed(PasswordChangeScreen.routeName);
           },
           borderRadius: BorderRadius.circular(8.0),
           child: Container(
@@ -735,7 +867,7 @@ class _PhoneVerificationDialogState extends State<PhoneVerificationDialog> {
   final List<TextEditingController> _controllers =
       List.generate(6, (i) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(6, (i) => FocusNode());
-  final String _correctCode = '123456'; // Código de exemplo
+  final String _correctCode = '123456';
 
   @override
   Widget build(BuildContext context) {
@@ -987,6 +1119,7 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
 
   void _verifyCode() {
     final enteredCode = _controllers.map((c) => c.text).join();
+    print("Minha filha $enteredCode");
     if (enteredCode == _correctCode) {
       Navigator.pop(context, true);
     } else {

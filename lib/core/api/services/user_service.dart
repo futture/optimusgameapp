@@ -103,6 +103,43 @@ class UserService {
     }
   }
 
+  Future<Map<String, dynamic>> updateUser(
+      String user_id, UpdateUserRequest userRequest) async {
+    try {
+      final requestBody = userRequest.toJson();
+      print('Dados enviados para atualização: $requestBody');
+      final response = await httpService.request(
+        '/user/update/${user_id}',
+        method: 'PUT',
+        body: requestBody,
+      );
+      if (response != null && response["id"] != null) {
+        print('Usuário atualizado com sucesso: $response');
+        final userResponse = UserResponse.FromJson(response);
+        await UserUtil.saveUserInfoData(userResponse);
+        return {
+          "isSuccess": true,
+          "data": userResponse,
+        };
+      } else {
+        final errorMessage = response?["message"] ?? "Resposta inválida da API";
+        print('Erro ao atualizar usuário: $errorMessage');
+        return {
+          "isSuccess": false,
+          "error": {
+            "detail": {
+              "message": errorMessage,
+              "details": "Verifique os dados e tente novamente"
+            }
+          }
+        };
+      }
+    } catch (e) {
+      print('Erro durante a atualização do usuário: $e');
+      return {"isSuccess": false, "message": e.toString()};
+    }
+  }
+
   Future<Map<String, dynamic>> sendOtp(String phone_number) async {
     try {
       final result = await httpService.request(
@@ -174,6 +211,42 @@ class UserService {
       };
     } catch (e) {
       return _errorUtil.handleError(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> changePassword({
+    required String user_id,
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    try { 
+      final encodedParams = Uri(
+        queryParameters: {
+          'user_id': user_id,
+          'old_password': oldPassword,
+          'new_password': newPassword,
+        },
+      ).query; 
+      final response = await httpService.request(
+        '/users/change-password?$encodedParams',
+        method: 'POST',
+      );
+      print(response['success']);
+      if (response != null && response['success'] == true) {
+        return response;
+      } else { 
+        return response;
+      }
+    } catch (e) {
+      return {
+        "isSuccess": false,
+        "error": {
+          "detail": {
+            "message": "Erro na comunicação com o servidor",
+            "details": e.toString()
+          }
+        }
+      };
     }
   }
 }
