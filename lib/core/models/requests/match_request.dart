@@ -1,6 +1,6 @@
 enum TrofeuTipo { ouro, prata, bronze, perdedor }
 
-enum Status {Pendente}
+enum Status { Pendente }
 
 class CreateRoomRequest {
   final String nameRoom;
@@ -114,8 +114,9 @@ class CreateRoomConfigurationRequest {
 }
 
 class JogadorResultado {
+  final String id;
   final String nome;
-  final int pontos;
+  final double pontos;
   final double premio;
   final int perguntasCertas;
   final int perguntasErradas;
@@ -123,8 +124,13 @@ class JogadorResultado {
   final int posicao;
   final bool isWinner;
   TrofeuTipo trofeu;
+  final double accuracyRate;
+  final double timeRate;
+  final double hitRateWeight;
+  final double timeRateWeight;
 
   JogadorResultado({
+    required this.id,
     required this.nome,
     required this.pontos,
     required this.premio,
@@ -133,6 +139,11 @@ class JogadorResultado {
     required this.top3vezes,
     required this.posicao,
     required this.isWinner,
+    required this.accuracyRate,
+    required this.timeRate,
+    required this.hitRateWeight,
+    required this.timeRateWeight,
     this.trofeu = TrofeuTipo.perdedor,
+    
   });
 }

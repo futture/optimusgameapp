@@ -4,11 +4,10 @@ import 'package:projeto_game_quiz/components/warnings/warning04_reducao_de_saldo
 import 'package:projeto_game_quiz/core/api/services/fcm_token_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
-import 'package:projeto_game_quiz/pages/payment_method/payment_selection_screen.dart';
-
+import 'package:projeto_game_quiz/dialogs/common_dialog_widget.dart';
+import 'package:projeto_game_quiz/utils.dart';
 import '/components/moda_listade_sala_widget.dart';
 import '/components/moda_menu_pagian_inicial_widget.dart';
-import '/components/modals_deposito_widget.dart';
 import '/components/modals_saque_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -34,6 +33,7 @@ class Tela03PrincipalWidget extends StatefulWidget {
 class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
   late Tela03PrincipalModel _model;
   final matchService = MatchService();
+  bool _isLoadingMatchDetails = false;
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final FcmTokenService _fcmTokenService = FcmTokenService();
 
@@ -58,1007 +58,704 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-        onWillPop: () async => false,
-        child: GestureDetector(
-            onTap: () {
-              FocusScope.of(context).unfocus();
-              FocusManager.instance.primaryFocus?.unfocus();
-            },
-            child: Scaffold(
-              key: scaffoldKey,
-              backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-              appBar: AppBar(
-                backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-                automaticallyImplyLeading: false,
-                leading: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(18.0, 0.0, 0.0, 0.0),
-                  child: FlutterFlowIconButton(
-                    borderRadius: 8.0,
-                    buttonSize: 45.0,
-                    fillColor: FlutterFlowTheme.of(context).primaryBackground,
-                    icon: FaIcon(
-                      FontAwesomeIcons.bars,
-                      color: Colors.black,
-                      size: 24.0,
-                    ),
-                    onPressed: () async {
-                      await showModalBottomSheet(
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        enableDrag: false,
-                        context: context,
-                        builder: (context) {
-                          return GestureDetector(
-                            onTap: () {
-                              FocusScope.of(context).unfocus();
-                              FocusManager.instance.primaryFocus?.unfocus();
-                            },
-                            child: Padding(
-                              padding: MediaQuery.viewInsetsOf(context),
-                              child: ModaMenuPagianInicialWidget(),
-                            ),
-                          );
-                        },
-                      ).then((value) => safeSetState(() {}));
-                    },
-                  ),
+      onWillPop: () async => false,
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Scaffold(
+          key: scaffoldKey,
+          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+          appBar: AppBar(
+            backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+            automaticallyImplyLeading: false,
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 18.0),
+              child: FlutterFlowIconButton(
+                borderRadius: 8.0,
+                buttonSize: 45.0,
+                fillColor: FlutterFlowTheme.of(context).primaryBackground,
+                icon: const FaIcon(
+                  FontAwesomeIcons.bars,
+                  color: Colors.black,
+                  size: 24.0,
                 ),
-                title: Text(
-                  'GAME QUIZ',
-                  style: FlutterFlowTheme.of(context).headlineSmall.override(
-                        fontFamily: 'Inter Tight',
-                        color: Color(0xFFEC8D0D),
-                        letterSpacing: 0.0,
-                      ),
-                ),
-                centerTitle: true,
-                elevation: 4.0,
+                onPressed: _showMenuModal,
               ),
-              body: SafeArea(
-                top: true,
-                child: Align(
-                  alignment: AlignmentDirectional(0.0, -1.0),
-                  child: Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Color(0x00FFFFFF),
-                      shape: BoxShape.rectangle,
-                    ),
-                    child: Align(
-                      alignment: AlignmentDirectional(0.0, -1.0),
-                      child: RefreshIndicator(
-                        onRefresh: () async {
-                          await _model.getUserInfoAndAccountInfoAsync(
-                              setState, context);
-                          await _model.loadMatches(setState);
-                        },
-                        child: SingleChildScrollView(
-                          physics: AlwaysScrollableScrollPhysics(),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Container(
-                                width: 320.0,
-                                height: 210.0,
-                                decoration: BoxDecoration(
-                                  color: Color(0xFFF1F4F8),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      blurRadius: 4.0,
-                                      color: Color(0x33000000),
-                                      offset: Offset(
-                                        0.0,
-                                        2.0,
-                                      ),
-                                      spreadRadius: 5.0,
-                                    )
-                                  ],
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    Align(
-                                      alignment:
-                                          AlignmentDirectional(0.0, -1.0),
-                                      child: Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 10.0, 0.0, 0.0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Align(
-                                              alignment: AlignmentDirectional(
-                                                  0.0, 0.0),
-                                              child: Stack(
-                                                alignment: AlignmentDirectional(
-                                                    0.0, 0.0),
-                                                children: [
-                                                  Align(
-                                                    alignment:
-                                                        AlignmentDirectional(
-                                                            -1.0, -0.9),
-                                                    child: Container(
-                                                      width: 70.0,
-                                                      height: 70.0,
-                                                      clipBehavior:
-                                                          Clip.antiAlias,
-                                                      decoration: BoxDecoration(
-                                                        shape: BoxShape.circle,
-                                                      ),
-                                                      child: Image.network(
-                                                        'https://images.unsplash.com/photo-1507679799987-c73779587ccf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwxfHxwcm98ZW58MHx8fHwxNzQzNTg0NTYxfDA&ixlib=rb-4.0.3&q=80&w=1080',
-                                                        fit: BoxFit.cover,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  FFButtonWidget(
-                                                    onPressed: () async {
-                                                      context.pushNamed(
-                                                        Tela04PerfilWidget
-                                                            .routeName,
-                                                        extra: <String,
-                                                            dynamic>{
-                                                          kTransitionInfoKey:
-                                                              TransitionInfo(
-                                                            hasTransition: true,
-                                                            transitionType:
-                                                                PageTransitionType
-                                                                    .rightToLeft,
-                                                          ),
-                                                        },
-                                                      );
-                                                    },
-                                                    text: '',
-                                                    options: FFButtonOptions(
-                                                      width: 70.0,
-                                                      height: 70.0,
-                                                      padding:
-                                                          EdgeInsetsDirectional
-                                                              .fromSTEB(
-                                                                  16.0,
-                                                                  0.0,
-                                                                  16.0,
-                                                                  0.0),
-                                                      iconPadding:
-                                                          EdgeInsetsDirectional
-                                                              .fromSTEB(
-                                                                  0.0,
-                                                                  0.0,
-                                                                  0.0,
-                                                                  0.0),
-                                                      color: Color(0x004B39EF),
-                                                      textStyle:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .titleSmall
-                                                              .override(
-                                                                fontFamily:
-                                                                    'Inter Tight',
-                                                                color: Colors
-                                                                    .white,
-                                                                letterSpacing:
-                                                                    0.0,
-                                                              ),
-                                                      elevation: 0.0,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              80.0),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Container(
-                                              width: 230.0,
-                                              height: 60.0,
-                                              decoration: BoxDecoration(
-                                                color: Color(0xFFF1F4F8),
-                                              ),
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.max,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Align(
-                                                    alignment:
-                                                        AlignmentDirectional(
-                                                            -1.0, 0.0),
-                                                    child: Text(
-                                                      _model.user == null
-                                                          ? "Carregando..."
-                                                          : _model.user!.name,
-                                                      style: FlutterFlowTheme
-                                                              .of(context)
-                                                          .bodyMedium
-                                                          .override(
-                                                            color: Colors.black,
-                                                            fontFamily: 'Inter',
-                                                            fontSize: 14.0,
-                                                            letterSpacing: 0.0,
-                                                          ),
-                                                    ),
-                                                  ),
-                                                  Align(
-                                                    alignment:
-                                                        AlignmentDirectional(
-                                                            -1.0, 0.0),
-                                                    child: Text(
-                                                      _model.userAccountInfo ==
-                                                              null
-                                                          ? "Carregando..."
-                                                          : 'ID: ${_model.userAccountInfo!.accountNumber}',
-                                                      style: FlutterFlowTheme
-                                                              .of(context)
-                                                          .bodyMedium
-                                                          .override(
-                                                            color: Colors.black,
-                                                            fontFamily: 'Inter',
-                                                            fontSize: 13.0,
-                                                            letterSpacing: 0.0,
-                                                          ),
-                                                    ),
-                                                  ),
-                                                ].divide(SizedBox(height: 5.0)),
-                                              ),
-                                            ),
-                                          ]
-                                              .divide(SizedBox(width: 10.0))
-                                              .addToStart(SizedBox(width: 20.0))
-                                              .addToEnd(SizedBox(width: 20.0)),
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      width: 360.0,
-                                      height: 40.0,
-                                      decoration: BoxDecoration(
-                                        color: Color(0xFFF1F4F8),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            'SALDO: ',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  color: Colors.black,
-                                                  fontFamily: 'Inter',
-                                                  fontSize: 18.0,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                          ),
-                                          Text(
-                                            _model.userAccountInfo == null
-                                                ? "Carregando..."
-                                                : _model.userAccountInfo!
-                                                    .availableBalance
-                                                    .toString(),
-                                            style: FlutterFlowTheme.of(context)
-                                                .titleMedium
-                                                .override(
-                                                  color: Colors.black,
-                                                  fontFamily: 'Inter Tight',
-                                                  letterSpacing: 0.0,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                          ),
-                                          Text(
-                                            ' AOA',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  color: Colors.black,
-                                                  fontFamily: 'Inter',
-                                                  fontSize: 18.0,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      width: 370.0,
-                                      height: 60.0,
-                                      decoration: BoxDecoration(
-                                        color: Color(0xFFF1F4F8),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          FFButtonWidget(
-                                            onPressed: () async {
-                                              await showModalBottomSheet(
-                                                isScrollControlled: true,
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                enableDrag: false,
-                                                context: context,
-                                                builder: (context) {
-                                                  return GestureDetector(
-                                                    onTap: () {
-                                                      FocusScope.of(context)
-                                                          .unfocus();
-                                                      FocusManager
-                                                          .instance.primaryFocus
-                                                          ?.unfocus();
-                                                    },
-                                                    child: Padding(
-                                                      padding: MediaQuery
-                                                          .viewInsetsOf(
-                                                              context),
-                                                      child:
-                                                          ModalsDepositoWidget(),
-                                                    ),
-                                                  );
-                                                },
-                                              ).then((value) =>
-                                                  safeSetState(() {}));
-                                            },
-                                            text: 'DEPOSITAR',
-                                            icon: Icon(
-                                              Icons.file_download_outlined,
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primaryText,
-                                              size: 20.0,
-                                            ),
-                                            options: FFButtonOptions(
-                                              width: 170.0,
-                                              height: 45.0,
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(
-                                                      16.0, 0.0, 16.0, 0.0),
-                                              iconPadding: EdgeInsetsDirectional
-                                                  .fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                              color: Color(0xFFEC8D0D),
-                                              textStyle: FlutterFlowTheme.of(
-                                                      context)
-                                                  .titleSmall
-                                                  .override(
-                                                    fontFamily: 'Inter Tight',
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .primaryText,
-                                                    letterSpacing: 0.0,
-                                                  ),
-                                              elevation: 0.0,
-                                              borderRadius:
-                                                  BorderRadius.circular(8.0),
-                                            ),
-                                          ),
-                                          FFButtonWidget(
-                                            onPressed: () async {
-                                              await showModalBottomSheet(
-                                                isScrollControlled: true,
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                enableDrag: false,
-                                                useSafeArea: true,
-                                                context: context,
-                                                builder: (context) {
-                                                  return GestureDetector(
-                                                    onTap: () {
-                                                      FocusScope.of(context)
-                                                          .unfocus();
-                                                      FocusManager
-                                                          .instance.primaryFocus
-                                                          ?.unfocus();
-                                                    },
-                                                    child: Padding(
-                                                      padding: MediaQuery
-                                                          .viewInsetsOf(
-                                                              context),
-                                                      child:
-                                                          ModalsSaqueWidget(),
-                                                    ),
-                                                  );
-                                                },
-                                              ).then((value) =>
-                                                  safeSetState(() {}));
-                                            },
-                                            text: 'SACAR',
-                                            icon: Icon(
-                                              Icons.file_upload_outlined,
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primaryText,
-                                              size: 20.0,
-                                            ),
-                                            options: FFButtonOptions(
-                                              width: 170.0,
-                                              height: 45.0,
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(
-                                                      16.0, 0.0, 16.0, 0.0),
-                                              iconPadding: EdgeInsetsDirectional
-                                                  .fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                              color: Color(0xFFEC8D0D),
-                                              textStyle: FlutterFlowTheme.of(
-                                                      context)
-                                                  .titleSmall
-                                                  .override(
-                                                    fontFamily: 'Inter Tight',
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .primaryText,
-                                                    letterSpacing: 0.0,
-                                                  ),
-                                              elevation: 0.0,
-                                              borderRadius:
-                                                  BorderRadius.circular(8.0),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ]
-                                      .divide(SizedBox(height: 10.0))
-                                      .addToStart(SizedBox(height: 0.0))
-                                      .addToEnd(SizedBox(height: 10.0)),
-                                ),
-                              ),
-                              Align(
-                                alignment: AlignmentDirectional(0.0, 0.0),
-                                child: Container(
-                                  width: 350.0,
-                                  height: 105.0,
-                                  decoration: BoxDecoration(
-                                    color: Color(0xFFF1F4F8),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        blurRadius: 4.0,
-                                        color: Color(0x33000000),
-                                        offset: Offset(
-                                          0.0,
-                                          2.0,
-                                        ),
-                                        spreadRadius: 5.0,
-                                      )
-                                    ],
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Align(
-                                        alignment:
-                                            AlignmentDirectional(-0.8, -1.0),
-                                        child: Text(
-                                          'Click para escolher sala de jogo',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                                fontFamily: 'Inter',
-                                                fontSize: 16.0,
-                                                letterSpacing: 0.0,
-                                                fontWeight: FontWeight.normal,
-                                              ),
-                                        ),
-                                      ),
-                                      Container(
-                                        width: 330.0,
-                                        height: 45.0,
-                                        decoration: BoxDecoration(
-                                          color: Color(0xFF00B80E),
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                        ),
-                                        child: Container(
-                                          width: double.infinity,
-                                          height: double.infinity,
-                                          child: Stack(
-                                            alignment:
-                                                AlignmentDirectional(0.0, 0.0),
-                                            children: [
-                                              Align(
-                                                alignment: AlignmentDirectional(
-                                                    0.0, 0.0),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.max,
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    FaIcon(
-                                                      FontAwesomeIcons.gamepad,
-                                                      color:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .primaryText,
-                                                      size: 20.0,
-                                                    ),
-                                                    Padding(
-                                                      padding:
-                                                          EdgeInsetsDirectional
-                                                              .fromSTEB(
-                                                                  50.0,
-                                                                  0.0,
-                                                                  50.0,
-                                                                  0.0),
-                                                      child: Text(
-                                                        'PARTIDAS',
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelLarge
-                                                                .override(
-                                                                  fontFamily:
-                                                                      'Inter',
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .primaryText,
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                ),
-                                                      ),
-                                                    ),
-                                                    Icon(
-                                                      Icons.arrow_forward_ios,
-                                                      color:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .primaryText,
-                                                      size: 19.0,
-                                                    ),
-                                                  ]
-                                                      .divide(
-                                                          SizedBox(width: 11.0))
-                                                      .addToStart(
-                                                          SizedBox(width: 5.0))
-                                                      .addToEnd(
-                                                          SizedBox(width: 5.0)),
-                                                ),
-                                              ),
-                                              Opacity(
-                                                opacity: 0.0,
-                                                child: FFButtonWidget(
-                                                  onPressed: () async {
-                                                    await showModalBottomSheet(
-                                                      isScrollControlled: true,
-                                                      backgroundColor:
-                                                          Colors.transparent,
-                                                      enableDrag: false,
-                                                      context: context,
-                                                      builder: (context) {
-                                                        return GestureDetector(
-                                                          onTap: () {
-                                                            FocusScope.of(
-                                                                    context)
-                                                                .unfocus();
-                                                            FocusManager
-                                                                .instance
-                                                                .primaryFocus
-                                                                ?.unfocus();
-                                                          },
-                                                          child: Padding(
-                                                            padding: MediaQuery
-                                                                .viewInsetsOf(
-                                                                    context),
-                                                            child:
-                                                                ModaListadeSalaWidget(),
-                                                          ),
-                                                        );
-                                                      },
-                                                    ).then((value) =>
-                                                        safeSetState(() {}));
-                                                  },
-                                                  text: 'jogar',
-                                                  options: FFButtonOptions(
-                                                    width: 340.0,
-                                                    height: 45.0,
-                                                    padding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(16.0, 0.0,
-                                                                16.0, 0.0),
-                                                    iconPadding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(0.0, 0.0,
-                                                                0.0, 0.0),
-                                                    color: Color(0x004B39EF),
-                                                    textStyle: FlutterFlowTheme
-                                                            .of(context)
-                                                        .titleSmall
-                                                        .override(
-                                                          fontFamily:
-                                                              'Inter Tight',
-                                                          color:
-                                                              Color(0x00FFFFFF),
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                    elevation: 0.0,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ]
-                                        .divide(SizedBox(height: 10.0))
-                                        .around(SizedBox(height: 10.0)),
-                                  ),
-                                ),
-                              ),
-                              Align(
-                                alignment: AlignmentDirectional(0.0, 0.0),
-                                child: Container(
-                                  width: 350.0,
-                                  height: 110.0,
-                                  decoration: BoxDecoration(
-                                    color: Color(0x00FFFFFF),
-                                  ),
-                                  child: Wrap(
-                                    spacing: 10.0,
-                                    runSpacing: 6.0,
-                                    alignment: WrapAlignment.start,
-                                    crossAxisAlignment:
-                                        WrapCrossAlignment.start,
-                                    direction: Axis.horizontal,
-                                    runAlignment: WrapAlignment.start,
-                                    verticalDirection: VerticalDirection.down,
-                                    clipBehavior: Clip.none,
-                                    children: [
-                                      Align(
-                                        alignment:
-                                            AlignmentDirectional(0.0, 0.0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Align(
-                                              alignment: AlignmentDirectional(
-                                                  -1.0, 0.0),
-                                              child: Text(
-                                                'SUPER LIGA',
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .headlineSmall
-                                                        .override(
-                                                          fontFamily:
-                                                              'Inter Tight',
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                              ),
-                                            ),
-                                            Icon(
-                                              Icons.bolt,
-                                              color: Color(0xFFD2A739),
-                                              size: 25.0,
-                                            ),
-                                          ].divide(SizedBox(width: 2.0)),
-                                        ),
-                                      ),
-                                      Text(
-                                        'Habilita-se a ganhar grandes prêmios, participando nas partidas abaixo.\nBasta clicar na partida para se inscrever.',
-                                        textAlign: TextAlign.justify,
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              fontFamily: 'Inter',
-                                              fontSize: 16.0,
-                                              letterSpacing: 0.0,
-                                            ),
-                                      ),
-                                      Align(
-                                        alignment:
-                                            AlignmentDirectional(0.0, 0.0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              'PRÓXIMA PARTIDA EM',
-                                              style: FlutterFlowTheme.of(
-                                                      context)
-                                                  .titleLarge
-                                                  .override(
-                                                    fontFamily: 'Inter Tight',
-                                                    color: Color(0xFF1219DB),
-                                                    fontSize: 18.0,
-                                                    letterSpacing: 0.0,
-                                                  ),
-                                            ),
-                                            SizedBox(width: 10),
-                                            if (_model.nextMatch != null)
-                                              Container(
-                                                padding: EdgeInsets.symmetric(
-                                                    horizontal: 8, vertical: 4),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.orange
-                                                      .withOpacity(0.2),
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                ),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    Icon(Icons.timer,
-                                                        size: 18,
-                                                        color: Colors.orange),
-                                                    SizedBox(width: 4),
-                                                    Text(
-                                                      _formatCountdown(_model
-                                                          .timerMilliseconds),
-                                                      style: TextStyle(
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors
-                                                            .orange.shade800,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              )
-                                            else
-                                              Container(
-                                                padding: EdgeInsets.symmetric(
-                                                    horizontal: 8, vertical: 4),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.orange
-                                                      .withOpacity(0.2),
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                ),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    Icon(Icons.timer,
-                                                        size: 18,
-                                                        color: Colors.orange),
-                                                    SizedBox(width: 4),
-                                                    Text(
-                                                      "N/A",
-                                                      style: TextStyle(
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors.blueGrey,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              )
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              if (_model.isLoadingMatches)
-                                Center(child: CircularProgressIndicator())
-                              else if (_model.matchList.isEmpty)
-                                Center(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.videogame_asset_outlined,
-                                          size: 48, color: Colors.grey),
-                                      SizedBox(height: 12),
-                                      Text(
-                                        'Nenhuma partida encontrada.',
-                                        style: TextStyle(
-                                            fontSize: 16, color: Colors.grey),
-                                      ),
-                                      SizedBox(height: 12),
-                                      IconButton(
-                                        icon: Icon(Icons.refresh, size: 30),
-                                        tooltip: 'Recarregar',
-                                        onPressed: () async {
-                                          await _model.loadMatches(setState);
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              else
-                                ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: _model.matchList.length,
-                                  itemBuilder: (context, index) {
-                                    final match = _model.matchList[index];
-                                    return MatchCard(match);
-                                  },
-                                )
-                            ]
-                                .divide(SizedBox(height: 20.0))
-                                .addToStart(SizedBox(height: 0.0))
-                                .addToEnd(SizedBox(height: 10.0)),
-                          ),
-                        ),
-                      ),
-                    ),
+            ),
+            title: Text(
+              'GAME QUIZ',
+              style: FlutterFlowTheme.of(context).headlineSmall.override(
+                    fontFamily: 'Inter Tight',
+                    color: const Color(0xFFEC8D0D),
+                    letterSpacing: 0.0,
                   ),
+            ),
+            centerTitle: true,
+            elevation: 4.0,
+          ),
+          body: SafeArea(
+            child: RefreshIndicator(
+              onRefresh: _refreshData,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    _buildUserProfileCard(),
+                    const SizedBox(height: 20),
+                    _buildGameRoomButton(),
+                    const SizedBox(height: 20),
+                    _buildSuperLeagueHeader(),
+                    const SizedBox(height: 16),
+                    if (_model.isLoadingMatches)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24.0),
+                        child: CircularProgressIndicator(),
+                      )
+                    else if (_model.matchList.isEmpty)
+                      _buildEmptyMatchesState()
+                    else
+                      ..._model.matchList.map((match) => Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: _buildMatchCard(match),
+                          )),
+                  ],
                 ),
               ),
-            )));
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
-  Widget MatchCard(MatchResponse match) {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 100),
-      curve: Curves.easeIn,
-      width: 350.0,
-      height: 120.0,
-      decoration: BoxDecoration(color: Color(0xFFF1F4F8)),
-      alignment: AlignmentDirectional(0.0, 0.0),
-      child: Align(
-        alignment: AlignmentDirectional(0.0, -1.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 350.0,
-              height: 80.0,
-              decoration: BoxDecoration(
-                color: match.isUserRegistered!
-                    ? Color.fromARGB(255, 80, 104, 70)
-                    : Color(0xFFEC8D0D),
-                boxShadow: [
-                  BoxShadow(
-                    blurRadius: 4.0,
-                    color: Color(0x33000000),
-                    offset: Offset(0.0, 2.0),
-                    spreadRadius: 5.0,
-                  )
-                ],
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Stack(
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            width: 200.0,
-                            height: 25.0,
-                            child: Row(
-                              children: [
-                                FaIcon(FontAwesomeIcons.sketch, size: 22.0),
-                                Text(
-                                  'Super Partida das',
-                                  style: FlutterFlowTheme.of(context)
-                                      .titleLarge
-                                      .override(
-                                        fontFamily: 'Inter Tight',
-                                        letterSpacing: 0.0,
-                                      ),
-                                ),
-                              ].divide(SizedBox(width: 5.0)),
-                            ),
-                          ),
-                          Container(
-                            width: 110.0,
-                            height: 25.0,
-                            child: Row(
-                              children: [
-                                Icon(Icons.watch_later, size: 22.0),
-                                Text(
-                                  formatHour(match.matchStartDate),
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16),
-                                ),
-                              ].divide(SizedBox(width: 2.0)),
-                            ),
-                          ),
-                        ]
-                            .addToStart(SizedBox(width: 10.0))
-                            .addToEnd(SizedBox(width: 10.0)),
-                      ),
-                      Row(
-                        children: [
-                          Container(
-                            width: 130.0,
-                            height: 25.0,
-                            child: Row(
-                              children: [
-                                Icon(Icons.people_alt_rounded, size: 20.0),
-                                Text('${match.matchPlayers?.length}'),
-                                Text('Insc...'),
-                              ].divide(SizedBox(width: 5.0)),
-                            ),
-                          ),
-                          Container(
-                            width: 90.0,
-                            height: 25.0,
-                            child: Row(
-                              children: [
-                                FaIcon(FontAwesomeIcons.donate, size: 20.0),
-                                Text(
-                                    '${match.room?.roomConfiguration?.minimumAmountToPlay}KZ'),
-                              ].divide(SizedBox(width: 5.0)),
-                            ),
-                          ),
-                        ]
-                            .divide(SizedBox(width: 81.0))
-                            .addToStart(SizedBox(width: 15.0))
-                            .addToEnd(SizedBox(width: 3.0)),
-                      ),
-                    ]
-                        .divide(SizedBox(height: 10.0))
-                        .around(SizedBox(height: 10.0)),
-                  ),
-                  FFButtonWidget(
-                    onPressed: () async {
-                      await _model.checkPlayerAlreadyRegisteredMatchAsync(
-                          setState, match.id);
+  Future<void> _refreshData() async {
+    await _model.getUserInfoAndAccountInfoAsync(setState, context);
+    await _model.loadMatches(setState);
+  }
 
-                      if (!_model.isNotRegisteredMatch) {
-                        Warning00ErrorUtil.showDialogMessageError(
-                            context,
-                            "Falha ao se increver na partida",
-                            "Jogador ja inscrito na partida.");
-                      } else {
-                        final result = await showDialog<bool>(
-                          context: context,
-                          builder: (context) {
-                            return Dialog(
-                              backgroundColor: Colors.transparent,
-                              insetPadding: EdgeInsets.all(24),
-                              child: Warning04ReducaoDeSaldoWidget(
-                                subscribe: true,
-                                matchInfo: match,
-                                onConfirmed: () {
-                                  Navigator.of(context).pop(true);
-                                },
-                              ),
-                            );
-                          },
-                        );
-                        if (result == true) {
-                          setState(() {
-                            _model.getUserInfoAndAccountInfoAsync(
-                                setState, context);
-                            _model.loadMatches(setState);
-                          });
-                        }
-                      }
+  void _showMenuModal() async {
+    await showModalBottomSheet(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      enableDrag: false,
+      context: context,
+      builder: (context) => GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Padding(
+          padding: MediaQuery.viewInsetsOf(context),
+          child: const ModaMenuPagianInicialWidget(isMainScreen: true),
+        ),
+      ),
+    );
+    safeSetState(() {});
+  }
+
+  Widget _buildUserProfileCard() {
+    return Card(
+      elevation: 4.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () => context.pushNamed(
+                    Tela04PerfilWidget.routeName,
+                    extra: <String, dynamic>{
+                      kTransitionInfoKey: const TransitionInfo(
+                        hasTransition: true,
+                        transitionType: PageTransitionType.rightToLeft,
+                      ),
                     },
-                    text: '',
-                    options: FFButtonOptions(
-                      width: 350.0,
-                      height: 80.0,
-                      color: Color(0x004B39EF),
-                      textStyle: TextStyle(color: Colors.white),
-                      elevation: 0.0,
-                      borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: CircleAvatar(
+                    radius: 35.0,
+                    backgroundImage: NetworkImage(
+                      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwxfHxwcm98ZW58MHx8fHwxNzQzNTg0NTYxfDA&ixlib=rb-4.0.3&q=80&w=1080',
                     ),
                   ),
-                ],
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _model.user?.name ?? "Carregando...",
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              color: Colors.black,
+                              fontFamily: 'Inter',
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.0,
+                            ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _model.userAccountInfo != null
+                            ? 'ID: ${_model.userAccountInfo!.accountNumber}'
+                            : "Carregando...",
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              color: Colors.black54,
+                              fontFamily: 'Inter',
+                              fontSize: 13.0,
+                              letterSpacing: 0.0,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: Colors.grey.shade300,
+                    width: 1.0,
+                  ),
+                  bottom: BorderSide(
+                    color: Colors.grey.shade300,
+                    width: 1.0,
+                  ),
+                ),
+              ),
+              child: Center(
+                child: RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'SALDO: ',
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              color: Colors.black,
+                              fontFamily: 'Inter',
+                              fontSize: 18.0,
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      TextSpan(
+                        text: _model.userAccountInfo != null
+                            ? CurrencyUtil.formatKwanza(
+                                    _model.userAccountInfo!.availableBalance)
+                                .toString()
+                            : "Carregando...",
+                        style:
+                            FlutterFlowTheme.of(context).titleMedium.override(
+                                  color: Colors.black,
+                                  fontFamily: 'Inter Tight',
+                                  fontSize: 18.0,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+                      TextSpan(
+                        text: ' AOA',
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              color: Colors.black,
+                              fontFamily: 'Inter',
+                              fontSize: 18.0,
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildActionButton(
+                  icon: Icons.file_download_outlined,
+                  label: 'DEPOSITAR',
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => Tela10DepositoListaWidget(),
+                    ),
+                  ),
+                ),
+                _buildActionButton(
+                  icon: Icons.file_upload_outlined,
+                  label: 'SACAR',
+                  onPressed: () async {
+                    await showModalBottomSheet(
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      enableDrag: false,
+                      useSafeArea: true,
+                      context: context,
+                      builder: (context) => GestureDetector(
+                        onTap: () => FocusScope.of(context).unfocus(),
+                        child: Padding(
+                          padding: MediaQuery.viewInsetsOf(context),
+                          child: const ModalsSaqueWidget(),
+                        ),
+                      ),
+                    );
+                    safeSetState(() {});
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: FFButtonWidget(
+          onPressed: onPressed,
+          text: label,
+          icon: Icon(icon, size: 20.0),
+          options: FFButtonOptions(
+            height: 45.0,
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            iconPadding: const EdgeInsets.only(right: 8.0),
+            color: const Color(0xFFEC8D0D),
+            textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                  fontFamily: 'Inter Tight',
+                  color: FlutterFlowTheme.of(context).primaryText,
+                  letterSpacing: 0.0,
+                ),
+            elevation: 2.0,
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGameRoomButton() {
+    return Card(
+      elevation: 4.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Clique para escolher sala de jogo',
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    fontFamily: 'Inter',
+                    fontSize: 16.0,
+                    letterSpacing: 0.0,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            FFButtonWidget(
+              onPressed: () async {
+                await showModalBottomSheet(
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  enableDrag: false,
+                  context: context,
+                  builder: (context) => GestureDetector(
+                    onTap: () => FocusScope.of(context).unfocus(),
+                    child: Padding(
+                      padding: MediaQuery.viewInsetsOf(context),
+                      child: const ModaListadeSalaWidget(),
+                    ),
+                  ),
+                );
+                safeSetState(() {});
+              },
+              text: 'PARTIDAS',
+              icon: const FaIcon(FontAwesomeIcons.gamepad, size: 20.0),
+              options: FFButtonOptions(
+                width: double.infinity,
+                height: 50.0,
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                color: const Color(0xFF00B80E),
+                textStyle: FlutterFlowTheme.of(context).titleMedium.override(
+                      fontFamily: 'Inter Tight',
+                      color: Colors.white,
+                      fontSize: 16.0,
+                      letterSpacing: 0.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                elevation: 2.0,
+                borderRadius: BorderRadius.circular(8.0),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildSuperLeagueHeader() {
+    return Card(
+      elevation: 4.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'SUPER LIGA',
+                      style:
+                          FlutterFlowTheme.of(context).headlineSmall.override(
+                                fontFamily: 'Inter Tight',
+                                fontSize: 20.0,
+                                letterSpacing: 0.0,
+                              ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(
+                      Icons.bolt,
+                      color: Color(0xFFD2A739),
+                      size: 24.0,
+                    ),
+                  ],
+                ),
+                if (_model.nextMatch != null)
+                  _buildCountdownTimer()
+                else
+                  _buildPlaceholderTimer(),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Habilita-se a ganhar grandes prêmios, participando nas partidas abaixo. '
+              'Basta clicar na partida para se inscrever.',
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    fontFamily: 'Inter',
+                    fontSize: 14.0,
+                    letterSpacing: 0.0,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCountdownTimer() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.orange.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.timer, size: 18, color: Colors.orange),
+          const SizedBox(width: 4),
+          Text(
+            _formatCountdown(_model.timerMilliseconds),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.orange.shade800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlaceholderTimer() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.timer, size: 18, color: Colors.grey),
+          SizedBox(width: 4),
+          Text(
+            "N/A",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyMatchesState() {
+    return Card(
+      elevation: 4.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.videogame_asset_outlined,
+              size: 48,
+              color: Colors.grey.shade400,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Nenhuma partida disponível no momento',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey.shade600,
+              ),
+            ),
+            const SizedBox(height: 16),
+            FFButtonWidget(
+              onPressed: () async {
+                await _model.loadMatches(setState);
+              },
+              text: 'Recarregar',
+              icon: const Icon(Icons.refresh, size: 20),
+              options: FFButtonOptions(
+                width: 150,
+                height: 40,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                color: FlutterFlowTheme.of(context).secondaryBackground,
+                textStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+                      fontFamily: 'Inter',
+                      fontSize: 14,
+                      letterSpacing: 0.0,
+                    ),
+                elevation: 1,
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMatchCard(MatchResponse match) {
+    final isRegistered = match.isUserRegistered ?? false;
+
+    return InkWell(
+      onTap: () async {
+        if (_isLoadingMatchDetails) return;
+
+        setState(() => _isLoadingMatchDetails = true);
+
+        try {
+          await _model.getUsersByMatchId(setState, match.id);
+          CommonDialogWidget.showMatchParticipantsDialog(
+              context,
+              List.empty(),
+              null,
+              match,
+              _model.users,
+              _model.user,
+              buildMatchButton(
+                isRegistered: isRegistered,
+                match: match,
+                onJoin: (m) => _handleMatchTap(m as MatchResponse),
+                onLeave: (m) => _leaveMatch(m as MatchResponse),
+                context: context,
+              ));
+        } catch (e) {
+          Warning00ErrorUtil.showDialogMessageError(
+            context,
+            "Erro ao carregar partida",
+            "Ocorreu um erro ao carregar os detalhes da partida.",
+          );
+        } finally {
+          setState(() => _isLoadingMatchDetails = false);
+        }
+        //_handleMatchTap(match);
+      },
+      borderRadius: BorderRadius.circular(12.0),
+      child: Card(
+        elevation: 4.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        color: isRegistered ? const Color(0xFF4CAF50) : const Color(0xFFEC8D0D),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Row(
+                      children: [
+                        const FaIcon(FontAwesomeIcons.sketch, size: 20.0),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            'Super Partida das ${formatHour(match.matchStartDate)}',
+                            style: FlutterFlowTheme.of(context)
+                                .titleMedium
+                                .override(
+                                  fontFamily: 'Inter Tight',
+                                  color: Colors.white,
+                                  fontSize: 16.0,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0, vertical: 4.0),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Text(
+                      '${match.room?.roomConfiguration?.minimumAmountToPlay ?? 0}KZ',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildMatchStat(
+                    icon: Icons.people_alt_rounded,
+                    value: '${match.matchPlayers?.length ?? 0} Inscritos',
+                  ),
+                  _buildMatchStat(
+                    icon: Icons.schedule,
+                    value: formatHour(match.matchStartDate),
+                  ),
+                  if (isRegistered)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0, vertical: 4.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: const Text(
+                        'INSCRITO',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  if (_isLoadingMatchDetails)
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: const Center(
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMatchStat({required IconData icon, required String value}) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: Colors.white),
+        const SizedBox(width: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleMatchTap(MatchResponse match) async {
+    await _model.checkPlayerAlreadyRegisteredMatchAsync(setState, match.id);
+
+    if (!_model.isNotRegisteredMatch) {
+      Navigator.pop(context);
+      Warning00ErrorUtil.showDialogMessageError(
+        context,
+        "Falha ao se increver na partida",
+        "Jogador já inscrito na partida.",
+      );
+    } else {
+      final result = await showDialog<bool>(
+        context: context,
+        builder: (context) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.all(24),
+            child: Warning04ReducaoDeSaldoWidget(
+              subscribe: true,
+              matchInfo: match,
+              onConfirmed: () => Navigator.of(context).pop(true),
+            ),
+          );
+        },
+      );
+
+      if (result == true) {
+        Navigator.pop(context);
+
+        setState(() {
+          _model.getUserInfoAndAccountInfoAsync(setState, context);
+          _model.loadMatches(setState);
+        });
+      }
+    }
   }
 
   String formatHour(DateTime? dateTime) {
@@ -1081,5 +778,62 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
     } else {
       return '${duration.inSeconds}s';
     }
+  }
+
+  Future<void> _leaveMatch(MatchResponse match) async {
+    try {
+      Navigator.pop(context);
+      await _model.leaveMatchAsync(match.id);
+      setState(() {
+        _model.getUserInfoAndAccountInfoAsync(setState, context);
+        _model.loadMatches(setState);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Você saiu da partida com sucesso')),
+      );
+    } catch (e) {
+      Warning00ErrorUtil.showDialogMessageError(
+        context,
+        "Erro ao sair da partida",
+        "Ocorreu um erro ao tentar sair da partida. Tente novamente.",
+      );
+    }
+  }
+
+  Widget buildMatchButton({
+    required bool isRegistered,
+    required dynamic match,
+    required Future<void> Function(dynamic) onJoin,
+    required Future<void> Function(dynamic) onLeave,
+    required BuildContext context,
+  }) {
+    return FFButtonWidget(
+      onPressed: () async {
+        if (isRegistered) {
+          await onLeave(match);
+        } else {
+          await onJoin(match);
+        }
+      },
+      text: isRegistered ? 'SAIR DA PARTIDA' : 'INSCREVER-SE',
+      icon: Icon(
+        isRegistered ? Icons.logout : Icons.login,
+        size: 20,
+      ),
+      options: FFButtonOptions(
+        width: double.infinity,
+        height: 50,
+        color: isRegistered ? Colors.redAccent : const Color(0xFF00B80E),
+        textStyle: FlutterFlowTheme.of(context).titleMedium.override(
+              fontFamily: 'Inter Tight',
+              color: Colors.white,
+              fontSize: 16,
+              letterSpacing: 0,
+              fontWeight: FontWeight.bold,
+            ),
+        elevation: 2,
+        borderRadius: BorderRadius.circular(8),
+      ),
+    );
   }
 }

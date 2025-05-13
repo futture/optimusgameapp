@@ -1,15 +1,14 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warning00_campo_vazio_widget.dart';
 import 'package:projeto_game_quiz/core/api/services/account_service.dart';
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/responses/account_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/transaction_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_model.dart';
 import 'package:projeto_game_quiz/pages/deposit_history/deposit_history_model.dart';
-
-import '/flutter_flow/flutter_flow_icon_button.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-import 'package:flutter/material.dart';
+import 'package:projeto_game_quiz/utils.dart';
 
 class DepositHistoryScreenWidget extends StatefulWidget {
   const DepositHistoryScreenWidget({super.key});
@@ -47,231 +46,371 @@ class _DepositHistoryScreenWidgetState
     super.dispose();
   }
 
-@override
-Widget build(BuildContext context) {
-  return GestureDetector(
-    onTap: () {
-      FocusScope.of(context).unfocus();
-    },
-    child: Scaffold(
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
       key: scaffoldKey,
-      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-      appBar: AppBar(
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        automaticallyImplyLeading: false,
-        leading: Padding(
-          padding: const EdgeInsetsDirectional.only(start: 18.0),
-          child: FlutterFlowIconButton(
-            borderRadius: 8.0,
-            buttonSize: 45.0,
-            fillColor: FlutterFlowTheme.of(context).primaryBackground,
-            icon: Icon(
-              Icons.arrow_back,
-              color: FlutterFlowTheme.of(context).primaryText,
-              size: 24.0,
-            ),
-            onPressed: () async {
-              context.safePop();
-            },
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.grey[50]!,
+              Colors.grey[100]!,
+            ],
           ),
         ),
-        title: Text(
-          'HISTÓRICO DE DEPÓSITO',
-          style: FlutterFlowTheme.of(context).headlineSmall.override(
-                fontFamily: 'Inter Tight',
-                color: const Color(0xFFEC8D0D),
-                letterSpacing: 0.0,
-              ),
-        ),
-        centerTitle: true,
-        elevation: 4.0,
-      ),
-      body: SafeArea(
-        top: true,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: FlutterFlowTheme.of(context).secondaryBackground,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 6,
-                  offset: const Offset(0, 3),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // AppBar personalizada
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 14.0, horizontal: 8.0),
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).primaryBackground,
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(12)),
-                  ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   child: Row(
-                    children: const [
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          'Operação',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFFEC8D0D)),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Histórico de Depósitos',
+                        style: TextStyle(
+                          color: Colors.grey[800],
+                          fontWeight: FontWeight.w600,
+                          fontSize: 20,
                         ),
                       ),
-                      Expanded(
-                        flex: 1,
-                        child: Text(
-                          'Montante',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
+                      const Spacer(),
+                      if (depositHistory.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEC8D0D).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(16),
                           ),
+                          child: Text(
+                            '${depositHistory.length}',
+                            style: const TextStyle(
+                              color: Color(0xFFEC8D0D),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              // Corpo principal
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      // Card de resumo premium
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              const Color(0xFFEC8D0D).withOpacity(0.1),
+                              const Color(0xFFEC8D0D).withOpacity(0.05),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    const Color(0xFFEC8D0D).withOpacity(0.2),
+                                    const Color(0xFFEC8D0D).withOpacity(0.1),
+                                  ],
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.account_balance_wallet_rounded,
+                                color: Color(0xFFEC8D0D),
+                                size: 28,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Total Depositado',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  _calculateTotalDeposits(),
+                                  style: const TextStyle(
+                                    color: Color(0xFFEC8D0D),
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
+                      const SizedBox(height: 24),
+                      // Lista de transações
                       Expanded(
-                        flex: 2,
-                        child: Text(
-                          'Data e Hora',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Text(
-                          'Status',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
+                        child: _buildHistoryContent(),
                       ),
                     ],
                   ),
                 ),
-                const Divider(height: 1, thickness: 1),
-                Expanded(
-                  child: depositHistory.isEmpty
-                      ? Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Text(
-                              'Nenhum Histórico encontrado.',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'Inter',
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.grey,
-                                  ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        )
-                      : ListView.separated(
-                          itemCount: depositHistory.length,
-                          separatorBuilder: (context, index) =>
-                              const Divider(height: 1, thickness: 1),
-                          itemBuilder: (context, index) {
-                            final item = depositHistory[index];
-                            final isRealizado = item['status'] == 'Realizado';
-
-                            return Container(
-                              color: index % 2 == 0
-                                  ? FlutterFlowTheme.of(context).primaryBackground
-                                  : FlutterFlowTheme.of(context)
-                                      .secondaryBackground,
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 16.0, horizontal: 8.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    flex: 2,
-                                    child: Text(
-                                      item['operacao'],
-                                      style: FlutterFlowTheme.of(context).bodyMedium,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 1,
-                                    child: Text(
-                                      item['montante'],
-                                      textAlign: TextAlign.center,
-                                      style: FlutterFlowTheme.of(context).bodyMedium,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Text(
-                                      item['dataHora'],
-                                      textAlign: TextAlign.center,
-                                      style: FlutterFlowTheme.of(context).bodyMedium,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 1,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 4.0, horizontal: 6.0),
-                                      decoration: BoxDecoration(
-                                        color: isRealizado
-                                            ? Colors.green.shade100
-                                            : Colors.red.shade100,
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        item['status'],
-                                        textAlign: TextAlign.center,
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              fontFamily: 'Inter',
-                                              color: isRealizado
-                                                  ? Colors.green.shade800
-                                                  : Colors.red.shade800,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
+  Widget _buildHistoryContent() {
+    if (isLoading) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(color: Color(0xFFEC8D0D)),
+            const SizedBox(height: 16),
+            Text(
+              'Carregando histórico...',
+              style: TextStyle(
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
-  Future<void> getUserAccountInfo(
-      void Function(VoidCallback fn) setState) async {
+    if (depositHistory.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.history_rounded,
+              size: 80,
+              color: Colors.grey[300],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Nenhum depósito encontrado',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Seus depósitos aparecerão aqui',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[400],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        // Cabeçalho da lista
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+          child: Row(
+            children: [
+              Text(
+                'TRANSAÇÕES RECENTES',
+                style: TextStyle(
+                  color: Colors.grey[500],
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Lista de itens
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: ListView.separated(
+              physics: const BouncingScrollPhysics(),
+              itemCount: depositHistory.length,
+              separatorBuilder: (context, index) => Divider(
+                height: 1,
+                color: Colors.grey[200],
+                indent: 16,
+                endIndent: 16,
+              ),
+              itemBuilder: (context, index) {
+                final item = depositHistory[index];
+                final isRealizado = item['status'] == 'Realizado';
+
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              const Color(0xFFEC8D0D).withOpacity(0.15),
+                              const Color(0xFFEC8D0D).withOpacity(0.05),
+                            ],
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isRealizado
+                              ? Icons.check_circle_rounded
+                              : Icons.pending_rounded,
+                          color: isRealizado
+                              ? Colors.green[600]
+                              : Colors.orange[600],
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item['operacao'],
+                              style: TextStyle(
+                                color: Colors.grey[800],
+                                fontWeight: FontWeight.w500,
+                                fontSize: 15,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              item['dataHora'],
+                              style: TextStyle(
+                                color: Colors.grey[500],
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            item['montante'],
+                            style: TextStyle(
+                              color: Colors.grey[800],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: isRealizado
+                                  ? Colors.green.withOpacity(0.1)
+                                  : Colors.orange.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              item['status'],
+                              style: TextStyle(
+                                color: isRealizado
+                                    ? Colors.green[800]
+                                    : Colors.orange[800],
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _calculateTotalDeposits() {
+    if (depositHistory.isEmpty) return '0,00 Kz';
+    
+    double total = 0;
+    for (var item in depositHistory) {
+      if (item['status'] == 'Realizado') {
+        final valueStr = item['montante'].replaceAll(' Kz', '').replaceAll(',', '.');
+        total += double.tryParse(valueStr) ?? 0;
+      }
+    }
+    
+     return CurrencyUtil.formatKwanza(total);
+  }
+
+  Future<void> getUserAccountInfo(void Function(VoidCallback fn) setState) async {
     var result = await accountService.getAccountByUserIdAsync(user!.id);
     if (result["isSuccess"]) {
       setState(() {
         userAccountInfo = result["data"];
       });
     } else {
-      Warning00ErrorUtil.showDialogMessageError(context,
-          result["error"].detail.message, result["error"].detail.details);
+      Warning00ErrorUtil.showDialogMessageError(
+          context,
+          result["error"].detail.message,
+          result["error"].detail.details);
     }
   }
 
@@ -310,7 +449,6 @@ Widget build(BuildContext context) {
       if (accountId != null) {
         final transactionsResult =
             await accountService.listDepositTransactionsAsync(accountId);
-        print(" Ai vou comer chobeee we $transactionsResult");
 
         if (transactionsResult['isSuccess']) {
           final List<TransactionResponse> transactions =
@@ -319,7 +457,7 @@ Widget build(BuildContext context) {
           setState(() {
             depositHistory = transactions.map((tx) {
               return {
-                'operacao': (tx.type == 'credit') ? 'Depósito' : (tx.type),
+                'operacao': (tx.type == 'credit') ? 'Depósito' : tx.type,
                 'montante':
                     '${double.tryParse(tx.amount.toString())?.toStringAsFixed(2).replaceAll('.', ',') ?? '0,00'} Kz',
                 'dataHora': DateFormat('dd/MM/yyyy HH:mm')

@@ -1,9 +1,13 @@
 import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warning00_campo_vazio_widget.dart';
+import 'package:projeto_game_quiz/core/api/services/account_service.dart';
+import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
+import 'package:projeto_game_quiz/core/models/responses/account_response.dart';
+import 'package:projeto_game_quiz/core/models/responses/transaction_response.dart';
+import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 import '/flutter_flow/flutter_flow_button_tabbar.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'tela08_carteira_model.dart';
@@ -22,6 +26,11 @@ class Tela08CarteiraWidget extends StatefulWidget {
 class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
     with TickerProviderStateMixin {
   late Tela08CarteiraModel _model;
+  AccountResponse? userAccountInfo;
+  UserResponse? user;
+  List<Map<String, dynamic>> depositHistory = [];
+  final AccountService accountService = AccountService();
+  bool isLoading = true;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -29,7 +38,6 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
   void initState() {
     super.initState();
     _model = createModel(context, () => Tela08CarteiraModel());
-
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if ((_model.textController1.text.isEmpty ||
               _model.textController1.text == '') ||
@@ -57,6 +65,9 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
       }
     });
 
+    getUserInfoAndAccountInfoAsync(setState, context).then((_) {
+      loadDepositHistory();
+    });
     _model.tabBarController = TabController(
       vsync: this,
       length: 2,
@@ -154,7 +165,7 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
                                     ),
                               ),
                               Text(
-                                '1234567890',
+                                userAccountInfo?.accountNumber.toString() ?? 'Não Informado',
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -184,7 +195,7 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
                                     ),
                               ),
                               Text(
-                                '100.000.000,00',
+                                (userAccountInfo?.availableBalance ?? 0.00).toStringAsFixed(2),
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
@@ -203,6 +214,63 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
                     ),
                   ),
                 ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 14.0, horizontal: 8.0),
+                  decoration: BoxDecoration(
+                    color: FlutterFlowTheme.of(context).primaryBackground,
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(12)),
+                  ),
+                  child: Row(
+                    children: const [
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          'Operação',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          'Montante',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          'Data e Hora',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          'Status',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1, thickness: 1),
                 Expanded(
                   child: Align(
                     alignment: AlignmentDirectional(0.0, -1.0),
@@ -212,741 +280,110 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
                       child: Column(
                         children: [
                           Expanded(
-                            child: TabBarView(
-                              controller: _model.tabBarController,
-                              children: [
-                                ListView(
-                                  padding: EdgeInsets.zero,
-                                  shrinkWrap: true,
-                                  scrollDirection: Axis.vertical,
-                                  children: [
-                                    Container(
-                                      width: 100.0,
-                                      height: 50.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .primaryBackground,
-                                        borderRadius: BorderRadius.only(
-                                          bottomLeft: Radius.circular(0.0),
-                                          bottomRight: Radius.circular(0.0),
-                                          topLeft: Radius.circular(8.0),
-                                          topRight: Radius.circular(8.0),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            'Categoria',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  fontFamily: 'Inter',
-                                                  fontSize: 15.0,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                          ),
-                                          Text(
-                                            'Quantia',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  fontFamily: 'Inter',
-                                                  fontSize: 15.0,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                          ),
-                                          Text(
-                                            'Data',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  fontFamily: 'Inter',
-                                                  fontSize: 15.0,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                          ),
-                                          Text(
-                                            'Estado',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  fontFamily: 'Inter',
-                                                  fontSize: 15.0,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                          ),
-                                        ]
-                                            .divide(SizedBox(width: 15.0))
-                                            .addToStart(SizedBox(width: 0.0))
-                                            .addToEnd(SizedBox(width: 0.0)),
+                            child: depositHistory.isEmpty
+                                ? Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(24.0),
+                                      child: Text(
+                                        'Nenhum Histórico encontrado.',
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .override(
+                                              fontFamily: 'Inter',
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.grey,
+                                            ),
+                                        textAlign: TextAlign.center,
                                       ),
                                     ),
-                                    Container(
-                                      width: 100.0,
-                                      height: 490.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .primaryBackground,
-                                        borderRadius: BorderRadius.only(
-                                          bottomLeft: Radius.circular(8.0),
-                                          bottomRight: Radius.circular(8.0),
-                                          topLeft: Radius.circular(0.0),
-                                          topRight: Radius.circular(0.0),
-                                        ),
-                                      ),
-                                      child: SingleChildScrollView(
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
+                                  )
+                                : ListView.separated(
+                                    itemCount: depositHistory.length,
+                                    separatorBuilder: (context, index) =>
+                                        const Divider(height: 1, thickness: 1),
+                                    itemBuilder: (context, index) {
+                                      final item = depositHistory[index];
+                                      final isRealizado =
+                                          item['status'] == 'Realizado';
+
+                                      return Container(
+                                        color: index % 2 == 0
+                                            ? FlutterFlowTheme.of(context)
+                                                .primaryBackground
+                                            : FlutterFlowTheme.of(context)
+                                                .secondaryBackground,
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16.0, horizontal: 8.0),
+                                        child: Row(
                                           children: [
-                                            Container(
-                                              width: double.infinity,
-                                              height: 50.0,
-                                              decoration: BoxDecoration(
-                                                color:
+                                            Expanded(
+                                              flex: 2,
+                                              child: Text(
+                                                item['operacao'],
+                                                style:
                                                     FlutterFlowTheme.of(context)
-                                                        .secondaryBackground,
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                              ),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.max,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Text(
-                                                    'Levantamen...',
-                                                    textAlign: TextAlign.center,
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          fontSize: 15.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                  ),
-                                                  Text(
-                                                    '11.000,00',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          fontSize: 15.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                  ),
-                                                  Text(
-                                                    '20/13/25',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          fontSize: 15.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                  ),
-                                                  Icon(
-                                                    Icons.verified_outlined,
-                                                    color: Color(0xFF04DF42),
-                                                    size: 24.0,
-                                                  ),
-                                                ]
-                                                    .divide(
-                                                        SizedBox(width: 10.0))
-                                                    .addToStart(
-                                                        SizedBox(width: 10.0))
-                                                    .addToEnd(
-                                                        SizedBox(width: 10.0)),
+                                                        .bodyMedium,
                                               ),
                                             ),
-                                            Container(
-                                              width: double.infinity,
-                                              height: 50.0,
-                                              decoration: BoxDecoration(
-                                                color:
+                                            Expanded(
+                                              flex: 1,
+                                              child: Text(
+                                                item['montante'],
+                                                textAlign: TextAlign.center,
+                                                style:
                                                     FlutterFlowTheme.of(context)
-                                                        .secondaryBackground,
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                              ),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.max,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Text(
-                                                    'Levantamen...',
-                                                    textAlign: TextAlign.center,
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          fontSize: 15.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                  ),
-                                                  Text(
-                                                    '11.000,00',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          fontSize: 15.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                  ),
-                                                  Text(
-                                                    '20/13/25',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          fontSize: 15.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                  ),
-                                                  Icon(
-                                                    Icons.verified_outlined,
-                                                    color: Color(0xFF04DF42),
-                                                    size: 24.0,
-                                                  ),
-                                                ]
-                                                    .divide(
-                                                        SizedBox(width: 10.0))
-                                                    .addToStart(
-                                                        SizedBox(width: 10.0))
-                                                    .addToEnd(
-                                                        SizedBox(width: 10.0)),
+                                                        .bodyMedium,
                                               ),
                                             ),
-                                            Container(
-                                              width: double.infinity,
-                                              height: 50.0,
-                                              decoration: BoxDecoration(
-                                                color:
+                                            Expanded(
+                                              flex: 2,
+                                              child: Text(
+                                                item['dataHora'],
+                                                textAlign: TextAlign.center,
+                                                style:
                                                     FlutterFlowTheme.of(context)
-                                                        .secondaryBackground,
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                              ),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.max,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Text(
-                                                    'Levantamen...',
-                                                    textAlign: TextAlign.center,
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          fontSize: 15.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                  ),
-                                                  Text(
-                                                    '11.000,00',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          fontSize: 15.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                  ),
-                                                  Text(
-                                                    '20/13/25',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          fontSize: 15.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                  ),
-                                                  Icon(
-                                                    Icons.verified_outlined,
-                                                    color: Color(0xFF04DF42),
-                                                    size: 24.0,
-                                                  ),
-                                                ]
-                                                    .divide(
-                                                        SizedBox(width: 10.0))
-                                                    .addToStart(
-                                                        SizedBox(width: 10.0))
-                                                    .addToEnd(
-                                                        SizedBox(width: 10.0)),
+                                                        .bodyMedium,
                                               ),
                                             ),
-                                          ]
-                                              .divide(SizedBox(height: 10.0))
-                                              .addToStart(
-                                                  SizedBox(height: 10.0))
-                                              .addToEnd(SizedBox(height: 10.0)),
+                                            Expanded(
+                                              flex: 1,
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 4.0,
+                                                        horizontal: 6.0),
+                                                decoration: BoxDecoration(
+                                                  color: isRealizado
+                                                      ? Colors.green.shade100
+                                                      : Colors.red.shade100,
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
+                                                ),
+                                                child: Text(
+                                                  item['status'],
+                                                  textAlign: TextAlign.center,
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        fontFamily: 'Inter',
+                                                        color: isRealizado
+                                                            ? Colors
+                                                                .green.shade800
+                                                            : Colors
+                                                                .red.shade800,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Align(
-                                  alignment: AlignmentDirectional(0.0, 0.0),
-                                  child: Container(
-                                    width: 345.0,
-                                    child: Form(
-                                      key: _model.formKey,
-                                      autovalidateMode:
-                                          AutovalidateMode.disabled,
-                                      child: Align(
-                                        alignment:
-                                            AlignmentDirectional(0.0, -1.0),
-                                        child: Container(
-                                          width: double.infinity,
-                                          height: 480.0,
-                                          decoration: BoxDecoration(
-                                            color: FlutterFlowTheme.of(context)
-                                                .primaryBackground,
-                                          ),
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              Align(
-                                                alignment: AlignmentDirectional(
-                                                    0.0, 0.0),
-                                                child: Container(
-                                                  width: double.infinity,
-                                                  height: 30.0,
-                                                  decoration: BoxDecoration(
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .primaryBackground,
-                                                  ),
-                                                  child: Column(
-                                                    mainAxisSize:
-                                                        MainAxisSize.max,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    children: [
-                                                      Align(
-                                                        alignment:
-                                                            AlignmentDirectional(
-                                                                0.0, 0.0),
-                                                        child: Text(
-                                                          'Enviar valor para companheiros',
-                                                          textAlign:
-                                                              TextAlign.justify,
-                                                          style: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .titleMedium
-                                                              .override(
-                                                                fontFamily:
-                                                                    'Inter Tight',
-                                                                letterSpacing:
-                                                                    0.0,
-                                                              ),
-                                                        ),
-                                                      ),
-                                                    ].divide(
-                                                        SizedBox(height: 5.0)),
-                                                  ),
-                                                ),
-                                              ),
-                                              Align(
-                                                alignment: AlignmentDirectional(
-                                                    0.0, 0.0),
-                                                child: Container(
-                                                  width: double.infinity,
-                                                  height: 70.0,
-                                                  decoration: BoxDecoration(
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .primaryBackground,
-                                                  ),
-                                                  child: Column(
-                                                    mainAxisSize:
-                                                        MainAxisSize.max,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    children: [
-                                                      Align(
-                                                        alignment:
-                                                            AlignmentDirectional(
-                                                                -1.0, -1.0),
-                                                        child: Text(
-                                                          'ID do Titular',
-                                                          style: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .bodyMedium
-                                                              .override(
-                                                                fontFamily:
-                                                                    'Inter',
-                                                                fontSize: 15.0,
-                                                                letterSpacing:
-                                                                    0.0,
-                                                              ),
-                                                        ),
-                                                      ),
-                                                      Align(
-                                                        alignment:
-                                                            AlignmentDirectional(
-                                                                -1.0, 0.0),
-                                                        child: Container(
-                                                          width:
-                                                              double.infinity,
-                                                          child: TextFormField(
-                                                            controller: _model
-                                                                .textController1,
-                                                            focusNode: _model
-                                                                .textFieldFocusNode1,
-                                                            autofocus: false,
-                                                            obscureText: false,
-                                                            decoration:
-                                                                InputDecoration(
-                                                              isDense: true,
-                                                              labelStyle:
-                                                                  FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .labelMedium
-                                                                      .override(
-                                                                        fontFamily:
-                                                                            'Inter',
-                                                                        letterSpacing:
-                                                                            0.0,
-                                                                      ),
-                                                              hintText:
-                                                                  '1234567890',
-                                                              hintStyle:
-                                                                  FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .labelMedium
-                                                                      .override(
-                                                                        fontFamily:
-                                                                            'Inter',
-                                                                        fontSize:
-                                                                            15.0,
-                                                                        letterSpacing:
-                                                                            0.0,
-                                                                      ),
-                                                              enabledBorder:
-                                                                  OutlineInputBorder(
-                                                                borderSide:
-                                                                    BorderSide(
-                                                                  color: Color(
-                                                                      0x00000000),
-                                                                  width: 1.0,
-                                                                ),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            8.0),
-                                                              ),
-                                                              focusedBorder:
-                                                                  OutlineInputBorder(
-                                                                borderSide:
-                                                                    BorderSide(
-                                                                  color: Color(
-                                                                      0x00000000),
-                                                                  width: 1.0,
-                                                                ),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            8.0),
-                                                              ),
-                                                              errorBorder:
-                                                                  OutlineInputBorder(
-                                                                borderSide:
-                                                                    BorderSide(
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .error,
-                                                                  width: 1.0,
-                                                                ),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            8.0),
-                                                              ),
-                                                              focusedErrorBorder:
-                                                                  OutlineInputBorder(
-                                                                borderSide:
-                                                                    BorderSide(
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .error,
-                                                                  width: 1.0,
-                                                                ),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            8.0),
-                                                              ),
-                                                              filled: true,
-                                                              fillColor: FlutterFlowTheme
-                                                                      .of(context)
-                                                                  .secondaryBackground,
-                                                            ),
-                                                            style: FlutterFlowTheme
-                                                                    .of(context)
-                                                                .bodyMedium
-                                                                .override(
-                                                                  fontFamily:
-                                                                      'Inter',
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                ),
-                                                            keyboardType:
-                                                                TextInputType
-                                                                    .number,
-                                                            cursorColor:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .primaryText,
-                                                            validator: _model
-                                                                .textController1Validator
-                                                                .asValidator(
-                                                                    context),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ].divide(
-                                                        SizedBox(height: 5.0)),
-                                                  ),
-                                                ),
-                                              ),
-                                              Align(
-                                                alignment: AlignmentDirectional(
-                                                    0.0, 0.0),
-                                                child: Container(
-                                                  width: double.infinity,
-                                                  height: 70.0,
-                                                  decoration: BoxDecoration(
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .primaryBackground,
-                                                  ),
-                                                  child: Column(
-                                                    mainAxisSize:
-                                                        MainAxisSize.max,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    children: [
-                                                      Align(
-                                                        alignment:
-                                                            AlignmentDirectional(
-                                                                -1.0, -1.0),
-                                                        child: Text(
-                                                          'Montante',
-                                                          style: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .bodyMedium
-                                                              .override(
-                                                                fontFamily:
-                                                                    'Inter',
-                                                                fontSize: 15.0,
-                                                                letterSpacing:
-                                                                    0.0,
-                                                              ),
-                                                        ),
-                                                      ),
-                                                      Align(
-                                                        alignment:
-                                                            AlignmentDirectional(
-                                                                -1.0, 0.0),
-                                                        child: Container(
-                                                          width:
-                                                              double.infinity,
-                                                          child: TextFormField(
-                                                            controller: _model
-                                                                .textController2,
-                                                            focusNode: _model
-                                                                .textFieldFocusNode2,
-                                                            autofocus: false,
-                                                            obscureText: false,
-                                                            decoration:
-                                                                InputDecoration(
-                                                              isDense: true,
-                                                              labelStyle:
-                                                                  FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .labelMedium
-                                                                      .override(
-                                                                        fontFamily:
-                                                                            'Inter',
-                                                                        letterSpacing:
-                                                                            0.0,
-                                                                      ),
-                                                              hintText:
-                                                                  '100 - 10.000,00 Kz',
-                                                              hintStyle:
-                                                                  FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .labelMedium
-                                                                      .override(
-                                                                        fontFamily:
-                                                                            'Inter',
-                                                                        fontSize:
-                                                                            15.0,
-                                                                        letterSpacing:
-                                                                            0.0,
-                                                                      ),
-                                                              enabledBorder:
-                                                                  OutlineInputBorder(
-                                                                borderSide:
-                                                                    BorderSide(
-                                                                  color: Color(
-                                                                      0x00000000),
-                                                                  width: 1.0,
-                                                                ),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            8.0),
-                                                              ),
-                                                              focusedBorder:
-                                                                  OutlineInputBorder(
-                                                                borderSide:
-                                                                    BorderSide(
-                                                                  color: Color(
-                                                                      0x00000000),
-                                                                  width: 1.0,
-                                                                ),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            8.0),
-                                                              ),
-                                                              errorBorder:
-                                                                  OutlineInputBorder(
-                                                                borderSide:
-                                                                    BorderSide(
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .error,
-                                                                  width: 1.0,
-                                                                ),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            8.0),
-                                                              ),
-                                                              focusedErrorBorder:
-                                                                  OutlineInputBorder(
-                                                                borderSide:
-                                                                    BorderSide(
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .error,
-                                                                  width: 1.0,
-                                                                ),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            8.0),
-                                                              ),
-                                                              filled: true,
-                                                              fillColor: FlutterFlowTheme
-                                                                      .of(context)
-                                                                  .secondaryBackground,
-                                                            ),
-                                                            style: FlutterFlowTheme
-                                                                    .of(context)
-                                                                .bodyMedium
-                                                                .override(
-                                                                  fontFamily:
-                                                                      'Inter',
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                ),
-                                                            keyboardType:
-                                                                TextInputType
-                                                                    .number,
-                                                            cursorColor:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .primaryText,
-                                                            validator: _model
-                                                                .textController2Validator
-                                                                .asValidator(
-                                                                    context),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ].divide(
-                                                        SizedBox(height: 5.0)),
-                                                  ),
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
-                                                        0.0, 30.0, 0.0, 0.0),
-                                                child: FFButtonWidget(
-                                                  onPressed: () {
-                                                    print(
-                                                        'enviarMontante pressed ...');
-                                                  },
-                                                  text: 'ENVIAR',
-                                                  options: FFButtonOptions(
-                                                    width: double.infinity,
-                                                    height: 45.0,
-                                                    padding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(16.0, 0.0,
-                                                                16.0, 0.0),
-                                                    iconPadding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(0.0, 0.0,
-                                                                0.0, 0.0),
-                                                    color: Color(0xFFEC8D0D),
-                                                    textStyle: FlutterFlowTheme
-                                                            .of(context)
-                                                        .titleSmall
-                                                        .override(
-                                                          fontFamily:
-                                                              'Inter Tight',
-                                                          color: Colors.white,
-                                                          fontSize: 14.0,
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                    elevation: 0.0,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                ),
-                                              ),
-                                            ].divide(SizedBox(height: 10.0)),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                      );
+                                    },
                                   ),
-                                ),
-                              ],
-                            ),
                           ),
                           Align(
                             alignment: Alignment(0.0, 0),
@@ -983,7 +420,7 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
                                   0.0, 0.0, 8.0, 0.0),
                               tabs: [
                                 Tab(
-                                  text: 'Histórico de Transferênicas',
+                                  text: 'Histórico',
                                 ),
                                 Tab(
                                   text: 'Transferir Saldo',
@@ -1006,5 +443,83 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
         ),
       ),
     );
+  }
+
+  Future<void> getUserAccountInfo(
+      void Function(VoidCallback fn) setState) async {
+    var result = await accountService.getAccountByUserIdAsync(user!.id);
+    if (result["isSuccess"]) {
+      setState(() {
+        userAccountInfo = result["data"];
+      });
+    } else {
+      Warning00ErrorUtil.showDialogMessageError(context,
+          result["error"].detail.message, result["error"].detail.details);
+    }
+  }
+
+  Future<void> getUserInfoAndAccountInfoAsync(
+      void Function(VoidCallback fn) setState, BuildContext context) async {
+    await getUserInfo(setState);
+    await getUserAccountInfo(setState);
+  }
+
+  Future<void> getUserInfo(void Function(VoidCallback fn) setState) async {
+    var _user = await UserUtil.getUserInfo();
+    setState(() {
+      user = _user!;
+    });
+  }
+
+  DateTime toDateTime(dynamic value) {
+    if (value == null) throw Exception('Data inválida: valor nulo');
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.parse(value);
+    throw Exception('Data inválida: tipo inesperado');
+  }
+
+  Future<void> loadDepositHistory() async {
+    final userId = user?.id;
+
+    if (userId == null) {
+      setState(() => isLoading = false);
+      return;
+    }
+
+    final accountResult = await accountService.getAccountByUserIdAsync(userId);
+    if (accountResult['isSuccess']) {
+      final accountId = accountResult['data']?.id;
+
+      if (accountId != null) {
+        final transactionsResult =
+            await accountService.listDepositTransactionsAsync(accountId);
+        print(" Ai vou comer chobeee we $transactionsResult");
+
+        if (transactionsResult['isSuccess']) {
+          final List<TransactionResponse> transactions =
+              List<TransactionResponse>.from(transactionsResult['data']);
+
+          setState(() {
+            depositHistory = transactions.map((tx) {
+              return {
+                'operacao': (tx.type == 'credit') ? 'Depósito' : (tx.type),
+                'montante':
+                    '${double.tryParse(tx.amount.toString())?.toStringAsFixed(2).replaceAll('.', ',') ?? '0,00'} Kz',
+                'dataHora': DateFormat('dd/MM/yyyy HH:mm')
+                    .format(toDateTime(tx.createdAt)),
+                'status': tx.status,
+              };
+            }).toList();
+            isLoading = false;
+          });
+        } else {
+          setState(() => isLoading = false);
+        }
+      } else {
+        setState(() => isLoading = false);
+      }
+    } else {
+      setState(() => isLoading = false);
+    }
   }
 }

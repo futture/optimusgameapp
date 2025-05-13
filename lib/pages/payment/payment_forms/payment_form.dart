@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_multi_formatter/formatters/formatter_utils.dart';
 import 'package:flutter_multi_formatter/formatters/masked_input_formatter.dart';
-import 'package:flutter_multi_formatter/formatters/phone_input_formatter.dart';
+//import 'package:flutter_multi_formatter/formatters/phone_input_formatter.dart';
 import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warning00_campo_vazio_widget.dart';
 import 'package:projeto_game_quiz/core/api/services/account_service.dart';
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
@@ -95,7 +95,7 @@ class _PaymentFormState extends State<PaymentForm> {
   final accountService = AccountService();
 
   try {
-    final String type = paymentData['paymentMethod'] ?? 'unknown';
+    //final String type = paymentData['paymentMethod'] ?? 'unknown';
     final String rawAmount = paymentData['amount']?.toString() ?? '0';
     final double amount = double.tryParse(rawAmount) ?? 0.0;
     final String accountId = paymentData['id'] ?? '';
@@ -355,19 +355,19 @@ class _PaymentFormState extends State<PaymentForm> {
     );
   }
 
-  String? _validatePhoneNumber(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Por favor insira um número de telefone';
-    }
-    final clean = toNumericString(value);
-    if (clean.length != 9) {
-      return 'O número de telefone deve ter exatamente 9 dígitos';
-    }
-    if (!clean.startsWith('9')) {
-      return 'O número de telefone deve começar com 9';
-    }
-    return null;
-  }
+  // String? _validatePhoneNumber(String? value) {
+  //   if (value == null || value.isEmpty) {
+  //     return 'Por favor insira um número de telefone';
+  //   }
+  //   final clean = toNumericString(value);
+  //   if (clean.length != 9) {
+  //     return 'O número de telefone deve ter exatamente 9 dígitos';
+  //   }
+  //   if (!clean.startsWith('9')) {
+  //     return 'O número de telefone deve começar com 9';
+  //   }
+  //   return null;
+  // }
 
   Future<void> getUserAccountInfo(
       void Function(VoidCallback fn) setState) async {

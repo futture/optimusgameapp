@@ -1,4 +1,5 @@
 import 'package:projeto_game_quiz/core/models/common/error_response.dart';
+import 'package:projeto_game_quiz/core/models/responses/match_prize_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 
@@ -28,8 +29,10 @@ class MatchResponse {
   final DateTime matchStartDate;
   final DateTime endDateOfMatch;
   final RoomResponse? room;
+  final MatchPrizeResponse? matchPrize;
   bool? isUserRegistered = false;
   final List<MatchPlayerResponse>? matchPlayers;
+  bool? isExpanded = false;
 
   MatchResponse(
       {required this.id,
@@ -37,9 +40,11 @@ class MatchResponse {
       required this.statusMatch,
       required this.matchStartDate,
       required this.endDateOfMatch,
+      required this.matchPrize,
       required this.room,
       required this.matchPlayers,
-      this.isUserRegistered});
+      this.isUserRegistered,
+      this.isExpanded});
 
   factory MatchResponse.fromJson(Map<String, dynamic> json) {
     return MatchResponse(
@@ -49,6 +54,7 @@ class MatchResponse {
       endDateOfMatch: DateTime.parse(json["endDateOfMatch"]),
       createdAt: DateTime.parse(json["createdAt"]),
       room: RoomResponse.fromJson(json["room"]),
+      matchPrize: MatchPrizeResponse.fromJson(json["matchPrize"]),
       matchPlayers: (json["matchPlayers"] as List<dynamic>)
           .map((e) => MatchPlayerResponse.fromJson(e))
           .toList(),
@@ -159,10 +165,14 @@ class PlayerRankingResponse {
   final int errors;
   final int totalResponseTime;
   final int timesInTop3;
-  final int points;
+  final double points;
   final double prize;
   final bool winner;
   final int position;
+  final double accuracyRate;
+  final double timeRate;
+  final double hitRateWeight;
+  final double timeRateWeight;
 
   PlayerRankingResponse(
       {required this.playerName,
@@ -174,7 +184,11 @@ class PlayerRankingResponse {
       required this.points,
       required this.prize,
       required this.winner,
-      required this.position});
+      required this.position,
+      required this.accuracyRate,
+      required this.timeRate,
+      required this.hitRateWeight,
+      required this.timeRateWeight,});
 
   factory PlayerRankingResponse.fromJson(Map<String, dynamic> json) =>
       PlayerRankingResponse(
@@ -184,7 +198,21 @@ class PlayerRankingResponse {
           errors: json["errors"],
           totalResponseTime: json["totalResponseTime"].round(),
           timesInTop3: json["timesInTop3"],
-          points: json["points"],
+          points: json["points"] is String
+              ? double.parse(json["points"])
+              : (json["points"] as num).toDouble(),
+          accuracyRate: json["accuracyRate"] is String
+              ? double.parse(json["accuracyRate"])
+              : (json["accuracyRate"] as num).toDouble(),
+          timeRate: json["timeRate"] is String
+              ? double.parse(json["timeRate"])
+              : (json["timeRate"] as num).toDouble(),
+          hitRateWeight: json["hitRateWeight"] is String
+              ? double.parse(json["hitRateWeight"])
+              : (json["hitRateWeight"] as num).toDouble(),
+          timeRateWeight: json["timeRateWeight"] is String
+              ? double.parse(json["timeRateWeight"])
+              : (json["timeRateWeight"] as num).toDouble(),                
           prize: json["prize"] is String
               ? double.parse(json["prize"])
               : (json["prize"] as num).toDouble(),

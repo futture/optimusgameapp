@@ -26,13 +26,15 @@ class OptionAnswersResponse {
   final String id;
   final String codeOption;
   final String textOption;
+  bool? isCorrect;
+
   //final DateTime createdAt;
 
   OptionAnswersResponse({
     required this.id,
     required this.textOption,
     required this.codeOption,
-    //required this.createdAt
+    this.isCorrect
   });
 
   factory OptionAnswersResponse.fromJson(Map<String, dynamic> json) =>
@@ -40,6 +42,8 @@ class OptionAnswersResponse {
         id: json["id"],
         textOption: json["textOption"],
         codeOption: json["codeOption"],
+        isCorrect:  json.containsKey('isCorrect') ? json['isCorrect']: false,
+
         //createdAt: DateTime.parse(json["createdAt"])
       );
 }

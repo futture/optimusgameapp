@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:projeto_game_quiz/Atualiza%C3%A7%C3%A3o/tela10_deposito/tela10_deposito_lista_widget.dart';
 import 'package:projeto_game_quiz/pages/deposit_history/deposit_history_widget.dart';
+import 'package:projeto_game_quiz/pages/support/support_screen.dart';
+import 'package:projeto_game_quiz/pages/password_change/password_change.dart';
+import 'package:projeto_game_quiz/pages/tela11_editar_perfil/tela11_editar_perfil_widget.dart';
 import 'package:projeto_game_quiz/pages/tela12_vitoria_view/tela12_vitoria_view_widget.dart';
 import 'package:projeto_game_quiz/pages/tela14_fim_partida/tela14_fim_partida_widget.dart';
 import 'package:provider/provider.dart';
@@ -75,11 +78,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => Tela06SaladeJogoWidget(),
         ),
         FFRoute(
-          name: Tela07EditarPerfilWidget.routeName,
-          path: Tela07EditarPerfilWidget.routePath,
-          builder: (context, params) => Tela07EditarPerfilWidget(),
-        ),
-        FFRoute(
           name: Tela07FinancasWidget.routeName,
           path: Tela07FinancasWidget.routePath,
           builder: (context, params) => Tela07FinancasWidget(),
@@ -110,13 +108,32 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => DepositHistoryScreenWidget(),
         ),
         FFRoute(
+          name: Tela11EditarPerfilWidget.routeName,
+          path: Tela11EditarPerfilWidget.routePath,
+          builder: (context, params) => Tela11EditarPerfilWidget(),
+        ),
+        FFRoute(
           name: Tela10DepositoListaWidget.routeName,
           path: Tela10DepositoListaWidget.routePath,
           builder: (context, params) => Tela10DepositoListaWidget(),
+        ),
+        FFRoute(
+          name: Tela17NotificacaoViewWidget.routeName,
+          path: Tela17NotificacaoViewWidget.routePath,
+          builder: (context, params) => Tela17NotificacaoViewWidget(),
+        ),
+         FFRoute(
+          name: TelaSuporteWidget.routeName,
+          path: TelaSuporteWidget.routePath,
+          builder: (context, params) => TelaSuporteWidget(),
+        ),
+         FFRoute(
+          name: PasswordChangeScreen.routeName,
+          path: PasswordChangeScreen.routePath,
+          builder: (context, params) => PasswordChangeScreen(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
-
 extension NavParamExtensions on Map<String, String?> {
   Map<String, String> get withoutNulls => Map.fromEntries(
         entries

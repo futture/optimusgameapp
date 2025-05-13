@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:projeto_game_quiz/core/api/common/http_client_api.dart';
 import 'package:projeto_game_quiz/core/api/utils/error_util.dart';
 import 'package:projeto_game_quiz/core/api/utils/token_util.dart';
@@ -14,13 +15,12 @@ class UserService {
 
   Future<List<Contact>> fetchContactsAsync() async {
     if (!kIsWeb) {
-      bool permissionGranted = await FlutterContacts.requestPermission();
+      final status = await Permission.contacts.request();
 
-      if (!permissionGranted) {
+      if (!status.isGranted) {
         print("Permissão negada para acessar contatos");
         return List.empty();
       }
-
       final fetchedContacts =
           await FlutterContacts.getContacts(withProperties: true);
 
@@ -49,6 +49,20 @@ class UserService {
         '/users/$playerId',
         method: 'GET',
         successParser: (json) => UserResponse.FromJson(json),
+      );
+      return {"isSuccess": true, "data": successResult};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
+  Future<dynamic> getPlayerByMatchIdAsync(String matchId) async {
+    try {
+      final successResult = await httpService.request<List<UserResponse>>(
+        '/users/match/$matchId',
+        method: 'GET',
+        successParser: (json) =>
+            (json as List).map((item) => UserResponse.FromJson(item)).toList(),
       );
       return {"isSuccess": true, "data": successResult};
     } catch (e) {
@@ -99,6 +113,43 @@ class UserService {
         return {"isSuccess": false, "message": "Erro ao criar usuário"};
       }
     } catch (e) {
+      return {"isSuccess": false, "message": e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> updateUser(
+      String user_id, UpdateUserRequest userRequest) async {
+    try {
+      final requestBody = userRequest.toJson();
+      print('Dados enviados para atualização: $requestBody');
+      final response = await httpService.request(
+        '/user/update/${user_id}',
+        method: 'PUT',
+        body: requestBody,
+      );
+      if (response != null && response["id"] != null) {
+        print('Usuário atualizado com sucesso: $response');
+        final userResponse = UserResponse.FromJson(response);
+        await UserUtil.saveUserInfoData(userResponse);
+        return {
+          "isSuccess": true,
+          "data": userResponse,
+        };
+      } else {
+        final errorMessage = response?["message"] ?? "Resposta inválida da API";
+        print('Erro ao atualizar usuário: $errorMessage');
+        return {
+          "isSuccess": false,
+          "error": {
+            "detail": {
+              "message": errorMessage,
+              "details": "Verifique os dados e tente novamente"
+            }
+          }
+        };
+      }
+    } catch (e) {
+      print('Erro durante a atualização do usuário: $e');
       return {"isSuccess": false, "message": e.toString()};
     }
   }
@@ -174,6 +225,58 @@ class UserService {
       };
     } catch (e) {
       return _errorUtil.handleError(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> logoutAsync(String userId) async {
+    try {
+      final result = await httpService.request(
+        '/users/${userId}/logout',
+        method: 'PATCH',
+        body: {},
+      );
+
+      await TokenUtil.removeToken();
+
+      return {"isSuccess": true, "data": result};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> changePassword({
+    required String user_id,
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final encodedParams = Uri(
+        queryParameters: {
+          'user_id': user_id,
+          'old_password': oldPassword,
+          'new_password': newPassword,
+        },
+      ).query;
+      final response = await httpService.request(
+        '/users/change-password?$encodedParams',
+        method: 'POST',
+      );
+      print(response['success']);
+      if (response != null && response['success'] == true) {
+        return response;
+      } else {
+        return response;
+      }
+    } catch (e) {
+      return {
+        "isSuccess": false,
+        "error": {
+          "detail": {
+            "message": "Erro na comunicação com o servidor",
+            "details": e.toString()
+          }
+        }
+      };
     }
   }
 }

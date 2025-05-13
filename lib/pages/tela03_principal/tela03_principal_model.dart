@@ -4,13 +4,15 @@ import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warn
 import 'package:projeto_game_quiz/core/api/services/account_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_web_socket_service.dart';
+import 'package:projeto_game_quiz/core/api/services/user_service.dart';
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/account_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
+import 'package:projeto_game_quiz/dialogs/common_dialog_widget.dart';
 import 'package:projeto_game_quiz/dialogs/success-dialog-widget.dart';
-import 'package:projeto_game_quiz/pages/tela13_dados_de_partida/tela13_dados_de_partida_widget.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_timer.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/instant_timer.dart';
@@ -29,6 +31,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
   MatchWebSocketService? _matchWebSocketService;
   final AccountService accountService = AccountService();
   final MatchService matchService = MatchService();
+  final UserService userService = UserService();
   final timerInitialTimeMs = 10800000;
   int timerMilliseconds = 10800000;
   String timerValue =
@@ -37,7 +40,9 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
       FlutterFlowTimerController(StopWatchTimer(mode: StopWatchMode.countDown));
   InstantTimer? instantTimer;
   bool isDialogStartScheduledMatchOpen = false;
+  List<UserResponse> users = List.empty();
   late BuildContext currentDialogStartScheduledMatchOpenContext;
+  bool hasStartedMatch = false; // Adicione isso no começo da classe
 
   @override
   void initState(BuildContext context) {
@@ -112,6 +117,9 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
 
       if (response['isSuccess']) {
         final List<MatchResponse> matches = response['data'];
+        matches.sort((a, b) =>
+            a.matchStartDate.compareTo(b.matchStartDate)); // ordem crescente
+
         setState(() => matchList = matches);
 
         for (var match in matches) {
@@ -164,30 +172,34 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
         timerMilliseconds = remaining.inMilliseconds;
       });
 
-      // if (remaining.inSeconds <= 4 && !alerted && remaining.inSeconds > 0) {
-      //   alerted = true;
-      //   await _callApiBeforeMatchStart(match.id);
-      // }
-      if (remaining.inSeconds == 0) {
+      if (remaining.inSeconds == 10 && !hasStartedMatch) {
+        hasStartedMatch = true;
         setState(() => alerted = false);
+
         var isExist =
             await checkPlayerAlreadyRegisteredMatchAsync(setState, match.id);
         if (isExist) {
-          Navigator.of(context!).push(
-            MaterialPageRoute(
-              builder: (_) => Tela13DadosDePartidaWidget(
-                matchId: match.id,
-                notDisplayButton: true,
-              ),
-            ),
-          );
+          await getUsersByMatchId(setState, match.id);
+          showMatchParticipantsDialog(match);
+          await startScheduledSatchAsync(setState, match);
+          // Navigator.of(context!).push(
+          //   MaterialPageRoute(
+          //     builder: (_) => Tela13DadosDePartidaWidget(
+          //       matchId: match.id,
+          //       notDisplayButton: true,
+          //     ),
+          //   ),
+          // );
           return;
         }
       }
 
       if (remaining.isNegative) {
         timer.cancel();
-        setState(() => alerted = false);
+        setState(() {
+          alerted = false;
+          hasStartedMatch = false; // resetar para o futuro
+        });
         loadMatches(setState);
       }
     });
@@ -210,19 +222,12 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
 
   Future<void> startScheduledSatchAsync(
       Function setState, MatchResponse match) async {
-    _matchWebSocketService?.disconnect();
-
     _matchWebSocketService = MatchWebSocketService(
       userId: user!.id,
       matchInfo: match,
       context: context!,
       matchId: match.id,
       onScheduledMatchUpdate: (stats) {
-        _matchWebSocketService?.disconnect();
-
-        showDialogStartScheduledMatch(
-            currentDialogStartScheduledMatchOpenContext);
-
         if (stats.error != null && stats.error!.detail != null) {
           _showErrorDialog(stats.error, match.id);
           closeDialogStartScheduledMatch();
@@ -231,6 +236,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
           final isUserInMatch = stats.players?.contains(user!.id);
 
           if (isUserInMatch!) {
+            Navigator.of(context!).pop();
             Navigator.of(context!).push(
               MaterialPageRoute(
                 builder: (_) => Tela06SaladeJogoWidget(
@@ -248,7 +254,9 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
         handleWebSocketFailureIfNeeded(() => {});
         debugPrint("Erro no WebSocket: $e");
       },
-      onDone: () => debugPrint("Conexão WebSocket encerrada."),
+      onDone: () {
+        debugPrint("Conexão WebSocket encerrada.");
+      },
     );
 
     _matchWebSocketService?.connectStartScheduledSatch();
@@ -296,8 +304,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
                           startScheduledSatchAsync(() {}, nextMatch!)
                               .whenComplete(() {
                             if (Navigator.of(_dialogContext).canPop()) {
-                              Navigator.of(_dialogContext)
-                                  .pop(); // Fecha o erro
+                              Navigator.of(_dialogContext).pop();
                             }
                           });
                         },
@@ -352,6 +359,14 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
     }
   }
 
+  Future<void> leaveMatchAsync(matchId) async {
+    var result = await matchService.leaveTheMatchAsync(matchId, user!.id);
+    if (!result["isSuccess"]) {
+      Warning00ErrorUtil.showDialogMessageError(context,
+          result["error"].detail.message, result["error"].detail.details);
+    }
+  }
+
   void showDialogStartScheduledMatch(BuildContext context) {
     if (isDialogStartScheduledMatchOpen) return;
 
@@ -396,5 +411,107 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
       Navigator.of(currentDialogStartScheduledMatchOpenContext).pop();
       isDialogStartScheduledMatchOpen = false;
     }
+  }
+
+  Future<void> getUsersByMatchId(Function setState, matchId) async {
+    var result = await userService.getPlayerByMatchIdAsync(matchId);
+
+    if (result["isSuccess"]) {
+      setState(() {
+        users = result["data"];
+      });
+    }
+  }
+
+  void showMatchParticipantsDialog(MatchResponse matchInfo) {
+    if (isDialogStartScheduledMatchOpen) return;
+    var participants = users;
+    var currentUser = user;
+    isDialogStartScheduledMatchOpen = true;
+    currentDialogStartScheduledMatchOpenContext = context!;
+    final minimumAmount =
+        matchInfo.room?.roomConfiguration?.minimumAmountToPlay ?? 0;
+    var infos = [
+      {
+        'title': 'Inscrição',
+        'icon': Icons.attach_money,
+        'value': '${minimumAmount}KZ',
+      },
+      {
+        'title': 'Prêmio',
+        'icon': Icons.wine_bar_rounded,
+        'value': '${matchInfo.matchPrize?.totalGain ?? 0} KZ',
+      },
+      {
+        'title': 'Nº Questões',
+        'icon': Icons.numbers,
+        'value': '${matchInfo.room!.roomConfiguration!.numberOfQuestions}',
+      },
+      {
+        'title': 'Vagas',
+        'icon': Icons.people,
+        'value':
+            '${matchInfo.matchPlayers?.length ?? 0}/${matchInfo.room?.roomConfiguration?.numberOfPlayers ?? 0}',
+      },
+    ];
+
+    CommonDialogWidget.showMatchParticipantsDialog(
+      currentDialogStartScheduledMatchOpenContext,
+      infos,
+      null,
+      matchInfo,
+      participants,
+      currentUser,
+      _buildDialogActions(participants, matchInfo),
+    );
+  }
+
+  Widget _buildDialogActions(
+      List<UserResponse> parts, MatchResponse matchInfo) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const CircularProgressIndicator(
+                  color: Color(0xFFEC8D0D),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Aguardando participantes...',
+                  textAlign: TextAlign.center,
+                  style: FlutterFlowTheme.of(
+                          currentDialogStartScheduledMatchOpenContext)
+                      .bodyMedium
+                      .override(
+                        fontFamily: 'Inter',
+                        color: const Color(0xFFEC8D0D),
+                        fontSize: 14,
+                        letterSpacing: 0,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Participantes conectados: ${parts.length}/${matchInfo.room!.roomConfiguration!.numberOfPlayers}',
+                  textAlign: TextAlign.center,
+                  style: FlutterFlowTheme.of(
+                          currentDialogStartScheduledMatchOpenContext)
+                      .bodySmall
+                      .override(
+                        fontFamily: 'Inter',
+                        letterSpacing: 0,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

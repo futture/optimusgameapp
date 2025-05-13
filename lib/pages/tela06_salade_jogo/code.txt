@@ -1,0 +1,1794 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:projeto_game_quiz/pages/tela03_principal/tela03_principal_widget.dart';
+import 'package:stop_watch_timer/stop_watch_timer.dart';
+import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warning00_campo_vazio_widget.dart';
+import 'package:projeto_game_quiz/core/api/services/match_service.dart';
+import 'package:projeto_game_quiz/core/api/services/question_service.dart';
+import 'package:projeto_game_quiz/core/api/services/question_web_socket_service.dart';
+import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
+import 'package:projeto_game_quiz/core/models/requests/question_request.dart';
+import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
+import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
+import 'package:projeto_game_quiz/pages/tela14_fim_partida/tela14_fim_partida_widget.dart';
+import '/flutter_flow/flutter_flow_timer.dart';
+import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/form_field_controller.dart';
+import 'tela06_salade_jogo_widget.dart' show Tela06SaladeJogoWidget;
+
+class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
+  final formKey = GlobalKey<FormState>();
+  final _matchService = MatchService();
+  final _questionService = QuestionService();
+
+  FlutterFlowTimerController timerController = FlutterFlowTimerController(
+    StopWatchTimer(mode: StopWatchMode.countDown),
+  );
+
+  FormFieldController<String>? radioGroupValueController;
+
+  String? userId = '';
+  double points = 0;
+  int position = 0;
+  bool isLoading = true;
+  bool hasStarted = false;
+  int secondsRemaining = 10;
+  int elapsedSeconds = 0;
+  bool isDialogOpen = false;
+  bool gameFinished = false;
+  bool isButtonDisabled = false;
+  int timerMilliseconds = 10000;
+  bool isBtnEndGameManually = false;
+  int questionsAlreadyPresented = 0;
+  int? playersConnected = 0;
+  int repeatedQuestionAttempts = 0;
+  final int maxRepeatedAttempts = 3;
+  bool isDialogFinishingMatchOpen = false;
+
+  String timerValue = StopWatchTimer.getDisplayTime(
+    10000,
+    hours: false,
+    minute: false,
+    milliSecond: false,
+  );
+
+  String answerOptionId = "";
+  String? get selectedOption => radioGroupValueController?.value;
+
+  MatchResponse? matchInfo;
+  late MatchResultResponse gameResult;
+  late QuestionResponse question;
+
+  QuestionWebSocketService? _questionWebSocketService;
+  Timer? countupTimer;
+  Timer? countdownTimer;
+  Set<String> shownQuestionIds = {};
+  late BuildContext currentContext;
+  late BuildContext currentDialogFinishingMatchOpenContext;
+
+  @override
+  void initState(BuildContext context) {
+    currentContext = context;
+    getUserIdAsync((_) {});
+  }
+
+  @override
+  void dispose() {
+    timerController.dispose();
+    _questionWebSocketService?.disconnect();
+  }
+
+  void iniciarContadorRegressivo(Function setState) {
+    final timeToRespond =
+        matchInfo?.room?.roomConfiguration?.timeToRespond ?? 10;
+    secondsRemaining = timeToRespond;
+    elapsedSeconds = 0;
+
+    countdownTimer?.cancel();
+    countupTimer?.cancel();
+
+    countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
+      if (--secondsRemaining == 0) {
+        timer.cancel();
+        await sendUserResponseAsync("", setState);
+      }
+      setState(() {});
+    });
+
+    countupTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (++elapsedSeconds == timeToRespond) {
+        timer.cancel();
+      }
+    });
+  }
+
+  Future<void> getUserIdAsync(Function setState) async {
+    userId = await UserUtil.getUserId();
+    setState(() {});
+  }
+
+  Future<void> sendUserResponseAsync(
+    String optionAnswerId,
+    Function setState,
+  ) async {
+    _questionWebSocketService?.sendAnswerToWebSocket(
+            PlayerAnswerRequest(
+              matchId: matchInfo!.id,
+              questionId: question.id,
+              optionAnswerId: optionAnswerId,
+              responseTimeInSecond: elapsedSeconds,
+            ));
+
+    // final result = await _questionService.answerQuestionAsync(
+    //   userId!,
+    //   PlayerAnswerRequest(
+    //     matchId: matchInfo!.id,
+    //     questionId: question.id,
+    //     optionAnswerId: optionAnswerId,
+    //     responseTimeInSecond: elapsedSeconds,
+    //   ),
+    // );
+
+    // if (!result["isSuccess"]) {
+    //   if (result["error"].detail.code != "ERR_QUESTION_NOTFOUND") {
+    //     Warning00ErrorUtil.showDialogMessageError(
+    //       context,
+    //       result["error"].detail.message,
+    //       result["error"].detail.details,
+    //     );
+    //   } else {
+    //     //TODO logica para forçar a proxima questão.
+    //     var forceNextQuestion =
+    //         await _questionService.nextQuestionMatchAsync(matchInfo!.id);
+    //     if (forceNextQuestion["isSuccess"]) {
+    //       await fetchNextQuestionMatchAsync(
+    //           setState, forceNextQuestion["data"]);
+    //     }
+    //   }
+    // } else {
+    //   await getWebSocketEveryoneWhoRespondedAsync(setState);
+    // }
+  }
+
+  Future<void> fetchNextQuestionMatchAsync(
+    Function setState,
+    QuestionResponse? nextQuestion,
+  ) async {
+    if (userId == null || userId == "") await getUserIdAsync(setState);
+
+    var numberTimesDisplayed =
+        shownQuestionIds.where((e) => e == nextQuestion!.id);
+    while (numberTimesDisplayed.length > 0) {
+      if (numberTimesDisplayed.length > 1) {
+        countdownTimer?.cancel();
+        _questionWebSocketService?.disconnect();
+
+        Warning00ErrorUtil.showDialogMessageError(
+          context,
+          "Erro ao carregar nova pergunta",
+          "Detectamos perguntas repetidas consecutivamente. A partida será finalizada.",
+        );
+
+        Navigator.of(context!).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => Tela03PrincipalWidget(),
+          ),
+        );
+        return;
+      }
+
+      var forceNextQuestion =
+          await _questionService.nextQuestionMatchAsync(matchInfo!.id);
+
+      if (!forceNextQuestion["isSuccess"]) {
+        // Warning00ErrorUtil.showDialogMessageError(
+        //   context,
+        //   forceNextQuestion["error"].detail.message,
+        //   forceNextQuestion["error"].detail.details,
+        // );
+        return;
+      }
+
+      nextQuestion = forceNextQuestion["data"];
+    }
+
+    repeatedQuestionAttempts = 0;
+    shownQuestionIds.add(nextQuestion!.id);
+
+    setState(() {
+      isLoading = true;
+      answerOptionId = "";
+      radioGroupValueController?.value = null;
+    });
+
+    setState(() {
+      question = nextQuestion!;
+      isButtonDisabled = false;
+      isLoading = false;
+    });
+
+    iniciarContadorRegressivo(setState);
+  }
+
+  Future<void> getMatchStartNoticeAsync(Function setState) async {
+    if (hasStarted) return;
+
+    setState(() => isLoading = true);
+
+    final result = await _matchService.getMatchStartNoticeAsync(matchInfo!.id);
+
+    if (result["isSuccess"]) {
+      setState(() => hasStarted = true);
+    }
+  }
+
+  Future<void> getWebSocketEveryoneWhoRespondedAsync(Function setState) async {
+    _questionWebSocketService?.disconnect();
+
+    _questionWebSocketService = QuestionWebSocketService(
+      matchInfo: matchInfo!,
+      question: question,
+      userId: userId!,
+      onUpdate: (_) {},
+      onWaitingForPlayersResponse: (stats) {
+        if (!isDialogOpen) {
+          showDialogWaitingPlayer(context!);
+        }
+      },
+      onAllPlayersResponded: (stats) {
+        _questionWebSocketService?.disconnect();
+        closeDialogWaitingPlayer();
+
+        points += stats.hits
+                ?.where((e) => e.playerId == userId)
+                .fold(0.0, (sum, e) => sum! + (e.score?.toDouble() ?? 0.0)) ??
+            0.0;
+
+        questionsAlreadyPresented = stats.totalQuestionsResponded!;
+
+        if (stats.gameFinished == true) {
+          endGameFlow(setState, gameResultFromBackend: stats.gameResult);
+        } else if (stats.nextQuestion != null) {
+          fetchNextQuestionMatchAsync(setState, stats.nextQuestion);
+        }
+      },
+      onError: (e) {
+        print("Erro no WebSocket: $e");
+        handleWebSocketFailureIfNeeded(setState);
+      },
+      onDone: () => print("Conexão WebSocket encerrada."),
+    );
+
+    _questionWebSocketService?.connect();
+  }
+
+  void showDialogWaitingPlayer(BuildContext context) {
+    if (isDialogOpen) return;
+
+    isDialogOpen = true;
+    currentContext = context;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: Text("Aguardando jogadores..."),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text("Esperando todos responderem a pergunta..."),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _questionWebSocketService?.disconnect();
+            },
+            child: const Text("Fechar"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void showDialogFinishingMatch(BuildContext context) {
+    if (isDialogFinishingMatchOpen) return;
+
+    isDialogFinishingMatchOpen = true;
+    currentDialogFinishingMatchOpenContext = context;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: Text("Finalizando a partida..."),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text("Preparar os resultados da partida, aguardem..."),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text("Fechar"),
+          ),
+          if (isBtnEndGameManually)
+            TextButton(
+              onPressed: () async {
+                await endGameFlow(() => {});
+              },
+              child: const Text("Terminar manualmente"),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void closeDialogWaitingPlayer() {
+    if (isDialogOpen && Navigator.canPop(currentContext)) {
+      Navigator.of(currentContext).pop();
+      isDialogOpen = false;
+    }
+  }
+
+  void closeDialogEndingGame() {
+    if (isDialogFinishingMatchOpen &&
+        Navigator.canPop(currentDialogFinishingMatchOpenContext)) {
+      Navigator.of(currentDialogFinishingMatchOpenContext).pop();
+      isDialogFinishingMatchOpen = false;
+    }
+  }
+
+  Future<void> endGameFlow(Function setState,
+      {dynamic gameResultFromBackend}) async {
+    gameFinished = true;
+    countdownTimer?.cancel();
+    countupTimer?.cancel();
+    shownQuestionIds.clear();
+    closeDialogWaitingPlayer();
+    _questionWebSocketService?.disconnect();
+
+    showDialogFinishingMatch(context!);
+
+    try {
+      if (gameResultFromBackend == null) {
+        var resultEndGame = await _matchService.endGameAsync(matchInfo!.id);
+        if (resultEndGame["isSuccess"]) {
+          Navigator.of(context!).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => Tela14FimPartidaViewWidget(
+                gameResultInfo: resultEndGame["data"],
+                matchInfo: matchInfo,
+              ),
+            ),
+          );
+        } else {
+          closeDialogEndingGame();
+          Warning00ErrorUtil.showDialogMessageError(
+            context,
+            resultEndGame["error"].detail.message,
+            resultEndGame["error"].detail.details,
+          );
+        }
+      }
+
+      setState(() => gameResult = gameResultFromBackend);
+      closeDialogEndingGame();
+
+      Navigator.of(context!).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => Tela14FimPartidaViewWidget(
+            gameResultInfo: gameResult,
+            matchInfo: matchInfo,
+          ),
+        ),
+      );
+    } catch (e) {
+      //if(){
+      var resultEndGame = await _matchService.endGameAsync(matchInfo!.id);
+      if (resultEndGame["isSuccess"]) {
+        Navigator.of(context!).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => Tela14FimPartidaViewWidget(
+              gameResultInfo: resultEndGame["data"],
+              matchInfo: matchInfo,
+            ),
+          ),
+        );
+      } else {
+        Warning00ErrorUtil.showDialogMessageError(
+          context,
+          resultEndGame["error"].detail.message,
+          resultEndGame["error"].detail.details,
+        );
+      }
+      // closeDialogEndingGame();
+      // Warning00ErrorUtil.showDialogMessageError(
+      //   context,
+      //   "Erro ao finalizar partida",
+      //   e.toString(),
+      // );
+    }
+  }
+
+  void handleWebSocketFailureIfNeeded(Function setState) {
+    final totalQuestionsToRespond =
+        matchInfo?.room?.roomConfiguration?.numberOfQuestions ?? 0;
+
+    if (questionsAlreadyPresented >= totalQuestionsToRespond) {
+      setState(() {
+        isBtnEndGameManually = true;
+      });
+    } else {
+      Navigator.of(context!).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => Tela03PrincipalWidget(),
+        ),
+      );
+    }
+  }
+
+  Future<void> inactivatePlayerInMatchAsync() async {
+    var result = await _matchService.inactivatePlayerInMatchAsync(
+        matchInfo!.id, userId!);
+
+    if (result["isSuccess"]) {
+    } else {}
+  }
+}
+
+
+
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:projeto_game_quiz/pages/tela03_principal/tela03_principal_widget.dart';
+import 'package:stop_watch_timer/stop_watch_timer.dart';
+import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warning00_campo_vazio_widget.dart';
+import 'package:projeto_game_quiz/core/api/services/match_service.dart';
+import 'package:projeto_game_quiz/core/api/services/question_service.dart';
+import 'package:projeto_game_quiz/core/api/services/question_web_socket_service.dart';
+import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
+import 'package:projeto_game_quiz/core/models/requests/question_request.dart';
+import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
+import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
+import 'package:projeto_game_quiz/pages/tela14_fim_partida/tela14_fim_partida_widget.dart';
+import '/flutter_flow/flutter_flow_timer.dart';
+import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/form_field_controller.dart';
+import 'tela06_salade_jogo_widget.dart' show Tela06SaladeJogoWidget;
+
+class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
+  final formKey = GlobalKey<FormState>();
+  final _matchService = MatchService();
+  final _questionService = QuestionService();
+
+  FlutterFlowTimerController timerController = FlutterFlowTimerController(
+    StopWatchTimer(mode: StopWatchMode.countDown),
+  );
+
+  FormFieldController<String>? radioGroupValueController;
+  bool isWebSocketConnected = false;
+
+  String? userId = '';
+  double points = 0;
+  int position = 0;
+  bool isLoading = true;
+  bool hasStarted = false;
+  int secondsRemaining = 10;
+  int elapsedSeconds = 0;
+  bool isDialogOpen = false;
+  bool gameFinished = false;
+  bool isButtonDisabled = false;
+  int timerMilliseconds = 10000;
+  bool isBtnEndGameManually = false;
+  int questionsAlreadyPresented = 0;
+  int? playersConnected = 0;
+  int repeatedQuestionAttempts = 0;
+  final int maxRepeatedAttempts = 3;
+  bool isDialogFinishingMatchOpen = false;
+  String? lastQuestionHandled;
+
+  String timerValue = StopWatchTimer.getDisplayTime(
+    10000,
+    hours: false,
+    minute: false,
+    milliSecond: false,
+  );
+
+  String answerOptionId = "";
+  String? get selectedOption => radioGroupValueController?.value;
+
+  MatchResponse? matchInfo;
+  late MatchResultResponse gameResult;
+  late QuestionResponse question;
+
+  QuestionWebSocketService? _questionWebSocketService;
+  Timer? countupTimer;
+  Timer? safetyTimeout;
+  Timer? countdownTimer;
+  Set<String> shownQuestionIds = {};
+  late BuildContext currentContext;
+  late BuildContext currentDialogFinishingMatchOpenContext;
+
+  @override
+  void initState(BuildContext context) {
+    currentContext = context;
+    getUserIdAsync((_) {});
+  }
+
+  @override
+  void dispose() {
+    timerController.dispose();
+    countdownTimer?.cancel();
+    countupTimer?.cancel();
+    _questionWebSocketService?.disconnect();
+  }
+
+  void cancelarTimers() {
+    countdownTimer?.cancel();
+    countupTimer?.cancel();
+  }
+
+  void iniciarContadorRegressivo(Function setState) {
+    final timeToRespond =
+        matchInfo?.room?.roomConfiguration?.timeToRespond ?? 10;
+    secondsRemaining = timeToRespond;
+    elapsedSeconds = 0;
+
+    countdownTimer?.cancel();
+    countupTimer?.cancel();
+
+    countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
+      if (--secondsRemaining == 0) {
+        timer.cancel();
+        await sendUserResponseAsync("", setState);
+      }
+      setState(() {});
+    });
+
+    countupTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (++elapsedSeconds == timeToRespond) {
+        timer.cancel();
+      }
+    });
+  }
+
+  Future<void> getUserIdAsync(Function setState) async {
+    userId = await UserUtil.getUserId();
+    setState(() {});
+  }
+
+  Future<void> sendUserResponseAsync(
+    String optionAnswerId,
+    Function setState,
+  ) async {
+    _questionWebSocketService?.sendAnswerToWebSocket(PlayerAnswerRequest(
+      matchId: matchInfo!.id,
+      questionId: question.id,
+      optionAnswerId: optionAnswerId,
+      responseTimeInSecond: elapsedSeconds,
+    ));
+
+    final result = await _questionService.answerQuestionAsync(
+      userId!,
+      PlayerAnswerRequest(
+        matchId: matchInfo!.id,
+        questionId: question.id,
+        optionAnswerId: optionAnswerId,
+        responseTimeInSecond: elapsedSeconds,
+      ),
+    );
+
+    if (!result["isSuccess"]) {
+      if (result["error"].detail.code != "ERR_QUESTION_NOTFOUND") {
+        Warning00ErrorUtil.showDialogMessageError(
+          context,
+          result["error"].detail.message,
+          result["error"].detail.details,
+        );
+      } else {
+        //TODO logica para forçar a proxima questão.
+        var forceNextQuestion =
+            await _questionService.nextQuestionMatchAsync(matchInfo!.id);
+        if (forceNextQuestion["isSuccess"]) {
+          await fetchNextQuestionMatchAsync(
+              setState, forceNextQuestion["data"]);
+        }
+      }
+    } else {
+      //await getWebSocketEveryoneWhoRespondedAsync(setState);
+    }
+  }
+
+  Future<void> setupGame(
+      Function setState, QuestionResponse? nextQuestion) async {
+    await fetchNextQuestionMatchAsync(setState, nextQuestion);
+    await getWebSocketEveryoneWhoRespondedAsync(setState);
+  }
+
+  Future<void> fetchNextQuestionMatchAsync(
+    Function setState,
+    QuestionResponse? nextQuestion,
+  ) async {
+    if (userId == null || userId == "") await getUserIdAsync(setState);
+
+    var numberTimesDisplayed =
+        shownQuestionIds.where((e) => e == nextQuestion!.id);
+    while (numberTimesDisplayed.length > 0) {
+      if (numberTimesDisplayed.length > 1) {
+        countdownTimer?.cancel();
+        // _questionWebSocketService?.disconnect();
+
+        Warning00ErrorUtil.showDialogMessageError(
+          context,
+          "Erro ao carregar nova pergunta",
+          "Detectamos perguntas repetidas consecutivamente. A partida será finalizada.",
+        );
+
+        Navigator.of(context!).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => Tela03PrincipalWidget(),
+          ),
+        );
+        return;
+      }
+
+      // var forceNextQuestion =
+      //     await _questionService.nextQuestionMatchAsync(matchInfo!.id);
+
+      // if (!forceNextQuestion["isSuccess"]) {
+      //   // Warning00ErrorUtil.showDialogMessageError(
+      //   //   context,
+      //   //   forceNextQuestion["error"].detail.message,
+      //   //   forceNextQuestion["error"].detail.details,
+      //   // );
+      //   return;
+      // }
+
+      // nextQuestion = forceNextQuestion["data"];
+    }
+
+    repeatedQuestionAttempts = 0;
+    shownQuestionIds.add(nextQuestion!.id);
+
+    setState(() {
+      isLoading = true;
+      answerOptionId = "";
+      radioGroupValueController?.value = null;
+    });
+
+    setState(() {
+      question = nextQuestion;
+      isButtonDisabled = false;
+      isLoading = false;
+    });
+
+    iniciarContadorRegressivo(setState);
+  }
+
+  Future<void> getMatchStartNoticeAsync(Function setState) async {
+    if (hasStarted) return;
+
+    setState(() => isLoading = true);
+
+    final result = await _matchService.getMatchStartNoticeAsync(matchInfo!.id);
+
+    if (result["isSuccess"]) {
+      setState(() => hasStarted = true);
+    }
+  }
+
+  Future<void> getWebSocketEveryoneWhoRespondedAsync(Function setState) async {
+    //_questionWebSocketService?.disconnect();
+    if (isWebSocketConnected) return; // impede múltiplas conexões
+
+    _questionWebSocketService = QuestionWebSocketService(
+      matchInfo: matchInfo!,
+      question: question,
+      userId: userId!,
+      onUpdate: (_) {},
+      onWaitingForPlayersResponse: (stats) {
+        if (!isDialogOpen) {
+          showDialogWaitingPlayer(context!);
+        }
+        safetyTimeout = Timer(Duration(seconds: 60), () {
+          if (!gameFinished) {
+            _questionWebSocketService?.disconnect();
+            Navigator.of(context!).push(
+              MaterialPageRoute(builder: (_) => Tela03PrincipalWidget()),
+            );
+          } else {
+            endGameFlow(setState, gameResultFromBackend: stats.gameResult);
+          }
+        });
+      },
+      onAllPlayersResponded: (stats) {
+        safetyTimeout?.cancel();
+        //_questionWebSocketService?.disconnect();
+        closeDialogWaitingPlayer();
+
+
+        points += stats.hits
+                ?.where((e) => e.playerId == userId)
+                .fold(0.0, (sum, e) => sum! + (e.score?.toDouble() ?? 0.0)) ??
+            0.0;
+
+        questionsAlreadyPresented = stats.totalQuestionsResponded!;
+
+        if (stats.gameFinished == true) {
+          gameFinished = stats.gameFinished!;
+          endGameFlow(setState, gameResultFromBackend: stats.gameResult);
+        } else if (stats.nextQuestion != null) {
+          fetchNextQuestionMatchAsync(setState, stats.nextQuestion);
+        }
+      },
+      onError: (e) {
+        print("Erro no WebSocket: $e");
+        if (!gameFinished) {
+          closeDialogWaitingPlayer();
+          closeDialogEndingGame();
+          showDialogErrorAndExit(
+              "Erro de conexão", "Perdemos a conexão com o servidor.");
+        }
+      },
+      onDone: () {
+        print("Conexão WebSocket encerrada.");
+
+        if (questionsAlreadyPresented !=
+            matchInfo!.room!.roomConfiguration!.numberOfQuestions - 1) {
+          closeDialogWaitingPlayer();
+          closeDialogEndingGame();
+          showDialogErrorAndExit(
+              "Conexão encerrada", "O servidor foi desconectado.");
+        }
+        else{
+          endGameFlow(setState, gameResultFromBackend:null);
+
+        }
+      },
+    );
+
+    _questionWebSocketService?.connect();
+    isWebSocketConnected = true;
+  }
+
+  void showDialogWaitingPlayer(BuildContext context) {
+    if (isDialogOpen) return;
+
+    isDialogOpen = true;
+    currentContext = context;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: Text("Aguardando jogadores..."),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text("Esperando todos responderem a pergunta..."),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _questionWebSocketService?.disconnect();
+            },
+            child: const Text("Fechar"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void showDialogFinishingMatch(BuildContext context) {
+    if (isDialogFinishingMatchOpen) return;
+
+    isDialogFinishingMatchOpen = true;
+    currentDialogFinishingMatchOpenContext = context;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: Text("Finalizando a partida..."),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text("Preparar os resultados da partida, aguardem..."),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text("Fechar"),
+          ),
+          if (isBtnEndGameManually)
+            TextButton(
+              onPressed: () async {
+                await endGameFlow(() => {});
+              },
+              child: const Text("Terminar manualmente"),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void closeDialogWaitingPlayer() {
+    if (isDialogOpen && Navigator.canPop(currentContext)) {
+      Navigator.of(currentContext).pop();
+      isDialogOpen = false;
+    }
+  }
+
+  void closeDialogEndingGame() {
+    if (isDialogFinishingMatchOpen &&
+        Navigator.canPop(currentDialogFinishingMatchOpenContext)) {
+      Navigator.of(currentDialogFinishingMatchOpenContext).pop();
+      isDialogFinishingMatchOpen = false;
+    }
+  }
+
+  Future<void> endGameFlow(Function setState,
+      {dynamic gameResultFromBackend}) async {
+    gameFinished = true;
+    countdownTimer?.cancel();
+    countupTimer?.cancel();
+    shownQuestionIds.clear();
+    closeDialogWaitingPlayer();
+    _questionWebSocketService?.disconnect();
+
+    showDialogFinishingMatch(context!);
+
+    try {
+      if (gameResultFromBackend == null) {
+        var resultEndGame = await _matchService.endGameAsync(matchInfo!.id);
+        if (resultEndGame["isSuccess"]) {
+          Navigator.of(context!).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => Tela14FimPartidaViewWidget(
+                gameResultInfo: resultEndGame["data"],
+                matchInfo: matchInfo,
+              ),
+            ),
+          );
+        } else {
+          closeDialogEndingGame();
+          Warning00ErrorUtil.showDialogMessageError(
+            context,
+            resultEndGame["error"].detail.message,
+            resultEndGame["error"].detail.details,
+          );
+        }
+      }
+
+      setState(() => gameResult = gameResultFromBackend);
+      closeDialogEndingGame();
+
+      Navigator.of(context!).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => Tela14FimPartidaViewWidget(
+            gameResultInfo: gameResult,
+            matchInfo: matchInfo,
+          ),
+        ),
+      );
+    } catch (e) {
+      //if(){
+      var resultEndGame = await _matchService.endGameAsync(matchInfo!.id);
+      if (resultEndGame["isSuccess"]) {
+        Navigator.of(context!).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => Tela14FimPartidaViewWidget(
+              gameResultInfo: resultEndGame["data"],
+              matchInfo: matchInfo,
+            ),
+          ),
+        );
+      } else {
+        Warning00ErrorUtil.showDialogMessageError(
+          context,
+          resultEndGame["error"].detail.message,
+          resultEndGame["error"].detail.details,
+        );
+      }
+      // closeDialogEndingGame();
+      // Warning00ErrorUtil.showDialogMessageError(
+      //   context,
+      //   "Erro ao finalizar partida",
+      //   e.toString(),
+      // );
+    }
+  }
+
+  void handleWebSocketFailureIfNeeded(Function setState) {
+    final totalQuestionsToRespond =
+        matchInfo?.room?.roomConfiguration?.numberOfQuestions ?? 0;
+
+    if (questionsAlreadyPresented >= totalQuestionsToRespond) {
+      setState(() {
+        isBtnEndGameManually = true;
+      });
+    } else {
+      showDialogErrorAndExit(
+        "Erro de conexão",
+        "O jogo foi interrompido devido à falha de comunicação com o servidor.",
+      );
+    }
+  }
+
+  Future<void> inactivatePlayerInMatchAsync() async {
+    var result = await _matchService.inactivatePlayerInMatchAsync(
+        matchInfo!.id, userId!);
+
+    if (result["isSuccess"]) {
+    } else {}
+  }
+
+  void showDialogErrorAndExit(String title, String message) {
+    showDialog(
+      context: context!,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context!).push(
+                MaterialPageRoute(builder: (_) => Tela03PrincipalWidget()),
+              );
+            },
+            child: Text("Voltar ao início"),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_widgets.dart';
+import '/flutter_flow/flutter_flow_icon_button.dart';
+import '/flutter_flow/flutter_flow_radio_button.dart';
+import '/flutter_flow/flutter_flow_theme.dart';
+import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/form_field_controller.dart';
+import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'tela06_salade_jogo_model.dart';
+export 'tela06_salade_jogo_model.dart';
+
+/// Jogadas
+class Tela06SaladeJogoWidget extends StatefulWidget {
+  final dynamic matchInfo;
+  Tela06SaladeJogoWidget(
+      {super.key,
+      dynamic matchInfo,
+      this.recebeuNotificaca,
+      this.playersConnected,
+      this.nextQuestion})
+      : this.matchInfo = matchInfo;
+  final bool? recebeuNotificaca;
+  final int? playersConnected;
+  final QuestionResponse? nextQuestion;
+
+  static String routeName = 'Tela06SaladeJogo';
+  static String routePath = '/tela06SaladeJogo';
+
+  @override
+  State<Tela06SaladeJogoWidget> createState() => _Tela06SaladeJogoWidgetState();
+}
+
+class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
+    with WidgetsBindingObserver {
+  late Tela06SaladeJogoModel _model;
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
+    _model = createModel(context, () => Tela06SaladeJogoModel());
+    _model.radioGroupValueController = FormFieldController<String>(null);
+    if (widget.matchInfo != null) {
+      _model.matchInfo = widget.matchInfo;
+      _model.playersConnected = widget.playersConnected;
+
+      _model.getUserIdAsync(setState);
+      if (widget.recebeuNotificaca == null) {
+        _model.getMatchStartNoticeAsync(setState);
+      }
+      _model.setupGame(safeSetState, widget.nextQuestion);
+      // _model.fetchNextQuestionMatchAsync();
+      // _model.getWebSocketEveryoneWhoRespondedAsync(setState);
+    }
+  }
+
+  void safeSetState(VoidCallback fn) {
+    if (mounted) setState(fn);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _model.dispose();
+    super.dispose();
+  }
+
+@override
+void didChangeAppLifecycleState(AppLifecycleState state) {
+  super.didChangeAppLifecycleState(state);
+
+  print('Mudança de ciclo de vida: $state');
+
+  if (state == AppLifecycleState.paused) {
+    Future.delayed(Duration(seconds: 5), () {
+      if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.paused) {
+        print('Confirmado: app ainda está em segundo plano após 5s.');
+        _model.inactivatePlayerInMatchAsync();
+      }
+    });
+  } else if (state == AppLifecycleState.resumed) {
+    print('App voltou ao primeiro plano');
+  }
+}
+
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+        onWillPop: () async => false,
+        child: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).unfocus();
+            FocusManager.instance.primaryFocus?.unfocus();
+          },
+          child: Scaffold(
+            key: scaffoldKey,
+            backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+            appBar: AppBar(
+              backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+              automaticallyImplyLeading: false,
+              leading: FlutterFlowIconButton(
+                borderColor: Colors.transparent,
+                borderRadius: 30.0,
+                borderWidth: 1.0,
+                buttonSize: 60.0,
+                icon: FaIcon(
+                  FontAwesomeIcons.bars,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                  size: 25.0,
+                ),
+                onPressed: () {
+                  print('IconButton pressed ...');
+                },
+              ),
+              title: Text(
+                'GAME QUIZ',
+                style: FlutterFlowTheme.of(context).headlineSmall.override(
+                      fontFamily: 'Inter Tight',
+                      color: Color(0xFFEC8D0D),
+                      letterSpacing: 0.0,
+                      fontWeight: FontWeight.w500,
+                    ),
+              ),
+              actions: [],
+              centerTitle: true,
+              elevation: 4.0,
+            ),
+            body: SafeArea(
+              top: true,
+              child: Align(
+                alignment: AlignmentDirectional(0.0, 0.0),
+                child: Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  constraints: BoxConstraints(
+                    minWidth: 350.0,
+                    minHeight: 350.0,
+                    maxWidth: 1024.0,
+                    maxHeight: 1360.0,
+                  ),
+                  decoration: BoxDecoration(
+                    color: FlutterFlowTheme.of(context).primaryBackground,
+                  ),
+                  child: Padding(
+                      padding:
+                          EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.only(bottom: 24.0),
+                        physics: BouncingScrollPhysics(),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 350.0,
+                              height: 60.0,
+                              decoration: BoxDecoration(
+                                color: Color(0x00F1F4F8),
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(0.0),
+                                  bottomRight: Radius.circular(0.0),
+                                  topLeft: Radius.circular(0.0),
+                                  topRight: Radius.circular(0.0),
+                                ),
+                              ),
+                              alignment: AlignmentDirectional(0.0, 0.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Align(
+                                    alignment: AlignmentDirectional(0.0, -1.0),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        //Falta codigo não remover esta parte
+                                        Align(
+                                          alignment:
+                                              AlignmentDirectional(0.0, 0.0),
+                                          child: Container(
+                                            width: 170.0,
+                                            height: 45.0,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFF01BF01),
+                                              borderRadius:
+                                                  BorderRadius.circular(50.0),
+                                            ),
+                                            child: Align(
+                                              alignment: AlignmentDirectional(
+                                                  0.0, 0.0),
+                                              child: Wrap(
+                                                spacing: 5.0,
+                                                runSpacing: 0.0,
+                                                alignment: WrapAlignment.start,
+                                                crossAxisAlignment:
+                                                    WrapCrossAlignment.start,
+                                                direction: Axis.horizontal,
+                                                runAlignment:
+                                                    WrapAlignment.start,
+                                                verticalDirection:
+                                                    VerticalDirection.down,
+                                                clipBehavior: Clip.none,
+                                                children: [
+                                                  Text(
+                                                    'POSIÇÃO:',
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          fontFamily: 'Inter',
+                                                          color: Colors.black,
+                                                          fontSize: 16.0,
+                                                          letterSpacing: 0.0,
+                                                        ),
+                                                  ),
+                                                  Text(
+                                                    '10',
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          fontFamily: 'Inter',
+                                                          color: Colors.black,
+                                                          fontSize: 16.0,
+                                                          letterSpacing: 0.0,
+                                                        ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Align(
+                                          alignment:
+                                              AlignmentDirectional(0.0, 0.0),
+                                          child: Container(
+                                            width: 170.0,
+                                            height: 45.0,
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFF01BF01),
+                                              borderRadius:
+                                                  BorderRadius.circular(20.0),
+                                            ),
+                                            child: Align(
+                                              alignment: AlignmentDirectional(
+                                                  0.0, 0.0),
+                                              child: Wrap(
+                                                spacing: 5.0,
+                                                runSpacing: 0.0,
+                                                alignment: WrapAlignment.start,
+                                                crossAxisAlignment:
+                                                    WrapCrossAlignment.start,
+                                                direction: Axis.horizontal,
+                                                runAlignment:
+                                                    WrapAlignment.start,
+                                                verticalDirection:
+                                                    VerticalDirection.down,
+                                                clipBehavior: Clip.none,
+                                                children: [
+                                                  Text(
+                                                    'PONTOS:',
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          fontFamily: 'Inter',
+                                                          color: Colors.black,
+                                                          fontSize: 16.0,
+                                                          letterSpacing: 0.0,
+                                                        ),
+                                                  ),
+                                                  Text(
+                                                    '${_model.points}',
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          fontFamily: 'Inter',
+                                                          color: Colors.black,
+                                                          fontSize: 16.0,
+                                                          letterSpacing: 0.0,
+                                                        ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ]
+                                          .divide(SizedBox(width: 10.0))
+                                          .addToStart(SizedBox(width: 0.0))
+                                          .addToEnd(SizedBox(width: 0.0)),
+                                    ),
+                                  ),
+                                ]
+                                    .divide(SizedBox(height: 0.0))
+                                    .addToStart(SizedBox(height: 2.0))
+                                    .addToEnd(SizedBox(height: 2.0)),
+                              ),
+                            ),
+                            Align(
+                              alignment: AlignmentDirectional(0.0, 0.0),
+                              child: Container(
+                                width: 350.0,
+                                height: 130.0,
+                                constraints: BoxConstraints(
+                                  minWidth: 300.0,
+                                  minHeight: 130.0,
+                                  maxWidth: 900.0,
+                                  maxHeight: 250.0,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: FlutterFlowTheme.of(context)
+                                      .primaryBackground,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      blurRadius: 4.0,
+                                      color: Color(0x33000000),
+                                      offset: Offset(
+                                        0.0,
+                                        2.0,
+                                      ),
+                                      spreadRadius: 5.0,
+                                    )
+                                  ],
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                child: Align(
+                                  alignment: AlignmentDirectional(0.0, -1.0),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Align(
+                                        alignment:
+                                            AlignmentDirectional(0.0, -1.0),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Padding(
+                                              padding: EdgeInsetsDirectional
+                                                  .fromSTEB(
+                                                      0.0, 10.0, 0.0, 0.0),
+                                              child: Container(
+                                                width: 320.0,
+                                                height: 25.0,
+                                                decoration: BoxDecoration(
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .primaryBackground,
+                                                ),
+                                                child: Align(
+                                                  alignment:
+                                                      AlignmentDirectional(
+                                                          0.0, 0.0),
+                                                  child: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.max,
+                                                    children: [
+                                                      Icon(
+                                                        Icons.quiz,
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .primaryText,
+                                                        size: 18.0,
+                                                      ),
+                                                      Text(
+                                                        '${_model.questionsAlreadyPresented}',
+                                                        style:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .bodyMedium
+                                                                .override(
+                                                                  fontFamily:
+                                                                      'Inter',
+                                                                  color: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .primaryText,
+                                                                  fontSize:
+                                                                      16.0,
+                                                                  letterSpacing:
+                                                                      0.0,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                      ),
+                                                      Text(
+                                                        '/',
+                                                        style:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .bodyMedium
+                                                                .override(
+                                                                  fontFamily:
+                                                                      'Inter',
+                                                                  color: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .primaryText,
+                                                                  fontSize:
+                                                                      16.0,
+                                                                  letterSpacing:
+                                                                      0.0,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                      ),
+                                                      Text(
+                                                        '${_model.matchInfo!.room!.roomConfiguration!.numberOfQuestions}',
+                                                        style:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .bodyMedium
+                                                                .override(
+                                                                  fontFamily:
+                                                                      'Inter',
+                                                                  color: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .primaryText,
+                                                                  fontSize:
+                                                                      16.0,
+                                                                  letterSpacing:
+                                                                      0.0,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                      ),
+                                                    ]
+                                                        .divide(SizedBox(
+                                                            width: 2.0))
+                                                        .addToStart(SizedBox(
+                                                            width: 5.0)),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ]
+                                              .divide(SizedBox(width: 1.0))
+                                              .addToStart(SizedBox(width: 15.0))
+                                              .addToEnd(SizedBox(width: 15.0)),
+                                        ),
+                                      ),
+                                      Container(
+                                        width: double.infinity,
+                                        height: 90.0,
+                                        decoration: BoxDecoration(
+                                          color: FlutterFlowTheme.of(context)
+                                              .primaryBackground,
+                                          borderRadius: BorderRadius.only(
+                                            bottomLeft: Radius.circular(10.0),
+                                            bottomRight: Radius.circular(10.0),
+                                            topLeft: Radius.circular(0.0),
+                                            topRight: Radius.circular(0.0),
+                                          ),
+                                        ),
+                                        child: Align(
+                                          alignment:
+                                              AlignmentDirectional(0.0, 0.0),
+                                          child: _model.isLoading
+                                              ? CircularProgressIndicator()
+                                              : Text(
+                                                  '${_model.question.utterance}',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .titleMedium
+                                                      .override(
+                                                        fontFamily:
+                                                            'Inter Tight',
+                                                        letterSpacing: 0.0,
+                                                      ),
+                                                ),
+                                        ),
+                                      ),
+                                    ]
+                                        .divide(SizedBox(height: 0.0))
+                                        .addToStart(SizedBox(height: 2.0))
+                                        .addToEnd(SizedBox(height: 2.0)),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Container(
+                                width: 35.0,
+                                height: 35.0,
+                                decoration: BoxDecoration(
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryBackground,
+                                  borderRadius: BorderRadius.circular(40.0),
+                                  border: Border.all(
+                                    color: Color(0xFFFF0505),
+                                  ),
+                                ),
+                                child: Center(
+                                    child: Text(
+                                  '${_model.secondsRemaining}s',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color: _model.secondsRemaining <= 3
+                                        ? Colors.red
+                                        : Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ))),
+                            Container(
+                              width: 390.0,
+                              height: 420.0,
+                              decoration: BoxDecoration(
+                                color: FlutterFlowTheme.of(context)
+                                    .primaryBackground,
+                              ),
+                              child: Align(
+                                alignment: AlignmentDirectional(0.0, 0.0),
+                                child: Form(
+                                  key: _model.formKey,
+                                  autovalidateMode: AutovalidateMode.disabled,
+                                  child: Align(
+                                    alignment: AlignmentDirectional(0.0, 0.0),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        if (_model.isLoading)
+                                          CircularProgressIndicator()
+                                        else if (_model
+                                                .question.optionAnswers !=
+                                            null)
+                                          ..._model.question.optionAnswers!
+                                              .asMap()
+                                              .entries
+                                              .map((entry) {
+                                            // final i = entry.key;
+                                            final e = entry.value;
+
+                                            return Align(
+                                              alignment: AlignmentDirectional(
+                                                  0.0, 0.0),
+                                              child: Container(
+                                                width: 350.0,
+                                                height: 45.0,
+                                                constraints: BoxConstraints(
+                                                  minWidth: 350.0,
+                                                  minHeight: 45.0,
+                                                  maxWidth: 900.0,
+                                                  maxHeight: 100.0,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: Color(0xFFEC8D0D),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      blurRadius: 4.0,
+                                                      color: Color(0x33000000),
+                                                      offset: Offset(0.0, 2.0),
+                                                      spreadRadius: 5.0,
+                                                    )
+                                                  ],
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10.0),
+                                                ),
+                                                alignment: AlignmentDirectional(
+                                                    0.0, 0.0),
+                                                child: Align(
+                                                  alignment:
+                                                      AlignmentDirectional(
+                                                          0.0, 0.0),
+                                                  child: Container(
+                                                    width: 350.0,
+                                                    height: double.infinity,
+                                                    child: Stack(
+                                                      alignment:
+                                                          AlignmentDirectional(
+                                                              0.0, 0.0),
+                                                      children: [
+                                                        Align(
+                                                          alignment:
+                                                              AlignmentDirectional(
+                                                                  0.0, 0.0),
+                                                          child: Padding(
+                                                            padding:
+                                                                EdgeInsetsDirectional
+                                                                    .fromSTEB(
+                                                                        12.0,
+                                                                        0.0,
+                                                                        0.0,
+                                                                        0.0),
+                                                            child: Row(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .max,
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                Text(
+                                                                  e.codeOption,
+                                                                  style: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .headlineSmall
+                                                                      .override(
+                                                                        fontFamily:
+                                                                            'Inter Tight',
+                                                                        color: Colors
+                                                                            .black,
+                                                                        letterSpacing:
+                                                                            0.0,
+                                                                      ),
+                                                                ),
+                                                                Align(
+                                                                  alignment:
+                                                                      AlignmentDirectional(
+                                                                          0.0,
+                                                                          0.0),
+                                                                  child: Text(
+                                                                    e.textOption,
+                                                                    style: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .titleLarge
+                                                                        .override(
+                                                                          fontFamily:
+                                                                              'Inter Tight',
+                                                                          color:
+                                                                              Colors.black,
+                                                                          letterSpacing:
+                                                                              0.0,
+                                                                        ),
+                                                                  ),
+                                                                ),
+                                                                Opacity(
+                                                                  opacity: 0.0,
+                                                                  child: Align(
+                                                                    alignment:
+                                                                        AlignmentDirectional(
+                                                                            0.0,
+                                                                            0.0),
+                                                                    child:
+                                                                        FaIcon(
+                                                                      FontAwesomeIcons
+                                                                          .font,
+                                                                      color: Colors
+                                                                          .black,
+                                                                      size:
+                                                                          24.0,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Align(
+                                                          alignment:
+                                                              AlignmentDirectional(
+                                                                  0.0, 0.0),
+                                                          child:
+                                                              FlutterFlowRadioButton(
+                                                            options: [
+                                                              '${e.codeOption}'
+                                                            ],
+                                                            onChanged: (val) {
+                                                              if (e.codeOption ==
+                                                                  val)
+                                                                setState(() {
+                                                                  _model.answerOptionId =
+                                                                      e.id;
+                                                                });
+                                                              safeSetState(
+                                                                  () {});
+                                                            },
+                                                            controller: _model
+                                                                .radioGroupValueController!,
+                                                            optionHeight: 60.0,
+                                                            optionWidth: 350.0,
+                                                            textStyle:
+                                                                FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .labelMedium
+                                                                    .override(
+                                                                      fontFamily:
+                                                                          'Inter',
+                                                                      letterSpacing:
+                                                                          0.0,
+                                                                    ),
+                                                            selectedTextStyle:
+                                                                FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .bodyMedium
+                                                                    .override(
+                                                                      fontFamily:
+                                                                          'Inter',
+                                                                      color: Color(
+                                                                          0x0014181B),
+                                                                      fontSize:
+                                                                          16.0,
+                                                                      letterSpacing:
+                                                                          0.0,
+                                                                    ),
+                                                            textPadding:
+                                                                EdgeInsetsDirectional
+                                                                    .fromSTEB(
+                                                                        250.0,
+                                                                        0.0,
+                                                                        0.0,
+                                                                        0.0),
+                                                            buttonPosition:
+                                                                RadioButtonPosition
+                                                                    .right,
+                                                            direction:
+                                                                Axis.vertical,
+                                                            radioButtonColor:
+                                                                Color(
+                                                                    0xFF00C90C),
+                                                            inactiveRadioButtonColor:
+                                                                Color(
+                                                                    0xFF14181B),
+                                                            toggleable: false,
+                                                            horizontalAlignment:
+                                                                WrapAlignment
+                                                                    .start,
+                                                            verticalAlignment:
+                                                                WrapCrossAlignment
+                                                                    .start,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }),
+                                        Align(
+                                          alignment:
+                                              AlignmentDirectional(0.0, 0.0),
+                                          child: FFButtonWidget(
+                                            onPressed: _model.isButtonDisabled
+                                                ? null
+                                                : () async {
+                                                    if (_model.answerOptionId ==
+                                                        "") {
+                                                      return;
+                                                    }
+
+                                                    setState(() {
+                                                      _model.isButtonDisabled =
+                                                          true;
+                                                      _model.isLoading = true;
+                                                    });
+                                                    _model.cancelarTimers();
+                                                    _model
+                                                        .showDialogWaitingPlayer(
+                                                            context);
+                                                    await _model
+                                                        .sendUserResponseAsync(
+                                                            _model
+                                                                .answerOptionId,
+                                                            setState);
+                                                  },
+                                            text: _model.isLoading
+                                                ? 'Validando...'
+                                                : 'Validar',
+                                            icon: _model.isLoading
+                                                ? CircularProgressIndicator(
+                                                    color: Colors.white,
+                                                    strokeWidth: 2,
+                                                  )
+                                                : null,
+                                            options: FFButtonOptions(
+                                              width: 350.0,
+                                              height: 45.0,
+                                              padding: EdgeInsetsDirectional
+                                                  .fromSTEB(
+                                                      16.0, 0.0, 16.0, 0.0),
+                                              iconPadding: EdgeInsetsDirectional
+                                                  .fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                              color: Color(0xFF01BF01),
+                                              textStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .titleMedium
+                                                      .override(
+                                                        fontFamily:
+                                                            'Inter Tight',
+                                                        color: Colors.black,
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FontWeight.normal,
+                                                      ),
+                                              elevation: 0.0,
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0),
+                                            ),
+                                          ),
+                                        ),
+                                      ]
+                                          .divide(SizedBox(height: 20.0))
+                                          .addToStart(SizedBox(height: 5.0))
+                                          .addToEnd(SizedBox(height: 20.0)),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )
+                          ].divide(SizedBox(height: 10.0)),
+                        ),
+                      )),
+                ),
+              ),
+            ),
+          ),
+        ));
+  }
+}

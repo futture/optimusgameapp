@@ -7,6 +7,10 @@ import 'package:projeto_game_quiz/core/api/services/room_service.dart';
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
+import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
+import 'package:projeto_game_quiz/dialogs/common_dialog_widget.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_widgets.dart';
 import 'package:projeto_game_quiz/pages/tela06_salade_jogo/tela06_salade_jogo_widget.dart';
 
 import '/flutter_flow/flutter_flow_timer.dart';
@@ -32,6 +36,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
   /// Serviços
   final roomService = RoomService();
   final matchService = MatchService();
+  UserResponse? currentUser;
 
   /// Variáveis de estado
   late BuildContext context;
@@ -62,6 +67,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
 
   Future<void> getUserIdAsync(VoidCallback? callback) async {
     userId = await UserUtil.getUserId() ?? "";
+    currentUser = await UserUtil.getUserInfo();
     callback?.call();
   }
 
@@ -153,7 +159,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
           isShowWaitingDialogOpen = false;
         }
 
-        _matchWebSocketService?.disconnect();
+        //_matchWebSocketService?.disconnect();
 
         onWaitingPlayersCallback?.call();
 
@@ -174,7 +180,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
         minPlayers = match.minPlayers;
         numberOfPlayers = match.numberOfPlayers;
         isWaitingPlayers = true;
-        showWaitingDialog();
+        showMatchParticipantsDialog();
       },
       onError: (error) => print("Erro no WebSocket: $error"),
       onDone: () => print("Conexão WebSocket encerrada."),
@@ -186,7 +192,6 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
   Future<void> leaveTheMatchAsync(context) async {
     var result = await matchService.leaveTheMatchAsync(matchId, userId);
     if (result["isSuccess"]) {
-      Navigator.of(context).pop();
       _matchWebSocketService?.disconnect();
     } else {
       await Warning00ErrorUtil.showDialogMessageError(
@@ -197,38 +202,149 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
     }
   }
 
-  void showWaitingDialog() {
+  // void showWaitingDialog() {
+  //   if (isShowWaitingDialogOpen) return;
+
+  //   isShowWaitingDialogOpen = true;
+  //   currentShowWaitingDialog = context;
+
+  //   showDialog(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     builder: (_) => AlertDialog(
+  //       title: const Text("Aguardando jogadores..."),
+  //       content: Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         children: [
+  //           CircularProgressIndicator(),
+  //           SizedBox(height: 16),
+  //           Text(
+  //             "Esperando participantes conectarem, Participante conectados: $playersConnected / $numberOfPlayers",
+  //           ),
+  //         ],
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () async {
+  //             await leaveTheMatchAsync(context);
+  //             _matchWebSocketService?.disconnect();
+  //             isShowWaitingDialogOpen = false;
+  //           },
+  //           child: const Text("Fechar"),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  void showMatchParticipantsDialog() {
     if (isShowWaitingDialogOpen) return;
 
     isShowWaitingDialogOpen = true;
     currentShowWaitingDialog = context;
+    List<UserResponse> participants = [currentUser!];
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        title: const Text("Aguardando jogadores..."),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
+    final minimumAmount =
+        matchInfo!.room?.roomConfiguration?.minimumAmountToPlay ?? 0;
+    var infos = [
+      {
+        'title': 'Inscrição',
+        'icon': Icons.attach_money,
+        'value': '${minimumAmount}KZ',
+      },
+      {
+        'title': 'Prêmio',
+        'icon': Icons.wine_bar_rounded,
+        'value': '${matchInfo!.matchPrize?.totalGain ?? 0} KZ',
+      },
+      {
+        'title': 'Nº Questões',
+        'icon': Icons.numbers,
+        'value': '${matchInfo!.room!.roomConfiguration!.numberOfQuestions}',
+      },
+      {
+        'title': 'Vagas',
+        'icon': Icons.people,
+        'value':
+            '${matchInfo!.matchPlayers?.length ?? 0}/${matchInfo!.room?.roomConfiguration?.numberOfPlayers ?? 0}',
+      },
+    ];
+    CommonDialogWidget.showMatchParticipantsDialog(
+      context,
+      infos,
+      "Desafio",
+      matchInfo!,
+      participants,
+      currentUser,
+      _buildDialogActions(),
+    );
+  }
+
+  Widget _buildDialogActions() {
+    return Column(
+      children: [
+        if (isWaitingPlayers) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              children: [
+                const CircularProgressIndicator(
+                  color: Color(0xFFEC8D0D),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Aguardando participantes...',
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        fontFamily: 'Inter',
+                        color: const Color(0xFFEC8D0D),
+                        fontSize: 14,
+                        letterSpacing: 0,
+                      ),
+                ),
+                Text(
+                  'Participantes conectados: $playersConnected/$numberOfPlayers',
+                  style: FlutterFlowTheme.of(context).bodySmall.override(
+                        fontFamily: 'Inter',
+                        letterSpacing: 0,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text(
-              "Esperando participantes conectarem, Participante conectados: $playersConnected / $numberOfPlayers",
+            FFButtonWidget(
+              onPressed: () async {
+                Navigator.of(currentShowWaitingDialog).pop();
+                await leaveTheMatchAsync(context);
+                _matchWebSocketService?.disconnect();
+                isShowWaitingDialogOpen = false;
+              },
+              text: 'Cancelar',
+              options: FFButtonOptions(
+                height: 40,
+                padding: const EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
+                color: FlutterFlowTheme.of(context).error,
+                textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                      fontFamily: 'Inter',
+                      color: Colors.white,
+                      letterSpacing: 0,
+                    ),
+                elevation: 3,
+                borderSide: const BorderSide(
+                  color: Colors.transparent,
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              await leaveTheMatchAsync(context);
-              _matchWebSocketService?.disconnect();
-              isShowWaitingDialogOpen = false;
-            },
-            child: const Text("Fechar"),
-          ),
-        ],
-      ),
+      ],
     );
   }
 }
