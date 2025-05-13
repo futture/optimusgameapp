@@ -1,5 +1,6 @@
+import 'package:projeto_game_quiz/pages/support/support_screen.dart';
+import 'package:projeto_game_quiz/pages/tela07_editar_perfil/tela07_editar_perfil_widget.dart';
 import 'package:projeto_game_quiz/pages/tela12_vitoria_view/tela12_vitoria_view_widget.dart';
-import 'package:projeto_game_quiz/pages/tela17_notificacao/tela17_notificacao_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -359,70 +360,6 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                       borderRadius: BorderRadius.circular(12.0),
                       shape: BoxShape.rectangle,
                     ),
-                    child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Icon(
-                            Icons.notifications_none,
-                            color: FlutterFlowTheme.of(context).primaryText,
-                            size: 24.0,
-                          ),
-                          Expanded(
-                            child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  12.0, 0.0, 0.0, 0.0),
-                              child: Text(
-                                'Notificações',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyLarge
-                                    .override(
-                                      fontFamily: 'Plus Jakarta Sans',
-                                      color: FlutterFlowTheme.of(context)
-                                          .primaryText,
-                                      fontSize: 16.0,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FontWeight.normal,
-                                    ),
-                              ),
-                            ),
-                          ),
-                          Align(
-                            alignment: AlignmentDirectional(0.9, 0.0),
-                            child: Icon(
-                              Icons.arrow_forward_ios,
-                              color: FlutterFlowTheme.of(context).primaryText,
-                              size: 18.0,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
-                  child: Container(
-                    width: double.infinity,
-                    height: 60.0,
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).secondaryBackground,
-                      boxShadow: [
-                        BoxShadow(
-                          blurRadius: 5.0,
-                          color: Color(0x3416202A),
-                          offset: Offset(
-                            0.0,
-                            2.0,
-                          ),
-                          spreadRadius: 4.0,
-                        )
-                      ],
-                      borderRadius: BorderRadius.circular(12.0),
-                      shape: BoxShape.rectangle,
-                    ),
                     child: Stack(
                       children: [
                         Padding(
@@ -468,13 +405,8 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                         ),
                         FFButtonWidget(
                           onPressed: () async {
-                            // Navigator.of(context).push(
-                            //   MaterialPageRoute(
-                            //     builder: (_) => Tela17NotificacaoViewWidget(),
-                            //   ),
-                            // );
                             context.pushNamed(
-                                Tela17NotificacaoViewWidget.routeName);
+                                Tela07EditarPerfilWidget.routeName);
                           },
                           text: '',
                           options: FFButtonOptions(
@@ -514,94 +446,94 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
                   ),
                 ),
 
-                // Padding(
-                //   padding:
-                //       EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
-                //   child: Container(
-                //     width: double.infinity,
-                //     height: 60.0,
-                //     decoration: BoxDecoration(
-                //       color: FlutterFlowTheme.of(context).secondaryBackground,
-                //       boxShadow: [
-                //         BoxShadow(
-                //           blurRadius: 5.0,
-                //           color: Color(0x3416202A),
-                //           offset: Offset(
-                //             0.0,
-                //             2.0,
-                //           ),
-                //         )
-                //       ],
-                //       borderRadius: BorderRadius.circular(12.0),
-                //       shape: BoxShape.rectangle,
-                //     ),
-                //     child: Padding(
-                //       padding: EdgeInsets.all(8.0),
-                //       child: Row(
-                //         mainAxisSize: MainAxisSize.max,
-                //         children: [
-                //           Icon(
-                //             Icons.help_outline_rounded,
-                //             color: FlutterFlowTheme.of(context).primaryText,
-                //             size: 24.0,
-                //           ),
-                //           Expanded(
-                //             child: Padding(
-                //               padding: EdgeInsetsDirectional.fromSTEB(
-                //                   12.0, 0.0, 0.0, 0.0),
-                //               child: Text(
-                //                 'Support',
-                //                 style: FlutterFlowTheme.of(context)
-                //                     .bodyLarge
-                //                     .override(
-                //                       fontFamily: 'Plus Jakarta Sans',
-                //                       color: FlutterFlowTheme.of(context)
-                //                           .primaryText,
-                //                       fontSize: 16.0,
-                //                       letterSpacing: 0.0,
-                //                       fontWeight: FontWeight.normal,
-                //                     ),
-                //               ),
-                //             ),
-                //           ),
-                //           Align(
-                //             alignment: AlignmentDirectional(0.9, 0.0),
-                //             child: Icon(
-                //               Icons.arrow_forward_ios,
-                //               color: FlutterFlowTheme.of(context).primaryText,
-                //               size: 18.0,
-                //             ),
-                //           ),
-                //           FFButtonWidget(
-                //           onPressed: () async {
-                //             context.pushNamed(TelaSuporteWidget.routeName);
-                //           },
-                //           text: '',
-                //           options: FFButtonOptions(
-                //             width: 360.0,
-                //             height: 60.0,
-                //             padding: EdgeInsetsDirectional.fromSTEB(
-                //                 16.0, 0.0, 16.0, 0.0),
-                //             iconPadding: EdgeInsetsDirectional.fromSTEB(
-                //                 0.0, 0.0, 0.0, 0.0),
-                //             color: Color(0x001D2428),
-                //             textStyle: FlutterFlowTheme.of(context)
-                //                 .titleSmall
-                //                 .override(
-                //                   fontFamily: 'Inter Tight',
-                //                   color: Colors.white,
-                //                   letterSpacing: 0.0,
-                //                 ),
-                //             elevation: 0.0,
-                //             borderRadius: BorderRadius.circular(8.0),
-                //           ),
-                //         ),
-                //         ],
-                //       ),
-                //     ),
-                //   ),
+                Padding(
+                  padding:
+                      EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
+                  child: Container(
+                    width: double.infinity,
+                    height: 60.0,
+                    decoration: BoxDecoration(
+                      color: FlutterFlowTheme.of(context).secondaryBackground,
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 5.0,
+                          color: Color(0x3416202A),
+                          offset: Offset(
+                            0.0,
+                            2.0,
+                          ),
+                        )
+                      ],
+                      borderRadius: BorderRadius.circular(12.0),
+                      shape: BoxShape.rectangle,
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Icon(
+                            Icons.help_outline_rounded,
+                            color: FlutterFlowTheme.of(context).primaryText,
+                            size: 24.0,
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsetsDirectional.fromSTEB(
+                                  12.0, 0.0, 0.0, 0.0),
+                              child: Text(
+                                'Support',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyLarge
+                                    .override(
+                                      fontFamily: 'Plus Jakarta Sans',
+                                      color: FlutterFlowTheme.of(context)
+                                          .primaryText,
+                                      fontSize: 16.0,
+                                      letterSpacing: 0.0,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                              ),
+                            ),
+                          ),
+                          Align(
+                            alignment: AlignmentDirectional(0.9, 0.0),
+                            child: Icon(
+                              Icons.arrow_forward_ios,
+                              color: FlutterFlowTheme.of(context).primaryText,
+                              size: 18.0,
+                            ),
+                          ),
+                          FFButtonWidget(
+                          onPressed: () async {
+                            context.pushNamed(TelaSuporteWidget.routeName);
+                          },
+                          text: '',
+                          options: FFButtonOptions(
+                            width: 360.0,
+                            height: 60.0,
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                16.0, 0.0, 16.0, 0.0),
+                            iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                0.0, 0.0, 0.0, 0.0),
+                            color: Color(0x001D2428),
+                            textStyle: FlutterFlowTheme.of(context)
+                                .titleSmall
+                                .override(
+                                  fontFamily: 'Inter Tight',
+                                  color: Colors.white,
+                                  letterSpacing: 0.0,
+                                ),
+                            elevation: 0.0,
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                        ],
+                      ),
+                    ),
+                  ),
 
-                // ),
+                ),
 
                 Padding(
                   padding:

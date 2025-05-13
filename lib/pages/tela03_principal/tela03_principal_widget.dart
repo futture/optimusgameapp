@@ -5,6 +5,7 @@ import 'package:projeto_game_quiz/core/api/services/fcm_token_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/dialogs/common_dialog_widget.dart';
+import 'package:projeto_game_quiz/utils.dart';
 import '/components/moda_listade_sala_widget.dart';
 import '/components/moda_menu_pagian_inicial_widget.dart';
 import '/components/modals_saque_widget.dart';
@@ -243,7 +244,8 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                       ),
                       TextSpan(
                         text: _model.userAccountInfo != null
-                            ? _model.userAccountInfo!.availableBalance
+                            ? CurrencyUtil.formatKwanza(
+                                    _model.userAccountInfo!.availableBalance)
                                 .toString()
                             : "Carregando...",
                         style:
@@ -778,7 +780,6 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
     }
   }
 
-
   Future<void> _leaveMatch(MatchResponse match) async {
     try {
       Navigator.pop(context);
@@ -798,6 +799,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
       );
     }
   }
+
   Widget buildMatchButton({
     required bool isRegistered,
     required dynamic match,

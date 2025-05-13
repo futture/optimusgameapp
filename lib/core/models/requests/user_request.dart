@@ -43,6 +43,23 @@ class CreateUserRequest {
       };
 }
 
+class UpdateUserRequest {
+  final String name;
+  final String email;
+  final String phone_number;
+
+  UpdateUserRequest({
+    required this.name,
+    required this.email,
+    required this.phone_number
+  }); 
+  Map<String, dynamic> toJson() => {
+        "name": name,
+        "email": email,
+        "phone_number": phone_number,
+      };
+}
+
 enum RoleEnum {
   JOGADOR,
   ADMIN,
