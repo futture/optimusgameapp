@@ -32,7 +32,12 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
   String _filterStatus = 'all'; // 'all', 'pending', 'in_progress'
   DateTimeRange? _dateRange;
   int _currentIndex = 0;
-  final List<String> _statusOptions = ['PENDING', 'IN_PROGRESS'];
+  final List<String> _statusOptions = [
+    'PENDING',
+    'IN_PROGRESS',
+    'WAITING_FOR_START',
+    'CANCELLED'
+  ];
 
   @override
   void initState() {
@@ -322,6 +327,10 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
         return 'Pendentes';
       case 'IN_PROGRESS':
         return 'Em Andamento';
+      case 'CANCELLED':
+        return 'Canceladas';
+      case 'WAITING_FOR_START':
+        return 'Aguardando Inicio';
       default:
         return status;
     }

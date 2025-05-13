@@ -73,9 +73,9 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                 borderRadius: 8.0,
                 buttonSize: 45.0,
                 fillColor: FlutterFlowTheme.of(context).primaryBackground,
-                icon: const FaIcon(
+                icon:  FaIcon(
                   FontAwesomeIcons.bars,
-                  color: Colors.black,
+                  color: FlutterFlowTheme.of(context).primaryText,
                   size: 24.0,
                 ),
                 onPressed: _showMenuModal,
@@ -187,7 +187,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                       Text(
                         _model.user?.name ?? "Carregando...",
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              color: Colors.black,
+                              color: FlutterFlowTheme.of(context).primaryText,
                               fontFamily: 'Inter',
                               fontSize: 16.0,
                               fontWeight: FontWeight.bold,
@@ -202,7 +202,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                             ? 'ID: ${_model.userAccountInfo!.accountNumber}'
                             : "Carregando...",
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              color: Colors.black54,
+                              color: FlutterFlowTheme.of(context).primaryText,
                               fontFamily: 'Inter',
                               fontSize: 13.0,
                               letterSpacing: 0.0,
@@ -235,7 +235,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                       TextSpan(
                         text: 'SALDO: ',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              color: Colors.black,
+                              color: FlutterFlowTheme.of(context).primaryText,
                               fontFamily: 'Inter',
                               fontSize: 18.0,
                               letterSpacing: 0.0,
@@ -248,14 +248,15 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                     _model.userAccountInfo!.availableBalance)
                                 .toString()
                             : "Carregando...",
-                        style:
-                            FlutterFlowTheme.of(context).titleMedium.override(
-                                  color: Colors.black,
-                                  fontFamily: 'Inter Tight',
-                                  fontSize: 18.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                        style: FlutterFlowTheme.of(context)
+                            .titleMedium
+                            .override(
+                              color: FlutterFlowTheme.of(context).primaryText,
+                              fontFamily: 'Inter Tight',
+                              fontSize: 18.0,
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       TextSpan(
                         text: ' AOA',

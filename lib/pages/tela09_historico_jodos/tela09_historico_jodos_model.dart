@@ -46,15 +46,15 @@ class Tela09HistoricoJodosModel
   }
 
   Future<void> load(Function setState) async {
+    setState(() {
+      isLoadingRanking = true;
+    });
     await getUserIdAsync();
     await getMatchByUserIdAsync(setState, userId!);
     await getRankingByUserdAsync(setState);
   }
 
   Future<void> getRankingByUserdAsync(Function setState) async {
-    setState(() {
-      isLoadingRanking = true;
-    });
     var result = await _rankingService.getRankingByUserdAsync(userId!);
 
     if (result["isSuccess"]) {
