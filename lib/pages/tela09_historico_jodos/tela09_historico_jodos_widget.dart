@@ -279,6 +279,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                       style: const TextStyle(fontSize: 14),
                                     ),
                                     style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFFEC8D0D),
+                                      foregroundColor: Colors.white,
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 12),
                                     ),
@@ -534,11 +536,12 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                     );
                   }).toList(),
                 ],
-                if (match.statusMatch == 'PENDING' &&
-                    match.matchStartDate >= DateTime.now()) ...[
+                if (match.statusMatch == 'PENDING') ...[
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      await _model.leaveTheMatchAsync(setState, match.id);
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFEC8D0D),
                       minimumSize: const Size(double.infinity, 50),
@@ -546,13 +549,15 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      'Sair da Partida',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: _model.isLoadingLeave
+                        ? CircularProgressIndicator()
+                        : const Text(
+                            'Sair da Partida',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ],
               ],

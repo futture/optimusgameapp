@@ -27,6 +27,7 @@ class Tela09HistoricoJodosModel
   UserResponse? currentUser;
   bool isLoadingRanking = false;
   bool isLoadingHistory = false;
+  bool isLoadingLeave = false;
   List<MatchResponse> matches = List.empty();
   List<RankingResponse> rankings = List.empty();
   List<PlayerAnswersResponse> historys = List.empty();
@@ -131,6 +132,29 @@ class Tela09HistoricoJodosModel
         matches.sort((a, b) => (b.matchStartDate).compareTo(a.matchStartDate));
       });
     } else {
+      Warning00ErrorUtil.showDialogMessageError(
+        context!,
+        result["error"].detail.message,
+        result["error"].detail.details,
+      );
+    }
+  }
+
+  Future<void> leaveTheMatchAsync(Function setState, matchId) async {
+    setState(() {
+      isLoadingLeave = true;
+    });
+    var result = await _matchService.leaveTheMatchAsync(matchId, userId!);
+
+    if (result["isSuccess"]) {
+      await getMatchByUserIdAsync(setState, matchId);
+      setState(() {
+        isLoadingLeave = false;
+      });
+    } else {
+      setState(() {
+        isLoadingLeave = false;
+      });
       Warning00ErrorUtil.showDialogMessageError(
         context!,
         result["error"].detail.message,
