@@ -78,11 +78,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => Tela06SaladeJogoWidget(),
         ),
         FFRoute(
-          name: Tela07EditarPerfilWidget.routeName,
-          path: Tela07EditarPerfilWidget.routePath,
-          builder: (context, params) => Tela07EditarPerfilWidget(),
-        ),
-        FFRoute(
           name: Tela07FinancasWidget.routeName,
           path: Tela07FinancasWidget.routePath,
           builder: (context, params) => Tela07FinancasWidget(),

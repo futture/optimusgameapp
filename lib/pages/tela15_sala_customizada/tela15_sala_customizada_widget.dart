@@ -57,8 +57,18 @@ class _Tela15SalaCustomizadaViewWidgetState
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized) {
-      return const Center(child: CircularProgressIndicator());
+      return Scaffold(
+        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        body: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(
+              FlutterFlowTheme.of(context).primary,
+            ),
+          ),
+        ),
+      );
     }
+
     return WillPopScope(
       onWillPop: () async {
         Navigator.of(context).pushReplacement(
@@ -78,11 +88,11 @@ class _Tela15SalaCustomizadaViewWidgetState
             child: FlutterFlowIconButton(
               borderRadius: 8.0,
               buttonSize: 45.0,
-              fillColor: FlutterFlowTheme.of(context).primaryBackground,
-              icon: const FaIcon(
+              //fillColor: FlutterFlowTheme.of(context).primary.withOpacity(0.1),
+              icon: FaIcon(
                 FontAwesomeIcons.bars,
-                color: Colors.black,
-                size: 24.0,
+                color: FlutterFlowTheme.of(context).primaryText,
+                size: 20.0,
               ),
               onPressed: () async {
                 await showModalBottomSheet(
@@ -109,28 +119,58 @@ class _Tela15SalaCustomizadaViewWidgetState
                   fontFamily: 'Inter Tight',
                   color: const Color(0xFFEC8D0D),
                   letterSpacing: 0.0,
+                  fontWeight: FontWeight.bold,
                 ),
           ),
           centerTitle: true,
-          elevation: 4.0,
+          elevation: 0,
+          shape: Border(
+            bottom: BorderSide(
+              color: FlutterFlowTheme.of(context).alternate,
+              width: 1,
+            ),
+          ),
         ),
         body: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           child: Form(
             key: _model.formKey,
             child: Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                   decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).primaryBackground,
+                    color: FlutterFlowTheme.of(context).secondaryBackground,
                     borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(20),
-                        bottomRight: Radius.circular(20)),
+                      bottomLeft: Radius.circular(20),
+                      bottomRight: Radius.circular(20),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Column(
                     children: [
-                      const Icon(Icons.people_alt_rounded,
-                          size: 50, color: Colors.grey),
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: FlutterFlowTheme.of(context)
+                              .primary
+                              .withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.people_alt_rounded,
+                          size: 40,
+                          color: const Color(0xFFEC8D0D),
+                        ),
+                      ),
                       const SizedBox(height: 10),
                       Text(
                         'CRIAR PARTIDA PERSONALIZADA',
@@ -138,24 +178,35 @@ class _Tela15SalaCustomizadaViewWidgetState
                             .titleMedium
                             .override(
                               fontFamily: 'Inter Tight',
-                              color: FlutterFlowTheme.of(context).secondaryText,
-                              fontSize: 16,
+                              color: FlutterFlowTheme.of(context).primaryText,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.5,
                             ),
+                        textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Configure sua partida e convide amigos',
+                        style: FlutterFlowTheme.of(context).bodySmall.override(
+                              fontFamily: 'Inter Tight',
+                              color: FlutterFlowTheme.of(context).secondaryText,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
                     ],
                   ),
                 ),
-
-                // Main Content
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Number of Players
-                      _buildSectionTitle('Configurações Básicas'),
+                      _buildSectionTitle(
+                        title: 'Configurações Básicas',
+                        icon: Icons.settings,
+                      ),
+                      const SizedBox(height: 12),
                       _buildInputCard(
                         context: context,
                         label: 'Número de Jogadores',
@@ -167,73 +218,82 @@ class _Tela15SalaCustomizadaViewWidgetState
                         maxLength: 2,
                         keyboardType: TextInputType.number,
                         icon: Icons.people_outline,
-                        onChanged: (value) {
-                          setState(() {});
-                        },
+                        onChanged: (value) => setState(() {}),
                       ),
-
                       if (_model
                           .numberPlayerTextController.text.isNotEmpty) ...[
-                        const SizedBox(height: 16),
-                        _buildSectionTitle('Adicionar Jogadores'),
+                        const SizedBox(height: 1),
+                        _buildSectionTitle(
+                          title: 'Adicionar Jogadores',
+                          icon: Icons.group_add,
+                        ),
+                        const SizedBox(height: 10),
                         _buildPlayerAutocomplete(context),
                         if (_model.addedUsers.isNotEmpty) ...[
                           const SizedBox(height: 16),
                           _buildAddedPlayersSection(context),
                         ],
-                        const SizedBox(height: 16),
-                        _buildSectionTitle('Configurações do Jogo'),
+                        const SizedBox(height: 10),
+                        _buildSectionTitle(
+                          title: 'Configurações do Jogo',
+                          icon: Icons.gamepad,
+                        ),
+                        const SizedBox(height: 8),
                         Row(
                           children: [
                             Expanded(
-                              child: _buildInputCard(
-                                  context: context,
-                                  label: 'Nº de Questões',
-                                  hintText: 'Ex.: 10',
-                                  controller:
-                                      _model.numberQuestionTextController,
-                                  focusNode: _model.numberQuestionFocusNode,
-                                  validator: (val) => _model
-                                      .validateNumberQuestion(context, val),
-                                  maxLength: 2,
-                                  keyboardType: TextInputType.number,
-                                  icon: Icons.quiz_outlined,
-                                  onChanged: ((e) {})),
+                              child: _buildResponsiveInputCard(
+                                context: context,
+                                label: 'Nº de Questões',
+                                hintText: 'Ex.: 10',
+                                controller: _model.numberQuestionTextController,
+                                focusNode: _model.numberQuestionFocusNode,
+                                validator: (val) =>
+                                    _model.validateNumberQuestion(context, val),
+                                maxLength: 2,
+                                keyboardType: TextInputType.number,
+                                icon: Icons.quiz_outlined,
+                                onChanged: (value) {},
+                              ),
                             ),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: 12),
                             Expanded(
-                              child: _buildInputCard(
-                                  context: context,
-                                  label: 'Opções Resposta',
-                                  hintText: 'Ex.: 4',
-                                  controller:
-                                      _model.numberOptionAnswerTextController,
-                                  focusNode: _model.numberOptionAnswerFocusNode,
-                                  validator: (val) => _model
-                                      .validateNumberOptionAnswer(context, val),
-                                  maxLength: 1,
-                                  keyboardType: TextInputType.number,
-                                  icon: Icons.format_list_numbered,
-                                  onChanged: ((e) {})),
+                              child: _buildResponsiveInputCard(
+                                context: context,
+                                label: 'Nº Opções Resposta',
+                                hintText: 'Ex.: 4',
+                                controller:
+                                    _model.numberOptionAnswerTextController,
+                                focusNode: _model.numberOptionAnswerFocusNode,
+                                validator: (val) => _model
+                                    .validateNumberOptionAnswer(context, val),
+                                maxLength: 1,
+                                keyboardType: TextInputType.number,
+                                icon: Icons.format_list_numbered,
+                                onChanged: (value) {},
+                              ),
                             ),
                           ],
                         ),
                         _buildInputCard(
-                            context: context,
-                            label: 'Valor da Aposta',
-                            hintText: 'Ex.: 1500',
-                            controller: _model.montanteTextController,
-                            focusNode: _model.montanteFocusNode,
-                            validator: (val) =>
-                                _model.validateMontante(context, val),
-                            maxLength: 10,
-                            keyboardType: TextInputType.number,
-                            icon: Icons.attach_money,
-                            prefixText: 'AOA ',
-                            onChanged: ((e) {})),
+                          context: context,
+                          label: 'Valor da Aposta',
+                          hintText: 'Ex.: 1500',
+                          controller: _model.montanteTextController,
+                          focusNode: _model.montanteFocusNode,
+                          validator: (val) =>
+                              _model.validateMontante(context, val),
+                          maxLength: 10,
+                          keyboardType: TextInputType.number,
+                          icon: Icons.attach_money,
+                          prefixText: 'AOA ',
+                          onChanged: (value) {},
+                        ),
+                        const SizedBox(height: 8),
                         _buildAdvancedSettingsSection(context),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 32),
                         _buildStartGameButton(context),
+                        const SizedBox(height: 16),
                       ],
                     ],
                   ),
@@ -246,21 +306,32 @@ class _Tela15SalaCustomizadaViewWidgetState
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Text(
-            title,
-            style: FlutterFlowTheme.of(context).titleMedium.override(
-                  fontFamily: 'Inter Tight',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+  Widget _buildSectionTitle({required String title, required IconData icon}) {
+    return Row(
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: FlutterFlowTheme.of(context).primary.withOpacity(0.1),
+            shape: BoxShape.circle,
           ),
-        ],
-      ),
+          child: Icon(
+            icon,
+            size: 16,
+            color: const Color(0xFFEC8D0D),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          title,
+          style: FlutterFlowTheme.of(context).titleMedium.override(
+                fontFamily: 'Inter Tight',
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+        ),
+      ],
     );
   }
 
@@ -277,33 +348,42 @@ class _Tela15SalaCustomizadaViewWidgetState
     required Function(String?)? onChanged,
     String? prefixText,
   }) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: FlutterFlowTheme.of(context).secondaryBackground,
         borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(icon,
-                    size: 20,
-                    color: FlutterFlowTheme.of(context).secondaryText),
+                Icon(
+                  icon,
+                  size: 20,
+                  color: const Color(0xFFEC8D0D),
+                ),
                 const SizedBox(width: 8),
                 Text(
                   label,
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
                         fontWeight: FontWeight.w500,
                         fontFamily: 'Roboto',
-                        color: FlutterFlowTheme.of(context).secondaryText,
                       ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             TextFormField(
               controller: controller,
               focusNode: focusNode,
@@ -312,7 +392,24 @@ class _Tela15SalaCustomizadaViewWidgetState
                 prefixText: prefixText,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
+                  borderSide: BorderSide(
+                    color: FlutterFlowTheme.of(context).alternate,
+                    width: 1,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: FlutterFlowTheme.of(context).alternate,
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: FlutterFlowTheme.of(context).primary,
+                    width: 1,
+                  ),
                 ),
                 filled: true,
                 fillColor: FlutterFlowTheme.of(context).secondaryBackground,
@@ -332,31 +429,41 @@ class _Tela15SalaCustomizadaViewWidgetState
   }
 
   Widget _buildPlayerAutocomplete(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return Container(
+      decoration: BoxDecoration(
+        color: FlutterFlowTheme.of(context).secondaryBackground,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(Icons.search,
-                    size: 20,
-                    color: FlutterFlowTheme.of(context).secondaryText),
+                Icon(
+                  Icons.search,
+                  size: 20,
+                  color: const Color(0xFFEC8D0D),
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Buscar Jogador',
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
                         fontWeight: FontWeight.w500,
                         fontFamily: 'Roboto',
-                        color: FlutterFlowTheme.of(context).secondaryText,
                       ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             buildAutocompleteUsuario(
               context: context,
               model: _model,
@@ -374,23 +481,42 @@ class _Tela15SalaCustomizadaViewWidgetState
   }
 
   Widget _buildAddedPlayersSection(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return Container(
+      decoration: BoxDecoration(
+        color: FlutterFlowTheme.of(context).secondaryBackground,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: ExpansionTile(
         initiallyExpanded: true,
-        tilePadding: const EdgeInsets.symmetric(horizontal: 12),
+        tilePadding: const EdgeInsets.symmetric(horizontal: 16),
         title: Row(
           children: [
-            Icon(Icons.group,
-                size: 20, color: FlutterFlowTheme.of(context).secondaryText),
-            const SizedBox(width: 8),
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: FlutterFlowTheme.of(context).primary.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.group,
+                size: 16,
+                color: FlutterFlowTheme.of(context).primary,
+              ),
+            ),
+            const SizedBox(width: 12),
             Text(
               'Jogadores Adicionados (${_model.addedUsers.length})',
               style: FlutterFlowTheme.of(context).bodyMedium.override(
                     fontWeight: FontWeight.w500,
                     fontFamily: 'Roboto',
-                    color: FlutterFlowTheme.of(context).secondaryText,
                   ),
             ),
           ],
@@ -406,8 +532,9 @@ class _Tela15SalaCustomizadaViewWidgetState
               ),
             ),
             title: Text(usuario['nome']!),
+            subtitle: Text(usuario['id']!),
             trailing: IconButton(
-              icon: const Icon(Icons.close, size: 20),
+              icon: Icon(Icons.close, size: 20, color: Colors.red[400]),
               onPressed: () {
                 setState(() {
                   _model.addedUsers.remove(usuario);
@@ -421,22 +548,41 @@ class _Tela15SalaCustomizadaViewWidgetState
   }
 
   Widget _buildAdvancedSettingsSection(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return Container(
+      decoration: BoxDecoration(
+        color: FlutterFlowTheme.of(context).secondaryBackground,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: ExpansionTile(
-        tilePadding: const EdgeInsets.symmetric(horizontal: 12),
+        tilePadding: const EdgeInsets.symmetric(horizontal: 16),
         title: Row(
           children: [
-            Icon(Icons.settings,
-                size: 20, color: FlutterFlowTheme.of(context).secondaryText),
-            const SizedBox(width: 8),
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: FlutterFlowTheme.of(context).primary.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.settings,
+                size: 16,
+                color: const Color(0xFFEC8D0D),
+              ),
+            ),
+            const SizedBox(width: 12),
             Text(
               'Configurações Avançadas',
               style: FlutterFlowTheme.of(context).bodyMedium.override(
                     fontWeight: FontWeight.w500,
                     fontFamily: 'Roboto',
-                    color: FlutterFlowTheme.of(context).primaryColor,
                   ),
             ),
           ],
@@ -451,14 +597,19 @@ class _Tela15SalaCustomizadaViewWidgetState
                   'Tipo de Pergunta:',
                   style: FlutterFlowTheme.of(context).bodyMedium,
                 ),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     Expanded(
                       child: RadioListTile<bool>(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Simples'),
+                        title: Text(
+                          'Simples',
+                          style: FlutterFlowTheme.of(context).bodyMedium,
+                        ),
                         value: true,
                         groupValue: _model.isSimpleQuestion,
+                        activeColor: FlutterFlowTheme.of(context).primary,
                         onChanged: (value) {
                           setState(() => _model.isSimpleQuestion = value!);
                         },
@@ -467,9 +618,13 @@ class _Tela15SalaCustomizadaViewWidgetState
                     Expanded(
                       child: RadioListTile<bool>(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Completa'),
+                        title: Text(
+                          'Completa',
+                          style: FlutterFlowTheme.of(context).bodyMedium,
+                        ),
                         value: false,
                         groupValue: _model.isSimpleQuestion,
+                        activeColor: FlutterFlowTheme.of(context).primary,
                         onChanged: (value) {
                           setState(() => _model.isSimpleQuestion = value!);
                         },
@@ -477,19 +632,24 @@ class _Tela15SalaCustomizadaViewWidgetState
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
                 Text(
                   'Vencedores:',
                   style: FlutterFlowTheme.of(context).bodyMedium,
                 ),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     Expanded(
                       child: RadioListTile<bool>(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Apenas 1'),
+                        title: Text(
+                          'Apenas 1',
+                          style: FlutterFlowTheme.of(context).bodyMedium,
+                        ),
                         value: true,
                         groupValue: _model.onlyOneWinner,
+                        activeColor: FlutterFlowTheme.of(context).primary,
                         onChanged: (value) {
                           setState(() => _model.onlyOneWinner = value!);
                         },
@@ -498,9 +658,13 @@ class _Tela15SalaCustomizadaViewWidgetState
                     Expanded(
                       child: RadioListTile<bool>(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Múltiplos'),
+                        title: Text(
+                          'Múltiplos',
+                          style: FlutterFlowTheme.of(context).bodyMedium,
+                        ),
                         value: false,
                         groupValue: _model.onlyOneWinner,
+                        activeColor: FlutterFlowTheme.of(context).primary,
                         onChanged: (value) {
                           setState(() => _model.onlyOneWinner = value!);
                         },
@@ -522,11 +686,12 @@ class _Tela15SalaCustomizadaViewWidgetState
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFEC8D0D),
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 18),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           elevation: 2,
+          shadowColor: const Color(0xFFEC8D0D).withOpacity(0.3),
         ),
         onPressed: _model.isLoadingStartMatch
             ? null
@@ -572,13 +737,21 @@ class _Tela15SalaCustomizadaViewWidgetState
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
               )
-            : Text(
-                'INICIAR PARTIDA',
-                style: FlutterFlowTheme.of(context).titleMedium.override(
-                      fontFamily: 'Inter Tight',
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.play_arrow, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Text(
+                    'INICIAR PARTIDA',
+                    style: FlutterFlowTheme.of(context).titleMedium.override(
+                          fontFamily: 'Inter Tight',
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                  ),
+                ],
               ),
       ),
     );
@@ -779,6 +952,110 @@ class _Tela15SalaCustomizadaViewWidgetState
           },
         );
       },
+    );
+  }
+
+  Widget _buildResponsiveInputCard({
+    required BuildContext context,
+    required String label,
+    required String hintText,
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    required String? Function(String?)? validator,
+    required int maxLength,
+    required TextInputType keyboardType,
+    required IconData icon,
+    required Function(String?)? onChanged,
+    String? prefixText,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: FlutterFlowTheme.of(context).secondaryBackground,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: double.infinity,
+              child: Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    size: 20,
+                    color: const Color(0xFFEC8D0D),
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Roboto',
+                          ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: controller,
+              focusNode: focusNode,
+              decoration: InputDecoration(
+                hintText: hintText,
+                prefixText: prefixText,
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 14,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: FlutterFlowTheme.of(context).alternate,
+                    width: 1,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: FlutterFlowTheme.of(context).alternate,
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: FlutterFlowTheme.of(context).primary,
+                    width: 1,
+                  ),
+                ),
+                filled: true,
+                fillColor: FlutterFlowTheme.of(context).secondaryBackground,
+              ),
+              style: FlutterFlowTheme.of(context).bodyLarge,
+              maxLength: maxLength,
+              keyboardType: keyboardType,
+              validator: validator,
+              onChanged: onChanged,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -8,8 +8,8 @@ export '/pages/tela03_principal/tela03_principal_widget.dart'
 export '/pages/tela04_perfil/tela04_perfil_widget.dart' show Tela04PerfilWidget;
 export '/pages/tela06_salade_jogo/tela06_salade_jogo_widget.dart'
     show Tela06SaladeJogoWidget;
-export '/pages/tela07_editar_perfil/tela07_editar_perfil_widget.dart'
-    show Tela07EditarPerfilWidget;
+export '/pages/tela11_editar_perfil/tela11_editar_perfil_widget.dart'
+    show Tela11EditarPerfilWidget;
 export '/pages/tela07_financas/tela07_financas_widget.dart'
     show Tela07FinancasWidget;
 export '/pages/tela08_carteira/tela08_carteira_widget.dart'

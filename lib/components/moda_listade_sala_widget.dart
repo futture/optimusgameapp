@@ -59,7 +59,6 @@ class _ModaListadeSalaWidgetState extends State<ModaListadeSalaWidget> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header
             Container(
               padding: EdgeInsets.all(12.0),
               decoration: BoxDecoration(
@@ -209,7 +208,8 @@ class _ModaListadeSalaWidgetState extends State<ModaListadeSalaWidget> {
                                       );
                                     },
                                     text:
-                                        'Entrar na sala (${e.roomConfiguration!.numberOfPlayers} jogadores)',
+                                        'Entrar na sala (${e.roomConfiguration!.numberOfPlayers} jogadores)'
+                                            .toUpperCase(),
                                     options: FFButtonOptions(
                                       width: double.infinity,
                                       height: 50.0,
