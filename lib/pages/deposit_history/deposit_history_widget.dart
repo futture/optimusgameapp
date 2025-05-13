@@ -8,6 +8,7 @@ import 'package:projeto_game_quiz/core/models/responses/transaction_response.dar
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_model.dart';
 import 'package:projeto_game_quiz/pages/deposit_history/deposit_history_model.dart';
+import 'package:projeto_game_quiz/utils.dart';
 
 class DepositHistoryScreenWidget extends StatefulWidget {
   const DepositHistoryScreenWidget({super.key});
@@ -396,7 +397,7 @@ class _DepositHistoryScreenWidgetState
       }
     }
     
-    return '${total.toStringAsFixed(2).replaceAll('.', ',')} Kz';
+     return CurrencyUtil.formatKwanza(total);
   }
 
   Future<void> getUserAccountInfo(void Function(VoidCallback fn) setState) async {

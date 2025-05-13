@@ -1,6 +1,7 @@
 import 'package:projeto_game_quiz/core/api/services/user_service.dart';
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/user_request.dart';
+import 'package:projeto_game_quiz/core/models/responses/otp_code_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 import 'package:projeto_game_quiz/dialogs/success-dialog-widget.dart';
 import 'package:projeto_game_quiz/pages/password_change/password_change.dart';
@@ -28,7 +29,14 @@ class _Tela11EditarPerfilWidgetState extends State<Tela11EditarPerfilWidget> {
   late Tela11EditarPerfilModel _model;
   UserResponse? user;
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  Map<String, dynamic> userData = {};
+  Map<String, dynamic> userData = {
+    'name': 'Carregando...',
+    'email': '',
+    'phone': '',
+    'birthDate': 'N/A',
+    'twoFactorEnabled': false,
+    'lastPasswordChange': 'N/A'
+  };
 
   @override
   void initState() {
@@ -260,7 +268,7 @@ class _Tela11EditarPerfilWidgetState extends State<Tela11EditarPerfilWidget> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [ 
+              children: [
                 Text(
                   'Editar $field',
                   style: TextStyle(
@@ -374,6 +382,9 @@ class _Tela11EditarPerfilWidgetState extends State<Tela11EditarPerfilWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (userData.isEmpty) {
+      return Center(child: CircularProgressIndicator());
+    }
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -523,7 +534,7 @@ class _Tela11EditarPerfilWidgetState extends State<Tela11EditarPerfilWidget> {
           ),
           SizedBox(height: 16.0),
           Text(
-            userData['name'],
+            userData['name'] ?? 'Carregando...',
             style: FlutterFlowTheme.of(context).titleLarge.override(
                   fontFamily: 'Inter Tight',
                   letterSpacing: 0.0,
@@ -1059,7 +1070,6 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
   final List<TextEditingController> _controllers =
       List.generate(6, (i) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(6, (i) => FocusNode());
-  final String _correctCode = '123456';
 
   @override
   Widget build(BuildContext context) {
@@ -1117,11 +1127,19 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
     );
   }
 
-  void _verifyCode() {
+  Future<void> _verifyCode() async {
     final enteredCode = _controllers.map((c) => c.text).join();
-    print("Minha filha $enteredCode");
-    if (enteredCode == _correctCode) {
-      Navigator.pop(context, true);
+    final verificationResult = await UserService().validateOtp(enteredCode);
+    print(verificationResult["isSuccess"]);
+    if ((verificationResult["isSuccess"])) {
+      OtpCodeResponse data = verificationResult["data"] as OtpCodeResponse;
+      if (enteredCode == data.code) {
+        Navigator.pop(context, true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Código invalido!')),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Código incorreto. Tente novamente.')),

@@ -105,22 +105,23 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
         user_id: user!.id,
         oldPassword: _currentPasswordController.text,
         newPassword: _newPasswordController.text,
-      );
-      print("Porrasss $result");
+      ); 
       setState(() => _isLoading = false);
       if (result['isSuccess'] == true) {
-        showDialog(
+        final shouldNavigate = await showDialog(
           context: context,
           barrierDismissible: false,
           builder: (context) => SuccessDialogWidget(
             message: 'Senha alterada com sucesso!',
             onOk: () async {
-              TokenUtil.removeToken();
-              await Future.delayed(Duration(seconds: 1));
-              context.pushNamed(Tela00LoginWidget.routeName);
+              Navigator.of(context).pop(true); 
             },
           ),
         );
+        if (shouldNavigate == true) {
+          TokenUtil.removeToken();
+          context.pushNamed(Tela00LoginWidget.routeName);
+        }
       } else {
         final error = result['error'] as Map<String, dynamic>;
         ScaffoldMessenger.of(context).showSnackBar(

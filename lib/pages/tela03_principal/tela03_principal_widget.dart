@@ -5,6 +5,7 @@ import 'package:projeto_game_quiz/core/api/services/fcm_token_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/pages/payment_method/payment_selection_screen.dart';
+import 'package:projeto_game_quiz/utils.dart';
 
 import '/components/moda_listade_sala_widget.dart';
 import '/components/moda_menu_pagian_inicial_widget.dart';
@@ -340,9 +341,9 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                           Text(
                                             _model.userAccountInfo == null
                                                 ? "Carregando..."
-                                                : _model.userAccountInfo!
-                                                    .availableBalance
-                                                    .toString(),
+                                                : CurrencyUtil.formatKwanza(
+                                                    _model.userAccountInfo!
+                                                        .availableBalance),
                                             style: FlutterFlowTheme.of(context)
                                                 .titleMedium
                                                 .override(
