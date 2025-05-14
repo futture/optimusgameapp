@@ -73,7 +73,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                 borderRadius: 8.0,
                 buttonSize: 45.0,
                 fillColor: FlutterFlowTheme.of(context).primaryBackground,
-                icon:  FaIcon(
+                icon: FaIcon(
                   FontAwesomeIcons.bars,
                   color: FlutterFlowTheme.of(context).primaryText,
                   size: 24.0,
@@ -257,17 +257,18 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                               letterSpacing: 0.0,
                               fontWeight: FontWeight.bold,
                             ),
-                      ),
-                      TextSpan(
-                        text: ' AOA',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              color: Colors.black,
-                              fontFamily: 'Inter',
-                              fontSize: 18.0,
-                              letterSpacing: 0.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
+                      )
+                      // ,
+                      // TextSpan(
+                      //   text: ' AOA',
+                      //   style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      //         color: Colors.black,
+                      //         fontFamily: 'Inter',
+                      //         fontSize: 18.0,
+                      //         letterSpacing: 0.0,
+                      //         fontWeight: FontWeight.bold,
+                      //       ),
+                      // ),
                     ],
                   ),
                 ),

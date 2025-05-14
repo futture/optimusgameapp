@@ -238,41 +238,60 @@ class _Tela15SalaCustomizadaViewWidgetState
                           title: 'Configurações do Jogo',
                           icon: Icons.gamepad,
                         ),
-                        const SizedBox(height: 8),
-                        Row(
+                        const SizedBox(height: 10),
+                        Column(
                           children: [
-                            Expanded(
-                              child: _buildResponsiveInputCard(
-                                context: context,
-                                label: 'Nº de Questões',
-                                hintText: 'Ex.: 10',
-                                controller: _model.numberQuestionTextController,
-                                focusNode: _model.numberQuestionFocusNode,
-                                validator: (val) =>
-                                    _model.validateNumberQuestion(context, val),
-                                maxLength: 2,
-                                keyboardType: TextInputType.number,
-                                icon: Icons.quiz_outlined,
-                                onChanged: (value) {},
-                              ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    constraints: BoxConstraints(
+                                      minHeight: 100,
+                                      maxHeight: 120,
+                                    ),
+                                    child: _buildCompactInputCard(
+                                      context: context,
+                                      label: 'Nº de Questões (*)',
+                                      hintText: 'Ex.: 10',
+                                      controller:
+                                          _model.numberQuestionTextController,
+                                      focusNode: _model.numberQuestionFocusNode,
+                                      validator: (val) => _model
+                                          .validateNumberQuestion(context, val),
+                                      maxLength: 2,
+                                      keyboardType: TextInputType.number,
+                                      icon: Icons.quiz_outlined,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Container(
+                                    constraints: BoxConstraints(
+                                      minHeight: 100,
+                                      maxHeight: 120,
+                                    ),
+                                    child: _buildCompactInputCard(
+                                      context: context,
+                                      label: 'Nº Opções Resposta (*)',
+                                      hintText: 'Ex.: 4',
+                                      controller: _model
+                                          .numberOptionAnswerTextController,
+                                      focusNode:
+                                          _model.numberOptionAnswerFocusNode,
+                                      validator: (val) =>
+                                          _model.validateNumberOptionAnswer(
+                                              context, val),
+                                      maxLength: 1,
+                                      keyboardType: TextInputType.number,
+                                      icon: Icons.format_list_numbered,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _buildResponsiveInputCard(
-                                context: context,
-                                label: 'Nº Opções Resposta',
-                                hintText: 'Ex.: 4',
-                                controller:
-                                    _model.numberOptionAnswerTextController,
-                                focusNode: _model.numberOptionAnswerFocusNode,
-                                validator: (val) => _model
-                                    .validateNumberOptionAnswer(context, val),
-                                maxLength: 1,
-                                keyboardType: TextInputType.number,
-                                icon: Icons.format_list_numbered,
-                                onChanged: (value) {},
-                              ),
-                            ),
+                            const SizedBox(height: 16),
                           ],
                         ),
                         _buildInputCard(
@@ -532,7 +551,6 @@ class _Tela15SalaCustomizadaViewWidgetState
               ),
             ),
             title: Text(usuario['nome']!),
-            subtitle: Text(usuario['id']!),
             trailing: IconButton(
               icon: Icon(Icons.close, size: 20, color: Colors.red[400]),
               onPressed: () {
@@ -955,7 +973,7 @@ class _Tela15SalaCustomizadaViewWidgetState
     );
   }
 
-  Widget _buildResponsiveInputCard({
+  Widget _buildCompactInputCard({
     required BuildContext context,
     required String label,
     required String hintText,
@@ -965,11 +983,8 @@ class _Tela15SalaCustomizadaViewWidgetState
     required int maxLength,
     required TextInputType keyboardType,
     required IconData icon,
-    required Function(String?)? onChanged,
-    String? prefixText,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,
         borderRadius: BorderRadius.circular(12),
@@ -984,74 +999,76 @@ class _Tela15SalaCustomizadaViewWidgetState
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              width: double.infinity,
-              child: Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Icon(
-                    icon,
-                    size: 20,
-                    color: const Color(0xFFEC8D0D),
+            // Label compacto
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 18,
+                  color: const Color(0xFFEC8D0D),
+                ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          fontFamily: 'Roboto',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      label,
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            fontWeight: FontWeight.w500,
-                            fontFamily: 'Roboto',
-                          ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
-            TextFormField(
-              controller: controller,
-              focusNode: focusNode,
-              decoration: InputDecoration(
-                hintText: hintText,
-                prefixText: prefixText,
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 14,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: FlutterFlowTheme.of(context).alternate,
-                    width: 1,
+            // Campo de texto compacto
+            SizedBox(
+              height: 56, // Altura fixa
+              child: TextFormField(
+                controller: controller,
+                focusNode: focusNode,
+                decoration: InputDecoration(
+                  hintText: hintText,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 12,
                   ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: FlutterFlowTheme.of(context).alternate,
-                    width: 1,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: FlutterFlowTheme.of(context).alternate,
+                      width: 1,
+                    ),
                   ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: FlutterFlowTheme.of(context).primary,
-                    width: 1,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: FlutterFlowTheme.of(context).alternate,
+                      width: 1,
+                    ),
                   ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: FlutterFlowTheme.of(context).primary,
+                      width: 1,
+                    ),
+                  ),
+                  filled: true,
+                  fillColor: FlutterFlowTheme.of(context).secondaryBackground,
                 ),
-                filled: true,
-                fillColor: FlutterFlowTheme.of(context).secondaryBackground,
+                style: FlutterFlowTheme.of(context).bodyMedium,
+                maxLength: maxLength,
+                keyboardType: keyboardType,
+                validator: validator,
               ),
-              style: FlutterFlowTheme.of(context).bodyLarge,
-              maxLength: maxLength,
-              keyboardType: keyboardType,
-              validator: validator,
-              onChanged: onChanged,
             ),
           ],
         ),
