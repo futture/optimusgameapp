@@ -245,7 +245,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                       TextSpan(
                         text: _model.userAccountInfo != null
                             ? CurrencyUtil.formatKwanza(
-                                    _model.userAccountInfo!.availableBalance)
+                                    _model.userAccountInfo!.balance)
                                 .toString()
                             : "Carregando...",
                         style: FlutterFlowTheme.of(context)
