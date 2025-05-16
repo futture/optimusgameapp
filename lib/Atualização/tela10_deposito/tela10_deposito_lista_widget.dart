@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
 import 'package:projeto_game_quiz/pages/payment/payment_forms/payment_form.dart';
 
 class Tela10DepositoListaWidget extends StatefulWidget {
@@ -14,94 +15,60 @@ class Tela10DepositoListaWidget extends StatefulWidget {
 }
 
 class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget> {
-  // Cores do tema atualizadas para melhor contraste
-  final Color _primaryColor = const Color(0xFFEC8D0D);
-  final Color _secondaryColor = const Color(0xFF2C3E50);
-  final Color _backgroundColor = const Color(0xFFF5F7FA);
+  final Color _primaryColor = const Color(0xFF4361EE);
+  final Color _backgroundColor = const Color(0xFFF8F9FA);
   final Color _surfaceColor = Colors.white;
-  final Color _onPrimaryColor = Colors.white;
-  final Color _onSurfaceColor = const Color(0xFF2C3E50);
-  final Color _borderColor = const Color(0xFFE0E0E0);
-
-  // Métodos de pagamento com sombras mais sutis
+  final Color _onSurfaceColor = const Color(0xFF212529);
+  final Color _borderColor = const Color(0xFFE9ECEF);
+  final Color _successColor = const Color(0xFF4BB543);
   final List<Map<String, dynamic>> _paymentMethods = [
     {
       'label': 'Multicaixa',
-      'icon': Icons.credit_card_outlined,
+      'icon': Icons.credit_card,
       'image': 'assets/images/multicaixa.png',
-      'color': Color(0xFFD2A739),
-      'gradient': [Color(0xFFD2A739), Color(0xFFF5D76E)],
+      'color': Color(0xFF2C3E50),
       'description': 'Pagamento via terminal ATM',
-      'shadow': BoxShadow(
-        color: Color(0xFFD2A739).withOpacity(0.2),
-        blurRadius: 10,
-        offset: Offset(0, 4),
-      )
     },
     {
       'label': 'Express',
-      'icon': Icons.bolt_outlined,
+      'icon': Icons.bolt,
       'image': 'assets/images/express.png',
-      'color': Color(0xFFFF8008),
-      'gradient': [Color(0xFFFF8008), Color(0xFFFFC837)],
+      'color': Color(0xFFFF7B25),
       'description': 'Transferência expressa',
-      'shadow': BoxShadow(
-        color: Color(0xFFFF8008).withOpacity(0.2),
-        blurRadius: 10,
-        offset: Offset(0, 4),
-      )
     },
     {
       'label': 'Afrimoney',
-      'icon': Icons.phone_android_outlined,
+      'icon': Icons.phone_android,
       'image': 'assets/images/afrimoney.png',
       'color': Color(0xFF1D976C),
-      'gradient': [Color(0xFF1D976C), Color(0xFF93F9B9)],
       'description': 'Carteira digital segura',
-      'shadow': BoxShadow(
-        color: Color(0xFF1D976C).withOpacity(0.2),
-        blurRadius: 10,
-        offset: Offset(0, 4),
-      )
     },
     {
       'label': 'Unitel Money',
-      'icon': Icons.phone_iphone_outlined,
-      'image': 'assets/images/unitel-money.png',
+      'icon': Icons.phone_iphone,
+      'image': 'assets/images/unitel.png',
       'color': Color(0xFF3498DB),
-      'gradient': [Color(0xFF3498DB), Color(0xFF2ECC71)],
       'description': 'Pagamento móvel rápido',
-      'shadow': BoxShadow(
-        color: Color(0xFF3498DB).withOpacity(0.2),
-        blurRadius: 10,
-        offset: Offset(0, 4),
-      )
     },
     {
       'label': 'Pay Pay',
-      'icon': Icons.account_balance_wallet_outlined,
-      'image': 'assets/images/paypay.png',
-      'color': Color(0xFF9D50BB),
-      'gradient': [Color(0xFF6E48AA), Color(0xFF9D50BB)],
+      'icon': Icons.account_balance_wallet,
+      'image': 'assets/images/paypay_africa_logo.jpeg',
+      'color': Color(0xFF6E48AA),
       'description': 'Solução digital completa',
-      'shadow': BoxShadow(
-        color: Color(0xFF9D50BB).withOpacity(0.2),
-        blurRadius: 10,
-        offset: Offset(0, 4),
-      )
     },
   ];
 
   @override
   Widget build(BuildContext context) {
+    final isWeb = MediaQuery.of(context).size.width > 600;
+
     return Theme(
       data: Theme.of(context).copyWith(
         colorScheme: ColorScheme.light(
           primary: _primaryColor,
-          secondary: _secondaryColor,
           background: _backgroundColor,
           surface: _surfaceColor,
-          onPrimary: _onPrimaryColor,
           onSurface: _onSurfaceColor,
         ),
         cardTheme: CardTheme(
@@ -109,299 +76,205 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          margin: EdgeInsets.zero,
         ),
       ),
       child: Scaffold(
         backgroundColor: _backgroundColor,
-        appBar: _buildAppBar(context),
-        body: _buildBody(context),
-      ),
-    );
-  }
-
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      title: Text(
-        'Depositar',
-        style: TextStyle(
-          color: _onSurfaceColor,
-          fontSize: 22,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.5,
-        ),
-      ),
-      centerTitle: true,
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back_ios_new_rounded, 
-                  color: _primaryColor, size: 22),
-        onPressed: () => Navigator.pop(context),
-      ),
-      actions: [
-        IconButton(
-          icon: Icon(Icons.help_outline_rounded, 
-                    color: _primaryColor, size: 24),
-          onPressed: () => _showHelpDialog(context),
-        ),
-      ],
-      elevation: 0,
-      backgroundColor: _surfaceColor,
-      shape: Border(
-        bottom: BorderSide(color: _borderColor, width: 1),
-      ),
-    );
-  }
-
-  Widget _buildBody(BuildContext context) {
-    return Column(
-      children: [
-        _buildHeader(context),
-        const SizedBox(height: 8),
-        Expanded(
-          child: CustomScrollView(
-            physics: BouncingScrollPhysics(),
-            slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _buildPaymentMethodCard(context, index),
-                    ),
-                    childCount: _paymentMethods.length,
-                  ),
+        appBar: AppBar(
+          title: Text(
+            'Depositar',
+            style: FlutterFlowTheme.of(context).headlineSmall.override(
+                  fontFamily: 'Inter Tight',
+                  color: const Color(0xFFEC8D0D),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
                 ),
+          ),
+          centerTitle: true,
+          elevation: 0,
+          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+          shape: Border(
+            bottom: BorderSide(
+              color: Colors.black.withOpacity(0.1),
+              width: 1,
+            ),
+          ),
+          toolbarHeight: 60,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: const Color(0xFFEC8D0D),
+              size: 20,
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          actions: [
+            IconButton(
+              icon: Icon(
+                Icons.help_outline_rounded,
+                color: const Color(0xFFEC8D0D).withOpacity(0.8),
               ),
-            ],
+              onPressed: () {},
+            ),
+          ],
+        ),
+        body: Center(
+          child: Container(
+            constraints: BoxConstraints(maxWidth: 800), // Largura máxima
+            padding: EdgeInsets.all(isWeb ? 24 : 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(context),
+                SizedBox(height: 24),
+                _buildPaymentMethodsGrid(context, isWeb),
+              ],
+            ),
           ),
         ),
-      ],
+      ),
     );
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: _primaryColor.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _primaryColor.withOpacity(0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 6,
-            offset: Offset(0, 2),
-          ),
-        ],
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: _borderColor, width: 1),
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: _primaryColor.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.account_balance_wallet_rounded, 
-                        color: _primaryColor, size: 22),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
+                Icon(Icons.account_balance_wallet_rounded,
+                    color: _primaryColor, size: 20),
+                SizedBox(width: 12),
                 Text(
-                  'Depósito Instantâneo',
+                  'Depósito Rápido',
                   style: TextStyle(
-                    color: _onSurfaceColor,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Saldo disponível em até 15 minutos após confirmação',
-                  style: TextStyle(
-                    color: _onSurfaceColor.withOpacity(0.7),
-                    fontSize: 13,
-                  ),
-                ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPaymentMethodCard(BuildContext context, int index) {
-    final method = _paymentMethods[index];
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: () => _showPaymentDialog(context, method['label']),
-        splashColor: method['color'].withOpacity(0.2),
-        highlightColor: method['color'].withOpacity(0.1),
-        child: Ink(
-          height: 90,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            gradient: LinearGradient(
-              colors: method['gradient'],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
+            SizedBox(height: 12),
+            Text(
+              'Selecione um método de pagamento para adicionar fundos à sua conta.',
+              style: TextStyle(
+                color: _onSurfaceColor.withOpacity(0.7),
+                fontSize: 13,
+              ),
             ),
-            boxShadow: [method['shadow']],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
+            SizedBox(height: 12),
+            Divider(height: 1, color: _borderColor),
+            SizedBox(height: 12),
+            Row(
               children: [
-                // Logo container
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: Image.asset(
-                      method['image'],
-                      width: 36,
-                      height: 36,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                // Text content
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        method['label'],
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 2,
-                              offset: Offset(0, 1),
-                            )
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        method['description'],
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
-                          fontSize: 13,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 2,
-                              offset: Offset(0, 1),
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Arrow icon
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  color: Colors.white.withOpacity(0.9),
-                  size: 18,
-                ),
+                Icon(Icons.access_time_rounded, size: 16, color: _primaryColor),
+                SizedBox(width: 8),
+                Text('Disponível em até 15 minutos',
+                    style: TextStyle(fontSize: 12)),
+                Spacer(),
+                Icon(Icons.security_rounded, size: 16, color: _successColor),
+                SizedBox(width: 8),
+                Text('100% Seguro',
+                    style: TextStyle(fontSize: 12, color: _successColor)),
               ],
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 
-  void _showHelpDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        backgroundColor: _surfaceColor,
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 70,
-                height: 70,
-                decoration: BoxDecoration(
-                  color: _primaryColor.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.help_outline_rounded,
-                  color: _primaryColor,
-                  size: 36,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Ajuda com Depósitos',
-                style: TextStyle(
-                  color: _onSurfaceColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  'Selecione um método de pagamento para depositar fundos na sua conta. '
-                  'Todos os depósitos são processados de forma segura e rápida.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: _onSurfaceColor.withOpacity(0.7),
-                    fontSize: 14,
-                    height: 1.4,
+  Widget _buildPaymentMethodsGrid(BuildContext context, bool isWeb) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero, 
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: isWeb ? 3 : 2,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 0.9, 
+        mainAxisExtent: 180, 
+      ),
+      itemCount: _paymentMethods.length,
+      itemBuilder: (context, index) => _buildPaymentMethodCard(context, index),
+    );
+  }
+
+Widget _buildPaymentMethodCard(BuildContext context, int index) {
+    final method = _paymentMethods[index];
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: 300, // Largura máxima para evitar expansão excessiva
+      ),
+      child: Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: _borderColor, width: 1),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => _showPaymentDialog(context, method['label']),
+          child: Padding(
+            padding: EdgeInsets.all(12), // Reduzido de 16
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 64, // Reduzido de 80
+                  height: 64, // Reduzido de 80
+                  decoration: BoxDecoration(
+                    color: method['color'].withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _primaryColor,
-                    foregroundColor: _onPrimaryColor,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      method['image'],
+                      fit: BoxFit.contain, // Alterado para contain
+                      width: 40, // Tamanho reduzido
+                      height: 40, // Tamanho reduzido
                     ),
-                    elevation: 0,
                   ),
+                ),
+                SizedBox(height: 12),
+                Flexible( // Adicionado Flexible para evitar overflow
                   child: Text(
-                    'ENTENDI',
+                    method['label'],
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      fontSize: 15,
+                      fontSize: 14,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-              ),
-            ],
+                SizedBox(height: 4),
+                Flexible( // Adicionado Flexible para evitar overflow
+                  child: Text(
+                    method['description'],
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: _onSurfaceColor.withOpacity(0.6),
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -418,275 +291,196 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget> {
 
   void _showGenericPaymentDialog(BuildContext context, String method) {
     final methodData = _paymentMethods.firstWhere((m) => m['label'] == method);
-    
-    showModalBottomSheet(
+
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: _surfaceColor,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              blurRadius: 20,
-              spreadRadius: 0,
-              offset: Offset(0, -5),
-            )
-          ],
-        ),
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 20,
-          right: 20,
-          top: 12,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: methodData['gradient'],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Image.asset(
-                      methodData['image'],
-                      width: 36,
-                      height: 36,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              methodData['label'],
-              style: TextStyle(
-                color: _onSurfaceColor,
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.4,
-              ),
-              child: SingleChildScrollView(
-                child: PaymentForm(method: method),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: _onSurfaceColor,
-                      side: BorderSide(color: _borderColor),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+      builder: (context) => Center(
+        // Centraliza o diálogo
+        child: Container(
+          width:
+              MediaQuery.of(context).size.width > 600 ? 500 : double.infinity,
+          margin: EdgeInsets.all(20),
+          child: Dialog(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
                       ),
-                    ),
-                    child: Text(
-                      'CANCELAR',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                      Spacer(),
+                      Text(
+                        methodData['label'],
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Spacer(),
+                      SizedBox(width: 48),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Divider(height: 1),
+                  SizedBox(height: 16),
+                  Flexible(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                          maxHeight: MediaQuery.of(context).size.height * 0.6),
+                      child: SingleChildScrollView(
+                        child: PaymentForm(method: method),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _primaryColor,
-                      foregroundColor: _onPrimaryColor,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                  SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text('CANCELAR'),
+                        ),
                       ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      'CONFIRMAR',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _showPaymentSuccess(context, method);
+                          },
+                          child: Text('CONFIRMAR'),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
-          ],
+          ),
         ),
       ),
     );
   }
 
   void _showMulticaixaDialog(BuildContext context) {
-    final method = _paymentMethods[0];
-    
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: _surfaceColor,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              blurRadius: 20,
-              spreadRadius: 0,
-              offset: Offset(0, -5),
-            )
-          ],
-        ),
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 20,
-          right: 20,
-          top: 12,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: method['gradient'],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
+      builder: (context) => Center(
+        // Centraliza o diálogo
+        child: Container(
+          width:
+              MediaQuery.of(context).size.width > 600 ? 500 : double.infinity,
+          margin: EdgeInsets.all(20),
+          child: Dialog(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      Spacer(),
+                      Text(
+                        'Multicaixa',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Spacer(),
+                      SizedBox(width: 48),
+                    ],
                   ),
-                  child: Center(
-                    child: Image.asset(
-                      method['image'],
-                      width: 36,
-                      height: 36,
-                      fit: BoxFit.contain,
+                  SizedBox(height: 16),
+                  Divider(height: 1),
+                  SizedBox(height: 16),
+                  _buildCopyableField(
+                    context,
+                    label: 'Entidade',
+                    value: '12345',
+                    icon: Icons.account_balance_rounded,
+                  ),
+                  SizedBox(height: 16),
+                  _buildCopyableField(
+                    context,
+                    label: 'Referência',
+                    value: '987654321',
+                    icon: Icons.receipt_rounded,
+                  ),
+                  SizedBox(height: 24),
+                  Text(
+                    'Como realizar o pagamento:',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  SizedBox(height: 12),
+                  ..._buildInstructionSteps(),
+                  SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text('FECHAR'),
                     ),
                   ),
-                ),
+                ],
               ),
             ),
-            const SizedBox(height: 12),
-            Text(
-              'Multicaixa',
-              style: TextStyle(
-                color: _onSurfaceColor,
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildCopyableField(
-              context,
-              label: 'Entidade',
-              value: '00000000',
-              iconColor: method['color'],
-            ),
-            const SizedBox(height: 12),
-            _buildCopyableField(
-              context,
-              label: 'Referência',
-              value: '000000',
-              iconColor: method['color'],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Como realizar o pagamento:',
-              style: TextStyle(
-                color: _onSurfaceColor,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            ..._buildInstructionSteps(),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _primaryColor,
-                  foregroundColor: _onPrimaryColor,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showPaymentSuccess(BuildContext context, String method) {
+    showDialog(
+      context: context,
+      builder: (context) => Center(
+        // Centraliza o diálogo
+        child: Container(
+          width:
+              MediaQuery.of(context).size.width > 600 ? 400 : double.infinity,
+          margin: EdgeInsets.all(20),
+          child: Dialog(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.check_circle, color: _successColor, size: 48),
+                  SizedBox(height: 16),
+                  Text(
+                    'Pagamento Processado!',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  'FECHAR',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
+                  SizedBox(height: 8),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      'Seu pagamento via $method foi enviado para processamento.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14),
+                    ),
                   ),
-                ),
+                  SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text('VOLTAR'),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-          ],
+          ),
         ),
       ),
     );
@@ -696,58 +490,39 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget> {
     BuildContext context, {
     required String label,
     required String value,
-    required Color iconColor,
+    required IconData icon,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: _onSurfaceColor.withOpacity(0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 6),
+        Text(label, style: TextStyle(fontSize: 12)),
+        SizedBox(height: 4),
         Material(
           color: _backgroundColor,
-          borderRadius: BorderRadius.circular(10),
-          elevation: 0,
+          borderRadius: BorderRadius.circular(8),
           child: InkWell(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(8),
             onTap: () {
               Clipboard.setData(ClipboardData(text: value));
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('$label copiado!'),
                   behavior: SnackBarBehavior.floating,
-                  backgroundColor: _primaryColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
                 ),
               );
             },
             child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: _borderColor),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               child: Row(
                 children: [
-                  Expanded(
-                    child: Text(
-                      value,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: _onSurfaceColor,
-                      ),
-                    ),
-                  ),
-                  Icon(Icons.copy, size: 20, color: iconColor),
+                  Icon(icon, size: 20, color: _primaryColor),
+                  SizedBox(width: 12),
+                  Expanded(child: Text(value)),
+                  Icon(Icons.copy, size: 18),
                 ],
               ),
             ),
@@ -764,37 +539,18 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget> {
       'Insira os dados fornecidos acima',
       'Confirme o valor e finalize',
       'Guarde o comprovante'
-    ].map((step) => Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 20,
-            height: 20,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: _primaryColor.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.circle,
-              size: 6,
-              color: _primaryColor,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              step,
-              style: TextStyle(
-                color: _onSurfaceColor.withOpacity(0.8),
-                fontSize: 13,
+    ]
+        .map((step) => Padding(
+              padding: EdgeInsets.only(bottom: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.circle, size: 8, color: _primaryColor),
+                  SizedBox(width: 8),
+                  Expanded(child: Text(step, style: TextStyle(fontSize: 13))),
+                ],
               ),
-            ),
-          ),
-        ],
-      ),
-    )).toList();
+            ))
+        .toList();
   }
 }

@@ -309,7 +309,6 @@ class _Tela11EditarPerfilWidgetState extends State<Tela11EditarPerfilWidget> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    // Botão Cancelar com texto em laranja
                     TextButton(
                       onPressed: () => Navigator.pop(context),
                       child: Text(
