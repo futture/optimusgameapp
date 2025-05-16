@@ -1,12 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:projeto_game_quiz/pages/payment/payment_forms/payment_form.dart';
-import '/flutter_flow/flutter_flow_icon_button.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'package:flutter/material.dart';
-import 'tela10_deposito_lista_model.dart';
-export 'tela10_deposito_lista_model.dart';
 
 class Tela10DepositoListaWidget extends StatefulWidget {
   const Tela10DepositoListaWidget({super.key});
@@ -20,756 +14,787 @@ class Tela10DepositoListaWidget extends StatefulWidget {
 }
 
 class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget> {
-  final List<Map<String, String>> methods = [
+  // Cores do tema atualizadas para melhor contraste
+  final Color _primaryColor = const Color(0xFFEC8D0D);
+  final Color _secondaryColor = const Color(0xFF2C3E50);
+  final Color _backgroundColor = const Color(0xFFF5F7FA);
+  final Color _surfaceColor = Colors.white;
+  final Color _onPrimaryColor = Colors.white;
+  final Color _onSurfaceColor = const Color(0xFF2C3E50);
+  final Color _borderColor = const Color(0xFFE0E0E0);
+
+  // Métodos de pagamento com sombras mais sutis
+  final List<Map<String, dynamic>> _paymentMethods = [
     {
       'label': 'Multicaixa',
+      'icon': Icons.credit_card_outlined,
+      'image': 'assets/images/multicaixa.png',
+      'color': Color(0xFFD2A739),
+      'gradient': [Color(0xFFD2A739), Color(0xFFF5D76E)],
+      'description': 'Pagamento via terminal ATM',
+      'shadow': BoxShadow(
+        color: Color(0xFFD2A739).withOpacity(0.2),
+        blurRadius: 10,
+        offset: Offset(0, 4),
+      )
     },
     {
       'label': 'Express',
+      'icon': Icons.bolt_outlined,
+      'image': 'assets/images/express.png',
+      'color': Color(0xFFFF8008),
+      'gradient': [Color(0xFFFF8008), Color(0xFFFFC837)],
+      'description': 'Transferência expressa',
+      'shadow': BoxShadow(
+        color: Color(0xFFFF8008).withOpacity(0.2),
+        blurRadius: 10,
+        offset: Offset(0, 4),
+      )
     },
     {
       'label': 'Afrimoney',
+      'icon': Icons.phone_android_outlined,
+      'image': 'assets/images/afrimoney.png',
+      'color': Color(0xFF1D976C),
+      'gradient': [Color(0xFF1D976C), Color(0xFF93F9B9)],
+      'description': 'Carteira digital segura',
+      'shadow': BoxShadow(
+        color: Color(0xFF1D976C).withOpacity(0.2),
+        blurRadius: 10,
+        offset: Offset(0, 4),
+      )
     },
     {
       'label': 'Unitel Money',
+      'icon': Icons.phone_iphone_outlined,
+      'image': 'assets/images/unitel-money.png',
+      'color': Color(0xFF3498DB),
+      'gradient': [Color(0xFF3498DB), Color(0xFF2ECC71)],
+      'description': 'Pagamento móvel rápido',
+      'shadow': BoxShadow(
+        color: Color(0xFF3498DB).withOpacity(0.2),
+        blurRadius: 10,
+        offset: Offset(0, 4),
+      )
+    },
+    {
+      'label': 'Pay Pay',
+      'icon': Icons.account_balance_wallet_outlined,
+      'image': 'assets/images/paypay.png',
+      'color': Color(0xFF9D50BB),
+      'gradient': [Color(0xFF6E48AA), Color(0xFF9D50BB)],
+      'description': 'Solução digital completa',
+      'shadow': BoxShadow(
+        color: Color(0xFF9D50BB).withOpacity(0.2),
+        blurRadius: 10,
+        offset: Offset(0, 4),
+      )
     },
   ];
-  late Tela10DepositoListaModel _model;
-
-  final scaffoldKey = GlobalKey<ScaffoldState>();
-
-  @override
-  void initState() {
-    super.initState();
-    _model = createModel(context, () => Tela10DepositoListaModel());
-  }
-
-  @override
-  void dispose() {
-    _model.dispose();
-
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-        FocusManager.instance.primaryFocus?.unfocus();
-      },
+    return Theme(
+      data: Theme.of(context).copyWith(
+        colorScheme: ColorScheme.light(
+          primary: _primaryColor,
+          secondary: _secondaryColor,
+          background: _backgroundColor,
+          surface: _surfaceColor,
+          onPrimary: _onPrimaryColor,
+          onSurface: _onSurfaceColor,
+        ),
+        cardTheme: CardTheme(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: EdgeInsets.zero,
+        ),
+      ),
       child: Scaffold(
-        key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-          automaticallyImplyLeading: false,
-          leading: Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(18.0, 0.0, 0.0, 0.0),
-            child: FlutterFlowIconButton(
-              borderRadius: 8.0,
-              buttonSize: 45.0,
-              fillColor: FlutterFlowTheme.of(context).primaryBackground,
-              icon: Icon(
-                Icons.arrow_back,
-                color: FlutterFlowTheme.of(context).primaryText,
-                size: 24.0,
+        backgroundColor: _backgroundColor,
+        appBar: _buildAppBar(context),
+        body: _buildBody(context),
+      ),
+    );
+  }
+
+  AppBar _buildAppBar(BuildContext context) {
+    return AppBar(
+      title: Text(
+        'Depositar',
+        style: TextStyle(
+          color: _onSurfaceColor,
+          fontSize: 22,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.5,
+        ),
+      ),
+      centerTitle: true,
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back_ios_new_rounded, 
+                  color: _primaryColor, size: 22),
+        onPressed: () => Navigator.pop(context),
+      ),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.help_outline_rounded, 
+                    color: _primaryColor, size: 24),
+          onPressed: () => _showHelpDialog(context),
+        ),
+      ],
+      elevation: 0,
+      backgroundColor: _surfaceColor,
+      shape: Border(
+        bottom: BorderSide(color: _borderColor, width: 1),
+      ),
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    return Column(
+      children: [
+        _buildHeader(context),
+        const SizedBox(height: 8),
+        Expanded(
+          child: CustomScrollView(
+            physics: BouncingScrollPhysics(),
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _buildPaymentMethodCard(context, index),
+                    ),
+                    childCount: _paymentMethods.length,
+                  ),
+                ),
               ),
-              onPressed: () async {
-                Navigator.of(context).pop();
-              },
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _primaryColor.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: _primaryColor.withOpacity(0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: _primaryColor.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.account_balance_wallet_rounded, 
+                        color: _primaryColor, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Depósito Instantâneo',
+                  style: TextStyle(
+                    color: _onSurfaceColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Saldo disponível em até 15 minutos após confirmação',
+                  style: TextStyle(
+                    color: _onSurfaceColor.withOpacity(0.7),
+                    fontSize: 13,
+                  ),
+                ),
+              ],
             ),
           ),
-          title: Text(
-            'DEPOSITAR',
-            style: FlutterFlowTheme.of(context).headlineSmall.override(
-                  fontFamily: 'Inter Tight',
-                  color: Color(0xFFEC8D0D),
-                  letterSpacing: 0.0,
-                ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentMethodCard(BuildContext context, int index) {
+    final method = _paymentMethods[index];
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () => _showPaymentDialog(context, method['label']),
+        splashColor: method['color'].withOpacity(0.2),
+        highlightColor: method['color'].withOpacity(0.1),
+        child: Ink(
+          height: 90,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            gradient: LinearGradient(
+              colors: method['gradient'],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            boxShadow: [method['shadow']],
           ),
-          actions: [],
-          centerTitle: true,
-          elevation: 4.0,
-        ),
-        body: SafeArea(
-          top: true,
-          child: Align(
-            alignment: AlignmentDirectional(0.0, -1.0),
-            child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(25.0, 0.0, 25.0, 25.0),
-              child: Container(
-                width: double.infinity,
-                height: double.infinity,
-                constraints: BoxConstraints(
-                  minWidth: 300.0,
-                  minHeight: 852.0,
-                  maxWidth: 500.0,
-                  maxHeight: 1000.0,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                // Logo container
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(
+                    child: Image.asset(
+                      method['image'],
+                      width: 36,
+                      height: 36,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                 ),
-                decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).primaryBackground,
-                ),
-                child: Align(
-                  alignment: AlignmentDirectional(0.0, 0.0),
+                const SizedBox(width: 14),
+                // Text content
+                Expanded(
                   child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Align(
-                        alignment: AlignmentDirectional(0.0, 0.0),
-                        child: Container(
-                          width: 330.0,
-                          height: 80.0,
-                          constraints: BoxConstraints(
-                            minWidth: 330.0,
-                            minHeight: 80.0,
-                            maxWidth: 500.0,
-                            maxHeight: 80.0,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 4.0,
-                                color: Color(0x33000000),
-                                offset: Offset(
-                                  0.0,
-                                  2.0,
-                                ),
-                                spreadRadius: 4.0,
-                              )
-                            ],
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: Stack(
-                            children: [
-                              Align(
-                                alignment: AlignmentDirectional(0.0, 0.0),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  child: Image.asset(
-                                    'assets/images/multicaixa.png',
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                    fit: BoxFit.scaleDown,
-                                    alignment: Alignment(0.0, 0.0),
-                                  ),
-                                ),
-                              ),
-                              Align(
-                                alignment: AlignmentDirectional(0.0, 0.0),
-                                child: FFButtonWidget(
-                                  onPressed: () {
-                                    _showPaymentDialog(context, 'Multicaixa');
-                                  },
-                                  text: '',
-                                  options: FFButtonOptions(
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
-                                    color: Color(0x00FFFFFF),
-                                    textStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .override(
-                                          fontFamily: 'Inter Tight',
-                                          color: Colors.white,
-                                          letterSpacing: 0.0,
-                                        ),
-                                    elevation: 0.0,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                      Text(
+                        method['label'],
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 2,
+                              offset: Offset(0, 1),
+                            )
+                          ],
                         ),
                       ),
-                      Align(
-                        alignment: AlignmentDirectional(0.0, 0.0),
-                        child: Container(
-                          width: 330.0,
-                          height: 80.0,
-                          constraints: BoxConstraints(
-                            minWidth: 330.0,
-                            minHeight: 80.0,
-                            maxWidth: 500.0,
-                            maxHeight: 80.0,
-                          ),
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 4.0,
-                                color: Color(0x33000000),
-                                offset: Offset(
-                                  0.0,
-                                  2.0,
-                                ),
-                                spreadRadius: 4.0,
-                              )
-                            ],
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: Stack(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.asset(
-                                  'assets/images/Unknown.jpeg',
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  fit: BoxFit.cover,
-                                  alignment: Alignment(0.0, 0.0),
-                                ),
-                              ),
-                              Align(
-                                alignment: AlignmentDirectional(0.0, 0.0),
-                                child: FFButtonWidget(
-                                  onPressed: () {
-                                    _showPaymentDialog(context, 'Express');
-                                  },
-                                  text: '',
-                                  options: FFButtonOptions(
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
-                                    color: Color(0x004B39EF),
-                                    textStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .override(
-                                          fontFamily: 'Inter Tight',
-                                          color: Colors.white,
-                                          letterSpacing: 0.0,
-                                        ),
-                                    elevation: 0.0,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                      const SizedBox(height: 4),
+                      Text(
+                        method['description'],
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: 13,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 2,
+                              offset: Offset(0, 1),
+                            )
+                          ],
                         ),
                       ),
-                      Align(
-                        alignment: AlignmentDirectional(0.0, 0.0),
-                        child: Container(
-                          width: 330.0,
-                          height: 80.0,
-                          constraints: BoxConstraints(
-                            minWidth: 330.0,
-                            minHeight: 80.0,
-                            maxWidth: 500.0,
-                            maxHeight: 80.0,
-                          ),
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 4.0,
-                                color: Color(0x33000000),
-                                offset: Offset(
-                                  0.0,
-                                  2.0,
-                                ),
-                                spreadRadius: 4.0,
-                              )
-                            ],
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: Stack(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.asset(
-                                  'assets/images/unitel-mobile-.png',
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  fit: BoxFit.fill,
-                                  alignment: Alignment(0.0, 0.0),
-                                ),
-                              ),
-                              Align(
-                                alignment: AlignmentDirectional(0.0, 0.0),
-                                child: FFButtonWidget(
-                                  onPressed: () {
-                                    _showPaymentDialog(context, 'Unitel Money');
-                                  },
-                                  text: '',
-                                  options: FFButtonOptions(
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
-                                    color: Color(0x004B39EF),
-                                    textStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .override(
-                                          fontFamily: 'Inter Tight',
-                                          color: Colors.white,
-                                          letterSpacing: 0.0,
-                                        ),
-                                    elevation: 0.0,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Align(
-                        alignment: AlignmentDirectional(0.0, 0.0),
-                        child: Container(
-                          width: 330.0,
-                          height: 80.0,
-                          constraints: BoxConstraints(
-                            minWidth: 330.0,
-                            minHeight: 80.0,
-                            maxWidth: 500.0,
-                            maxHeight: 80.0,
-                          ),
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 4.0,
-                                color: Color(0x33000000),
-                                offset: Offset(
-                                  0.0,
-                                  2.0,
-                                ),
-                                spreadRadius: 4.0,
-                              )
-                            ],
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: Stack(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.asset(
-                                  'assets/images/paypay_africa_logo.jpeg',
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  fit: BoxFit.cover,
-                                  alignment: Alignment(0.0, 0.0),
-                                ),
-                              ),
-                              Align(
-                                alignment: AlignmentDirectional(0.0, 0.0),
-                                child: FFButtonWidget(
-                                  onPressed: () {
-                                    _showPaymentDialog(context, 'Pay Pay');
-                                  },
-                                  text: '',
-                                  options: FFButtonOptions(
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
-                                    color: Color(0x004B39EF),
-                                    textStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .override(
-                                          fontFamily: 'Inter Tight',
-                                          color: Colors.white,
-                                          letterSpacing: 0.0,
-                                        ),
-                                    elevation: 0.0,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Align(
-                        alignment: AlignmentDirectional(0.0, 0.0),
-                        child: Container(
-                          width: 330.0,
-                          height: 80.0,
-                          constraints: BoxConstraints(
-                            minWidth: 330.0,
-                            minHeight: 80.0,
-                            maxWidth: 500.0,
-                            maxHeight: 80.0,
-                          ),
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 4.0,
-                                color: Color(0x33000000),
-                                offset: Offset(
-                                  0.0,
-                                  2.0,
-                                ),
-                                spreadRadius: 4.0,
-                              )
-                            ],
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: Stack(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.asset(
-                                  'assets/images/images.png',
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  fit: BoxFit.cover,
-                                  alignment: Alignment(0.0, 0.0),
-                                ),
-                              ),
-                              Align(
-                                alignment: AlignmentDirectional(0.0, 0.0),
-                                child: FFButtonWidget(
-                                  onPressed: () {
-                                    _showPaymentDialog(context, 'Afrimoney');
-                                  },
-                                  text: '',
-                                  options: FFButtonOptions(
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
-                                    color: Color(0x004B39EF),
-                                    textStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .override(
-                                          fontFamily: 'Inter Tight',
-                                          color: Colors.white,
-                                          letterSpacing: 0.0,
-                                        ),
-                                    elevation: 0.0,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ]
-                        .divide(SizedBox(height: 20.0))
-                        .addToStart(SizedBox(height: 20.0)),
+                    ],
+                  ),
+                ),
+                // Arrow icon
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: Colors.white.withOpacity(0.9),
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showHelpDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: _surfaceColor,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 70,
+                height: 70,
+                decoration: BoxDecoration(
+                  color: _primaryColor.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.help_outline_rounded,
+                  color: _primaryColor,
+                  size: 36,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Ajuda com Depósitos',
+                style: TextStyle(
+                  color: _onSurfaceColor,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  'Selecione um método de pagamento para depositar fundos na sua conta. '
+                  'Todos os depósitos são processados de forma segura e rápida.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: _onSurfaceColor.withOpacity(0.7),
+                    fontSize: 14,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _primaryColor,
+                    foregroundColor: _onPrimaryColor,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    'ENTENDI',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showPaymentDialog(BuildContext context, String method) {
+    if (method == 'Multicaixa') {
+      _showMulticaixaDialog(context);
+    } else {
+      _showGenericPaymentDialog(context, method);
+    }
+  }
+
+  void _showGenericPaymentDialog(BuildContext context, String method) {
+    final methodData = _paymentMethods.firstWhere((m) => m['label'] == method);
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: _surfaceColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 20,
+              spreadRadius: 0,
+              offset: Offset(0, -5),
+            )
+          ],
+        ),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 20,
+          right: 20,
+          top: 12,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: methodData['gradient'],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Image.asset(
+                      methodData['image'],
+                      width: 36,
+                      height: 36,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  AlertDialog _genericPaymentDialog(BuildContext context, String method) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: Row(
-        children: [
-          _getIconForMethod(method),
-          const SizedBox(width: 8),
-          Text(
-            method,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.deepPurple,
-            ),
-          ),
-        ],
-      ),
-      content: SizedBox(
-        width: 350,
-        child: PaymentForm(method: method), // único formulário reutilizável
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text(
-            'Fechar',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.deepPurple,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  AlertDialog _multicaixaDialog(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      backgroundColor: Colors.white,
-      title: Row(
-        children: const [
-          Icon(Icons.credit_card, color: Color(0xFFD2A739)),
-          SizedBox(width: 8),
-          Text(
-            'Multicaixa',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.normal,
-              color: Color(0xFFD2A739),
-            ),
-          ),
-        ],
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Divider(thickness: 1),
-          const SizedBox(height: 12),
-          _buildCopyableText(context, 'Entidade', '00000000'),
-          const SizedBox(height: 10),
-          _buildCopyableText(context, 'Referência', '000000'),
-          const SizedBox(height: 24),
-          const Text(
-            'Como carregar via Multicaixa: ',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 8),
-          _buildInstructionStep('1. Vá a um  ATM.'),
-          _buildInstructionStep(
-              '2. Vá até a opção “Pagamento por Referência”.'),
-          _buildInstructionStep(
-              '3. Insira a Entidade e Referência fornecidas.'),
-          _buildInstructionStep('4. Confirme o valor e finalize o pagamento.'),
-        ],
-      ),
-      actions: [
-        TextButton.icon(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.close, color: Colors.redAccent),
-          label: const Text(
-            'Fechar',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.redAccent,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCopyableText(BuildContext context, String label, String value) {
-    return GestureDetector(
-      onTap: () {
-        Clipboard.setData(ClipboardData(text: value));
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('$label copiado para a área de transferência')),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-        decoration: BoxDecoration(
-          color: Color(0xFFF9F9F9),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Color(0xFFD2A739), width: 1),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.copy, color: Color(0xFFD2A739)),
-            const SizedBox(width: 10),
+            const SizedBox(height: 12),
             Text(
-              '$label: ',
-              style: const TextStyle(
-                  fontWeight: FontWeight.normal, color: Colors.black),
-            ),
-            Expanded(
-              child: Text(
-                value,
-                style: const TextStyle(
-                    fontWeight: FontWeight.normal, color: Colors.black),
-                overflow: TextOverflow.ellipsis,
+              methodData['label'],
+              style: TextStyle(
+                color: _onSurfaceColor,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
               ),
             ),
+            const SizedBox(height: 16),
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.4,
+              ),
+              child: SingleChildScrollView(
+                child: PaymentForm(method: method),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: _onSurfaceColor,
+                      side: BorderSide(color: _borderColor),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(
+                      'CANCELAR',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _primaryColor,
+                      foregroundColor: _onPrimaryColor,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'CONFIRMAR',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInstructionStep(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.arrow_right, size: 20, color: Colors.black54),
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(fontSize: 14, color: Colors.black87),
+  void _showMulticaixaDialog(BuildContext context) {
+    final method = _paymentMethods[0];
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: _surfaceColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 20,
+              spreadRadius: 0,
+              offset: Offset(0, -5),
+            )
+          ],
+        ),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 20,
+          right: 20,
+          top: 12,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: method['gradient'],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Image.asset(
+                      method['image'],
+                      width: 36,
+                      height: 36,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Multicaixa',
+              style: TextStyle(
+                color: _onSurfaceColor,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildCopyableField(
+              context,
+              label: 'Entidade',
+              value: '00000000',
+              iconColor: method['color'],
+            ),
+            const SizedBox(height: 12),
+            _buildCopyableField(
+              context,
+              label: 'Referência',
+              value: '000000',
+              iconColor: method['color'],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Como realizar o pagamento:',
+              style: TextStyle(
+                color: _onSurfaceColor,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ..._buildInstructionSteps(),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _primaryColor,
+                  foregroundColor: _onPrimaryColor,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'FECHAR',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }
 
-  // AlertDialog _empressDialog(BuildContext context) {
-  //   return AlertDialog(
-  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-  //     title: Row(
-  //       children: const [
-  //         Icon(Icons.flash_on, color: Colors.deepPurple),
-  //         SizedBox(width: 8),
-  //         Text(
-  //           'Express',
-  //           style: TextStyle(
-  //             fontSize: 20,
-  //             fontWeight: FontWeight.bold,
-  //             color: Colors.deepPurple,
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //     content: SizedBox(
-  //       width: 350,
-  //       child: Tela10DepositoEXPRESSWidget(),
-  //     ),
-  //     actions: [
-  //       TextButton(
-  //         onPressed: () => Navigator.pop(context),
-  //         child: const Text(
-  //           'Fechar',
-  //           style: TextStyle(
-  //             fontWeight: FontWeight.bold,
-  //             color: Colors.deepPurple,
-  //           ),
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
-
-  // AlertDialog _afrimoneyUnitelDialog(BuildContext context, String method) {
-  //   return AlertDialog(
-  //     title: Text(method,
-  //         style: TextStyle(
-  //             fontSize: 20,
-  //             fontWeight: FontWeight.bold,
-  //             color: Colors.deepPurple)),
-  //     content: Column(
-  //       mainAxisSize: MainAxisSize.min,
-  //       children: const [
-  //         TextField(
-  //             decoration: InputDecoration(
-  //                 labelText: 'Número de Telefone',
-  //                 labelStyle: TextStyle(color: Colors.deepPurple))),
-  //         SizedBox(height: 12),
-  //         TextField(
-  //             decoration: InputDecoration(
-  //                 labelText: 'Montante',
-  //                 labelStyle: TextStyle(color: Colors.deepPurple))),
-  //       ],
-  //     ),
-  //     actions: [
-  //       TextButton(
-  //         onPressed: () => Navigator.pop(context),
-  //         child: Text('Fechar',
-  //             style: TextStyle(
-  //                 fontWeight: FontWeight.bold, color: Colors.deepPurple)),
-  //       ),
-  //     ],
-  //   );
-  // }
-
-  // void _showCommonDialog({
-  //   required BuildContext context,
-  //   required String method,
-  //   required Icon icon,
-  //   required Color color,
-  //   required Widget content,
-  // }) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (_) => AlertDialog(
-  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-  //       title: Row(
-  //         children: [
-  //           icon,
-  //           const SizedBox(width: 8),
-  //           Text(
-  //             method,
-  //             style: TextStyle(
-  //               fontSize: 20,
-  //               fontWeight: FontWeight.bold,
-  //               color: color,
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //       content: SizedBox(width: 350, child: content),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () => Navigator.pop(context),
-  //           child: Text(
-  //             'Fechar',
-  //             style: TextStyle(
-  //               fontWeight: FontWeight.bold,
-  //               color: color,
-  //             ),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  void _showPaymentDialog(BuildContext context, String method) {
-    showDialog(
-      context: context,
-      builder: (_) {
-        if (method == 'Multicaixa') {
-          return _multicaixaDialog(context);
-        } else {
-          return _genericPaymentDialog(context, method);
-        }
-      },
+  Widget _buildCopyableField(
+    BuildContext context, {
+    required String label,
+    required String value,
+    required Color iconColor,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: _onSurfaceColor.withOpacity(0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Material(
+          color: _backgroundColor,
+          borderRadius: BorderRadius.circular(10),
+          elevation: 0,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () {
+              Clipboard.setData(ClipboardData(text: value));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('$label copiado!'),
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: _primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              );
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: _borderColor),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: _onSurfaceColor,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.copy, size: 20, color: iconColor),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  Icon _getIconForMethod(String method) {
-    switch (method) {
-      case 'Express':
-        return const Icon(Icons.flash_on, color: Colors.deepPurple);
-      case 'Unitel Money':
-      case 'Afrimoney':
-        return const Icon(Icons.phone_android, color: Colors.deepPurple);
-      case 'Pay Pay':
-        return const Icon(Icons.account_balance_wallet,
-            color: Colors.deepPurple);
-      default:
-        return const Icon(Icons.warning, color: Colors.deepPurple);
-    }
+  List<Widget> _buildInstructionSteps() {
+    return [
+      'Acesse um terminal Multicaixa',
+      'Selecione "Pagamento por Referência"',
+      'Insira os dados fornecidos acima',
+      'Confirme o valor e finalize',
+      'Guarde o comprovante'
+    ].map((step) => Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 20,
+            height: 20,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: _primaryColor.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.circle,
+              size: 6,
+              color: _primaryColor,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              step,
+              style: TextStyle(
+                color: _onSurfaceColor.withOpacity(0.8),
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ),
+    )).toList();
   }
 }
