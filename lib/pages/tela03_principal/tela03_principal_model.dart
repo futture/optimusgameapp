@@ -175,7 +175,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
       });
 
       if (remaining.inSeconds == 2 && !hasStartedMatch) {
-        var superMatchPref = await SuperMatchUtil.getPreference();
+        var superMatchPref = await SuperMatchUtil.getSuperMatch();
 
         if (superMatchPref == null) {
           hasStartedMatch = true;
@@ -189,8 +189,6 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
             await startScheduledSatchAsync(setState, match);
             return;
           }
-        } else {
-          await SuperMatchUtil.removePreference();
         }
       }
 
@@ -198,7 +196,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
         timer.cancel();
         setState(() {
           alerted = false;
-          hasStartedMatch = false; // resetar para o futuro
+          hasStartedMatch = false;
         });
         loadMatches(setState);
       }

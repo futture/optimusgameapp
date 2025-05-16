@@ -500,7 +500,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
         gameResultFromBackend = resultEndGame["data"];
       }
     }
-    await SuperMatchUtil.removePreference();
+    await SuperMatchUtil.removeSuperMatch();
     Navigator.of(currentContext!).pushReplacement(
       MaterialPageRoute(
         builder: (_) => Tela14FimPartidaViewWidget(

@@ -1,4 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_web_socket_service.dart';
@@ -20,13 +21,15 @@ class NotificationHandler {
   final MatchService _matchService = MatchService();
 
   Future<void> subscribeToMatchTopic(String topic, String matchId) async {
-    try {
-      final topicName = "${topic}_$matchId";
-      await FirebaseMessaging.instance.subscribeToTopic(topicName);
-      debugPrint('Subscribed to match topic: $topicName');
-    } catch (e) {
-      debugPrint('Error subscribing to topic: $e');
-      rethrow;
+    if (kIsWeb) {
+      try {
+        final topicName = "${topic}_$matchId";
+        await FirebaseMessaging.instance.subscribeToTopic(topicName);
+        debugPrint('Subscribed to match topic: $topicName');
+      } catch (e) {
+        debugPrint('Error subscribing to topic: $e');
+        rethrow;
+      }
     }
   }
 
@@ -106,9 +109,9 @@ class NotificationHandler {
           break;
         case 'SCHEDULED_MATCH_START':
           MatchResponse _match = matchInfo["data"];
+          await SuperMatchUtil.saveSuperMatch(_match.id);
           await handlerScheduledMatchStart(
               context, _match, participants, currentUser);
-          await SuperMatchUtil.savePreference(_match.id);
           await startScheduledSatchAsync(context, () {}, _match, currentUser);
           break;
         case 'DISQUALIFIED_FROM_MATCH':

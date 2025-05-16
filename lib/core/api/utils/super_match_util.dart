@@ -1,22 +1,20 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+const String _superMatchKey = 'super_match';
+
 class SuperMatchUtil {
-  static Future<void> savePreference(String matchId) async {
+  static Future<void> saveSuperMatch(String matchId) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('super_match');
-    await prefs.setString('super_match', matchId);
+    await prefs.setString(_superMatchKey, matchId);
   }
-  static Future<void> removePreference() async {
+
+  static Future<String?> getSuperMatch() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('super_match');
+    return prefs.getString(_superMatchKey);
   }
-  static Future<String?> getPreference() async {
+
+  static Future<void> removeSuperMatch() async {
     final prefs = await SharedPreferences.getInstance();
-    final superMatch = prefs.getString('super_match');
-   
-    if (superMatch == null ) {
-      return null;
-    }
-    return superMatch;
+    await prefs.remove(_superMatchKey);
   }
 }
