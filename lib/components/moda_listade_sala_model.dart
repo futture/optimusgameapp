@@ -269,15 +269,9 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
             '${matchInfo!.matchPlayers?.length ?? 0}/${matchInfo!.room?.roomConfiguration?.numberOfPlayers ?? 0}',
       },
     ];
-    CommonDialogWidget.showMatchParticipantsDialog(
-      context,
-      infos,
-      "Desafio",
-      matchInfo!,
-      participants,
-      currentUser,
-      _buildDialogActions(),
-    );
+    CommonDialogWidget.showMatchParticipantsDialog(context, infos, "Desafio",
+        matchInfo!, participants, currentUser, _buildDialogActions(),
+        timeCloseDialog: 3600, isPlaySound: false, isProgressBar: false);
   }
 
   Widget _buildDialogActions() {

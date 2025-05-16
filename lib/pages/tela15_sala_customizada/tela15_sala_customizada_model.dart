@@ -465,6 +465,8 @@ class Tela15SalaCustomizadaViewModel
       participants,
       currentUser,
       _buildDialogActions(),
+      isPlaySound: false,
+       isProgressBar: false
     );
   }
 

@@ -15,7 +15,9 @@ class DadosDaPartidaUtils {
       Widget? widget,
       bool doNotDisplayButton = false,
       String title = "Desafio",
-      bool isError = false}) {
+      bool isError = false,
+      int timeCloseDialog = 10,
+      bool isProgressBar = false}) {
     final minimumAmount =
         matchInfo.room?.roomConfiguration?.minimumAmountToPlay ?? 0;
     var infos = [
@@ -51,7 +53,9 @@ class DadosDaPartidaUtils {
         currentUser,
         _buildDialogActions(
             ctx, matchInfo, participants, widget, doNotDisplayButton),
-        isError: isError);
+        isError: isError,
+        timeCloseDialog: timeCloseDialog,
+        isProgressBar: isProgressBar);
   }
 
   static Widget _buildDialogActions(
@@ -71,6 +75,8 @@ class DadosDaPartidaUtils {
               if (doNotDisplayButton == false)
                 FFButtonWidget(
                   onPressed: () async {
+                    Navigator.of(ctx).pop();
+
                     showDialog(
                       context: ctx,
                       builder: (context) => Dialog(

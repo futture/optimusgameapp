@@ -587,7 +587,9 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                 onJoin: (m) => _handleMatchTap(m as MatchResponse),
                 onLeave: (m) => _leaveMatch(m as MatchResponse),
                 context: context,
-              ));
+              ),
+              isPlaySound: false,
+              isProgressBar: false);
         } catch (e) {
           Warning00ErrorUtil.showDialogMessageError(
             context,
