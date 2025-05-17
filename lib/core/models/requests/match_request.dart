@@ -1,6 +1,12 @@
 enum TrofeuTipo { ouro, prata, bronze, perdedor }
 
-enum Status { Pendente }
+enum Status {
+  Pendente('Pendente'),
+  AguardandoInicio('Aguardando inicio');
+
+  final String label;
+  const Status(this.label);
+}
 
 class CreateRoomRequest {
   final String nameRoom;
@@ -144,6 +150,5 @@ class JogadorResultado {
     required this.hitRateWeight,
     required this.timeRateWeight,
     this.trofeu = TrofeuTipo.perdedor,
-    
   });
 }

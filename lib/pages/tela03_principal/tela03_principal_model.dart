@@ -5,6 +5,7 @@ import 'package:projeto_game_quiz/core/api/services/account_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_web_socket_service.dart';
 import 'package:projeto_game_quiz/core/api/services/user_service.dart';
+import 'package:projeto_game_quiz/core/api/utils/super_match_util.dart';
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/account_response.dart';
@@ -42,7 +43,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
   bool isDialogStartScheduledMatchOpen = false;
   List<UserResponse> users = List.empty();
   late BuildContext currentDialogStartScheduledMatchOpenContext;
-  bool hasStartedMatch = false; // Adicione isso no começo da classe
+  bool hasStartedMatch = false;
 
   @override
   void initState(BuildContext context) {
@@ -113,12 +114,13 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
     try {
       var _dateTime = DateTime.now();
       final response = await matchService.getAllMatchAsync(
-          true, Status.Pendente.name.toString(), _dateTime, null);
+          isEvent: true,
+          status: [Status.Pendente.label, Status.AguardandoInicio.label],
+          startDate: _dateTime);
 
       if (response['isSuccess']) {
         final List<MatchResponse> matches = response['data'];
-        matches.sort((a, b) =>
-            a.matchStartDate.compareTo(b.matchStartDate)); // ordem crescente
+        matches.sort((a, b) => a.matchStartDate.compareTo(b.matchStartDate));
 
         setState(() => matchList = matches);
 
@@ -167,30 +169,26 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
 
     Timer.periodic(Duration(seconds: 1), (timer) async {
       final remaining = match.matchStartDate.difference(DateTime.now());
-
+      
       setState(() {
         timerMilliseconds = remaining.inMilliseconds;
       });
 
-      if (remaining.inSeconds == 10 && !hasStartedMatch) {
-        hasStartedMatch = true;
-        setState(() => alerted = false);
+      if (remaining.inSeconds == 2 && !hasStartedMatch) {
+        var superMatchPref = await SuperMatchUtil.getSuperMatch();
 
-        var isExist =
-            await checkPlayerAlreadyRegisteredMatchAsync(setState, match.id);
-        if (isExist) {
-          await getUsersByMatchId(setState, match.id);
-          showMatchParticipantsDialog(match);
-          await startScheduledSatchAsync(setState, match);
-          // Navigator.of(context!).push(
-          //   MaterialPageRoute(
-          //     builder: (_) => Tela13DadosDePartidaWidget(
-          //       matchId: match.id,
-          //       notDisplayButton: true,
-          //     ),
-          //   ),
-          // );
-          return;
+        if (superMatchPref == null) {
+          hasStartedMatch = true;
+          setState(() => alerted = false);
+          print("[INFO] - ESTOU AQUI");
+          var isExist =
+              await checkPlayerAlreadyRegisteredMatchAsync(setState, match.id);
+          if (isExist) {
+            await getUsersByMatchId(setState, match.id);
+            showMatchParticipantsDialog(match);
+            await startScheduledSatchAsync(setState, match);
+            return;
+          }
         }
       }
 
@@ -198,7 +196,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
         timer.cancel();
         setState(() {
           alerted = false;
-          hasStartedMatch = false; // resetar para o futuro
+          hasStartedMatch = false;
         });
         loadMatches(setState);
       }
@@ -456,14 +454,15 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
     ];
 
     CommonDialogWidget.showMatchParticipantsDialog(
-      currentDialogStartScheduledMatchOpenContext,
-      infos,
-      null,
-      matchInfo,
-      participants,
-      currentUser,
-      _buildDialogActions(participants, matchInfo),
-    );
+        currentDialogStartScheduledMatchOpenContext,
+        infos,
+        null,
+        matchInfo,
+        participants,
+        currentUser,
+        _buildDialogActions(participants, matchInfo),
+        isPlaySound: true,
+        isProgressBar: false);
   }
 
   Widget _buildDialogActions(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_util.dart';
 
 class TelaSuporteWidget extends StatefulWidget {
   const TelaSuporteWidget({super.key});
@@ -67,162 +68,168 @@ class _TelaSuporteWidgetState extends State<TelaSuporteWidget> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(
-          horizontal: isSmallScreen ? 16 : 24,
-          vertical: 16,
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    primaryColor.withOpacity(0.9),
-                    primaryColor,
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(12),
+      body: Center(
+        child: Container( // Adicionado Container com maxWidth
+              constraints: BoxConstraints(
+                maxWidth: isWeb ? 1000 : double.infinity,
               ),
-              child: Row(
-                children: [
-                  Icon(Icons.support_agent, size: 40, color: lightColor),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Central de Ajuda',
-                          style: TextStyle(
-                            color: lightColor,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Estamos aqui para resolver suas dúvidas',
-                          style: TextStyle(
-                            color: lightColor.withOpacity(0.9),
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(
+            horizontal: isSmallScreen ? 16 : 24,
+            vertical: 16,
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      primaryColor.withOpacity(0.9),
+                      primaryColor,
+                    ],
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: isSmallScreen ? 1 : 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 4,
-              children: [
-                _buildSupportOption(
-                  icon: Icons.help_outline,
-                  title: 'Perguntas Frequentes (FAQ)',
-                  subtitle: 'Encontre respostas rápidas',
-                  onTap: () => _showFAQPopup(context),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                _buildSupportOption(
-                  icon: Icons.chat_bubble_outline,
-                  title: 'Fale Conosco',
-                  subtitle: 'Converse com nosso time',
-                  onTap: () {},
-                ),
-                _buildSupportOption(
-                  icon: Icons.report_problem_outlined,
-                  title: 'Relatar um Problema',
-                  subtitle: 'Informe sobre dificuldades',
-                  onTap: () => _showReportProblemPopup(context),
-                ),
-                _buildSupportOption(
-                  icon: Icons.policy_outlined,
-                  title: 'Política de Privacidade',
-                  subtitle: 'Termos e condições',
-                  onTap: () {},
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 24),
-
-            Text(
-              'CONTATO DIRETO',
-              style: TextStyle(
-                color: primaryColor,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.1,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                _buildContactButton(
-                  icon: Icons.email,
-                  label: 'E-mail',
-                ),
-                _buildContactButton(
-                  icon: Icons.phone,
-                  label: 'Telefone',
-                ),
-                _buildContactButton(
-                  icon: Icons.chat,
-                  label: 'Chat Online',
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 24),
-
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: primaryColor.withOpacity(0.3)),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    'Precisa de ajuda urgente?',
-                    style: TextStyle(
-                      color: lightColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                      foregroundColor: darkColor,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                child: Row(
+                  children: [
+                    Icon(Icons.support_agent, size: 40, color: lightColor),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Central de Ajuda',
+                            style: TextStyle(
+                              color: lightColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Estamos aqui para resolver suas dúvidas',
+                            style: TextStyle(
+                              color: lightColor.withOpacity(0.9),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    onPressed: () {},
-                    child: const Text('SUPORTE URGENTE 24H'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+        
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: isSmallScreen ? 1 : 2,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 4,
+                children: [
+                  _buildSupportOption(
+                    icon: Icons.help_outline,
+                    title: 'Perguntas Frequentes (FAQ)',
+                    subtitle: 'Encontre respostas rápidas',
+                    onTap: () => _showFAQPopup(context),
+                  ),
+                  _buildSupportOption(
+                    icon: Icons.chat_bubble_outline,
+                    title: 'Fale Conosco',
+                    subtitle: 'Converse com nosso time',
+                    onTap: () {},
+                  ),
+                  _buildSupportOption(
+                    icon: Icons.report_problem_outlined,
+                    title: 'Relatar um Problema',
+                    subtitle: 'Informe sobre dificuldades',
+                    onTap: () => _showReportProblemPopup(context),
+                  ),
+                  _buildSupportOption(
+                    icon: Icons.policy_outlined,
+                    title: 'Política de Privacidade',
+                    subtitle: 'Termos e condições',
+                    onTap: () {},
                   ),
                 ],
               ),
-            ),
-          ],
+        
+              const SizedBox(height: 24),
+        
+              Text(
+                'CONTATO DIRETO',
+                style: TextStyle(
+                  color: primaryColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.1,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  _buildContactButton(
+                    icon: Icons.email,
+                    label: 'E-mail',
+                  ),
+                  _buildContactButton(
+                    icon: Icons.phone,
+                    label: 'Telefone',
+                  ),
+                  _buildContactButton(
+                    icon: Icons.chat,
+                    label: 'Chat Online',
+                  ),
+                ],
+              ),
+        
+              const SizedBox(height: 24),
+        
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: primaryColor.withOpacity(0.3)),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'Precisa de ajuda urgente?',
+                      style: TextStyle(
+                        color: lightColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        foregroundColor: darkColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () {},
+                      child: const Text('SUPORTE URGENTE 24H'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-    );
+    ));
   }
 
   void _showFAQPopup(BuildContext context) {

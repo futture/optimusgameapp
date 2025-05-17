@@ -1,11 +1,16 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
+import 'package:projeto_game_quiz/core/api/services/match_web_socket_service.dart';
 import 'package:projeto_game_quiz/core/api/services/user_service.dart';
+import 'package:projeto_game_quiz/core/api/utils/super_match_util.dart';
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/common/error_response.dart';
+import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
+import 'package:projeto_game_quiz/dialogs/common_dialog_widget.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_util.dart';
 import 'package:projeto_game_quiz/pages/tela06_salade_jogo/tela06_salade_jogo_widget.dart';
@@ -15,22 +20,21 @@ class NotificationHandler {
   final UserService _userService = UserService();
   final MatchService _matchService = MatchService();
 
-  /// Subscreve para tópicos de notificação de partida
   Future<void> subscribeToMatchTopic(String topic, String matchId) async {
-    try {
-      final topicName = "${topic}_$matchId";
-      await FirebaseMessaging.instance.subscribeToTopic(topicName);
-      debugPrint('Subscribed to match topic: $topicName');
-    } catch (e) {
-      debugPrint('Error subscribing to topic: $e');
-      rethrow;
+    if (!kIsWeb) {
+      try {
+        final topicName = "${topic}_$matchId";
+        await FirebaseMessaging.instance.subscribeToTopic(topicName);
+        debugPrint('Subscribed to match topic: $topicName');
+      } catch (e) {
+        debugPrint('Error subscribing to topic: $e');
+        rethrow;
+      }
     }
   }
 
-  /// Configura os handlers para notificações recebidas
   void setupNotificationHandlers() {
-    print(
-        "Cheguei dfffffffffffffffffffffffffffffffffffffffffffffffffff fd       dfffffffffffffffffffffffffffff");
+    print("Cheguei  ......");
     _setupForegroundNotificationHandler();
     _setupBackgroundNotificationHandler();
   }
@@ -90,18 +94,29 @@ class NotificationHandler {
           await _handleMatchStart(context, message.data, matchInfo);
           break;
         case 'TO_JOIN_THE_MATCH':
+          //Navigator.of(context).pop();
           await _handleJoinMatch(context, currentUser, matchInfo, participants);
           break;
         case 'ERR_START_TO_MATCH_SCHEDULED':
+          //Navigator.of(context).pop();
           await _handleMatchStartError(
               context, currentUser, message.data, matchInfo, participants);
           break;
         case 'SCHEDULED_MATCH_WILL_BEGIN':
+          //Navigator.of(context).pop();
           await _handleMatchWillBegin(
               context, currentUser, matchInfo, participants);
           break;
+        case 'SCHEDULED_MATCH_START':
+          MatchResponse _match = matchInfo["data"];
+          await SuperMatchUtil.saveSuperMatch(_match.id);
+          await handlerScheduledMatchStart(
+              context, _match, participants, currentUser);
+          await startScheduledSatchAsync(context, () {}, _match, currentUser);
+          break;
         case 'DISQUALIFIED_FROM_MATCH':
           if (isBackground) {
+            //Navigator.of(context).pop();
             await _handleDisqualification(
                 context, currentUser, matchInfo, participants);
           }
@@ -148,6 +163,7 @@ class NotificationHandler {
       currentUser: currentUser,
       matchInfo: matchInfo['data']!,
       participants: participants,
+      timeCloseDialog: 30,
       widget: isPending
           ? null
           : _buildMatchStatusMessage(
@@ -174,6 +190,7 @@ class NotificationHandler {
         currentUser: currentUser,
         matchInfo: matchInfo['data']!,
         participants: participants,
+        timeCloseDialog: 50,
         widget: _buildErrorWidget(context, error),
         isError: true);
   }
@@ -185,18 +202,18 @@ class NotificationHandler {
     List<UserResponse> participants,
   ) async {
     DadosDaPartidaUtils.showMatchParticipantsDialog(
-      ctx: context,
-      title: 'Super Partida',
-      currentUser: currentUser,
-      matchInfo: matchInfo['data']!,
-      participants: participants,
-      widget: _buildMatchStatusMessage(
-        context,
-        title: 'Partida começa em breve...',
-        message: 'Fique atento para não perder',
-      ),
-      doNotDisplayButton: true,
-    );
+        ctx: context,
+        title: 'Super Partida',
+        currentUser: currentUser,
+        matchInfo: matchInfo['data']!,
+        participants: participants,
+        widget: _buildMatchStatusMessage(
+          context,
+          title: 'Partida começa em breve...',
+          message: 'Fique atento para não perder',
+        ),
+        doNotDisplayButton: true,
+        isProgressBar: true);
   }
 
   Future<void> _handleDisqualification(
@@ -313,4 +330,155 @@ class NotificationHandler {
       return <UserResponse>[];
     }
   }
+
+  Future<void> handlerScheduledMatchStart(
+      BuildContext context,
+      MatchResponse matchInfo,
+      List<UserResponse> participants,
+      UserResponse? currentUser) async {
+    final minimumAmount =
+        matchInfo.room?.roomConfiguration?.minimumAmountToPlay ?? 0;
+    var infos = [
+      {
+        'title': 'Inscrição',
+        'icon': Icons.attach_money,
+        'value': '${minimumAmount}KZ',
+      },
+      {
+        'title': 'Prêmio',
+        'icon': Icons.wine_bar_rounded,
+        'value': '${matchInfo.matchPrize?.totalGain ?? 0} KZ',
+      },
+      {
+        'title': 'Nº Questões',
+        'icon': Icons.numbers,
+        'value': '${matchInfo.room!.roomConfiguration!.numberOfQuestions}',
+      },
+      {
+        'title': 'Vagas',
+        'icon': Icons.people,
+        'value':
+            '${matchInfo.matchPlayers?.length ?? 0}/${matchInfo.room?.roomConfiguration?.numberOfPlayers ?? 0}',
+      },
+    ];
+
+    CommonDialogWidget.showMatchParticipantsDialog(
+        context,
+        infos,
+        null,
+        matchInfo,
+        participants,
+        currentUser,
+        _buildDialogActions(context, participants, matchInfo),
+        timeCloseDialog: 60,
+        isProgressBar: false);
+  }
+
+  Widget _buildDialogActions(
+      BuildContext context, List<UserResponse> parts, MatchResponse matchInfo) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const CircularProgressIndicator(
+                  color: Color(0xFFEC8D0D),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Aguardando participantes...',
+                  textAlign: TextAlign.center,
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        fontFamily: 'Inter',
+                        color: const Color(0xFFEC8D0D),
+                        fontSize: 14,
+                        letterSpacing: 0,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Participantes conectados: ${parts.length}/${matchInfo.room!.roomConfiguration!.numberOfPlayers}',
+                  textAlign: TextAlign.center,
+                  style: FlutterFlowTheme.of(context).bodySmall.override(
+                        fontFamily: 'Inter',
+                        letterSpacing: 0,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> startScheduledSatchAsync(BuildContext context, Function setState,
+      MatchResponse match, UserResponse? currentUser) async {
+    var _matchWebSocketService = MatchWebSocketService(
+      userId: currentUser!.id,
+      matchInfo: match,
+      context: context,
+      matchId: match.id,
+      onScheduledMatchUpdate: (stats) {
+        if (stats.error != null && stats.error!.detail != null) {
+          _showErrorDialog(stats.error, match.id);
+        } else {
+          final isUserInMatch = stats.players?.contains(currentUser.id);
+          if (isUserInMatch!) {
+            Navigator.of(context).pop();
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => Tela06SaladeJogoWidget(
+                  matchInfo: match,
+                  nextQuestion: stats.nextQuestion,
+                ),
+              ),
+            );
+          } else {
+            debugPrint("Usuário não está na lista de jogadores desta partida.");
+          }
+        }
+      },
+      onError: (e) {
+        handleWebSocketFailureIfNeeded(() => {});
+        debugPrint("Erro no WebSocket: $e");
+      },
+      onDone: () {
+        debugPrint("Conexão WebSocket encerrada.");
+      },
+    );
+
+    _matchWebSocketService.connectStartScheduledSatch();
+  }
+
+  void handleWebSocketFailureIfNeeded(Function setState) {
+    //   final totalQuestionsToRespond =
+    //       matchInfo?.room?.roomConfiguration?.numberOfQuestions ?? 0;
+
+    //   if (questionsAlreadyPresented >= totalQuestionsToRespond) {
+    //     setState(() {
+    //       isBtnEndGameManually = true;
+    //     });
+    //   } else {
+    //     Navigator.of(context!).pushReplacement(
+    //       MaterialPageRoute(
+    //         builder: (_) => Tela03PrincipalWidget(),
+    //       ),
+    //     );
+    //     //Navigator.of(context!).popUntil((route) => route.isFirst);
+    //   }
+  }
+
+  void _showErrorDialog(error, matchId) {
+    if (error == null) return;
+    if (error.detail == null) return;
+  }
+
+  void closeDialogStartScheduledMatch() {}
+//TODO endregion start super match
 }

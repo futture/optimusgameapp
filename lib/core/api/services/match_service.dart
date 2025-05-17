@@ -33,26 +33,45 @@ class MatchService {
     }
   }
 
-  Future<dynamic> getAllMatchAsync(bool? isEvent, String? status,
-      DateTime? startDate, DateTime? endDate) async {
+  Future<dynamic> getAllMatchAsync(
+      {bool? isEvent,
+      List<String>? status,
+      DateTime? startDate,
+      DateTime? endDate}) async {
     try {
-      final queryParams = <String, String>{};
+      final queryParams = <String, dynamic>{};
 
       if (isEvent != null) {
         queryParams['isEvent'] = isEvent.toString();
       }
-      if (status != null) {
-        queryParams['status'] = status;
-      }
-      if (startDate != null) {
-        queryParams['startDate'] = startDate.toIso8601String();
-      }
-      if (endDate != null) {
-        queryParams['endDate'] = endDate.toString();
-      }
-      String queryString = Uri(queryParameters: queryParams).query;
 
-      var route = queryString.isNotEmpty ? "/match?$queryString" : "/match";
+      String queryString = '';
+
+      if (status != null && status.isNotEmpty) {
+        // Montar status separadamente
+        queryString +=
+            status.map((s) => 'status=${Uri.encodeComponent(s)}').join('&');
+      }
+
+      if (startDate != null) {
+        if (queryString.isNotEmpty) queryString += '&';
+        queryString +=
+            'startDate=${Uri.encodeComponent(startDate.toIso8601String())}';
+      }
+
+      if (endDate != null) {
+        if (queryString.isNotEmpty) queryString += '&';
+        queryString +=
+            'endDate=${Uri.encodeComponent(endDate.toIso8601String())}';
+      }
+
+      if (isEvent != null) {
+        if (queryString.isNotEmpty) queryString += '&';
+        queryString += 'isEvent=$isEvent';
+      }
+
+      final route = queryString.isNotEmpty ? '/match?$queryString' : '/match';
+      print("[INFOdd] - url: $route");
 
       final successResult = await httpService.request<List<MatchResponse>>(
         route,
@@ -202,7 +221,8 @@ class MatchService {
       return _errorUtil.handleError(e);
     }
   }
-    Future<dynamic> activatePlayerInMatchAsync(
+
+  Future<dynamic> activatePlayerInMatchAsync(
       String matchId, String userId) async {
     try {
       final result = await httpService.request<MatchResultResponse>(

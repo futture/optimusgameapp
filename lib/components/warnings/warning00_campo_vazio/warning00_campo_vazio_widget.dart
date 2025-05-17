@@ -1,17 +1,20 @@
 import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
-import 'warning00_campo_vazio_model.dart';
-export 'warning00_campo_vazio_model.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class Warning00CampoVazioWidget extends StatefulWidget {
   final String titulo;
   final String detalhe;
+  final int tempoExibicao;
+
   const Warning00CampoVazioWidget({
     super.key,
     required this.titulo,
     required this.detalhe,
+    this.tempoExibicao = 3,
   });
 
   @override
@@ -19,99 +22,182 @@ class Warning00CampoVazioWidget extends StatefulWidget {
       _Warning00CampoVazioWidgetState();
 }
 
-class _Warning00CampoVazioWidgetState extends State<Warning00CampoVazioWidget> {
-  late Warning00CampoVazioModel _model;
-
-  @override
-  void setState(VoidCallback callback) {
-    super.setState(callback);
-    _model.onUpdate();
-  }
+class _Warning00CampoVazioWidgetState extends State<Warning00CampoVazioWidget>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _fadeAnimation;
+  late AnimationController _progressController;
+  late AudioPlayer _audioPlayer;
+  double _progressValue = 0.0;
 
   @override
   void initState() {
     super.initState();
-    _model = createModel(context, () => Warning00CampoVazioModel());
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+    );
+
+    _progressController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: widget.tempoExibicao),
+    )..addListener(() {
+        setState(() {
+          _progressValue = _progressController.value;
+        });
+        if (_progressController.isCompleted) {
+          _fecharDialogo();
+        }
+      });
+
+    // _audioPlayer = AudioPlayer();
+    // _tocarSomAlerta();
+
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _controller.forward();
+      _progressController.forward();
+    });
+  }
+
+  // Future<void> _tocarSomAlerta() async {
+  //   await _audioPlayer.play(AssetSource('sounds/alert.wav'));
+  // }
+
+  Future<void> _fecharDialogo() async {
+    await _controller.reverse();
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
   void dispose() {
-    _model.maybeDispose();
+    _controller.dispose();
+    _progressController.dispose();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 280.0,
-      constraints: BoxConstraints(
-        minWidth: 280.0,
-        maxWidth: 400.0,
-        minHeight: 200.0,
-        maxHeight: 300.0,
-      ),
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: EdgeInsets.only(top: 10.0),
-            child: Icon(
-              Icons.warning_amber_rounded,
-              color: Colors.red,
-              size: 60.0,
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Container(
+          width: 320.0,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                FlutterFlowTheme.of(context).secondaryBackground,
+                FlutterFlowTheme.of(context).primaryBackground,
+              ],
             ),
+            borderRadius: BorderRadius.circular(20.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 25.0,
+                offset: const Offset(0, 10),
+              )
+            ],
           ),
-          Padding(
-            padding: EdgeInsets.only(top: 8.0, left: 20.0, right: 20.0),
-            child: Text(
-              widget.titulo,
-              textAlign: TextAlign.center,
-              style: FlutterFlowTheme.of(context).titleMedium.override(
-                    fontFamily: 'Plus Jakarta Sans',
-                    color: Colors.red,
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(20.0, 8.0, 20.0, 0.0),
-            child: Text(
-              widget.detalhe,
-              textAlign: TextAlign.center,
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    fontFamily: 'Plus Jakarta Sans',
-                    fontSize: 14.0,
-                    color: FlutterFlowTheme.of(context).primaryText,
-                    fontWeight: FontWeight.normal,
-                  ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
-            child: FFButtonWidget(
-              onPressed: () async {
-                context.safePop();
-              },
-              text: 'OK',
-              options: FFButtonOptions(
-                height: 45.0,
-                color: Color(0xFF00C804),
-                textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                      fontFamily: 'Inter Tight',
-                      color: Colors.black,
-                      fontSize: 14.0,
-                    ),
-                elevation: 0.0,
-                borderRadius: BorderRadius.circular(8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.red.withOpacity(0.1),
+                      ),
+                      child: Icon(
+                        Icons.warning_amber_rounded,
+                        color: Colors.red[700],
+                        size: 48.0,
+                      ),
+                    )
+                        .animate(onPlay: (c) => c.repeat())
+                        .shake(duration: 1000.ms, hz: 2),
+
+                    const SizedBox(height: 20),
+
+                    // Título
+                    Text(
+                      widget.titulo,
+                      textAlign: TextAlign.center,
+                      style: FlutterFlowTheme.of(context).titleMedium.override(
+                            fontFamily: 'Plus Jakarta Sans',
+                            color: Colors.red[700],
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    )
+                        .animate()
+                        .fadeIn(duration: 300.ms)
+                        .slideY(begin: 0.1, end: 0),
+
+                    const SizedBox(height: 12),
+
+                    Text(
+                      widget.detalhe,
+                      textAlign: TextAlign.center,
+                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                            fontFamily: 'Plus Jakarta Sans',
+                            fontSize: 15.0,
+                            color: FlutterFlowTheme.of(context).primaryText,
+                          ),
+                    ).animate().fadeIn(delay: 100.ms),
+
+                    const SizedBox(height: 24),
+
+                    FFButtonWidget(
+                      onPressed: _fecharDialogo,
+                      text: 'ENTENDI',
+                      options: FFButtonOptions(
+                        width: 150,
+                        height: 45,
+                        padding: const EdgeInsets.symmetric(vertical: 0),
+                        color: const Color(0xFFEC8D0D),
+                        textStyle:
+                            FlutterFlowTheme.of(context).titleSmall.override(
+                                  fontFamily: 'Inter Tight',
+                                  color: Colors.white,
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                        elevation: 2,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ).animate().scale(delay: 200.ms),
+                  ],
+                ),
               ),
-            ),
+              LinearProgressIndicator(
+                value: _progressValue,
+                backgroundColor: Colors.grey[300],
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                minHeight: 4,
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -119,25 +205,25 @@ class _Warning00CampoVazioWidgetState extends State<Warning00CampoVazioWidget> {
 
 class Warning00ErrorUtil {
   static Future<void> showDialogMessageError(
-      context, String title, String description) async {
+    BuildContext? context,
+    String title,
+    String description, {
+    int displayTime = 6,
+  }) async {
     await showDialog(
-      context: context,
+      context: context!,
+      barrierDismissible: false,
+      barrierColor: Colors.black54,
       builder: (dialogContext) {
         return Dialog(
           elevation: 0,
-          insetPadding: EdgeInsets.zero,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
           backgroundColor: Colors.transparent,
-          alignment: AlignmentDirectional(0.0, 0.0)
-              .resolve(Directionality.of(context)),
-          child: GestureDetector(
-            onTap: () {
-              FocusScope.of(dialogContext).unfocus();
-              FocusManager.instance.primaryFocus?.unfocus();
-            },
-            child: Warning00CampoVazioWidget(
-              titulo: title,
-              detalhe: description,
-            ),
+          alignment: Alignment.center,
+          child: Warning00CampoVazioWidget(
+            titulo: title,
+            detalhe: description,
+            tempoExibicao: displayTime,
           ),
         );
       },

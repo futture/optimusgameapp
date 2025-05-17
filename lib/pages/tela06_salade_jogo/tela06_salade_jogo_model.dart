@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:projeto_game_quiz/core/api/utils/super_match_util.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_model.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
 import 'package:projeto_game_quiz/pages/tela03_principal/tela03_principal_widget.dart';
@@ -499,7 +500,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
         gameResultFromBackend = resultEndGame["data"];
       }
     }
-
+    await SuperMatchUtil.removeSuperMatch();
     Navigator.of(currentContext!).pushReplacement(
       MaterialPageRoute(
         builder: (_) => Tela14FimPartidaViewWidget(

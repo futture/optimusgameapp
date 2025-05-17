@@ -73,9 +73,9 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                 borderRadius: 8.0,
                 buttonSize: 45.0,
                 fillColor: FlutterFlowTheme.of(context).primaryBackground,
-                icon: const FaIcon(
+                icon: FaIcon(
                   FontAwesomeIcons.bars,
-                  color: Colors.black,
+                  color: FlutterFlowTheme.of(context).primaryText,
                   size: 24.0,
                 ),
                 onPressed: _showMenuModal,
@@ -92,40 +92,46 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
             centerTitle: true,
             elevation: 4.0,
           ),
-          body: SafeArea(
-            child: RefreshIndicator(
-              onRefresh: _refreshData,
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    _buildUserProfileCard(),
-                    const SizedBox(height: 20),
-                    _buildGameRoomButton(),
-                    const SizedBox(height: 20),
-                    _buildSuperLeagueHeader(),
-                    const SizedBox(height: 16),
-                    if (_model.isLoadingMatches)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 24.0),
-                        child: CircularProgressIndicator(),
-                      )
-                    else if (_model.matchList.isEmpty)
-                      _buildEmptyMatchesState()
-                    else
-                      ..._model.matchList.map((match) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12.0),
-                            child: _buildMatchCard(match),
-                          )),
-                  ],
+          body: Center(
+            child: Container( // Adicionado Container com maxWidth
+              constraints: BoxConstraints(
+                maxWidth: isWeb ? 1000 : double.infinity,
+              ),
+            child: SafeArea(
+              child: RefreshIndicator(
+                onRefresh: _refreshData,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      _buildUserProfileCard(),
+                      const SizedBox(height: 20),
+                      _buildGameRoomButton(),
+                      const SizedBox(height: 20),
+                      _buildSuperLeagueHeader(),
+                      const SizedBox(height: 16),
+                      if (_model.isLoadingMatches)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24.0),
+                          child: CircularProgressIndicator(),
+                        )
+                      else if (_model.matchList.isEmpty)
+                        _buildEmptyMatchesState()
+                      else
+                        ..._model.matchList.map((match) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12.0),
+                              child: _buildMatchCard(match),
+                            )),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
         ),
       ),
-    );
+    ));
   }
 
   Future<void> _refreshData() async {
@@ -187,7 +193,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                       Text(
                         _model.user?.name ?? "Carregando...",
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              color: Colors.black,
+                              color: FlutterFlowTheme.of(context).primaryText,
                               fontFamily: 'Inter',
                               fontSize: 16.0,
                               fontWeight: FontWeight.bold,
@@ -202,7 +208,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                             ? 'ID: ${_model.userAccountInfo!.accountNumber}'
                             : "Carregando...",
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              color: Colors.black54,
+                              color: FlutterFlowTheme.of(context).primaryText,
                               fontFamily: 'Inter',
                               fontSize: 13.0,
                               letterSpacing: 0.0,
@@ -235,7 +241,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                       TextSpan(
                         text: 'SALDO: ',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              color: Colors.black,
+                              color: FlutterFlowTheme.of(context).primaryText,
                               fontFamily: 'Inter',
                               fontSize: 18.0,
                               letterSpacing: 0.0,
@@ -245,28 +251,30 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                       TextSpan(
                         text: _model.userAccountInfo != null
                             ? CurrencyUtil.formatKwanza(
-                                    _model.userAccountInfo!.availableBalance)
+                                    _model.userAccountInfo!.balance)
                                 .toString()
                             : "Carregando...",
-                        style:
-                            FlutterFlowTheme.of(context).titleMedium.override(
-                                  color: Colors.black,
-                                  fontFamily: 'Inter Tight',
-                                  fontSize: 18.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                      ),
-                      TextSpan(
-                        text: ' AOA',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              color: Colors.black,
-                              fontFamily: 'Inter',
+                        style: FlutterFlowTheme.of(context)
+                            .titleMedium
+                            .override(
+                              color: FlutterFlowTheme.of(context).primaryText,
+                              fontFamily: 'Inter Tight',
                               fontSize: 18.0,
                               letterSpacing: 0.0,
                               fontWeight: FontWeight.bold,
                             ),
-                      ),
+                      )
+                      // ,
+                      // TextSpan(
+                      //   text: ' AOA',
+                      //   style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      //         color: Colors.black,
+                      //         fontFamily: 'Inter',
+                      //         fontSize: 18.0,
+                      //         letterSpacing: 0.0,
+                      //         fontWeight: FontWeight.bold,
+                      //       ),
+                      // ),
                     ],
                   ),
                 ),
@@ -585,7 +593,9 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                 onJoin: (m) => _handleMatchTap(m as MatchResponse),
                 onLeave: (m) => _leaveMatch(m as MatchResponse),
                 context: context,
-              ));
+              ),
+              isPlaySound: false,
+              isProgressBar: false);
         } catch (e) {
           Warning00ErrorUtil.showDialogMessageError(
             context,
