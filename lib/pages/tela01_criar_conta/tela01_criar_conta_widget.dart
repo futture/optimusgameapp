@@ -58,317 +58,323 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Hero(
-                  tag: 'register_logo',
-                  child: Center(
-                    child: Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            spreadRadius: 2,
-                          )
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(24),
-                        child: Image.network(
-                          'https://images.unsplash.com/photo-1604594849809-dfedbc827105?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHw3fHxtb25leXxlbnwwfHx8fDE3NDM2MjA1MTR8MA&ixlib=rb-4.0.3&q=80&w=1080',
-                          fit: BoxFit.cover,
+        body: Center(
+          child: Container( // Adicionado Container com maxWidth
+              constraints: BoxConstraints(
+                maxWidth: isWeb ? 400 : double.infinity,
+              ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Hero(
+                    tag: 'register_logo',
+                    child: Center(
+                      child: Container(
+                        width: 180,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              spreadRadius: 2,
+                            )
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(24),
+                          child: Image.network(
+                            'https://images.unsplash.com/photo-1604594849809-dfedbc827105?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHw3fHxtb25leXxlbnwwfHx8fDE3NDM2MjA1MTR8MA&ixlib=rb-4.0.3&q=80&w=1080',
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-
-                const SizedBox(height: 32),
-
-                // Título
-                Text(
-                  'Criar Conta',
-                  textAlign: TextAlign.center,
-                  style: FlutterFlowTheme.of(context).headlineMedium.override(
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.bold,
-                        color: FlutterFlowTheme.of(context).primaryText,
-                      ),
-                ),
-
-                const SizedBox(height: 8),
-
-                // Subtítulo
-                Text(
-                  'Preencha os dados abaixo para se registrar',
-                  textAlign: TextAlign.center,
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        fontFamily: 'Inter',
-                        color: FlutterFlowTheme.of(context).secondaryText,
-                      ),
-                ),
-
-                const SizedBox(height: 32),
-
-                Form(
-                  key: _model.formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        'Nome Completo',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w500,
-                              color: FlutterFlowTheme.of(context).primaryText,
-                            ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _model.inputMomeCompletoTextController,
-                        focusNode: _model.inputMomeCompletoFocusNode,
-                        decoration: _inputDecoration(
-                          context,
-                          'Digite seu nome completo',
-                          prefixIcon: const Icon(Icons.person_outline),
+          
+                  const SizedBox(height: 32),
+          
+                  // Título
+                  Text(
+                    'Criar Conta',
+                    textAlign: TextAlign.center,
+                    style: FlutterFlowTheme.of(context).headlineMedium.override(
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.bold,
+                          color: FlutterFlowTheme.of(context).primaryText,
                         ),
-                        validator: _model
-                            .inputMomeCompletoTextControllerValidator
-                            .asValidator(context),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Campo Telefone
-                      Text(
-                        'Telefone',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w500,
-                              color: FlutterFlowTheme.of(context).primaryText,
-                            ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _model.inputTelefoneTextController,
-                        focusNode: _model.inputTelefoneFocusNode,
-                        keyboardType: TextInputType.phone,
-                        decoration: _inputDecoration(
-                          context,
-                          '999-999-999',
-                          prefixIcon: const Icon(Icons.phone_outlined),
+                  ),
+          
+                  const SizedBox(height: 8),
+          
+                  // Subtítulo
+                  Text(
+                    'Preencha os dados abaixo para se registrar',
+                    textAlign: TextAlign.center,
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          fontFamily: 'Inter',
+                          color: FlutterFlowTheme.of(context).secondaryText,
                         ),
-                        validator: _model.inputTelefoneTextControllerValidator
-                            .asValidator(context),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Campo Email
-                      Text(
-                        'Email',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w500,
-                              color: FlutterFlowTheme.of(context).primaryText,
-                            ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _model.inputEmailTextController,
-                        focusNode: _model.inputEmailFocusNode,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: _inputDecoration(
-                          context,
-                          'seu@email.com',
-                          prefixIcon: const Icon(Icons.email_outlined),
-                        ),
-                        validator: _model.inputEmailTextControllerValidator
-                            .asValidator(context),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Campo Senha
-                      Text(
-                        'Senha',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w500,
-                              color: FlutterFlowTheme.of(context).primaryText,
-                            ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _model.inputSenhaTextController1,
-                        focusNode: _model.inputSenhaFocusNode1,
-                        obscureText: !_model.inputSenhaVisibility1,
-                        decoration: _inputDecoration(
-                          context,
-                          'Digite sua senha',
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _model.inputSenhaVisibility1
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
-                              size: 20,
-                            ),
-                            onPressed: () => setState(() {
-                              _model.inputSenhaVisibility1 =
-                                  !_model.inputSenhaVisibility1;
-                            }),
-                          ),
-                        ),
-                        validator: _model.inputSenhaTextController1Validator
-                            .asValidator(context),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Campo Confirmar Senha
-                      Text(
-                        'Confirmar Senha',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w500,
-                              color: FlutterFlowTheme.of(context).primaryText,
-                            ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _model.inputSenhaTextController2,
-                        focusNode: _model.inputSenhaFocusNode2,
-                        obscureText: !_model.inputSenhaVisibility2,
-                        decoration: _inputDecoration(
-                          context,
-                          'Confirme sua senha',
-                          prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _model.inputSenhaVisibility2
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
-                              size: 20,
-                            ),
-                            onPressed: () => setState(() {
-                              _model.inputSenhaVisibility2 =
-                                  !_model.inputSenhaVisibility2;
-                            }),
-                          ),
-                        ),
-                        validator: _model.inputSenhaTextController2Validator
-                            .asValidator(context),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Checkbox Termos
-                      Row(
-                        children: [
-                          Checkbox(
-                              value: _model.checkboxValue ??= true,
-                              onChanged: (value) =>
-                                  setState(() => _model.checkboxValue = value),
-                              activeColor: FlutterFlowTheme.of(context).primary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(4),
-                              )),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: RichText(
-                              text: TextSpan(
-                                text: 'Eu concordo com os ',
-                                style: FlutterFlowTheme.of(context).bodyMedium,
-                                children: [
-                                  TextSpan(
-                                    text: 'Termos de Serviço',
-                                    style: TextStyle(
-                                      color:
-                                          FlutterFlowTheme.of(context).primary,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                                  ),
-                                  const TextSpan(text: ' e '),
-                                  TextSpan(
-                                    text: 'Política de Privacidade',
-                                    style: TextStyle(
-                                      color:
-                                          FlutterFlowTheme.of(context).primary,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                                  ),
-                                ],
+                  ),
+          
+                  const SizedBox(height: 32),
+          
+                  Form(
+                    key: _model.formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Nome Completo',
+                          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w500,
+                                color: FlutterFlowTheme.of(context).primaryText,
                               ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _model.inputMomeCompletoTextController,
+                          focusNode: _model.inputMomeCompletoFocusNode,
+                          decoration: _inputDecoration(
+                            context,
+                            'Digite seu nome completo',
+                            prefixIcon: const Icon(Icons.person_outline),
+                          ),
+                          validator: _model
+                              .inputMomeCompletoTextControllerValidator
+                              .asValidator(context),
+                        ),
+          
+                        const SizedBox(height: 16),
+          
+                        // Campo Telefone
+                        Text(
+                          'Telefone',
+                          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w500,
+                                color: FlutterFlowTheme.of(context).primaryText,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _model.inputTelefoneTextController,
+                          focusNode: _model.inputTelefoneFocusNode,
+                          keyboardType: TextInputType.phone,
+                          decoration: _inputDecoration(
+                            context,
+                            '999-999-999',
+                            prefixIcon: const Icon(Icons.phone_outlined),
+                          ),
+                          validator: _model.inputTelefoneTextControllerValidator
+                              .asValidator(context),
+                        ),
+          
+                        const SizedBox(height: 16),
+          
+                        // Campo Email
+                        Text(
+                          'Email',
+                          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w500,
+                                color: FlutterFlowTheme.of(context).primaryText,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _model.inputEmailTextController,
+                          focusNode: _model.inputEmailFocusNode,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: _inputDecoration(
+                            context,
+                            'seu@email.com',
+                            prefixIcon: const Icon(Icons.email_outlined),
+                          ),
+                          validator: _model.inputEmailTextControllerValidator
+                              .asValidator(context),
+                        ),
+          
+                        const SizedBox(height: 16),
+          
+                        // Campo Senha
+                        Text(
+                          'Senha',
+                          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w500,
+                                color: FlutterFlowTheme.of(context).primaryText,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _model.inputSenhaTextController1,
+                          focusNode: _model.inputSenhaFocusNode1,
+                          obscureText: !_model.inputSenhaVisibility1,
+                          decoration: _inputDecoration(
+                            context,
+                            'Digite sua senha',
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _model.inputSenhaVisibility1
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                size: 20,
+                              ),
+                              onPressed: () => setState(() {
+                                _model.inputSenhaVisibility1 =
+                                    !_model.inputSenhaVisibility1;
+                              }),
                             ),
                           ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Botão Cadastrar
-                      FilledButton(
-                        onPressed: _registerUser,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Color(0xFFEC8D0D),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                          validator: _model.inputSenhaTextController1Validator
+                              .asValidator(context),
+                        ),
+          
+                        const SizedBox(height: 16),
+          
+                        // Campo Confirmar Senha
+                        Text(
+                          'Confirmar Senha',
+                          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w500,
+                                color: FlutterFlowTheme.of(context).primaryText,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _model.inputSenhaTextController2,
+                          focusNode: _model.inputSenhaFocusNode2,
+                          obscureText: !_model.inputSenhaVisibility2,
+                          decoration: _inputDecoration(
+                            context,
+                            'Confirme sua senha',
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _model.inputSenhaVisibility2
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                size: 20,
+                              ),
+                              onPressed: () => setState(() {
+                                _model.inputSenhaVisibility2 =
+                                    !_model.inputSenhaVisibility2;
+                              }),
+                            ),
                           ),
+                          validator: _model.inputSenhaTextController2Validator
+                              .asValidator(context),
                         ),
-                        child: Text(
-                          'CADASTRAR',
-                          style:
-                              FlutterFlowTheme.of(context).titleMedium.override(
-                                    fontFamily: 'Inter',
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Já tem conta? Login
-                      TextButton(
-                        onPressed: () =>
-                            context.pushNamed(Tela00LoginWidget.routeName),
-                        child: RichText(
-                          text: TextSpan(
-                            text: 'Já tem uma conta? ',
-                            style: FlutterFlowTheme.of(context).bodyMedium,
-                            children: [
-                              TextSpan(
-                                text: 'Faça login',
-                                style: TextStyle(
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  fontWeight: FontWeight.bold,
-                                  decoration: TextDecoration.underline,
+          
+                        const SizedBox(height: 16),
+          
+                        // Checkbox Termos
+                        Row(
+                          children: [
+                            Checkbox(
+                                value: _model.checkboxValue ??= true,
+                                onChanged: (value) =>
+                                    setState(() => _model.checkboxValue = value),
+                                activeColor: FlutterFlowTheme.of(context).primary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                )),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: RichText(
+                                text: TextSpan(
+                                  text: 'Eu concordo com os ',
+                                  style: FlutterFlowTheme.of(context).bodyMedium,
+                                  children: [
+                                    TextSpan(
+                                      text: 'Termos de Serviço',
+                                      style: TextStyle(
+                                        color:
+                                            FlutterFlowTheme.of(context).primary,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                    const TextSpan(text: ' e '),
+                                    TextSpan(
+                                      text: 'Política de Privacidade',
+                                      style: TextStyle(
+                                        color:
+                                            FlutterFlowTheme.of(context).primary,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
+                            ),
+                          ],
+                        ),
+          
+                        const SizedBox(height: 24),
+          
+                        // Botão Cadastrar
+                        FilledButton(
+                          onPressed: _registerUser,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Color(0xFFEC8D0D),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            'CADASTRAR',
+                            style:
+                                FlutterFlowTheme.of(context).titleMedium.override(
+                                      fontFamily: 'Inter',
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                           ),
                         ),
-                      ),
-                    ],
+          
+                        const SizedBox(height: 24),
+          
+                        // Já tem conta? Login
+                        TextButton(
+                          onPressed: () =>
+                              context.pushNamed(Tela00LoginWidget.routeName),
+                          child: RichText(
+                            text: TextSpan(
+                              text: 'Já tem uma conta? ',
+                              style: FlutterFlowTheme.of(context).bodyMedium,
+                              children: [
+                                TextSpan(
+                                  text: 'Faça login',
+                                  style: TextStyle(
+                                    color: FlutterFlowTheme.of(context).primary,
+                                    fontWeight: FontWeight.bold,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
-    );
+    ));
   }
 
   InputDecoration _inputDecoration(

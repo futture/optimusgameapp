@@ -21,7 +21,7 @@ class NotificationHandler {
   final MatchService _matchService = MatchService();
 
   Future<void> subscribeToMatchTopic(String topic, String matchId) async {
-    if (kIsWeb) {
+    if (!kIsWeb) {
       try {
         final topicName = "${topic}_$matchId";
         await FirebaseMessaging.instance.subscribeToTopic(topicName);

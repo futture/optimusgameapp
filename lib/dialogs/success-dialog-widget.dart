@@ -25,7 +25,6 @@ class _SuccessDialogWidgetState extends State<SuccessDialogWidget>
   @override
   void initState() {
     super.initState();
-
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),
@@ -49,7 +48,7 @@ class _SuccessDialogWidgetState extends State<SuccessDialogWidget>
   @override
   Widget build(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
-    const successGreen = Color(0xFF4CAF50); // Verde sucesso
+    const successGreen = Color(0xFF4CAF50);
 
     return Center(
       child: FadeTransition(
@@ -59,78 +58,83 @@ class _SuccessDialogWidgetState extends State<SuccessDialogWidget>
           child: Dialog(
             elevation: 0,
             backgroundColor: Colors.transparent,
-            insetPadding: const EdgeInsets.symmetric(horizontal: 32),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: theme.secondaryBackground.withOpacity(0.75),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: successGreen.withOpacity(0.2),
-                      width: 1,
+            insetPadding: EdgeInsets.zero, // Removido padding fixo
+            child: ConstrainedBox( // Adicionado ConstrainedBox
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width > 600 ? 500 : double.infinity,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: theme.secondaryBackground.withOpacity(0.75),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: successGreen.withOpacity(0.2),
+                        width: 1,
+                      ),
                     ),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 32,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.check_circle_rounded,
-                        size: 72,
-                        color: successGreen,
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Sucesso!',
-                        style: theme.titleLarge.copyWith(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: theme.primaryText,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 32,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.check_circle_rounded,
+                          size: 72,
+                          color: successGreen,
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        widget.message,
-                        textAlign: TextAlign.center,
-                        style: theme.bodyMedium.copyWith(
-                          fontSize: 16,
-                          color: theme.secondaryText,
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            widget.onOk?.call();
-                            Navigator.of(context).pop();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: successGreen,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: const Text(
-                            'OK',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
-                              color: Colors.white,
-                            ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Sucesso!',
+                          style: theme.titleLarge.copyWith(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: theme.primaryText,
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 16),
+                        Text(
+                          widget.message,
+                          textAlign: TextAlign.center,
+                          style: theme.bodyMedium.copyWith(
+                            fontSize: 16,
+                            color: theme.secondaryText,
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              widget.onOk?.call();
+                              Navigator.of(context).pop();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: successGreen,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: const Text(
+                              'OK',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -148,25 +152,12 @@ class SuccessDialogWidgetUtil {
     await showDialog(
       context: context,
       builder: (dialogContext) {
-        return Dialog(
-          elevation: 0,
-          insetPadding: EdgeInsets.zero,
-          backgroundColor: Colors.transparent,
-          alignment: AlignmentDirectional(0.0, 0.0)
-              .resolve(Directionality.of(context)),
-          child: GestureDetector(
-            onTap: () {
-              FocusScope.of(dialogContext).unfocus();
-              FocusManager.instance.primaryFocus?.unfocus();
-            },
-            child: SuccessDialogWidget(
-              message: title,
-              onOk: () {
-                Navigator.of(dialogContext).pop();
-                func!();
-              },
-            ),
-          ),
+        return SuccessDialogWidget(
+          message: title,
+          onOk: () {
+            Navigator.of(dialogContext).pop();
+            func?.call();
+          },
         );
       },
     );

@@ -92,40 +92,46 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
             centerTitle: true,
             elevation: 4.0,
           ),
-          body: SafeArea(
-            child: RefreshIndicator(
-              onRefresh: _refreshData,
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    _buildUserProfileCard(),
-                    const SizedBox(height: 20),
-                    _buildGameRoomButton(),
-                    const SizedBox(height: 20),
-                    _buildSuperLeagueHeader(),
-                    const SizedBox(height: 16),
-                    if (_model.isLoadingMatches)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 24.0),
-                        child: CircularProgressIndicator(),
-                      )
-                    else if (_model.matchList.isEmpty)
-                      _buildEmptyMatchesState()
-                    else
-                      ..._model.matchList.map((match) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12.0),
-                            child: _buildMatchCard(match),
-                          )),
-                  ],
+          body: Center(
+            child: Container( // Adicionado Container com maxWidth
+              constraints: BoxConstraints(
+                maxWidth: isWeb ? 1000 : double.infinity,
+              ),
+            child: SafeArea(
+              child: RefreshIndicator(
+                onRefresh: _refreshData,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      _buildUserProfileCard(),
+                      const SizedBox(height: 20),
+                      _buildGameRoomButton(),
+                      const SizedBox(height: 20),
+                      _buildSuperLeagueHeader(),
+                      const SizedBox(height: 16),
+                      if (_model.isLoadingMatches)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24.0),
+                          child: CircularProgressIndicator(),
+                        )
+                      else if (_model.matchList.isEmpty)
+                        _buildEmptyMatchesState()
+                      else
+                        ..._model.matchList.map((match) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12.0),
+                              child: _buildMatchCard(match),
+                            )),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
         ),
       ),
-    );
+    ));
   }
 
   Future<void> _refreshData() async {

@@ -141,170 +141,174 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> {
         centerTitle: true,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        physics: BouncingScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: FlutterFlowTheme.of(context).secondaryBackground,
-                boxShadow: [
-                  BoxShadow(
-                    blurRadius: 3.0,
-                    color: Color(0x33000000),
-                    offset: Offset(0.0, 1.0),
-                  )
-                ],
+      body: Center(
+        child: Container( // Adicionado Container com maxWidth
+              constraints: BoxConstraints(
+                maxWidth: isWeb ? 1000 : double.infinity,
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 80.0,
-                      height: 80.0,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Color(0xFFEC8D0D),
-                          width: 2.0,
-                        ),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(40.0),
-                        child: CachedNetworkImage(
-                          imageUrl:
-                              'https://images.unsplash.com/photo-1531123414780-f74242c2b052?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NDV8fHByb2ZpbGV8ZW58MHx8MHx8&auto=format&fit=crop&w=900&q=60',
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) =>
-                              CircularProgressIndicator(),
-                          errorWidget: (context, url, error) =>
-                              Icon(Icons.person),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16.0),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _model.user == null
-                                ? 'Carregando...'
-                                : _model.user!.name.toUpperCase(),
-                            style: FlutterFlowTheme.of(context)
-                                .headlineSmall
-                                .override(
-                                  fontFamily: 'Outfit',
-                                  fontSize: 20.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4.0),
-                          Text(
-                            _model.userAccountInfo == null
-                                ? "Carregando..."
-                                : 'ID: ${_model.userAccountInfo!.availableBalance}',
-                            style: FlutterFlowTheme.of(context)
-                                .labelMedium
-                                .override(
-                                  fontFamily: 'Plus Jakarta Sans',
-                                  fontSize: 14.0,
-                                  letterSpacing: 0.0,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
+        child: SingleChildScrollView(
+          physics: BouncingScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: FlutterFlowTheme.of(context).secondaryBackground,
+                  boxShadow: [
+                    BoxShadow(
+                      blurRadius: 3.0,
+                      color: Color(0x33000000),
+                      offset: Offset(0.0, 1.0),
+                    )
                   ],
                 ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 80.0,
+                        height: 80.0,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Color(0xFFEC8D0D),
+                            width: 2.0,
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(40.0),
+                          child: CachedNetworkImage(
+                            imageUrl:
+                                'https://images.unsplash.com/photo-1531123414780-f74242c2b052?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NDV8fHByb2ZpbGV8ZW58MHx8MHx8&auto=format&fit=crop&w=900&q=60',
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) =>
+                                CircularProgressIndicator(),
+                            errorWidget: (context, url, error) =>
+                                Icon(Icons.person),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16.0),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _model.user == null
+                                  ? 'Carregando...'
+                                  : _model.user!.name.toUpperCase(),
+                              style: FlutterFlowTheme.of(context)
+                                  .headlineSmall
+                                  .override(
+                                    fontFamily: 'Outfit',
+                                    fontSize: 20.0,
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4.0),
+                            Text(
+                              _model.userAccountInfo == null
+                                  ? "Carregando..."
+                                  : 'ID: ${_model.userAccountInfo!.availableBalance}',
+                              style: FlutterFlowTheme.of(context)
+                                  .labelMedium
+                                  .override(
+                                    fontFamily: 'Plus Jakarta Sans',
+                                    fontSize: 14.0,
+                                    letterSpacing: 0.0,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ), 
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24.0, 24.0, 0.0, 8.0),
+                child: Text(
+                  'CONTA',
+                  style: FlutterFlowTheme.of(context).labelLarge.override(
+                        fontFamily: 'Plus Jakarta Sans',
+                        color: FlutterFlowTheme.of(context).secondaryText,
+                        fontSize: 12.0,
+                        letterSpacing: 1.0,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
               ),
-            ),
-
-            // Seção de Conta
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24.0, 24.0, 0.0, 8.0),
-              child: Text(
-                'CONTA',
-                style: FlutterFlowTheme.of(context).labelLarge.override(
-                      fontFamily: 'Plus Jakarta Sans',
-                      color: FlutterFlowTheme.of(context).secondaryText,
-                      fontSize: 12.0,
-                      letterSpacing: 1.0,
-                      fontWeight: FontWeight.w600,
-                    ),
+              _buildProfileItem(
+                icon: Icons.hotel_class,
+                title: 'Ranking de Partida',
+                onTap: () {
+                  context.pushNamed(
+                    Tela12VitoriaViewWidget.routeName,
+                    extra: <String, dynamic>{
+                      kTransitionInfoKey: TransitionInfo(
+                        hasTransition: true,
+                        transitionType: PageTransitionType.rightToLeft,
+                      ),
+                    },
+                  );
+                },
               ),
-            ),
-            _buildProfileItem(
-              icon: Icons.hotel_class,
-              title: 'Ranking de Partida',
-              onTap: () {
-                context.pushNamed(
-                  Tela12VitoriaViewWidget.routeName,
-                  extra: <String, dynamic>{
-                    kTransitionInfoKey: TransitionInfo(
-                      hasTransition: true,
-                      transitionType: PageTransitionType.rightToLeft,
-                    ),
-                  },
-                );
-              },
-            ),
-
-            _buildProfileItem(
-              icon: Icons.notifications_none,
-              title: 'Notificações',
-              onTap: () {
-                context.pushNamed(Tela17NotificacaoViewWidget.routeName);
-              },
-            ),
-
-            _buildProfileItem(
-              icon: Icons.account_circle_outlined,
-              title: 'Editar Perfil',
-              onTap: () {
-                context.pushNamed(Tela11EditarPerfilWidget.routeName);
-              },
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24.0, 24.0, 0.0, 8.0),
-              child: Text(
-                'GERAL',
-                style: FlutterFlowTheme.of(context).labelLarge.override(
-                      fontFamily: 'Plus Jakarta Sans',
-                      color: FlutterFlowTheme.of(context).secondaryText,
-                      fontSize: 12.0,
-                      letterSpacing: 1.0,
-                      fontWeight: FontWeight.w600,
-                    ),
+        
+              _buildProfileItem(
+                icon: Icons.notifications_none,
+                title: 'Notificações',
+                onTap: () {
+                  context.pushNamed(Tela17NotificacaoViewWidget.routeName);
+                },
               ),
-            ),
-            _buildProfileItem(
-              icon: Icons.support_outlined,
-              title: 'Suporte',
-              onTap: () {
-                context.pushNamed(TelaSuporteWidget.routeName);
-              },
-            ),
-            _buildProfileItem(
-              icon: Icons.privacy_tip_rounded,
-              title: 'Termos de Serviço',
-            ),
-
-            _buildProfileItem(
-              icon: Icons.ios_share,
-              title: 'Convidar Amigos',
-            ),
-
-            const SizedBox(height: 24.0),
-          ],
+        
+              _buildProfileItem(
+                icon: Icons.account_circle_outlined,
+                title: 'Editar Perfil',
+                onTap: () {
+                  context.pushNamed(Tela11EditarPerfilWidget.routeName);
+                },
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24.0, 24.0, 0.0, 8.0),
+                child: Text(
+                  'GERAL',
+                  style: FlutterFlowTheme.of(context).labelLarge.override(
+                        fontFamily: 'Plus Jakarta Sans',
+                        color: FlutterFlowTheme.of(context).secondaryText,
+                        fontSize: 12.0,
+                        letterSpacing: 1.0,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+              _buildProfileItem(
+                icon: Icons.support_outlined,
+                title: 'Suporte',
+                onTap: () {
+                  context.pushNamed(TelaSuporteWidget.routeName);
+                },
+              ),
+              _buildProfileItem(
+                icon: Icons.privacy_tip_rounded,
+                title: 'Termos de Serviço',
+              ),
+        
+              _buildProfileItem(
+                icon: Icons.ios_share,
+                title: 'Convidar Amigos',
+              ),
+        
+              const SizedBox(height: 24.0),
+            ],
+          ),
         ),
       ),
-    );
+    ));
   }
 }
