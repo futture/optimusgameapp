@@ -763,6 +763,10 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
             'Taxa de Jogo',
             '${(!ranking.isWinner! ? 0 : _model.matchInfo!.room?.roomConfiguration?.premiumRate ?? 0) * 100}%',
           ),
+          //  _buildDetailRow(
+          //     'Imposto aplicado',
+          //     '${(!ranking.isWinner! ? 0 : ranking.) * 100}%',
+          //   ),
           _buildDetailRow(
             'Ganho Líquido',
             '${!ranking.isWinner! ? 0 : _model.matchInfo!.matchPrize?.netPremium ?? 0} AOA',
