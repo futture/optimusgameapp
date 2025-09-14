@@ -772,7 +772,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
     });
 
     _model.cancelarTimers();
-    _model.showDialogWaitingPlayer(context);
+    _model.showDialogWaitingPlayer(context, setState);
     await _model.sendUserResponseAsync(_model.answerOptionId, setState);
   }
 }

@@ -130,6 +130,10 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
       }
 
       await getMatchByMatchIdAsync();
+      bool isFree = matchInfo!.room!.isFree;
+      if (isFree) {
+        showMatchParticipantsDialog(isFree: isFree);
+      }
       await getWebSocketWaitForPlayerAsync();
     } catch (e) {
       print("Erro inesperado ao criar partida: $e");
@@ -237,7 +241,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
   //   );
   // }
 
-  void showMatchParticipantsDialog() {
+  void showMatchParticipantsDialog({bool isFree = false}) {
     if (isShowWaitingDialogOpen) return;
 
     isShowWaitingDialogOpen = true;
@@ -269,12 +273,20 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
             '${matchInfo!.matchPlayers?.length ?? 0}/${matchInfo!.room?.roomConfiguration?.numberOfPlayers ?? 0}',
       },
     ];
-    CommonDialogWidget.showMatchParticipantsDialog(context, infos, "Desafio",
-        matchInfo!, participants, currentUser, _buildDialogActions(),
-        timeCloseDialog: 3600, isPlaySound: false, isProgressBar: false);
+    CommonDialogWidget.showMatchParticipantsDialog(
+        context,
+        infos,
+        "Desafio",
+        matchInfo!,
+        participants,
+        currentUser,
+        _buildDialogActions(isFree: isFree),
+        timeCloseDialog: 3600,
+        isPlaySound: false,
+        isProgressBar: false);
   }
 
-  Widget _buildDialogActions() {
+  Widget _buildDialogActions({bool isFree = false}) {
     return Column(
       children: [
         if (isWaitingPlayers) ...[
@@ -297,6 +309,36 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
                 ),
                 Text(
                   'Participantes conectados: $playersConnected/$numberOfPlayers',
+                  style: FlutterFlowTheme.of(context).bodySmall.override(
+                        fontFamily: 'Inter',
+                        letterSpacing: 0,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+        if (isFree) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              children: [
+                const CircularProgressIndicator(
+                  color: Color(0xFFEC8D0D),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Aguarde...',
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        fontFamily: 'Inter',
+                        color: const Color(0xFFEC8D0D),
+                        fontSize: 14,
+                        letterSpacing: 0,
+                      ),
+                ),
+                Text(
+                  'Preparando a partida: $playersConnected/$numberOfPlayers',
                   style: FlutterFlowTheme.of(context).bodySmall.override(
                         fontFamily: 'Inter',
                         letterSpacing: 0,
