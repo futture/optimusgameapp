@@ -119,17 +119,19 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget> {
             ),
           ],
         ),
-        body: Center(
-          child: Container(
-            constraints: BoxConstraints(maxWidth: 800), // Largura máxima
-            padding: EdgeInsets.all(isWeb ? 24 : 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(context),
-                SizedBox(height: 24),
-                _buildPaymentMethodsGrid(context, isWeb),
-              ],
+        body: SingleChildScrollView(
+          child: Center(
+            child: Container(
+              constraints: BoxConstraints(maxWidth: 800), // Largura máxima
+              padding: EdgeInsets.all(isWeb ? 24 : 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(context),
+                  SizedBox(height: 24),
+                  _buildPaymentMethodsGrid(context, isWeb),
+                ],
+              ),
             ),
           ),
         ),
