@@ -139,7 +139,8 @@ class _ModaMenuPagianInicialWidgetState
                 icon: Icons.logout_sharp,
                 text: 'Terminar Sessão',
                 onTap: () async {
-                  try {
+                  try { 
+                    await _model.logoutAsync();
                     TokenUtil.removeToken();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -147,7 +148,6 @@ class _ModaMenuPagianInicialWidgetState
                         backgroundColor: Colors.green,
                       ),
                     );
-                    await _model.logoutAsync();
                     context.pushNamed(Tela00LoginWidget.routeName);
                   } catch (e) {
                     print('Erro ao terminar sessão: $e');
