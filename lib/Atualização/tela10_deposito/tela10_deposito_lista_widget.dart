@@ -576,25 +576,96 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget> {
       }
     }
 
-    bool _isMontanteValido() {
-      if (montanteController.text.isEmpty) return false;
-      final valor =
-          double.tryParse(montanteController.text.replaceAll(',', '.'));
-      return valor != null && valor >= 500;
+    String _formatarMontante(String value) {
+      if (value.isEmpty) return '';
+
+      // Remove todos os caracteres não numéricos
+      String cleaned = value.replaceAll(RegExp(r'[^\d]'), '');
+
+      // Se estiver vazio após limpeza, retorna vazio
+      if (cleaned.isEmpty) return '';
+
+      // Converte para número
+      double number =
+          double.parse(cleaned) / 100; // Divide por 100 para ter decimais
+
+      // Formata como moeda angolana
+      String formatted = number.toStringAsFixed(2);
+
+      // Adiciona separadores de milhares e substitui ponto por vírgula
+      List<String> parts = formatted.split('.');
+      String integerPart = parts[0];
+      String decimalPart = parts.length > 1 ? parts[1] : '00';
+
+      // Adiciona separadores de milhares
+      String formattedInteger = '';
+      for (int i = integerPart.length - 1, j = 0; i >= 0; i--, j++) {
+        if (j > 0 && j % 3 == 0) {
+          formattedInteger = '.$formattedInteger';
+        }
+        formattedInteger = integerPart[i] + formattedInteger;
+      }
+
+      return '$formattedInteger,$decimalPart';
     }
 
-    String? _validarMontante(String? value) {
+    bool _isMontanteValido() {
+      if (montanteController.text.isEmpty) return false;
+
+      // Remove formatação para verificar o valor numérico
+      String valorSemFormatacao =
+          montanteController.text.replaceAll(RegExp(r'[^\d]'), '');
+      if (valorSemFormatacao.isEmpty) return false;
+
+      final valor = double.parse(valorSemFormatacao) / 100;
+      return valor >= 500.0;
+    }
+
+    String? _validateMoney(String? value) {
       if (value == null || value.isEmpty) {
         return 'Insira o montante';
       }
-      final valor = double.tryParse(value.replaceAll(',', '.'));
-      if (valor == null) {
+
+      // Remove formatação para verificar o valor numérico
+      String valorSemFormatacao = value.replaceAll(RegExp(r'[^\d]'), '');
+      if (valorSemFormatacao.isEmpty) {
         return 'Valor inválido';
       }
-      if (valor < 500) {
-        return 'Mínimo 500 Kz';
+
+      final valor = double.parse(valorSemFormatacao) / 100;
+
+      if (valor < 500.0) {
+        return 'Mínimo 500,00 Kz';
       }
+
       return null;
+    }
+
+    double _getNumericValue() {
+      if (montanteController.text.isEmpty) return 0;
+      String valorSemFormatacao =
+          montanteController.text.replaceAll(RegExp(r'[^\d]'), '');
+      if (valorSemFormatacao.isEmpty) return 0;
+      return double.parse(valorSemFormatacao) / 100;
+    }
+
+    void _clearReferenceIfAmountEmpty(String value) { 
+      String valorSemFormatacao = value.replaceAll(RegExp(r'[^\d]'), '');
+
+      if (valorSemFormatacao.isEmpty && referenciaGerada) {
+        referencia = '';
+        referenciaGerada = false;
+      }
+    }
+
+    void _applyAmountFormatting() {
+      final formattedValue = _formatarMontante(montanteController.text);
+      if (formattedValue != montanteController.text) {
+        montanteController.text = formattedValue;
+        montanteController.selection = TextSelection.collapsed(
+          offset: formattedValue.length,
+        );
+      }
     }
 
     // Defina estas cores conforme seu tema
@@ -782,7 +853,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget> {
                               TextField(
                                 controller: montanteController,
                                 decoration: InputDecoration(
-                                  hintText: 'Digite o valor (mínimo 500 Kz)...',
+                                  hintText: 'Ex: 500,00',
                                   hintStyle: TextStyle(
                                     color: _textSecondary,
                                     fontSize: 14,
@@ -790,16 +861,50 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget> {
                                   border: InputBorder.none,
                                   contentPadding: EdgeInsets.zero,
                                   errorText:
-                                      _validarMontante(montanteController.text),
+                                      _validateMoney(montanteController.text),
                                 ),
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                   color: _textPrimary,
                                 ),
-                                keyboardType: TextInputType.numberWithOptions(
-                                    decimal: true),
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  TextInputFormatter.withFunction(
+                                      (oldValue, newValue) {
+                                    // Aplica formatação enquanto digita
+                                    if (newValue.text.isEmpty) {
+                                      return newValue;
+                                    }
+
+                                    String formattedValue =
+                                        _formatarMontante(newValue.text);
+
+                                    return TextEditingValue(
+                                      text: formattedValue,
+                                      selection: TextSelection.collapsed(
+                                        offset: formattedValue.length,
+                                      ),
+                                    );
+                                  }),
+                                ],
                                 onChanged: (value) {
+                                  // Limpa a referência se o montante for apagado
+                                  String valorSemFormatacao =
+                                      value.replaceAll(RegExp(r'[^\d]'), '');
+                                  if (valorSemFormatacao.isEmpty &&
+                                      referenciaGerada) {
+                                    setState(() {
+                                      referencia = '';
+                                      referenciaGerada = false;
+                                    });
+                                  } else {
+                                    setState(() {});
+                                  }
+                                },
+                                onEditingComplete: () {
+                                  _applyAmountFormatting();
                                   setState(() {});
                                 },
                               ),
@@ -847,7 +952,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget> {
                                 Text(
                                   _isMontanteValido()
                                       ? 'Clique para gerar referência'
-                                      : 'Insira montante mínimo de 500 Kz',
+                                      : 'Insira montante mínimo de 500,00 Kz',
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: _textSecondary,
@@ -882,6 +987,18 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget> {
                               : null,
                         ),
                       ],
+                    ),
+                  ),
+                  // Exemplo de valores formatados (opcional - para debug)
+                  Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Exemplos: 500 → 5,00 | 50000 → 500,00 | 123456 → 1.234,56',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: _textSecondary,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
                   ),
                   SizedBox(height: 20),
