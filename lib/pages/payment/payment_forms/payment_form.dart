@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_multi_formatter/formatters/formatter_utils.dart';
 import 'package:flutter_multi_formatter/formatters/masked_input_formatter.dart';
-//import 'package:flutter_multi_formatter/formatters/phone_input_formatter.dart';
 import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warning00_campo_vazio_widget.dart';
 import 'package:projeto_game_quiz/core/api/services/account_service.dart';
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
@@ -77,55 +76,69 @@ class _PaymentFormState extends State<PaymentForm> {
   }
 
   Future<void> _submitForm() async {
-  if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) return;
 
-  setState(() => _isLoading = true);
- 
- print(userAccountInfo?.id);
-  final Map<String, dynamic> paymentData = {
-    'paymentMethod': widget.method,
-    if (_refController.text.isNotEmpty) 'Entidade': _refController.text,
-    if (_phoneController.text.isNotEmpty) 'phone': _phoneController.text,
-    if (_amountController.text.isNotEmpty) 'amount': _amountController.text,
-    if (_accountController.text.isNotEmpty) 'account': _accountController.text,
-    if (userAccountInfo?.id != null)
-      'id': userAccountInfo!.id,
-  };
+    setState(() => _isLoading = true);
 
-  final accountService = AccountService();
+    final Map<String, dynamic> paymentData = {
+      'paymentMethod': widget.method,
+      if (_refController.text.isNotEmpty) 'Entidade': _refController.text,
+      if (_phoneController.text.isNotEmpty) 'phone': _phoneController.text,
+      if (_amountController.text.isNotEmpty) 'amount': _amountController.text,
+      if (_accountController.text.isNotEmpty) 'account': _accountController.text,
+      if (userAccountInfo?.id != null) 'id': userAccountInfo!.id,
+    };
 
-  try {
-    //final String type = paymentData['paymentMethod'] ?? 'unknown';
-    final String rawAmount = paymentData['amount']?.toString() ?? '0';
-    final double amount = double.tryParse(rawAmount) ?? 0.0;
-    final String accountId = paymentData['id'] ?? '';
+    final accountService = AccountService();
 
-    final transaction = TransactionRequest(
-      type: 'credit',
-      amount: amount,
-      account_id: accountId,
-    );
-    print(jsonEncode(transaction.toJson()));
-    final response = await accountService.createTransactionAsync(transaction);
+    try {
+      final String rawAmount = paymentData['amount']?.toString() ?? '0';
+      final double amount = double.tryParse(rawAmount) ?? 0.0;
+      final String accountId = paymentData['id'] ?? '';
 
-    if (response['isSuccess']) {
-      if (mounted) {
-        await showDialog(
-          context: context,
-          builder: (_) => Dialog(
-            backgroundColor: Colors.transparent,
-            insetPadding: const EdgeInsets.all(20),
-            child: SuccessDialogWidget(
-              message: 'Deposito feito com sucesso!',
-              onOk: () {
-                context.pushNamed(Tela03PrincipalWidget.routeName);
-              },
+      final transaction = TransactionRequest(
+        type: 'credit',
+        amount: amount,
+        account_id: accountId,
+      );
+      
+      final response = await accountService.createTransactionAsync(transaction);
+
+      if (response['isSuccess']) {
+        if (mounted) {
+          await showDialog(
+            context: context,
+            builder: (_) => Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: const EdgeInsets.all(20),
+              child: SuccessDialogWidget(
+                message: 'Depósito realizado com sucesso!',
+                onOk: () {
+                  context.pushNamed(Tela03PrincipalWidget.routeName);
+                },
+              ),
             ),
-          ),
-        );
+          );
+        }
+      } else {
+        final error = response['message'] ?? 'Erro ao criar transação.';
+        if (mounted) {
+          await showDialog(
+            context: context,
+            builder: (_) => Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: const EdgeInsets.all(20),
+              child: ErrorDialogWidget(
+                message: error,
+                onOk: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+          );
+        }
       }
-    } else {
-      final error = response['message'] ?? 'Erro ao criar transação.';
+    } catch (e) {
       if (mounted) {
         await showDialog(
           context: context,
@@ -133,39 +146,20 @@ class _PaymentFormState extends State<PaymentForm> {
             backgroundColor: Colors.transparent,
             insetPadding: const EdgeInsets.all(20),
             child: ErrorDialogWidget(
-              message: error,
+              message: 'Ocorreu um erro inesperado.',
               onOk: () {
-                Navigator.of(context).pop(); // Fecha o diálogo
+                Navigator.of(context).pop();
               },
             ),
           ),
         );
       }
-    }
-  } catch (e) {
-    print('Erro ao enviar transação: $e');
-    if (mounted) {
-      await showDialog(
-        context: context,
-        builder: (_) => Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.all(20),
-          child: ErrorDialogWidget(
-            message: 'Ocorreu um erro inesperado.',
-            onOk: () {
-              Navigator.of(context).pop(); // Fecha o diálogo
-            },
-          ),
-        ),
-      );
-    }
-  } finally {
-    if (mounted) {
-      setState(() => _isLoading = false);
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
-}
-
 
   String? _validateRequired(String? value) {
     if (value == null || value.isEmpty) return 'Campo obrigatório';
@@ -174,8 +168,9 @@ class _PaymentFormState extends State<PaymentForm> {
 
   String? _validatePhone(String? value) {
     if (value == null || value.isEmpty) return 'Campo obrigatório';
-    if (!RegExp(r'^\d+$').hasMatch(value))
+    if (!RegExp(r'^\d+$').hasMatch(value)) {
       return 'Apenas números são permitidos';
+    }
     return null;
   }
 
@@ -193,29 +188,110 @@ class _PaymentFormState extends State<PaymentForm> {
     TextInputType keyboardType = TextInputType.text,
     List<TextInputFormatter>? inputFormatters,
     String? Function(String?)? customValidator,
+    String? hintText,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
-      child: TextFormField(
-        controller: controller,
-        enabled: !_isLoading,
-        keyboardType: keyboardType,
-        inputFormatters: inputFormatters,
-        validator: customValidator ?? _validateRequired,
-        style: const TextStyle(color: Colors.black87, fontSize: 16),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(color: Color(0xFFEC8D0D)),
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          focusedBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Color(0xFFEC8D0D)),
-            borderRadius: BorderRadius.circular(8),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFF2D3748),
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          const SizedBox(height: 6),
+          TextFormField(
+            controller: controller,
+            enabled: !_isLoading,
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
+            validator: customValidator ?? _validateRequired,
+            style: const TextStyle(
+              color: Colors.black87,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+            decoration: InputDecoration(
+              hintText: hintText,
+              hintStyle: const TextStyle(
+                color: Colors.grey,
+                fontSize: 14,
+              ),
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFFEC8D0D), width: 2),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.red),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEntityStatus() {
+    if (_entityName == null) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _entityName == 'Entidade não encontrada'
+            ? const Color(0xFFFEE2E2)
+            : const Color(0xFFD1FAE5),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: _entityName == 'Entidade não encontrada'
+              ? const Color(0xFFFECACA)
+              : const Color(0xFFA7F3D0),
         ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            _entityName == 'Entidade não encontrada'
+                ? Icons.error_outline
+                : Icons.check_circle_outline,
+            color: _entityName == 'Entidade não encontrada'
+                ? const Color(0xFFDC2626)
+                : const Color(0xFF059669),
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              _entityName!,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: _entityName == 'Entidade não encontrada'
+                    ? const Color(0xFFDC2626)
+                    : const Color(0xFF059669),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -224,21 +300,22 @@ class _PaymentFormState extends State<PaymentForm> {
     switch (widget.method) {
       case 'Express':
         return [
-          _buildTextField(label: 'Entidade', controller: _refController),
-          if (_entityName != null)
-            Padding(
-              padding: const EdgeInsets.only(left: 4, bottom: 8),
-              child: Text(
-                _entityName!,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: _entityName == 'Entidade não encontrada'
-                      ? Colors.red
-                      : Colors.green,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
+          _buildTextField(
+            label: 'Número de Telefone',
+            controller: _phoneController,
+            keyboardType: TextInputType.phone,
+            inputFormatters: [
+              MaskedInputFormatter('+244 ### ### ###'),
+            ],
+            customValidator: (value) {
+              final clean = toNumericString(value ?? '');
+              if (clean.length != 12 || !clean.startsWith('2449')) {
+                return 'Número inválido. Use o formato +244 9XX XXX XXX';
+              }
+              return null;
+            },
+            hintText: '+244 9XX XXX XXX',
+          ),
           _buildTextField(
             label: 'Montante',
             controller: _amountController,
@@ -247,6 +324,7 @@ class _PaymentFormState extends State<PaymentForm> {
               FilteringTextInputFormatter.allow(RegExp(r'^\d+[\.,]?\d{0,2}'))
             ],
             customValidator: _validateAmount,
+            hintText: '0,00',
           ),
         ];
       case 'Unitel Money':
@@ -257,7 +335,7 @@ class _PaymentFormState extends State<PaymentForm> {
             controller: _phoneController,
             keyboardType: TextInputType.phone,
             inputFormatters: [
-              MaskedInputFormatter('+244 ### ### ###'), // Máscara personalizada
+              MaskedInputFormatter('+244 ### ### ###'),
             ],
             customValidator: (value) {
               final clean = toNumericString(value ?? '');
@@ -266,6 +344,7 @@ class _PaymentFormState extends State<PaymentForm> {
               }
               return null;
             },
+            hintText: '+244 9XX XXX XXX',
           ),
           _buildTextField(
             label: 'Montante',
@@ -275,6 +354,7 @@ class _PaymentFormState extends State<PaymentForm> {
               FilteringTextInputFormatter.allow(RegExp(r'^\d+[\.,]?\d{0,2}'))
             ],
             customValidator: _validateAmount,
+            hintText: '0,00',
           ),
         ];
       case 'Pay Pay':
@@ -285,6 +365,7 @@ class _PaymentFormState extends State<PaymentForm> {
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             customValidator: _validatePhone,
+            hintText: 'Digite o número da conta',
           ),
           _buildTextField(
             label: 'Montante',
@@ -294,55 +375,138 @@ class _PaymentFormState extends State<PaymentForm> {
               FilteringTextInputFormatter.allow(RegExp(r'^\d+[\.,]?\d{0,2}'))
             ],
             customValidator: _validateAmount,
+            hintText: '0,00',
           ),
         ];
       default:
-        return [const Text("Método não suportado.")];
+        return [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFEF3C7),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFF59E0B)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.warning_amber, color: Color(0xFFD97706)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    "Método de pagamento não suportado.",
+                    style: TextStyle(
+                      color: const Color(0xFF92400E),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ];
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Form(
-        key: _formKey,
-        child: Padding(
-          padding: const EdgeInsets.all(20),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Form(
+          key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Container(
+                margin: const EdgeInsets.only(bottom: 24),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF6E6),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFEC8D0D).withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.payment,
+                      color: const Color(0xFFEC8D0D),
+                      size: 24,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Método selecionado',
+                            style: TextStyle(
+                              color: const Color(0xFF2D3748),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            widget.method,
+                            style: const TextStyle(
+                              color: Color(0xFFEC8D0D),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               ..._buildFields(),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFEC8D0D),
+                    foregroundColor: Colors.white,
+                    elevation: 2,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    shadowColor: const Color(0xFFEC8D0D).withOpacity(0.3),
                   ),
                   onPressed: _isLoading ? null : _submitForm,
                   child: _isLoading
                       ? const SizedBox(
-                          height: 20,
-                          width: 20,
+                          height: 22,
+                          width: 22,
                           child: CircularProgressIndicator(
                             color: Colors.white,
-                            strokeWidth: 2,
+                            strokeWidth: 3,
                           ),
                         )
                       : const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.send, color: Colors.white),
-                            SizedBox(width: 8),
+                            Icon(Icons.send, size: 20),
+                            SizedBox(width: 12),
                             Text(
-                              'Enviar',
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.white),
+                              'Realizar Depósito',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),
@@ -355,20 +519,6 @@ class _PaymentFormState extends State<PaymentForm> {
     );
   }
 
-  // String? _validatePhoneNumber(String? value) {
-  //   if (value == null || value.isEmpty) {
-  //     return 'Por favor insira um número de telefone';
-  //   }
-  //   final clean = toNumericString(value);
-  //   if (clean.length != 9) {
-  //     return 'O número de telefone deve ter exatamente 9 dígitos';
-  //   }
-  //   if (!clean.startsWith('9')) {
-  //     return 'O número de telefone deve começar com 9';
-  //   }
-  //   return null;
-  // }
-
   Future<void> getUserAccountInfo(
       void Function(VoidCallback fn) setState) async {
     var result = await accountService.getAccountByUserIdAsync(user!.id);
@@ -377,8 +527,11 @@ class _PaymentFormState extends State<PaymentForm> {
         userAccountInfo = result["data"];
       });
     } else {
-      Warning00ErrorUtil.showDialogMessageError(context,
-          result["error"].detail.message, result["error"].detail.details);
+      Warning00ErrorUtil.showDialogMessageError(
+        context,
+        result["error"].detail.message,
+        result["error"].detail.details,
+      );
     }
   }
 

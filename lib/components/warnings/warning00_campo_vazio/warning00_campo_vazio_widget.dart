@@ -60,8 +60,8 @@ class _Warning00CampoVazioWidgetState extends State<Warning00CampoVazioWidget>
         }
       });
 
-    // _audioPlayer = AudioPlayer();
-    // _tocarSomAlerta();
+    _audioPlayer = AudioPlayer();
+    //_tocarSomAlerta();
 
     SchedulerBinding.instance.addPostFrameCallback((_) {
       _controller.forward();

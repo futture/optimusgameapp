@@ -1,0 +1,2 @@
+C:/Users/ACER/Documents/OptimusGame/optmusgameapp/updated/optimusgameapp/android/app/.cxx/RelWithDebInfo/5f6or304/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/ACER/Documents/OptimusGame/optmusgameapp/updated/optimusgameapp/android/app/.cxx/RelWithDebInfo/5f6or304/x86_64/CMakeFiles/rebuild_cache.dir
