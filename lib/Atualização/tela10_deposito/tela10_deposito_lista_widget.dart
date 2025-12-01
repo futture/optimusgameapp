@@ -3,6 +3,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:projeto_game_quiz/Atualiza%C3%A7%C3%A3o/tela10_deposito/tela10_deposito_lista_model.dart';
+import 'package:projeto_game_quiz/flutter_flow/flutter_flow_model.dart';
 import 'package:projeto_game_quiz/pages/payment/payment_forms/payment_form.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -109,7 +111,10 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
       'type': 'mobile',
     },
   ];
-
+  
+  late Tela10DepositoListaModel _model;
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+  
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _slideAnimation;
@@ -118,6 +123,11 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
   void initState() {
     super.initState();
     
+    // Inicializar o modelo
+    _model = createModel(context, () => Tela10DepositoListaModel());
+    _model.getUserInfoAndAccountInfoAsync(setState, context);
+    
+    // Inicializar animações
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: this,
@@ -143,6 +153,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
   @override
   void dispose() {
     _animationController.dispose();
+    _model.dispose();
     super.dispose();
   }
 
@@ -210,7 +221,6 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
     return Container(
       decoration: BoxDecoration(
         gradient: _primaryGradient,
-        // REMOVIDO border radius para ficar reto
         boxShadow: [
           BoxShadow(
             color: _primaryColor.withOpacity(0.2),
@@ -536,7 +546,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
         crossAxisCount: 2,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
-        childAspectRatio: 0.85, // Ajustado para evitar corte do botão
+        childAspectRatio: 0.85,
       ),
       itemCount: _paymentMethods.length,
       itemBuilder: (context, index) => _buildMethodCard(index, true),
@@ -690,7 +700,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                 
                 SizedBox(height: isMobile ? 16 : 20),
                 
-                // Botão de ação - GARANTIDO que aparece
+                // Botão de ação
                 Container(
                   width: double.infinity,
                   height: isMobile ? 42 : 46,
@@ -1119,188 +1129,103 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
   }
 
   void _showMulticaixaInfo(BuildContext context, Map<String, dynamic> method) {
-    // Controladores e variáveis de estado preservadas da versão original
-    TextEditingController montanteController = TextEditingController();
-    String referencia = '';
-    bool referenciaGerada = false;
-
-    String gerarReferenciaAleatoria() {
-      final random = Random();
-      return List.generate(9, (_) => random.nextInt(10)).join();
-    }
-
-    void _copiarReferencia(BuildContext context) {
-      if (referencia.isNotEmpty) {
-        Clipboard.setData(ClipboardData(text: referencia));
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Referência copiada!'),
-            backgroundColor: _successColor,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    }
-
-    String _formatarMontante(String value) {
-      if (value.isEmpty) return '';
-      String cleaned = value.replaceAll(RegExp(r'[^\d]'), '');
-      if (cleaned.isEmpty) return '';
-      double number = double.parse(cleaned) / 100;
-      String formatted = number.toStringAsFixed(2);
-      List<String> parts = formatted.split('.');
-      String integerPart = parts[0];
-      String decimalPart = parts.length > 1 ? parts[1] : '00';
-      
-      String formattedInteger = '';
-      for (int i = integerPart.length - 1, j = 0; i >= 0; i--, j++) {
-        if (j > 0 && j % 3 == 0) {
-          formattedInteger = '.$formattedInteger';
-        }
-        formattedInteger = integerPart[i] + formattedInteger;
-      }
-
-      return '$formattedInteger,$decimalPart';
-    }
-
-    bool _isMontanteValido() {
-      if (montanteController.text.isEmpty) return false;
-      String valorSemFormatacao =
-          montanteController.text.replaceAll(RegExp(r'[^\d]'), '');
-      if (valorSemFormatacao.isEmpty) return false;
-      final valor = double.parse(valorSemFormatacao) / 100;
-      return valor >= 500.0;
-    }
-
-    String? _validateMoney(String? value) {
-      if (value == null || value.isEmpty) {
-        return 'Insira o montante';
-      }
-      String valorSemFormatacao = value.replaceAll(RegExp(r'[^\d]'), '');
-      if (valorSemFormatacao.isEmpty) {
-        return 'Valor inválido';
-      }
-      final valor = double.parse(valorSemFormatacao) / 100;
-
-      if (valor < 500.0) {
-        return 'Mínimo 500,00 Kz';
-      }
-      return null;
-    }
-
-    void _clearReferenceIfAmountEmpty(String value) { 
-      String valorSemFormatacao = value.replaceAll(RegExp(r'[^\d]'), '');
-      if (valorSemFormatacao.isEmpty && referenciaGerada) {
-        referencia = '';
-        referenciaGerada = false;
-      }
-    }
-
-    void _applyAmountFormatting() {
-      final formattedValue = _formatarMontante(montanteController.text);
-      if (formattedValue != montanteController.text) {
-        montanteController.text = formattedValue;
-        montanteController.selection = TextSelection.collapsed(
-          offset: formattedValue.length,
-        );
-      }
-    }
-
-    // Widgets auxiliares preservados da versão original
-    Widget _buildCopyableField(
-      BuildContext context, {
-      required String label,
-      required String value,
-      required IconData icon,
-      required bool showCopyButton,
-    }) {
-      return Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: _backgroundColor,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _borderColor),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: _primaryColor, size: 20),
-                SizedBox(width: 8),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: _textSecondary,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: _textPrimary,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-                if (showCopyButton)
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: _primaryColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () {
-                          Clipboard.setData(ClipboardData(text: value));
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('$label copiado!'),
-                              backgroundColor: _successColor,
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        },
-                        child: Center(
-                          child: Icon(
-                            Icons.copy_rounded,
-                            color: _primaryColor,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ],
-        ),
-      );
-    }
-
     showDialog(
       context: context,
       barrierColor: Colors.black.withOpacity(0.5),
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
+          // Variáveis locais para este dialog
+          TextEditingController montanteController = TextEditingController();
+          bool referenciaGerada = false;
+          String referencia = '';
+          
+          // Funções auxiliares
+          String gerarReferenciaAleatoria() {
+            final random = Random();
+            return List.generate(9, (_) => random.nextInt(10)).join();
+          }
+          
+          String? _validarMontante(String value) {
+            if (value.isEmpty) {
+              return 'Insira o montante';
+            }
+            String valorSemFormatacao = value.replaceAll(RegExp(r'[^\d]'), '');
+            if (valorSemFormatacao.isEmpty) {
+              return 'Valor inválido';
+            }
+            final valor = double.parse(valorSemFormatacao) / 100;
+            
+            if (valor < 500.0) {
+              return 'Mínimo 500,00 Kz';
+            }
+            return null;
+          }
+          
+          void _copiarReferencia(BuildContext context) {
+            if (referencia.isNotEmpty) {
+              Clipboard.setData(ClipboardData(text: referencia));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Referência copiada!'),
+                  backgroundColor: _successColor,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            }
+          }
+          
+          String _formatarMontante(String value) {
+            if (value.isEmpty) return '';
+            String cleaned = value.replaceAll(RegExp(r'[^\d]'), '');
+            if (cleaned.isEmpty) return '';
+            double number = double.parse(cleaned) / 100;
+            String formatted = number.toStringAsFixed(2);
+            List<String> parts = formatted.split('.');
+            String integerPart = parts[0];
+            String decimalPart = parts.length > 1 ? parts[1] : '00';
+            
+            String formattedInteger = '';
+            for (int i = integerPart.length - 1, j = 0; i >= 0; i--, j++) {
+              if (j > 0 && j % 3 == 0) {
+                formattedInteger = '.$formattedInteger';
+              }
+              formattedInteger = integerPart[i] + formattedInteger;
+            }
+            
+            return '$formattedInteger,$decimalPart';
+          }
+          
+          bool _isMontanteValido() {
+            if (montanteController.text.isEmpty) return false;
+            String valorSemFormatacao =
+                montanteController.text.replaceAll(RegExp(r'[^\d]'), '');
+            if (valorSemFormatacao.isEmpty) return false;
+            final valor = double.parse(valorSemFormatacao) / 100;
+            return valor >= 500.0;
+          }
+          
+          void _clearReferenceIfAmountEmpty(String value) { 
+            String valorSemFormatacao = value.replaceAll(RegExp(r'[^\d]'), '');
+            if (valorSemFormatacao.isEmpty && referenciaGerada) {
+              referencia = '';
+              referenciaGerada = false;
+            }
+          }
+          
+          void _applyAmountFormatting() {
+            final formattedValue = _formatarMontante(montanteController.text);
+            if (formattedValue != montanteController.text) {
+              montanteController.text = formattedValue;
+              montanteController.selection = TextSelection.collapsed(
+                offset: formattedValue.length,
+              );
+            }
+          }
+          
           return Dialog(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
             insetPadding: EdgeInsets.symmetric(
@@ -1355,7 +1280,6 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                         children: [
                           // Entidade
                           _buildCopyableField(
-                            context,
                             label: 'Entidade',
                             value: method['entidade'] ?? '12345',
                             icon: Icons.account_balance_rounded,
@@ -1398,7 +1322,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                                       color: _textSecondary.withOpacity(0.6),
                                     ),
                                     border: InputBorder.none,
-                                    errorText: _validateMoney(montanteController.text),
+                                    errorText: _validarMontante(montanteController.text),
                                     errorStyle: TextStyle(
                                       color: _errorColor,
                                       fontSize: 12,
@@ -1709,6 +1633,91 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
             ),
           );
         },
+      ),
+    );
+  }
+
+  // Widget auxiliar para campos copiáveis
+  Widget _buildCopyableField({
+    required String label,
+    required String value,
+    required IconData icon,
+    required bool showCopyButton,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _backgroundColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: _primaryColor, size: 20),
+              SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: _textSecondary,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: _textPrimary,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+              if (showCopyButton)
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: _primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(text: value));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('$label copiado!'),
+                            backgroundColor: _successColor,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
+                      child: Center(
+                        child: Icon(
+                          Icons.copy_rounded,
+                          color: _primaryColor,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }
