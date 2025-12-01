@@ -33,6 +33,10 @@ class Tela01CriarContaModel extends FlutterFlowModel<Tela01CriarContaWidget> {
   // State field(s) for Checkbox widget.
   bool? checkboxValue;
 
+  bool get isRegistering => false;
+
+  set isRegistering(bool isRegistering) {}
+
   @override
   void initState(BuildContext context) {
     inputSenhaVisibility1 = false;

@@ -91,7 +91,7 @@ class UserService {
         successParser: (json) => UserResponse.FromJson(json),
       );
 
-      UserUtil.saveUserInfoData(successResult);
+      await UserUtil.saveUserInfoData(successResult);
 
       return {"isSuccess": true, "data": successResult};
     } catch (e) {

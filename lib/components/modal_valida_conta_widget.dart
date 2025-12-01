@@ -14,7 +14,12 @@ import 'modal_valida_conta_model.dart';
 export 'modal_valida_conta_model.dart';
 
 class ModalValidaContaWidget extends StatefulWidget {
-  const ModalValidaContaWidget({super.key});
+  const ModalValidaContaWidget({
+    super.key,
+    this.onOtpValidated,
+  });
+
+  final VoidCallback? onOtpValidated;
 
   @override
   State<ModalValidaContaWidget> createState() => _ModalValidaContaWidgetState();
@@ -22,6 +27,42 @@ class ModalValidaContaWidget extends StatefulWidget {
 
 class _ModalValidaContaWidgetState extends State<ModalValidaContaWidget> {
   late ModalValidaContaModel _model;
+
+  // Cores modernas alinhadas com o tema
+  final Color _primaryColor = Color(0xFFEC8D0D);
+  final Color _primaryLight = Color(0xFFFDE68A);
+  final Color _primaryDark = Color(0xFFD97706);
+  final Color _backgroundColor = Color(0xFFFAFAFA);
+  final Color _surfaceColor = Color(0xFFFFFFFF);
+  final Color _textPrimary = Color(0xFF1F2937);
+  final Color _textSecondary = Color(0xFF6B7280);
+  final Color _textTertiary = Color(0xFF9CA3AF);
+  final Color _borderColor = Color(0xFFE5E7EB);
+  final Color _successColor = Color(0xFF10B981);
+  final Color _errorColor = Color(0xFFEF4444);
+  final Color _warningColor = Color(0xFFF59E0B);
+
+  // Gradiente
+  final LinearGradient _primaryGradient = LinearGradient(
+    colors: [
+      Color(0xFFEC8D0D),
+      Color(0xFFF59E0B),
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  // Controladores para os 6 campos OTP
+  final List<TextEditingController> _otpControllers = List.generate(
+    6,
+    (_) => TextEditingController(),
+  );
+  final List<FocusNode> _otpFocusNodes = List.generate(
+    6,
+    (_) => FocusNode(),
+  );
+
+  bool _isValidating = false;
 
   @override
   void setState(VoidCallback callback) {
@@ -34,386 +75,567 @@ class _ModalValidaContaWidgetState extends State<ModalValidaContaWidget> {
     super.initState();
     _model = createModel(context, () => ModalValidaContaModel());
 
-    _model.otpTextController ??= TextEditingController();
-    _model.otpFocusNode ??= FocusNode();
+    // Configura listeners para navegação automática
+    for (int i = 0; i < _otpControllers.length; i++) {
+      _otpControllers[i].addListener(() {
+        final text = _otpControllers[i].text;
+        if (text.isNotEmpty && i < _otpControllers.length - 1) {
+          FocusScope.of(context).requestFocus(_otpFocusNodes[i + 1]);
+        }
+        if (text.isEmpty && i > 0) {
+          FocusScope.of(context).requestFocus(_otpFocusNodes[i - 1]);
+        }
+      });
+    }
+  }
+
+  String _getOtpCode() {
+    return _otpControllers.map((controller) => controller.text).join();
+  }
+
+  void _clearOtpFields() {
+    for (final controller in _otpControllers) {
+      controller.clear();
+    }
+    FocusScope.of(context).requestFocus(_otpFocusNodes[0]);
+  }
+
+  Future<void> _validateOtp() async {
+    final otp = _getOtpCode();
+    
+    // Verifica se todos os 6 dígitos foram preenchidos
+    if (otp.length != 6) {
+      // CORREÇÃO: Usar um simples SnackBar em vez de showGeneralDialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Por favor, insira todos os 6 dígitos do código',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: _errorColor,
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.all(20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+      
+      // Foca no primeiro campo vazio
+      for (int i = 0; i < _otpControllers.length; i++) {
+        if (_otpControllers[i].text.isEmpty) {
+          FocusScope.of(context).requestFocus(_otpFocusNodes[i]);
+          break;
+        }
+      }
+      return;
+    }
+
+    setState(() {
+      _isValidating = true;
+    });
+
+    try {
+      final response = await UserService().validateOtp(otp);
+      
+      if (response["isSuccess"]) {
+        OtpCodeResponse data = response["data"] as OtpCodeResponse;
+        if (otp == data.code) {
+          // Sucesso - mostra mensagem e fecha automaticamente
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (dialogContext) {
+              Future.delayed(Duration(seconds: 2), () {
+                Navigator.pop(dialogContext); // Fecha o diálogo de sucesso
+                Navigator.pop(context, true); // Fecha o modal OTP
+                // Chama callback se fornecido
+                if (widget.onOtpValidated != null) {
+                  widget.onOtpValidated!();
+                }
+              });
+
+              return Dialog(
+                backgroundColor: Colors.transparent,
+                insetPadding: const EdgeInsets.symmetric(horizontal: 40.0),
+                child: SuccessDialogWidget(
+                  message: 'Código validado com sucesso!',
+                  onOk: () {},
+                ),
+              );
+            },
+          );
+          return;
+        }
+      }
+      
+      // Se chegou aqui, é porque falhou na validação da API
+      // CORREÇÃO: Usar showDialog em vez de showGeneralDialog para não fechar o modal
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 40.0),
+            child: ErrorDialogWidget(
+              message: 'Código OTP inválido. Tente novamente.',
+              onOk: () {
+                Navigator.pop(dialogContext); // Fecha apenas o diálogo de erro
+                _clearOtpFields(); // Limpa os campos para nova tentativa
+              },
+            ),
+          );
+        },
+      );
+      
+    } catch (e) {
+      // CORREÇÃO: Usar showDialog para erros também
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 40.0),
+            child: ErrorDialogWidget(
+              message: 'Erro ao validar código. Verifique sua conexão.',
+              onOk: () => Navigator.pop(dialogContext), // Fecha apenas o diálogo de erro
+            ),
+          );
+        },
+      );
+    } finally {
+      setState(() {
+        _isValidating = false;
+      });
+    }
   }
 
   @override
   void dispose() {
+    for (final controller in _otpControllers) {
+      controller.dispose();
+    }
+    for (final focusNode in _otpFocusNodes) {
+      focusNode.dispose();
+    }
     _model.maybeDispose();
-
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final isMobile = mediaQuery.size.width < 768;
+    
     return Align(
-      alignment: AlignmentDirectional(0.0, 0.0),
+      alignment: AlignmentDirectional.center,
       child: Container(
-        width: 350.0,
-        height: 290.0,
+        width: isMobile ? mediaQuery.size.width * 0.9 : 450,
+        constraints: BoxConstraints(
+          maxWidth: 500,
+          maxHeight: mediaQuery.size.height * 0.8,
+        ),
         decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).primaryBackground,
+          color: _surfaceColor,
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              blurRadius: 4.0,
-              color: Color(0x33000000),
-              offset: Offset(
-                0.0,
-                1.0,
-              ),
-              spreadRadius: 5.0,
-            )
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 30,
+              offset: Offset(0, 15),
+              spreadRadius: -5,
+            ),
           ],
-          borderRadius: BorderRadius.circular(10.0),
+          border: Border.all(
+            color: _borderColor.withOpacity(0.6),
+            width: 1.5,
+          ),
         ),
         child: SingleChildScrollView(
           child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    FaIcon(
-                      FontAwesomeIcons.checkCircle,
-                      color: FlutterFlowTheme.of(context).primaryText,
-                      size: 20.0,
-                    ),
-                    Align(
-                      alignment: AlignmentDirectional(0.0, 0.0),
-                      child: Text(
-                        'CONFIRMAR OTP',
-                        style:
-                            FlutterFlowTheme.of(context).titleMedium.override(
-                                  fontFamily: 'Inter Tight',
-                                  fontSize: 18.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.normal,
-                                ),
-                      ),
-                    ),
-                    FlutterFlowIconButton(
-                      borderRadius: 8.0,
-                      buttonSize: 40.0,
-                      fillColor:
-                          FlutterFlowTheme.of(context).secondaryBackground,
-                      icon: Icon(
-                        Icons.close,
-                        color: FlutterFlowTheme.of(context).primaryText,
-                        size: 24.0,
-                      ),
-                      onPressed: () async {
-                        context.safePop();
-                      },
-                    ),
-                  ]
-                      .divide(SizedBox(width: 10.0))
-                      .addToStart(SizedBox(width: 9.0))
-                      .addToEnd(SizedBox(width: 9.0)),
-                ),
-              ),
-              Align(
-                alignment: AlignmentDirectional(0.0, 0.0),
-                child: Container(
-                  width: double.infinity,
-                  height: 200.0,
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).primaryBackground,
+              // Header do modal
+              Container(
+                padding: EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: _primaryColor.withOpacity(0.05),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
-                            25.0, 10.0, 20.0, 0.0),
-                        child: Text(
-                          'Insira o código que recebeu no seu contacto telefônico',
-                          style:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    fontFamily: 'Inter',
-                                    fontSize: 16.0,
-                                    letterSpacing: 0.0,
-                                  ),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: _borderColor.withOpacity(0.4),
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: _primaryColor,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _primaryColor.withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: FaIcon(
+                          FontAwesomeIcons.checkCircle,
+                          color: Colors.white,
+                          size: 24,
                         ),
                       ),
-                      Form(
-                        key: _model.formKey,
-                        autovalidateMode: AutovalidateMode.disabled,
-                        child: Align(
-                          alignment: AlignmentDirectional(0.0, 0.0),
-                          child: Container(
-                            width: double.infinity,
-                            height: 130.0,
-                            decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context)
-                                  .primaryBackground,
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Verificação de Segurança',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: _textPrimary,
+                              ),
                             ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Align(
-                                  alignment: AlignmentDirectional(0.0, 0.0),
-                                  child: Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 15.0, 0.0, 20.0),
-                                    child: Container(
-                                      width: 300.0,
-                                      height: 45.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryBackground,
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.comment,
-                                            color: FlutterFlowTheme.of(context)
-                                                .primaryText,
-                                            size: 22.0,
-                                          ),
-                                          Expanded(
-                                            child: Container(
-                                              width: 200.0,
-                                              child: TextFormField(
-                                                controller:
-                                                    _model.otpTextController,
-                                                focusNode: _model.otpFocusNode,
-                                                autofocus: false,
-                                                obscureText: false,
-                                                decoration: InputDecoration(
-                                                  isDense: true,
-                                                  labelStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .labelMedium
-                                                          .override(
-                                                            fontFamily: 'Inter',
-                                                            fontSize: 16.0,
-                                                            letterSpacing: 0.0,
-                                                          ),
-                                                  hintText: 'OTP',
-                                                  hintStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .labelMedium
-                                                          .override(
-                                                            fontFamily: 'Inter',
-                                                            letterSpacing: 0.0,
-                                                          ),
-                                                  enabledBorder:
-                                                      OutlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                      color: Color(0x00000000),
-                                                      width: 1.0,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                  focusedBorder:
-                                                      OutlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                      color: Color(0x00000000),
-                                                      width: 1.0,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                  errorBorder:
-                                                      OutlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                      color:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .error,
-                                                      width: 1.0,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                  focusedErrorBorder:
-                                                      OutlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                      color:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .error,
-                                                      width: 1.0,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                  ),
-                                                  filled: true,
-                                                  fillColor:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .secondaryBackground,
-                                                ),
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily: 'Inter',
-                                                          letterSpacing: 0.0,
-                                                        ),
-                                                maxLength: 6,
-                                                maxLengthEnforcement:
-                                                    MaxLengthEnforcement
-                                                        .enforced,
-                                                buildCounter: (context,
-                                                        {required currentLength,
-                                                        required isFocused,
-                                                        maxLength}) =>
-                                                    null,
-                                                keyboardType:
-                                                    TextInputType.number,
-                                                cursorColor:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primaryText,
-                                                validator: _model
-                                                    .otpTextControllerValidator
-                                                    .asValidator(context),
-                                              ),
-                                            ),
-                                          ),
-                                        ]
-                                            .divide(SizedBox(width: 10.0))
-                                            .addToStart(SizedBox(width: 9.0))
-                                            .addToEnd(SizedBox(width: 9.0)),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.all(5.0),
-                                  child: FFButtonWidget(
-                                    onPressed: () async {
-                                      String otp =
-                                          _model.otpTextController.text;
-                                      final response =
-                                          await UserService().validateOtp(otp);
-                                      if (response["isSuccess"]) {
-                                        OtpCodeResponse data =
-                                            response["data"] as OtpCodeResponse;
-                                        if (otp == data.code) {
-                                          await showDialog(
-                                            context: context,
-                                            barrierDismissible: false,
-                                            builder: (dialogContext) { 
-                                              Future.delayed(
-                                                  Duration(seconds: 2), () {
-                                                Navigator.pop(
-                                                    dialogContext); 
-                                                Navigator.pop(context,
-                                                    true);
-                                              });
-
-                                              return Dialog(
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                insetPadding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 40.0),
-                                                child: SuccessDialogWidget(
-                                                  message:
-                                                      'Código validado com sucesso!',
-                                                  onOk:
-                                                      () {}, 
-                                                ),
-                                              );
-                                            },
-                                          );
-                                          return;
-                                        }
-                                      } else {
-                                        await showGeneralDialog(
-                                          context: context,
-                                          barrierDismissible: false,
-                                          barrierLabel: "Erro OTP",
-                                          barrierColor: Colors.black54,
-                                          transitionDuration:
-                                              const Duration(milliseconds: 400),
-                                          pageBuilder: (context, animation,
-                                              secondaryAnimation) {
-                                            return Center(
-                                              child: ErrorDialogWidget(
-                                                message: 'Código OTP inválido',
-                                                onOk: () {
-                                                  Navigator.pop(context, false);
-                                                },
-                                              ),
-                                            );
-                                          },
-                                          transitionBuilder: (context,
-                                              animation,
-                                              secondaryAnimation,
-                                              child) {
-                                            return ScaleTransition(
-                                              scale: CurvedAnimation(
-                                                parent: animation,
-                                                curve: Curves.easeOutBack,
-                                              ),
-                                              child: child,
-                                            );
-                                          },
-                                        );
-                                      }
-                                    },
-                                    text: 'CONFIRMAR',
-                                    options: FFButtonOptions(
-                                      width: 300.0,
-                                      height: 45.0,
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          16.0, 0.0, 16.0, 0.0),
-                                      iconPadding:
-                                          EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 0.0, 0.0, 0.0),
-                                      color: Color(0xFFEC8D0D),
-                                      textStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .override(
-                                            fontFamily: 'Inter Tight',
-                                            color: FlutterFlowTheme.of(context)
-                                                .primaryText,
-                                            letterSpacing: 0.0,
-                                          ),
-                                      elevation: 0.0,
-                                      borderRadius: BorderRadius.circular(8.0),
-                                    ),
-                                  ),
-                                ),
-                                Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [],
-                                ),
-                              ],
+                            SizedBox(height: 4),
+                            Text(
+                              'Confirme seu número de telefone',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: _textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: _surfaceColor,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: _borderColor,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Center(
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.close_rounded,
+                            size: 18,
+                            color: _textSecondary,
+                          ),
+                          onPressed: () async {
+                            context.safePop();
+                          },
+                          padding: EdgeInsets.zero,
+                          constraints: BoxConstraints(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Conteúdo do modal
+              Padding(
+                padding: EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Mensagem de instrução
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      margin: EdgeInsets.only(bottom: 24),
+                      decoration: BoxDecoration(
+                        color: _primaryColor.withOpacity(0.03),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _primaryColor.withOpacity(0.1),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: _primaryColor.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.sms_rounded,
+                                color: _primaryColor,
+                                size: 20,
+                              ),
                             ),
                           ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Insira o código que recebeu no seu contacto telefônico',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: _textSecondary,
+                                fontWeight: FontWeight.w500,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Título dos campos OTP
+                    Text(
+                      'Código de Verificação',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: _textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+
+                    Text(
+                      'Digite o código de 6 dígitos recebido por SMS',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: _textSecondary,
+                      ),
+                    ),
+                    SizedBox(height: 24),
+
+                    // Campos OTP com quadrados
+                    Container(
+                      height: 72,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: List.generate(6, (index) {
+                          return SizedBox(
+                            width: 52,
+                            height: 52,
+                            child: TextField(
+                              controller: _otpControllers[index],
+                              focusNode: _otpFocusNodes[index],
+                              textAlign: TextAlign.center,
+                              keyboardType: TextInputType.number,
+                              maxLength: 1,
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                                color: _textPrimary,
+                              ),
+                              decoration: InputDecoration(
+                                counterText: '',
+                                filled: true,
+                                fillColor: _otpFocusNodes[index].hasFocus
+                                    ? Colors.white
+                                    : _backgroundColor,
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: _borderColor,
+                                    width: 2,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: _primaryColor,
+                                    width: 2,
+                                  ),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: _borderColor,
+                                    width: 2,
+                                  ),
+                                ),
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                              onChanged: (value) {
+                                if (value.isNotEmpty && index < 5) {
+                                  FocusScope.of(context).requestFocus(_otpFocusNodes[index + 1]);
+                                }
+                                if (value.isEmpty && index > 0) {
+                                  FocusScope.of(context).requestFocus(_otpFocusNodes[index - 1]);
+                                }
+                              },
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+
+                    // Botão de reenviar
+                    Padding(
+                      padding: EdgeInsets.only(top: 20, bottom: 32),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Não recebeu o código? ',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: _textSecondary,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              // TODO: Implementar reenvio do OTP
+                              print('Reenviar OTP pressionado');
+                              _clearOtpFields();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Código reenviado com sucesso!',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  backgroundColor: _successColor,
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              'Reenviar código',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: _primaryColor,
+                                fontWeight: FontWeight.w600,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Botão de confirmação
+                    Container(
+                      height: 56,
+                      decoration: BoxDecoration(
+                        gradient: _primaryGradient,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _primaryColor.withOpacity(0.3),
+                            blurRadius: 20,
+                            offset: Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(16),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: _isValidating ? null : _validateOtp,
+                          child: _isValidating
+                              ? Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                            Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(width: 12),
+                                      Text(
+                                        'Validando...',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : Center(
+                                  child: Text(
+                                    'CONFIRMAR E CONTINUAR',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 1.0,
+                                    ),
+                                  ),
+                                ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+
+                    // Informações de segurança
+                    Padding(
+                      padding: EdgeInsets.only(top: 24),
+                      child: Container(
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: _backgroundColor,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: _borderColor.withOpacity(0.4),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.security_rounded,
+                              size: 16,
+                              color: _successColor,
+                            ),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Este código expira em 10 minutos. Mantenha-o em segurança.',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: _textSecondary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ].divide(SizedBox(height: 5.0)).addToStart(SizedBox(height: 20.0)),
+            ],
           ),
         ),
       ),

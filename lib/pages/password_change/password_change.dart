@@ -27,15 +27,23 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
       TextEditingController();
   UserResponse? user;
 
-  // Cores modernas
-  final Color _primaryColor = const Color(0xFFEC8D0D);
-  final Color _secondaryColor = const Color(0xFFEC8D0D);
-  final Color _accentColor = const Color(0xFF4CC9F0);
-  final Color _successColor = const Color(0xFF38B000);
-  final Color _errorColor = const Color(0xFFEF233C);
-  final Color _backgroundColor = const Color(0xFFF8F9FA);
-  final Color _cardColor = Colors.white;
-  final Color _textColor = const Color(0xFF2B2D42);
+  // Cores do tema premium com laranja como primária
+  final Color _primaryColor = Color(0xFFEC8D0D);
+  final Color _primaryDark = Color(0xFFD17A0A);
+  final Color _backgroundColor = Color(0xFFF8FAFC);
+  final Color _surfaceColor = Colors.white;
+  final Color _onSurfaceColor = Color(0xFF1E293B);
+  final Color _outlineColor = Color(0xFFE2E8F0);
+  final Color _successColor = Color(0xFF10B981);
+  final Color _errorColor = Color(0xFFEF4444);
+  final Color _warningColor = Color(0xFFF59E0B);
+
+  // Gradientes premium
+  final LinearGradient _primaryGradient = LinearGradient(
+    colors: [Color(0xFFEC8D0D), Color(0xFFF59E0B)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 
   // Estados
   bool _obscureCurrentPassword = true;
@@ -43,29 +51,38 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
   bool _obscureConfirmPassword = true;
   int _passwordStrength = 0;
   bool _isLoading = false;
-  bool _showSuccess = false;
 
   // Animações
   late AnimationController _animationController;
-  // ignore: unused_field
   late Animation<double> _fadeAnimation;
-  // ignore: unused_field
-  late Animation<double> _scaleAnimation;
+  late Animation<double> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
+    
+    // Configuração das animações
     _animationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
       vsync: this,
-      duration: const Duration(milliseconds: 500),
     );
+    
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
     );
-    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    
+    _slideAnimation = Tween<double>(begin: 30.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutCubic,
+      ),
     );
+
     getUserInfo();
+    _animationController.forward();
   }
 
   @override
@@ -108,7 +125,9 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
         oldPassword: _currentPasswordController.text,
         newPassword: _newPasswordController.text,
       ); 
+      
       setState(() => _isLoading = false);
+      
       if (result['isSuccess'] == true) {
         final shouldNavigate = await showDialog(
           context: context,
@@ -120,29 +139,37 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
             },
           ),
         );
+        
         if (shouldNavigate == true) {
           TokenUtil.removeToken();
           context.pushNamed(Tela00LoginWidget.routeName);
         }
       } else {
         final error = result['error'] as Map<String, dynamic>;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content:
-                Text(error['detail']['message'] ?? 'Erro ao alterar senha'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        _showSnackBar(error['detail']['message'] ?? 'Erro ao alterar senha', _errorColor);
       }
     } catch (e) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro ao conectar com o servidor: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showSnackBar('Erro ao conectar com o servidor: ${e.toString()}', _errorColor);
     }
+  }
+
+  void _showSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.error_outline_rounded, color: Colors.white, size: 20),
+            SizedBox(width: 8),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 8,
+      ),
+    );
   }
 
   Future<void> getUserInfo() async {
@@ -163,134 +190,269 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _backgroundColor,
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 500),
-        child: _showSuccess ? _buildSuccessState() : _buildFormState(),
-      ),
-    );
-  }
-
-  Widget _buildFormState() {
-    return CustomScrollView(
-      physics: const BouncingScrollPhysics(),
-      slivers: [
-        SliverAppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_rounded, size: 24),
-            onPressed: () => Navigator.pop(context),
-          ),
-          expandedHeight: 220,
-          flexibleSpace: FlexibleSpaceBar(
-            collapseMode: CollapseMode.pin,
-            title: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: _primaryColor.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Text(
-                'Alterar Senha',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+      body: AnimatedBuilder(
+        animation: _animationController,
+        builder: (context, child) {
+          return Opacity(
+            opacity: _fadeAnimation.value,
+            child: Transform.translate(
+              offset: Offset(0, _slideAnimation.value),
+              child: child,
             ),
-            background: DecoratedBox(
+          );
+        },
+        child: Column(
+          children: [
+            // Header Premium
+            Container(
+              width: double.infinity,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    _primaryColor,
-                    _secondaryColor,
-                  ],
-                ),
+                gradient: _primaryGradient,
+                boxShadow: [
+                  BoxShadow(
+                    color: _primaryColor.withOpacity(0.3),
+                    blurRadius: 15,
+                    offset: Offset(0, 4),
+                  ),
+                ],
               ),
-              child: Center(
-                child: Icon(
-                  Icons.security_rounded,
-                  size: 80,
-                  color: Colors.white.withOpacity(0.2),
-                ),
-              ),
-            ),
-          ),
-          pinned: true,
-          elevation: 0,
-          systemOverlayStyle: SystemUiOverlayStyle.light,
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            child: Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              color: _cardColor,
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Form(
-                  key: _formKey,
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildPasswordField(
-                        controller: _currentPasswordController,
-                        label: 'Senha Atual',
-                        icon: Icons.lock_outline_rounded,
-                        obscureText: _obscureCurrentPassword,
-                        onToggle: () => setState(() =>
-                            _obscureCurrentPassword = !_obscureCurrentPassword),
-                        validator: (value) => value?.isEmpty ?? true
-                            ? 'Digite sua senha atual'
-                            : null,
+                      Row(
+                        children: [
+                          // Botão Voltar Premium
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: IconButton(
+                              onPressed: () {
+                                context.safePop();
+                              },
+                              icon: Icon(
+                                Icons.arrow_back_ios_rounded,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              splashRadius: 20,
+                            ),
+                          ),
+                          SizedBox(width: 16),
+                          Expanded(
+                            child: Text(
+                              'Alterar Senha',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                          ),
+                          // Ícone de segurança
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.lock_rounded,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 24),
-                      _buildPasswordField(
-                        controller: _newPasswordController,
-                        label: 'Nova Senha',
-                        icon: Icons.lock_reset_rounded,
-                        obscureText: _obscureNewPassword,
-                        onChanged: _analyzePassword,
-                        onToggle: () => setState(
-                            () => _obscureNewPassword = !_obscureNewPassword),
-                        validator: (value) {
-                          if (value?.isEmpty ?? true)
-                            return 'Digite uma nova senha';
-                          if (value!.length < 8) return 'Mínimo 8 caracteres';
-                          return null;
-                        },
+                      SizedBox(height: 8),
+                      // Barra de progresso sutil
+                      Container(
+                        height: 2,
+                        width: 60,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      _buildPasswordStrength(),
-                      const SizedBox(height: 24),
-                      _buildPasswordField(
-                        controller: _confirmPasswordController,
-                        label: 'Confirmar Senha',
-                        icon: Icons.lock_clock_rounded,
-                        obscureText: _obscureConfirmPassword,
-                        onToggle: () => setState(() =>
-                            _obscureConfirmPassword = !_obscureConfirmPassword),
-                        validator: (value) {
-                          if (value?.isEmpty ?? true)
-                            return 'Confirme sua senha';
-                          if (value != _newPasswordController.text)
-                            return 'As senhas não coincidem';
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 32),
-                      _buildSubmitButton(),
                     ],
                   ),
                 ),
               ),
             ),
-          ),
+
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Container(
+                  constraints: BoxConstraints(
+                    minWidth: 300.0,
+                    maxWidth: 500.0,
+                  ),
+                  padding: EdgeInsets.all(24.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        // Card Principal
+                        Container(
+                          decoration: BoxDecoration(
+                            color: _surfaceColor,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 20,
+                                offset: Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Informação de segurança
+                                _buildSecurityInfo(),
+                                SizedBox(height: 32),
+
+                                // Campo Senha Atual
+                                _buildPasswordField(
+                                  controller: _currentPasswordController,
+                                  label: 'Senha Atual',
+                                  icon: Icons.lock_rounded,
+                                  obscureText: _obscureCurrentPassword,
+                                  onToggle: () => setState(() =>
+                                      _obscureCurrentPassword = !_obscureCurrentPassword),
+                                  validator: (value) => value?.isEmpty ?? true
+                                      ? 'Digite sua senha atual'
+                                      : null,
+                                ),
+                                SizedBox(height: 24),
+
+                                // Campo Nova Senha
+                                _buildPasswordField(
+                                  controller: _newPasswordController,
+                                  label: 'Nova Senha',
+                                  icon: Icons.lock_reset_rounded,
+                                  obscureText: _obscureNewPassword,
+                                  onChanged: _analyzePassword,
+                                  onToggle: () => setState(
+                                      () => _obscureNewPassword = !_obscureNewPassword),
+                                  validator: (value) {
+                                    if (value?.isEmpty ?? true)
+                                      return 'Digite uma nova senha';
+                                    if (value!.length < 8) return 'Mínimo 8 caracteres';
+                                    return null;
+                                  },
+                                ),
+                                SizedBox(height: 16),
+
+                                // Indicador de força da senha
+                                _buildPasswordStrength(),
+                                SizedBox(height: 24),
+
+                                // Campo Confirmar Senha
+                                _buildPasswordField(
+                                  controller: _confirmPasswordController,
+                                  label: 'Confirmar Senha',
+                                  icon: Icons.lock_clock_rounded,
+                                  obscureText: _obscureConfirmPassword,
+                                  onToggle: () => setState(() =>
+                                      _obscureConfirmPassword = !_obscureConfirmPassword),
+                                  validator: (value) {
+                                    if (value?.isEmpty ?? true)
+                                      return 'Confirme sua senha';
+                                    if (value != _newPasswordController.text)
+                                      return 'As senhas não coincidem';
+                                    return null;
+                                  },
+                                ),
+                                SizedBox(height: 32),
+
+                                // Botão de Atualização
+                                _buildSubmitButton(),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(height: 24),
+
+                        // Dicas de Segurança
+                        _buildSecurityTips(),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildSecurityInfo() {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _primaryColor.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: _primaryColor.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: _primaryColor.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.security_rounded,
+              color: _primaryColor,
+              size: 20,
+            ),
+          ),
+          SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Segurança da Conta',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: _onSurfaceColor,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Escolha uma senha forte para proteger sua conta',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 12,
+                    color: _onSurfaceColor.withOpacity(0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -309,38 +471,56 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
         Text(
           label,
           style: TextStyle(
+            fontFamily: 'Inter',
             fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: _textColor.withOpacity(0.8),
+            fontWeight: FontWeight.w600,
+            color: _onSurfaceColor,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         TextFormField(
           controller: controller,
           obscureText: obscureText,
           onChanged: onChanged,
           validator: validator,
-          style: TextStyle(color: _textColor),
+          style: TextStyle(
+            fontFamily: 'Inter',
+            color: _onSurfaceColor,
+            fontSize: 16,
+          ),
           decoration: InputDecoration(
             hintText: 'Digite sua $label',
-            hintStyle: TextStyle(color: Colors.grey[400]),
-            prefixIcon: Icon(icon, color: _primaryColor),
+            hintStyle: TextStyle(
+              fontFamily: 'Inter',
+              color: _onSurfaceColor.withOpacity(0.4),
+            ),
+            prefixIcon: Container(
+              width: 20,
+              height: 20,
+              margin: EdgeInsets.all(12),
+              child: Icon(
+                icon,
+                color: _primaryColor,
+                size: 20,
+              ),
+            ),
             suffixIcon: IconButton(
               icon: Icon(
                 obscureText
                     ? Icons.visibility_off_rounded
                     : Icons.visibility_rounded,
-                color: Colors.grey[500],
+                color: _onSurfaceColor.withOpacity(0.4),
+                size: 20,
               ),
               onPressed: onToggle,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderSide: BorderSide(color: _outlineColor),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderSide: BorderSide(color: _outlineColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -355,9 +535,8 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
               borderSide: BorderSide(color: _errorColor, width: 2),
             ),
             filled: true,
-            fillColor: Colors.white,
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            fillColor: _surfaceColor,
+            contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
           ),
         ),
       ],
@@ -372,10 +551,11 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
       'Forte',
       'Excelente'
     ][_passwordStrength];
+    
     final strengthColor = [
       _errorColor,
-      Colors.orange,
-      _accentColor,
+      _warningColor,
+      Color(0xFF3B82F6),
       _primaryColor,
       _successColor
     ][_passwordStrength];
@@ -389,13 +569,16 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
             Text(
               'Força da senha:',
               style: TextStyle(
+                fontFamily: 'Inter',
                 fontSize: 13,
-                color: _textColor.withOpacity(0.6),
+                color: _onSurfaceColor.withOpacity(0.6),
+                fontWeight: FontWeight.w500,
               ),
             ),
             Text(
               strengthText,
               style: TextStyle(
+                fontFamily: 'Inter',
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: strengthColor,
@@ -403,17 +586,32 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
             ),
           ],
         ),
-        const SizedBox(height: 8),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: _passwordStrength / 4,
-            backgroundColor: Colors.grey[200],
-            color: strengthColor,
-            minHeight: 6,
+        SizedBox(height: 8),
+        Container(
+          height: 6,
+          decoration: BoxDecoration(
+            color: _outlineColor,
+            borderRadius: BorderRadius.circular(3),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                flex: _passwordStrength,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: strengthColor,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 4 - _passwordStrength,
+                child: SizedBox(),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 16),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -432,10 +630,10 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isMet ? _successColor.withOpacity(0.1) : Colors.grey[100],
+        color: isMet ? _successColor.withOpacity(0.1) : _outlineColor.withOpacity(0.3),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isMet ? _successColor : Colors.grey.shade300,
+          color: isMet ? _successColor : _outlineColor,
           width: 1,
         ),
       ),
@@ -445,14 +643,15 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
           Icon(
             isMet ? Icons.check_rounded : Icons.circle_rounded,
             size: 14,
-            color: isMet ? _successColor : Colors.grey.shade400,
+            color: isMet ? _successColor : _onSurfaceColor.withOpacity(0.4),
           ),
           const SizedBox(width: 6),
           Text(
             text,
             style: TextStyle(
+              fontFamily: 'Inter',
               fontSize: 12,
-              color: isMet ? _textColor : Colors.grey.shade600,
+              color: isMet ? _successColor : _onSurfaceColor.withOpacity(0.6),
               fontWeight: isMet ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
@@ -462,107 +661,144 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
   }
 
   Widget _buildSubmitButton() {
-    return SizedBox(
-      height: 52,
-      child: ElevatedButton(
-        onPressed: _isLoading ? null : _submitForm,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _primaryColor,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: _primaryColor.withOpacity(0.3),
+            blurRadius: 15,
+            offset: Offset(0, 8),
           ),
-          elevation: 0,
-          shadowColor: Colors.transparent,
-          disabledBackgroundColor: _primaryColor.withOpacity(0.5),
+        ],
+      ),
+      child: SizedBox(
+        height: 56,
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: _isLoading ? null : _submitForm,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: _primaryColor,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            disabledBackgroundColor: _primaryColor.withOpacity(0.5),
+          ),
+          child: _isLoading
+              ? SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: Colors.white,
+                  ),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.lock_reset_rounded, size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      'ATUALIZAR SENHA',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
         ),
-        child: _isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 3,
-                  color: Colors.white,
-                ),
-              )
-            : const Text(
-                'ATUALIZAR SENHA',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                ),
-              ),
       ),
     );
   }
 
-  Widget _buildSuccessState() {
-    return Scaffold(
-      backgroundColor: _backgroundColor,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+  Widget _buildSecurityTips() {
+    return Container(
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: _surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
+        border: Border.all(
+          color: _outlineColor,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
               Container(
-                width: 150,
-                height: 150,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
-                  color: _successColor.withOpacity(0.1),
+                  color: _primaryColor.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.verified_rounded,
-                  size: 80,
-                  color: _successColor,
+                  Icons.lightbulb_rounded,
+                  color: _primaryColor,
+                  size: 18,
                 ),
               ),
-              const SizedBox(height: 32),
+              SizedBox(width: 12),
               Text(
-                'Senha Atualizada!',
+                'Dicas de Segurança',
                 style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: _textColor,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Sua senha foi alterada com sucesso.\nVocê será redirecionado automaticamente.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
+                  fontFamily: 'Inter',
                   fontSize: 16,
-                  color: _textColor.withOpacity(0.7),
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 40),
-              SizedBox(
-                width: 180,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _successColor,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'CONTINUAR',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  fontWeight: FontWeight.w600,
+                  color: _onSurfaceColor,
                 ),
               ),
             ],
           ),
-        ),
+          SizedBox(height: 16),
+          _buildTipItem('Use uma combinação de letras, números e símbolos'),
+          _buildTipItem('Evite informações pessoais como nome ou data'),
+          _buildTipItem('Não reutilize senhas de outras contas'),
+          _buildTipItem('Considere usar um gerenciador de senhas'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTipItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.check_circle_rounded,
+            color: _successColor,
+            size: 16,
+          ),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 13,
+                color: _onSurfaceColor.withOpacity(0.7),
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
