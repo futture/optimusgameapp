@@ -61,4 +61,24 @@ class AccountService {
       return _errorUtil.handleError(e);
     }
   }
+
+  Future<Map<String, dynamic>> listTransactionsByStatusAsync(
+      String accountId, String status) async {
+    try {
+      final encodedStatus = Uri.encodeComponent(status);
+
+      final successResult =
+          await httpService.request<List<TransactionResponse>>(
+        '/accounts/$accountId/transactions/status/$encodedStatus',
+        method: 'GET',
+        successParser: (json) => (json as List)
+            .map((item) => TransactionResponse.fromJson(item))
+            .toList(),
+      );
+
+      return {"isSuccess": true, "data": successResult};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
 }

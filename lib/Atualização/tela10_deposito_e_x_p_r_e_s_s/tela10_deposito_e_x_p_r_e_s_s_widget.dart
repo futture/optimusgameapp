@@ -72,7 +72,7 @@ class _Tela10DepositoEXPRESSWidgetState
             'DEPOSITAR',
             style: FlutterFlowTheme.of(context).headlineSmall.override(
                   fontFamily: 'Inter Tight',
-                  color: Color(0xFFEC8D0D),
+                  color: Color(0xFFEC8D0D), // Laranja
                   letterSpacing: 0.0,
                 ),
           ),
@@ -112,9 +112,12 @@ class _Tela10DepositoEXPRESSWidgetState
                           maxWidth: double.infinity,
                         ),
                         decoration: BoxDecoration(
-                          color:
-                              FlutterFlowTheme.of(context).secondaryBackground,
+                          color: FlutterFlowTheme.of(context).secondaryBackground,
                           borderRadius: BorderRadius.circular(8.0),
+                          border: Border.all(
+                            color: Color(0xFFEC8D0D).withOpacity(0.3), // Borda laranja suave
+                            width: 1.0,
+                          ),
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
@@ -123,9 +126,11 @@ class _Tela10DepositoEXPRESSWidgetState
                               width: double.infinity,
                               height: 40.0,
                               decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context)
-                                    .secondaryBackground,
-                                borderRadius: BorderRadius.circular(8.0),
+                                color: FlutterFlowTheme.of(context).secondaryBackground,
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(8.0),
+                                  topRight: Radius.circular(8.0),
+                                ),
                               ),
                               child: Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(
@@ -150,6 +155,8 @@ class _Tela10DepositoEXPRESSWidgetState
                                           .bodyMedium
                                           .override(
                                             fontFamily: 'Inter',
+                                            color: Color(0xFFEC8D0D), // Laranja
+                                            fontWeight: FontWeight.bold,
                                             letterSpacing: 0.0,
                                           ),
                                     ),
@@ -157,13 +164,16 @@ class _Tela10DepositoEXPRESSWidgetState
                                 ),
                               ),
                             ),
+                            Divider(
+                              height: 1.0,
+                              thickness: 1.0,
+                              color: Color(0xFFEC8D0D).withOpacity(0.2), // Divider laranja suave
+                            ),
                             Container(
                               width: double.infinity,
                               height: 40.0,
                               decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context)
-                                    .secondaryBackground,
-                                borderRadius: BorderRadius.circular(8.0),
+                                color: FlutterFlowTheme.of(context).secondaryBackground,
                               ),
                               child: Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(
@@ -195,13 +205,20 @@ class _Tela10DepositoEXPRESSWidgetState
                                 ),
                               ),
                             ),
+                            Divider(
+                              height: 1.0,
+                              thickness: 1.0,
+                              color: Color(0xFFEC8D0D).withOpacity(0.2), // Divider laranja suave
+                            ),
                             Container(
                               width: double.infinity,
                               height: 40.0,
                               decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context)
-                                    .secondaryBackground,
-                                borderRadius: BorderRadius.circular(8.0),
+                                color: FlutterFlowTheme.of(context).secondaryBackground,
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(8.0),
+                                  bottomRight: Radius.circular(8.0),
+                                ),
                               ),
                               child: Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(
@@ -212,7 +229,7 @@ class _Tela10DepositoEXPRESSWidgetState
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      'Referância',
+                                      'Referência',
                                       style: FlutterFlowTheme.of(context)
                                           .bodyMedium
                                           .override(
@@ -226,6 +243,7 @@ class _Tela10DepositoEXPRESSWidgetState
                                           .bodyMedium
                                           .override(
                                             fontFamily: 'Inter',
+                                            color: Color(0xFFEC8D0D), // Laranja
                                             letterSpacing: 0.0,
                                           ),
                                     ),
@@ -243,9 +261,12 @@ class _Tela10DepositoEXPRESSWidgetState
                           width: double.infinity,
                           height: 370.0,
                           decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
+                            color: FlutterFlowTheme.of(context).secondaryBackground,
                             borderRadius: BorderRadius.circular(8.0),
+                            border: Border.all(
+                              color: Color(0xFFEC8D0D).withOpacity(0.3), // Borda laranja suave
+                              width: 1.0,
+                            ),
                           ),
                           child: Column(
                             mainAxisSize: MainAxisSize.max,
@@ -254,9 +275,11 @@ class _Tela10DepositoEXPRESSWidgetState
                                 width: double.infinity,
                                 height: 150.0,
                                 decoration: BoxDecoration(
-                                  color: FlutterFlowTheme.of(context)
-                                      .secondaryBackground,
-                                  borderRadius: BorderRadius.circular(8.0),
+                                  color: FlutterFlowTheme.of(context).secondaryBackground,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(8.0),
+                                    topRight: Radius.circular(8.0),
+                                  ),
                                 ),
                                 child: Form(
                                   key: _model.formKey,
@@ -271,10 +294,8 @@ class _Tela10DepositoEXPRESSWidgetState
                                           width: 300.0,
                                           height: 80.0,
                                           decoration: BoxDecoration(
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryBackground,
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
+                                            color: FlutterFlowTheme.of(context).secondaryBackground,
+                                            borderRadius: BorderRadius.circular(8.0),
                                           ),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
@@ -284,8 +305,7 @@ class _Tela10DepositoEXPRESSWidgetState
                                                     -1.0, 0.0),
                                                 child: Text(
                                                   'Número do Express',
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
+                                                  style: FlutterFlowTheme.of(context)
                                                       .bodyMedium
                                                       .override(
                                                         fontFamily: 'Inter',
@@ -309,83 +329,67 @@ class _Tela10DepositoEXPRESSWidgetState
                                                     decoration: InputDecoration(
                                                       isDense: true,
                                                       labelStyle:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
+                                                          FlutterFlowTheme.of(context)
                                                               .labelMedium
                                                               .override(
-                                                                fontFamily:
-                                                                    'Inter',
-                                                                letterSpacing:
-                                                                    0.0,
+                                                                fontFamily: 'Inter',
+                                                                letterSpacing: 0.0,
                                                               ),
                                                       hintText: '999-999-999',
                                                       hintStyle:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
+                                                          FlutterFlowTheme.of(context)
                                                               .labelMedium
                                                               .override(
-                                                                fontFamily:
-                                                                    'Inter',
-                                                                letterSpacing:
-                                                                    0.0,
+                                                                fontFamily: 'Inter',
+                                                                color: Colors.grey[600],
+                                                                letterSpacing: 0.0,
                                                               ),
                                                       enabledBorder:
                                                           OutlineInputBorder(
                                                         borderSide: BorderSide(
-                                                          color:
-                                                              Color(0x00000000),
-                                                          width: 1.0,
+                                                          color: Color(0xFFEC8D0D).withOpacity(0.5), // Borda laranja
+                                                          width: 1.5,
                                                         ),
                                                         borderRadius:
-                                                            BorderRadius
-                                                                .circular(8.0),
+                                                            BorderRadius.circular(8.0),
                                                       ),
                                                       focusedBorder:
                                                           OutlineInputBorder(
                                                         borderSide: BorderSide(
-                                                          color:
-                                                              Color(0x00000000),
-                                                          width: 1.0,
+                                                          color: Color(0xFFEC8D0D), // Borda laranja focada
+                                                          width: 2.0,
                                                         ),
                                                         borderRadius:
-                                                            BorderRadius
-                                                                .circular(8.0),
+                                                            BorderRadius.circular(8.0),
                                                       ),
                                                       errorBorder:
                                                           OutlineInputBorder(
                                                         borderSide: BorderSide(
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .error,
-                                                          width: 1.0,
+                                                          color: Colors.red,
+                                                          width: 1.5,
                                                         ),
                                                         borderRadius:
-                                                            BorderRadius
-                                                                .circular(8.0),
+                                                            BorderRadius.circular(8.0),
                                                       ),
                                                       focusedErrorBorder:
                                                           OutlineInputBorder(
                                                         borderSide: BorderSide(
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .error,
-                                                          width: 1.0,
+                                                          color: Colors.red,
+                                                          width: 2.0,
                                                         ),
                                                         borderRadius:
-                                                            BorderRadius
-                                                                .circular(8.0),
+                                                            BorderRadius.circular(8.0),
                                                       ),
                                                       filled: true,
                                                       fillColor:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
+                                                          FlutterFlowTheme.of(context)
                                                               .primaryBackground,
                                                       prefixIcon: Icon(
                                                         Icons.phone_sharp,
+                                                        color: Color(0xFFEC8D0D), // Ícone laranja
                                                       ),
                                                     ),
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
+                                                    style: FlutterFlowTheme.of(context)
                                                         .bodyMedium
                                                         .override(
                                                           fontFamily: 'Inter',
@@ -395,9 +399,7 @@ class _Tela10DepositoEXPRESSWidgetState
                                                     keyboardType:
                                                         TextInputType.number,
                                                     cursorColor:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .primaryText,
+                                                        Color(0xFFEC8D0D), // Cursor laranja
                                                     validator: _model
                                                         .textControllerValidator
                                                         .asValidator(context),
@@ -408,80 +410,98 @@ class _Tela10DepositoEXPRESSWidgetState
                                           ),
                                         ),
                                       ),
-                                      FFButtonWidget(
-                                        onPressed: () {
-                                          print('Button pressed ...');
-                                        },
-                                        text: 'Requisitar',
-                                        options: FFButtonOptions(
-                                          width: 300.0,
-                                          height: 40.0,
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  16.0, 0.0, 16.0, 0.0),
-                                          iconPadding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  0.0, 0.0, 0.0, 0.0),
-                                          color: Color(0xFFEC8D0D),
-                                          textStyle: FlutterFlowTheme.of(
-                                                  context)
-                                              .titleSmall
-                                              .override(
-                                                fontFamily: 'Inter Tight',
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primaryText,
-                                                fontSize: 15.0,
-                                                letterSpacing: 0.0,
-                                              ),
-                                          elevation: 0.0,
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
+                                      Padding(
+                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                            0.0, 15.0, 0.0, 0.0),
+                                        child: FFButtonWidget(
+                                          onPressed: () {
+                                            print('Button pressed ...');
+                                          },
+                                          text: 'Requisitar',
+                                          options: FFButtonOptions(
+                                            width: 300.0,
+                                            height: 45.0,
+                                            padding:
+                                                EdgeInsetsDirectional.fromSTEB(
+                                                    16.0, 0.0, 16.0, 0.0),
+                                            iconPadding:
+                                                EdgeInsetsDirectional.fromSTEB(
+                                                    0.0, 0.0, 0.0, 0.0),
+                                            color: Color(0xFFEC8D0D), // Laranja
+                                            textStyle: FlutterFlowTheme.of(context)
+                                                .titleSmall
+                                                .override(
+                                                  fontFamily: 'Inter Tight',
+                                                  color: Colors.white, // Texto branco
+                                                  fontSize: 16.0,
+                                                  fontWeight: FontWeight.w600,
+                                                  letterSpacing: 0.0,
+                                                ),
+                                            elevation: 2.0,
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
                               ),
+                              Divider(
+                                height: 1.0,
+                                thickness: 1.0,
+                                color: Color(0xFFEC8D0D).withOpacity(0.2), // Divider laranja suave
+                              ),
                               Container(
                                 width: 300.0,
                                 height: 200.0,
                                 decoration: BoxDecoration(
-                                  color: FlutterFlowTheme.of(context)
-                                      .secondaryBackground,
-                                  borderRadius: BorderRadius.circular(8.0),
+                                  color: FlutterFlowTheme.of(context).secondaryBackground,
+                                  borderRadius: BorderRadius.only(
+                                    bottomLeft: Radius.circular(8.0),
+                                    bottomRight: Radius.circular(8.0),
+                                  ),
                                 ),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.max,
                                   children: [
-                                    Align(
-                                      alignment: AlignmentDirectional(0.0, 0.0),
-                                      child: Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 15.0, 0.0, 0.0),
-                                        child: Text(
-                                          'Pagamento via código QR',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                                fontFamily: 'Inter',
-                                                fontSize: 15.0,
-                                                letterSpacing: 0.0,
-                                              ),
-                                        ),
+                                    Padding(
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          0.0, 15.0, 0.0, 0.0),
+                                      child: Text(
+                                        'Pagamento via código QR',
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .override(
+                                              fontFamily: 'Inter',
+                                              fontSize: 15.0,
+                                              fontWeight: FontWeight.w500,
+                                              letterSpacing: 0.0,
+                                            ),
                                       ),
                                     ),
                                     Padding(
                                       padding: EdgeInsetsDirectional.fromSTEB(
-                                          0.0, 10.0, 0.0, 0.0),
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        child: Image.network(
-                                          'https://images.unsplash.com/photo-1550482768-88b710a445fd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHw1fHxRUnxlbnwwfHx8fDE3NDM5NTc0NTB8MA&ixlib=rb-4.0.3&q=80&w=1080',
-                                          width: 150.0,
-                                          height: 150.0,
-                                          fit: BoxFit.cover,
+                                          0.0, 15.0, 0.0, 0.0),
+                                      child: Container(
+                                        width: 180.0,
+                                        height: 180.0,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(8.0),
+                                          border: Border.all(
+                                            color: Color(0xFFEC8D0D).withOpacity(0.3), // Borda laranja suave
+                                            width: 2.0,
+                                          ),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(6.0),
+                                          child: Image.network(
+                                            'https://images.unsplash.com/photo-1550482768-88b710a445fd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHw1fHxRUnxlbnwwfHx8fDE3NDM5NTc0NTB8MA&ixlib=rb-4.0.3&q=80&w=1080',
+                                            width: 150.0,
+                                            height: 150.0,
+                                            fit: BoxFit.cover,
+                                          ),
                                         ),
                                       ),
                                     ),

@@ -1,0 +1,2 @@
+C:/Users/PC/Documents/app/app/optimusgameapp/android/app/.cxx/RelWithDebInfo/l642q6s1/x86/CMakeFiles/edit_cache.dir
+C:/Users/PC/Documents/app/app/optimusgameapp/android/app/.cxx/RelWithDebInfo/l642q6s1/x86/CMakeFiles/rebuild_cache.dir

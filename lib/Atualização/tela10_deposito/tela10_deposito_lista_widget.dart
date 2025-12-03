@@ -232,14 +232,13 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
               children: [
                 // Background decorative elements
                 _buildBackgroundElements(),
-                
+
                 Positioned.fill(
                   child: SingleChildScrollView(
                     physics: BouncingScrollPhysics(),
                     child: Column(
                       children: [
                         SizedBox(height: safePadding + (isMobile ? 85 : 95)),
-                        
                         Transform.translate(
                           offset: Offset(0, _slideAnimation.value),
                           child: Opacity(
@@ -265,7 +264,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                     ),
                   ),
                 ),
-                
+
                 Positioned(
                   top: 0,
                   left: 0,
@@ -556,33 +555,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                 ),
               ),
             ],
-          ),
-          SizedBox(height: isMobile ? 28 : 36),
-          Container(
-            padding: EdgeInsets.all(isMobile ? 18 : 22),
-            decoration: BoxDecoration(
-              color: _backgroundColor,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: _borderColor.withOpacity(0.5)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
-                  blurRadius: 15,
-                  offset: Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Text(
-              'Selecione uma das opções abaixo para adicionar saldo à sua conta. '
-              'Todas as transações são processadas instantaneamente com segurança garantida.',
-              style: TextStyle(
-                color: _textSecondary,
-                fontSize: isMobile ? 15 : 17,
-                height: 1.7,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ),
+          ), 
           SizedBox(height: isMobile ? 28 : 36),
           _buildFeaturesRow(isMobile),
         ],
@@ -722,11 +695,11 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
           ),
         ),
         SizedBox(height: isMobile ? 32 : 40),
-        
+
         // Lista responsiva de métodos
-        if (isMobile) 
+        if (isMobile)
           _buildMobileMethodsList()
-        else if (width < 1100) 
+        else if (width < 1100)
           _buildDesktopMethodsGrid(2)
         else if (width < 1500)
           _buildDesktopMethodsGrid(3)
@@ -787,7 +760,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                 // Imagem do método de pagamento
                 _buildPaymentMethodImage(method, 68, true),
                 SizedBox(width: 20),
-                
+
                 // Informações do método
                 Expanded(
                   child: Column(
@@ -919,7 +892,8 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
         crossAxisCount: crossAxisCount,
         crossAxisSpacing: 24,
         mainAxisSpacing: 24,
-        childAspectRatio: crossAxisCount == 2 ? 1.15 : (crossAxisCount == 3 ? 1.05 : 0.95),
+        childAspectRatio:
+            crossAxisCount == 2 ? 1.15 : (crossAxisCount == 3 ? 1.05 : 0.95),
       ),
       itemCount: _paymentMethods.length,
       itemBuilder: (context, index) => _buildMethodCard(index),
@@ -1011,7 +985,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                   ],
                 ),
                 SizedBox(height: 24),
-                
+
                 // Nome do método
                 Text(
                   method['name'],
@@ -1025,7 +999,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                   ),
                 ),
                 SizedBox(height: 12),
-                
+
                 // Descrição
                 Expanded(
                   child: Text(
@@ -1041,20 +1015,18 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                   ),
                 ),
                 SizedBox(height: 24),
-                
+
                 // Botão de ação
                 Container(
                   width: double.infinity,
                   height: 52,
                   decoration: BoxDecoration(
-                    color: isAvailable
-                        ? color.withOpacity(0.1)
-                        : _backgroundColor,
+                    color:
+                        isAvailable ? color.withOpacity(0.1) : _backgroundColor,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: isAvailable
-                          ? color.withOpacity(0.3)
-                          : _borderColor,
+                      color:
+                          isAvailable ? color.withOpacity(0.3) : _borderColor,
                       width: 2,
                     ),
                   ),
@@ -1084,7 +1056,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                     ),
                   ),
                 ),
-                
+
                 // Limites (se disponível)
                 if (isAvailable && method.containsKey('minAmount'))
                   Padding(
@@ -1118,12 +1090,13 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
     );
   }
 
-  Widget _buildPaymentMethodImage(Map<String, dynamic> method, double size, bool isList) {
+  Widget _buildPaymentMethodImage(
+      Map<String, dynamic> method, double size, bool isList) {
     final color = method['color'] as Color;
     final isAvailable = method['available'] as bool;
     final imageName = method['image'] as String;
     final imageType = method['imageType'] as String;
-    
+
     // Se for do tipo asset, carrega a imagem
     if (imageType == 'asset') {
       return Container(
@@ -1212,7 +1185,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
   Widget _buildPaymentMethodIcon(Map<String, dynamic> method, double iconSize) {
     final isAvailable = method['available'] as bool;
     final color = method['color'] as Color;
-    
+
     // Tenta carregar a imagem do asset
     try {
       return Image.asset(
@@ -1308,10 +1281,8 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                 ),
                 SizedBox(height: isMobile ? 14 : 18),
                 Text(
-                  'Todas as transações são criptografadas com tecnologia SSL de 256 bits '
-                  'e monitoradas 24/7. Seus dados financeiros estão protegidos com as '
-                  'mais avançadas tecnologias de segurança do mercado. Garantimos a '
-                  'confidencialidade e integridade de todas as operações.',
+                  'Seus dados financeiros permanecem seguros'
+                  'mantendo total confidencialidade e integridade em cada operação',
                   style: TextStyle(
                     fontSize: isMobile ? 15 : 17,
                     color: _textSecondary,
@@ -1331,19 +1302,23 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
     final faqs = [
       {
         'question': 'Quanto tempo leva para o depósito ser processado?',
-        'answer': 'A maioria dos depósitos é processada instantaneamente. Em alguns casos, pode levar de 5 a 15 minutos.',
+        'answer':
+            'A maioria dos depósitos é processada instantaneamente. Em alguns casos, pode levar de 5 a 15 minutos.',
       },
       {
         'question': 'Existem taxas para depositar?',
-        'answer': 'Não cobramos taxas para depósitos. No entanto, seu provedor de pagamento pode cobrar taxas próprias.',
+        'answer':
+            'Não cobramos taxas para depósitos.',
       },
       {
         'question': 'Qual é o valor mínimo para depósito?',
-        'answer': 'O valor mínimo varia conforme o método de pagamento. Consulte os limites específicos de cada método.',
+        'answer':
+            'O valor mínimo é 500,00 Kz',
       },
       {
         'question': 'Os meus dados estão seguros?',
-        'answer': 'Sim, utilizamos criptografia de ponta a ponta e nunca compartilhamos seus dados com terceiros.',
+        'answer':
+            'Sim, utilizamos criptografia de ponta a ponta e nunca compartilhamos seus dados com terceiros.',
       },
     ];
 
@@ -1394,7 +1369,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
           ...faqs.asMap().entries.map((entry) {
             final index = entry.key;
             final faq = entry.value;
-            
+
             return Container(
               margin: EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
@@ -1469,7 +1444,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
-              
+
               Expanded(
                 child: SingleChildScrollView(
                   physics: BouncingScrollPhysics(),
@@ -1501,7 +1476,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                           ),
                         ),
                         SizedBox(height: 24),
-                        
+
                         // Título
                         Text(
                           'Central de Ajuda',
@@ -1513,7 +1488,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                           ),
                         ),
                         SizedBox(height: 12),
-                        
+
                         // Descrição
                         Text(
                           'Tire suas dúvidas sobre depósitos e formas de pagamento. '
@@ -1527,7 +1502,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                           ),
                         ),
                         SizedBox(height: 36),
-                        
+
                         // Opções de contato
                         _buildContactOption(
                           icon: Icons.phone_in_talk_rounded,
@@ -1539,7 +1514,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                           ),
                         ),
                         SizedBox(height: 16),
-                        
+
                         _buildContactOption(
                           icon: Icons.email_rounded,
                           title: 'Email',
@@ -1550,7 +1525,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                           ),
                         ),
                         SizedBox(height: 16),
-                        
+
                         _buildContactOption(
                           icon: Icons.chat_bubble_rounded,
                           title: 'Chat Online',
@@ -1559,7 +1534,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                           gradient: _primaryGradient,
                         ),
                         SizedBox(height: 40),
-                        
+
                         // Botão de fechar
                         Container(
                           width: double.infinity,
@@ -1824,7 +1799,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                   ],
                 ),
               ),
-              
+
               // Formulário
               Expanded(
                 child: SingleChildScrollView(
@@ -1833,7 +1808,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                   child: PaymentForm(method: method['name']),
                 ),
               ),
-              
+
               // Footer
               Container(
                 padding: EdgeInsets.all(24),
@@ -1899,7 +1874,8 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                           borderRadius: BorderRadius.circular(18),
                           boxShadow: [
                             BoxShadow(
-                              color: (method['color'] as Color).withOpacity(0.5),
+                              color:
+                                  (method['color'] as Color).withOpacity(0.5),
                               blurRadius: 25,
                               offset: Offset(0, 10),
                             ),
@@ -1925,7 +1901,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                                   ),
                                   SizedBox(width: 12),
                                   Text(
-                                    'CONFIRMAR PAGAMENTO',
+                                    'CONFIRMAR',
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 17,
@@ -2050,7 +2026,7 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
   void _mostrarMensagemTemporaria(String mensagem, Color cor,
       {bool isSuccess = false}) {
     _timerMensagem?.cancel();
-    
+
     setState(() {
       _mensagemStatus = mensagem;
       _corMensagem = cor;
@@ -2080,17 +2056,17 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
     try {
       final result = await widget.model.generateReference(
         _montanteController.text,
-        () { 
+        () {
           setState(() {
             _referenciaGerada = widget.model.reference.isNotEmpty;
             _isLoading = false;
           });
         },
-        context, 
+        context,
       );
 
-      if (result != null && result["isSuccess"] == true) { 
-        if (!_referenciaGerada) { 
+      if (result != null && result["isSuccess"] == true) {
+        if (!_referenciaGerada) {
           setState(() {
             _referenciaGerada = true;
             _isLoading = false;
@@ -2150,12 +2126,14 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
     _mostrarMensagemTemporaria(
       '📋 Entidade copiada para a área de transferência!',
       _infoColor,
-      );
+    );
   }
 
   void _copiarTudo() {
-    if (widget.model.reference.isNotEmpty && _montanteController.text.isNotEmpty) {
-      String tudo = 'Entidade: 11454\nReferência: ${widget.model.reference}\nValor: Kz ${_montanteController.text}';
+    if (widget.model.reference.isNotEmpty &&
+        _montanteController.text.isNotEmpty) {
+      String tudo =
+          'Entidade: 11454\nReferência: ${widget.model.reference}\nValor: Kz ${_montanteController.text}';
       Clipboard.setData(ClipboardData(text: tudo));
       _mostrarMensagemTemporaria(
         '📋 Todos os dados copiados para a área de transferência!',
@@ -2422,9 +2400,8 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
                     SizedBox(height: 24),
 
                     // Botão copiar tudo (apenas quando referência gerada)
-                    if (_referenciaGerada)
-                      _buildCopyAllButton(),
-                    
+                    if (_referenciaGerada) _buildCopyAllButton(),
+
                     if (_referenciaGerada) SizedBox(height: 24),
 
                     // Instruções
@@ -2695,7 +2672,8 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
               ),
               filled: true,
               fillColor: Colors.white,
-              contentPadding: EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 22, vertical: 18),
               prefixText: 'Kz ',
               prefixStyle: TextStyle(
                 color: _textPrimary,
@@ -2710,7 +2688,8 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
               ),
               suffixIcon: _montanteController.text.isNotEmpty
                   ? IconButton(
-                      icon: Icon(Icons.clear_rounded, color: _textSecondary, size: 24),
+                      icon: Icon(Icons.clear_rounded,
+                          color: _textSecondary, size: 24),
                       onPressed: () {
                         _montanteController.clear();
                       },
@@ -2732,200 +2711,214 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
     );
   }
 
-  Widget _buildReferenceCard() {
-    return Container(
-      padding: EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: _backgroundColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: _borderColor.withOpacity(0.7),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 20,
-            offset: Offset(0, 8),
-          ),
-        ],
+Widget _buildReferenceCard() {
+  return Container(
+    padding: EdgeInsets.all(24),
+    constraints: BoxConstraints( // ADD THIS: Limita a largura máxima
+      maxWidth: MediaQuery.of(context).size.width,
+    ),
+    decoration: BoxDecoration(
+      color: _backgroundColor,
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(
+        color: _borderColor.withOpacity(0.7),
+        width: 2,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      _infoColor.withOpacity(0.15),
-                      _infoColor.withOpacity(0.05),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: _infoColor.withOpacity(0.25),
-                    width: 2,
-                  ),
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.receipt_long_rounded,
-                    color: _infoColor,
-                    size: 28,
-                  ),
-                ),
-              ),
-              SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Referência de pagamento',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: _textPrimary,
-                      ),
-                    ),
-                    SizedBox(height: 6),
-                    Text(
-                      'Use este código no terminal ATM, ou outro canal ou applicativo com serviço pagamento por referência',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: _textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.06),
+          blurRadius: 20,
+          offset: Offset(0, 8),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    _infoColor.withOpacity(0.15),
+                    _infoColor.withOpacity(0.05),
                   ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: _infoColor.withOpacity(0.25),
+                  width: 2,
                 ),
               ),
-            ],
-          ),
-          SizedBox(height: 20),
-          Container(
-            padding: EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: _referenciaGerada
-                  ? _successColor.withOpacity(0.08)
-                  : Colors.white,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: _referenciaGerada
-                    ? _successColor.withOpacity(0.25)
-                    : _borderColor,
-                width: 2,
+              child: Center(
+                child: Icon(
+                  Icons.receipt_long_rounded,
+                  color: _infoColor,
+                  size: 28,
+                ),
               ),
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (_referenciaGerada &&
-                          widget.model.reference.isNotEmpty)
-                        Text(
-                          widget.model.reference,
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            color: _successColor,
-                            letterSpacing: 1.5,
-                            fontFamily: 'Monospace',
-                          ),
-                        ),
-                      if (!_referenciaGerada ||
-                          widget.model.reference.isEmpty)
-                        Text(
-                          'Aguardando geração da referência...',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: _textSecondary.withOpacity(0.5),
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: 16),
-                Column(
-                  children: [
-                    if (_referenciaGerada &&
-                        widget.model.reference.isNotEmpty) 
-                      Container(
-                        width: 56,
-                        height: 56,
-                        margin: EdgeInsets.only(bottom: 16),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              _successColor.withOpacity(0.15),
-                              _successColor.withOpacity(0.05),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: _successColor.withOpacity(0.25),
-                            width: 2,
-                          ),
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(14),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(14),
-                            onTap: _copiarReferencia,
-                            child: Center(
-                              child: Icon(
-                                Icons.copy_rounded,
-                                color: _successColor,
-                                size: 24,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          if (_referenciaGerada && widget.model.reference.isNotEmpty)
-            Padding(
-              padding: EdgeInsets.only(top: 14),
-              child: Row(
+            SizedBox(width: 12), // REDUZIDO DE 20 PARA 12
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.access_time_rounded,
-                    color: _successColor,
-                    size: 18,
-                  ),
-                  SizedBox(width: 10),
                   Text(
-                    'Válida por 24 horas a partir da geração',
+                    'Referência de pagamento',
                     style: TextStyle(
-                      fontSize: 13,
-                      color: _successColor,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: _textPrimary,
                     ),
+                    overflow: TextOverflow.ellipsis, // ADD THIS
+                    maxLines: 1, // ADD THIS
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    'Use este código no terminal ATM, ou outro canal ou applicativo com serviço pagamento por referência',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: _textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis, // ADD THIS
+                    maxLines: 2, // ADD THIS
                   ),
                 ],
               ),
             ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+        SizedBox(height: 20),
+        Container(
+          padding: EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: _referenciaGerada
+                ? _successColor.withOpacity(0.08)
+                : Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: _referenciaGerada
+                  ? _successColor.withOpacity(0.25)
+                  : _borderColor,
+              width: 2,
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_referenciaGerada &&
+                        widget.model.reference.isNotEmpty)
+                      ConstrainedBox( // ADD THIS
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width - 180, // Reserva espaço para o botão
+                        ),
+                        child: Text(
+                          widget.model.reference,
+                          style: TextStyle(
+                            fontSize: 20, // REDUZIDO DE 22 PARA 20
+                            fontWeight: FontWeight.w900,
+                            color: _successColor,
+                            letterSpacing: 1.0, // REDUZIDO DE 1.5 PARA 1.0
+                            fontFamily: 'Monospace',
+                          ),
+                          overflow: TextOverflow.ellipsis, // ADD THIS
+                          maxLines: 1, // ADD THIS
+                        ),
+                      ),
+                    if (!_referenciaGerada || widget.model.reference.isEmpty)
+                      Text(
+                        'Aguardando geração da referência...',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: _textSecondary.withOpacity(0.5),
+                          fontStyle: FontStyle.italic,
+                        ),
+                        overflow: TextOverflow.ellipsis, // ADD THIS
+                        maxLines: 1, // ADD THIS
+                      ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 12), // REDUZIDO DE 16 PARA 12
+              if (_referenciaGerada && widget.model.reference.isNotEmpty)
+                Container(
+                  width: 48, // REDUZIDO DE 56 PARA 48
+                  height: 48, // REDUZIDO DE 56 PARA 48
+                  margin: EdgeInsets.only(bottom: 8), // REDUZIDO DE 16 PARA 8
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        _successColor.withOpacity(0.15),
+                        _successColor.withOpacity(0.05),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12), // REDUZIDO DE 14 PARA 12
+                    border: Border.all(
+                      color: _successColor.withOpacity(0.25),
+                      width: 2,
+                    ),
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(12), // REDUZIDO DE 14 PARA 12
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12), // REDUZIDO DE 14 PARA 12
+                      onTap: _copiarReferencia,
+                      child: Center(
+                        child: Icon(
+                          Icons.copy_rounded,
+                          color: _successColor,
+                          size: 20, // REDUZIDO DE 24 PARA 20
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        if (_referenciaGerada && widget.model.reference.isNotEmpty)
+          Padding(
+            padding: EdgeInsets.only(top: 14),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.access_time_rounded,
+                  color: _successColor,
+                  size: 16, // REDUZIDO DE 18 PARA 16
+                ),
+                SizedBox(width: 8), // REDUZIDO DE 10 PARA 8
+                Expanded(
+                  child: Text(
+                    'Válida por 24 horas a partir da geração',
+                    style: TextStyle(
+                      fontSize: 12, // REDUZIDO DE 13 PARA 12
+                      color: _successColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis, // ADD THIS
+                    maxLines: 1, // ADD THIS
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    ),
+  );
+}
 
   Widget _buildMainActionButtons() {
     return Row(
@@ -2963,13 +2956,10 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
                         size: 24,
                       ),
                       SizedBox(width: 10),
-                      Text(
-                        'LIMPAR',
-                        style: TextStyle(
-                          color: _textSecondary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                        ),
+                      Icon(
+                        Icons.clear,
+                        color: _textSecondary,
+                        size: 24,
                       ),
                     ],
                   ),
@@ -3040,9 +3030,7 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
                             ),
                             SizedBox(width: 12),
                             Text(
-                              _referenciaGerada
-                                  ? 'CONCLUIR PAGAMENTO'
-                                  : 'GERAR REFERÊNCIA',
+                              _referenciaGerada ? 'Ok' : 'GERAR REFERÊNCIA',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
@@ -3102,7 +3090,7 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
                 ),
                 SizedBox(width: 12),
                 Text(
-                  'COPIAR TUDO (ENTIDADE + REFERÊNCIA + VALOR)',
+                  ' COPIAR TUDO',
                   style: TextStyle(
                     color: _infoColor,
                     fontSize: 15,

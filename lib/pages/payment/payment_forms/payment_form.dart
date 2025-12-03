@@ -85,7 +85,8 @@ class _PaymentFormState extends State<PaymentForm> {
       if (_refController.text.isNotEmpty) 'Entidade': _refController.text,
       if (_phoneController.text.isNotEmpty) 'phone': _phoneController.text,
       if (_amountController.text.isNotEmpty) 'amount': _amountController.text,
-      if (_accountController.text.isNotEmpty) 'account': _accountController.text,
+      if (_accountController.text.isNotEmpty)
+        'account': _accountController.text,
       if (userAccountInfo?.id != null) 'id': userAccountInfo!.id,
     };
 
@@ -100,8 +101,9 @@ class _PaymentFormState extends State<PaymentForm> {
         type: 'credit',
         amount: amount,
         account_id: accountId,
+        transactionMethod: widget.method,
       );
-      
+
       final response = await accountService.createTransactionAsync(transaction);
 
       if (response['isSuccess']) {
@@ -233,7 +235,8 @@ class _PaymentFormState extends State<PaymentForm> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFEC8D0D), width: 2),
+                borderSide:
+                    const BorderSide(color: Color(0xFFEC8D0D), width: 2),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -305,16 +308,18 @@ class _PaymentFormState extends State<PaymentForm> {
             controller: _phoneController,
             keyboardType: TextInputType.phone,
             inputFormatters: [
-              MaskedInputFormatter('+244 ### ### ###'),
+              MaskedInputFormatter('### ### ###'),
             ],
             customValidator: (value) {
               final clean = toNumericString(value ?? '');
-              if (clean.length != 12 || !clean.startsWith('2449')) {
-                return 'Número inválido. Use o formato +244 9XX XXX XXX';
+
+              if (clean.length != 9 || !clean.startsWith('9')) {
+                return 'Número inválido. Deve começar com 9 e ter 9 dígitos.';
               }
+
               return null;
             },
-            hintText: '+244 9XX XXX XXX',
+            hintText: '9XX XXX XXX',
           ),
           _buildTextField(
             label: 'Montante',
@@ -434,7 +439,8 @@ class _PaymentFormState extends State<PaymentForm> {
                 decoration: BoxDecoration(
                   color: const Color(0xFFFEF6E6),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFEC8D0D).withOpacity(0.3)),
+                  border: Border.all(
+                      color: const Color(0xFFEC8D0D).withOpacity(0.3)),
                 ),
                 child: Row(
                   children: [
