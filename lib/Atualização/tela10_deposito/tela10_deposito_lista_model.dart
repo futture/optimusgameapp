@@ -15,7 +15,6 @@ class Tela10DepositoListaModel
 
   UserResponse? user;
   String reference = "";
-  bool isLoadingButton = false;
   AccountResponse? userAccountInfo;
   final AccountService accountService = AccountService();
   
@@ -52,27 +51,89 @@ class Tela10DepositoListaModel
           result["error"].detail.message, result["error"].detail.details);
     }
   }
-  generateReference(amount, Function setState) async {
-    setState(() {
-      isLoadingButton = true;
-    });
-    var result = await accountTransactionService.generateReference(
-        GenerateReferenceRequest(Amount: amount, AccountId: userAccountInfo!.id));
-
-    if (result["isSuccess"]) {
-      setState(() {
-        reference = result["data"];
-        isLoadingButton = false;
-      });
-    } else {
-      setState(() {
-        isLoadingButton = false;
-      });
-      Warning00ErrorUtil.showDialogMessageError(
-        context!,
-        result["error"].detail.message,
-        result["error"].detail.details,
+  
+  // CORREÇÃO 1: Mudar o tipo do parâmetro para VoidCallback
+  Future<Map<String, dynamic>> generateReference(
+    String amount, 
+    VoidCallback updateUI, // Alterado de Function para VoidCallback
+    BuildContext context, // Adicionado contexto para mostrar erros
+  ) async { 
+    
+    try {
+      var result = await accountTransactionService.generateReference(
+        GenerateReferenceRequest(Amount: amount, AccountId: userAccountInfo!.id)
       );
+      
+      print("YOLANDA RESULT AQUI: $result");
+      
+      if (result["isSuccess"]) { 
+        reference = result["data"].Reference.toString(); 
+        if (updateUI != null) {
+          updateUI();
+        }
+        
+        return {
+          'isSuccess': true,
+          'data': result["data"]
+        };
+      } else {
+        // Mostra erro se necessário
+        Warning00ErrorUtil.showDialogMessageError(
+          context,
+          result["error"].detail.message,
+          result["error"].detail.details,
+        );
+        
+        return {
+          'isSuccess': false,
+          'error': result["error"]
+        };
+      }
+    } catch (e) {
+      print('Erro ao gerar referência: $e');
+      
+      return {
+        'isSuccess': false,
+        'error': {
+          'detail': {
+            'message': 'Erro ao gerar referência',
+            'details': e.toString()
+          }
+        }
+      };
+    }
+  }
+  
+  // Método alternativo simplificado (opcional)
+  Future<Map<String, dynamic>> generateReferenceSimple(String amount) async {
+    try {
+      var result = await accountTransactionService.generateReference(
+        GenerateReferenceRequest(Amount: amount, AccountId: userAccountInfo!.id)
+      );
+      
+      if (result["isSuccess"]) {
+        reference = result["data"].toString();
+        return {
+          'isSuccess': true,
+          'data': result["data"]
+        };
+      } else {
+        return {
+          'isSuccess': false,
+          'error': result["error"]
+        };
+      }
+    } catch (e) {
+      print('Erro no generateReferenceSimple: $e');
+      return {
+        'isSuccess': false,
+        'error': {
+          'detail': {
+            'message': 'Erro de conexão',
+            'details': e.toString()
+          }
+        }
+      };
     }
   }
 }

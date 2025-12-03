@@ -16,9 +16,10 @@ class AccountTransactionService {
         method: 'POST',
         body: obj.toJson(),
         successParser: (json) => GenerateReferenceResponse.fromJson(json),
-      );
+      ); 
       return {"isSuccess": true, "data": successResult};
     } catch (e) {
+      print("successResult: $e");
       return _errorUtil.handleError(e);
     }
   }

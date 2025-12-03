@@ -1,5 +1,5 @@
 class GenerateReferenceResponse {
-  final String Reference;
+  final int Reference;
 
   GenerateReferenceResponse({required this.Reference});
 
