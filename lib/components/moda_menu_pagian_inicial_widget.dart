@@ -21,6 +21,7 @@ class ModaMenuPagianInicialWidget extends StatefulWidget {
 class _ModaMenuPagianInicialWidgetState
     extends State<ModaMenuPagianInicialWidget> {
   late ModaMenuPagianInicialModel _model;
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   // Cores premium
   final Color _primaryColor = Color(0xFFEC8D0D);
@@ -400,7 +401,7 @@ class _ModaMenuPagianInicialWidgetState
           borderRadius: BorderRadius.circular(isMobile ? 14.0 : 16.0),
           child: InkWell(
             borderRadius: BorderRadius.circular(isMobile ? 14.0 : 16.0),
-            onTap: () => _showLogoutConfirmationDialog(context),
+            onTap: () => context.pushNamed(Tela00LoginWidget.routeName),
             child: Container(
               padding: EdgeInsets.all(isMobile ? 14.0 : 16.0),
               decoration: BoxDecoration(
@@ -621,7 +622,7 @@ class _ModaMenuPagianInicialWidgetState
                                   if (Navigator.canPop(context)) {
                                     Navigator.pop(context);
                                   }
-                                  await _executeLogoutSilently(context);
+                                  await _executeLogoutSilently();
                                 },
                                 child: Center(
                                   child: Text(
@@ -667,7 +668,7 @@ class _ModaMenuPagianInicialWidgetState
                                   }
 
                                   // Executa logout silenciosamente
-                                  await _executeLogoutSilently(context);
+                                  await _executeLogoutSilently();
                                 },
                                 child: Center(
                                   child: Row(
@@ -706,26 +707,49 @@ class _ModaMenuPagianInicialWidgetState
     );
   }
 
-  Future<void> _executeLogoutSilently(BuildContext context) async {
-    // Fecha apenas diálogos e menus
-    Navigator.of(context, rootNavigator: true).pop();
+  Future<void> _executeLogoutSilently() async {
+    print('Iniciando logout...');
 
-    // Limpa token
-    await TokenUtil.removeToken();
-
-    // Logout API (async)
     try {
-      await _model.logoutAsync();
-    } catch (e) {
-      print('API logout error: $e');
-    }
+      // 1. Executa operações de limpeza primeiro
+      await TokenUtil.removeToken();
 
-    // Navega para login, limpando toda a pilha
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Navigator.of(context).pushNamedAndRemoveUntil(
+      try {
+        await _model.logoutAsync();
+      } catch (e) {
+        print('API logout error: $e');
+      }
+
+      print('Dados limpos, iniciando navegação...');
+ 
+        Navigator.of(context, rootNavigator: true).pop();
+        await Future.delayed(Duration(milliseconds: 50)); 
+
+      // 3. MÉTODO QUE SEMPRE FUNCIONA NO FLUTTER FLOW:
+      // Usa FFNavigator com clearStack
+      await context.pushNamed(
         Tela00LoginWidget.routeName,
-        (route) => false,
+        extra: {
+          'clearStack': true,
+        },
       );
-    });
+
+      print('Navegação concluída');
+    } catch (e) {
+      print('ERRO NO LOGOUT: $e');
+
+      // Último recurso: força navegação direta
+      try {
+        Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (_) => Tela00LoginWidget(),
+            fullscreenDialog: true,
+          ),
+          (route) => false,
+        );
+      } catch (e2) {
+        print('Falha catastrófica: $e2');
+      }
+    }
   }
 }
