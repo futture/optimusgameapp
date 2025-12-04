@@ -427,69 +427,86 @@ class _ModalValidaContaWidgetState extends State<ModalValidaContaWidget> {
                     ),
                     SizedBox(height: 24),
 
-                    // Campos OTP com quadrados
+                    // Campos OTP com quadrados - CORREÇÃO DO OVERFLOW
                     Container(
                       height: 72,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: List.generate(6, (index) {
-                          return SizedBox(
-                            width: 52,
-                            height: 52,
-                            child: TextField(
-                              controller: _otpControllers[index],
-                              focusNode: _otpFocusNodes[index],
-                              textAlign: TextAlign.center,
-                              keyboardType: TextInputType.number,
-                              maxLength: 1,
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w700,
-                                color: _textPrimary,
-                              ),
-                              decoration: InputDecoration(
-                                counterText: '',
-                                filled: true,
-                                fillColor: _otpFocusNodes[index].hasFocus
-                                    ? Colors.white
-                                    : _backgroundColor,
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(
-                                    color: _borderColor,
-                                    width: 2,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          // Calcula o tamanho dinâmico baseado na largura disponível
+                          final availableWidth = constraints.maxWidth;
+                          final spacing = 8.0; // Espaçamento mínimo entre os campos
+                          final maxFieldWidth = 52.0;
+                          
+                          // Calcula o tamanho ideal para os campos
+                          double fieldWidth = (availableWidth - (5 * spacing)) / 6;
+                          fieldWidth = fieldWidth.clamp(40.0, maxFieldWidth);
+                          
+                          // Se for muito pequeno, reduzimos o espaçamento
+                          double actualSpacing = (availableWidth - (6 * fieldWidth)) / 5;
+                          actualSpacing = actualSpacing.clamp(4.0, 12.0);
+                          
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: List.generate(6, (index) {
+                              return SizedBox(
+                                width: fieldWidth,
+                                height: fieldWidth,
+                                child: TextField(
+                                  controller: _otpControllers[index],
+                                  focusNode: _otpFocusNodes[index],
+                                  textAlign: TextAlign.center,
+                                  keyboardType: TextInputType.number,
+                                  maxLength: 1,
+                                  style: TextStyle(
+                                    fontSize: fieldWidth > 45 ? 22 : 20,
+                                    fontWeight: FontWeight.w700,
+                                    color: _textPrimary,
                                   ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(
-                                    color: _primaryColor,
-                                    width: 2,
+                                  decoration: InputDecoration(
+                                    counterText: '',
+                                    filled: true,
+                                    fillColor: _otpFocusNodes[index].hasFocus
+                                        ? Colors.white
+                                        : _backgroundColor,
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: _borderColor,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: _primaryColor,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: _borderColor,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    contentPadding: EdgeInsets.zero,
                                   ),
+                                  onChanged: (value) {
+                                    if (value.isNotEmpty && index < 5) {
+                                      FocusScope.of(context).requestFocus(_otpFocusNodes[index + 1]);
+                                    }
+                                    if (value.isEmpty && index > 0) {
+                                      FocusScope.of(context).requestFocus(_otpFocusNodes[index - 1]);
+                                    }
+                                  },
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                  ],
                                 ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(
-                                    color: _borderColor,
-                                    width: 2,
-                                  ),
-                                ),
-                                contentPadding: EdgeInsets.zero,
-                              ),
-                              onChanged: (value) {
-                                if (value.isNotEmpty && index < 5) {
-                                  FocusScope.of(context).requestFocus(_otpFocusNodes[index + 1]);
-                                }
-                                if (value.isEmpty && index > 0) {
-                                  FocusScope.of(context).requestFocus(_otpFocusNodes[index - 1]);
-                                }
-                              },
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                            ),
+                              );
+                            }),
                           );
-                        }),
+                        },
                       ),
                     ),
 

@@ -385,8 +385,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
             ),
           ],
         ),
-      ),
-    );
+      ));
   }
 
   Widget _buildCompletedFilters(bool isMobile) {
@@ -537,6 +536,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                 fontWeight: FontWeight.w500,
                                 color: _onSurfaceColor,
                               ),
+                              maxLines: 1,
                             ),
                           ],
                         ),
@@ -667,32 +667,80 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
         padding: EdgeInsets.all(isMobile ? 16 : 20),
         child: Column(
           children: [
-            // Cabeçalho da Tabela
-            Container(
-              padding: EdgeInsets.all(isMobile ? 16 : 20),
-              decoration: BoxDecoration(
-                color: _surfaceColor,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 12,
-                    offset: Offset(0, 4),
-                  ),
-                ],
+            // Cabeçalho da Tabela - APENAS PARA DESKTOP
+            if (!isMobile)
+              Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: _surfaceColor,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 12,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(width: 48), // Espaço para o ícone de expansão
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        'DATA',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                          color: _onSurfaceColor.withOpacity(0.6),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        'RESULTADO',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                          color: _onSurfaceColor.withOpacity(0.6),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        'TEMPO',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                          color: _onSurfaceColor.withOpacity(0.6),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        'PONTOS',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                          color: _onSurfaceColor.withOpacity(0.6),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildHeaderItem('DATA', flex: 2),
-                  _buildHeaderItem('RESULTADO', flex: 2),
-                  _buildHeaderItem('TEMPO', flex: 1),
-                  _buildHeaderItem('PONTOS', flex: 1),
-                  _buildHeaderItem('', flex: 1), // Espaço para o ícone
-                ],
-              ),
-            ),
-            SizedBox(height: 12),
+            if (!isMobile) SizedBox(height: 12),
             // Lista de Jogos
             ListView.builder(
               shrinkWrap: true,
@@ -738,6 +786,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
   }
 
   Widget _buildPendingMatchCard(MatchResponse match, bool isMobile) {
+    final matchStartDate = match.matchStartDate ?? DateTime.now();
+    
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -756,17 +806,46 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
         borderRadius: BorderRadius.circular(16),
         child: Column(
           children: [
-            // Header do Card com Ícone
+            // Header do Card com Ícone - SETA NO TOPO
             Padding(
               padding: EdgeInsets.all(isMobile ? 16 : 20),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Ícone de expandir no lado ESQUERDO (no topo)
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: _backgroundColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          match.isExpanded = !(match.isExpanded ?? false);
+                        });
+                      },
+                      icon: Icon(
+                        match.isExpanded ?? false
+                            ? Icons.expand_less_rounded
+                            : Icons.expand_more_rounded,
+                        color: _primaryColor,
+                        size: 24,
+                      ),
+                      padding: EdgeInsets.zero,
+                      splashRadius: 20,
+                    ),
+                  ),
+                  
+                  SizedBox(width: 12),
+                  
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
                               width: 32,
@@ -787,7 +866,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    DateFormat('dd/MM/yyyy').format(match.matchStartDate),
+                                    DateFormat('dd/MM/yyyy').format(matchStartDate),
                                     style: TextStyle(
                                       fontFamily: 'Inter',
                                       fontWeight: FontWeight.w700,
@@ -797,7 +876,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                   ),
                                   SizedBox(height: 2),
                                   Text(
-                                    DateFormat('HH:mm').format(match.matchStartDate),
+                                    DateFormat('HH:mm').format(matchStartDate),
                                     style: TextStyle(
                                       fontFamily: 'Inter',
                                       color: _onSurfaceColor.withOpacity(0.6),
@@ -810,53 +889,28 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                           ],
                         ),
                         SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: _getStatusColor(match.statusMatch).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: _getStatusColor(match.statusMatch).withOpacity(0.3),
-                                  width: 1.5,
-                                ),
-                              ),
-                              child: Text(
-                                _getStatusLabel(match.statusMatch),
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  color: _getStatusColor(match.statusMatch),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
-                                ),
-                              ),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: _getStatusColor(match.statusMatch).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: _getStatusColor(match.statusMatch).withOpacity(0.3),
+                              width: 1.5,
                             ),
-                          ],
+                          ),
+                          child: Text(
+                            _getStatusLabel(match.statusMatch ?? 'PENDING'),
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              color: _getStatusColor(match.statusMatch),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
+                            maxLines: 1,
+                          ),
                         ),
                       ],
-                    ),
-                  ),
-                  // Ícone de expandir no canto superior direito
-                  Container(
-                    decoration: BoxDecoration(
-                      color: _backgroundColor,
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          match.isExpanded = !(match.isExpanded ?? false);
-                        });
-                      },
-                      icon: Icon(
-                        match.isExpanded ?? false
-                            ? Icons.expand_less_rounded
-                            : Icons.expand_more_rounded,
-                        color: _primaryColor,
-                        size: 24,
-                      ),
-                      splashRadius: 20,
                     ),
                   ),
                 ],
@@ -897,7 +951,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 8.0),
                           child: _buildPlayerTile(player.userResponse,
-                              currentUser: _model.currentUser!),
+                              currentUser: _model.currentUser),
                         );
                       }).toList(),
                     ],
@@ -953,6 +1007,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                             fontSize: 16,
                                             fontWeight: FontWeight.w700,
                                           ),
+                                          maxLines: 1,
                                         ),
                                       ],
                                     ),
@@ -1014,6 +1069,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
+                  maxLines: 1,
                 ),
                 SizedBox(height: 2),
                 Text(
@@ -1024,6 +1080,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                     color: _onSurfaceColor,
                     fontSize: 16,
                   ),
+                  maxLines: 1,
                 ),
               ],
             ),
@@ -1034,225 +1091,494 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
   }
 
   Widget _buildGameCard(RankingResponse ranking, bool isMobile) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: _surfaceColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 12,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
-        child: Column(
-          children: [
-            // Header do Card
-            Padding(
-              padding: EdgeInsets.all(isMobile ? 16 : 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+    final createdAt = ranking.createdAt ?? DateTime.now();
+    final isWinner = ranking.isWinner ?? false;
+    final totalScore = ranking.totalScore ?? 0;
+    final totalResponseTime = ranking.totalResponseTime ?? 0;
+    
+    if (isMobile) {
+      // Layout mobile otimizado
+      return Container(
+        margin: EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: _surfaceColor,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+          child: Column(
+            children: [
+              // Header do Card - Layout vertical para mobile
+              Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    // Linha 1: Data e Resultado - COM SETA NO TOPO
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: _primaryColor.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.calendar_today_rounded,
-                                color: _primaryColor,
-                                size: 16,
-                              ),
+                        // Ícone de expandir NO LADO ESQUERDO
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: _backgroundColor,
+                            shape: BoxShape.circle,
+                          ),
+                          child: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                ranking.isExpanded = !(ranking.isExpanded ?? false);
+                              });
+                              if (ranking.isExpanded ?? false) {
+                                _model.getHistoryUserdAsync(setState, ranking.matchId);
+                              }
+                            },
+                            icon: Icon(
+                              ranking.isExpanded ?? false
+                                  ? Icons.expand_less_rounded
+                                  : Icons.expand_more_rounded,
+                              color: _primaryColor,
+                              size: 20,
                             ),
-                            SizedBox(width: 8),
-                            Text(
-                              ranking.createdAt != null
-                                  ? DateFormat('dd/MM/yyyy').format(ranking.createdAt!)
-                                  : '--/--/----',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 14,
-                                color: _onSurfaceColor,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+                            padding: EdgeInsets.zero,
+                          ),
                         ),
-                        SizedBox(height: 4),
-                        Padding(
-                          padding: EdgeInsets.only(left: 40),
-                          child: Text(
-                            ranking.createdAt != null
-                                ? DateFormat('HH:mm').format(ranking.createdAt!)
-                                : '--:--',
+                        
+                        SizedBox(width: 12),
+                        
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      color: _primaryColor.withOpacity(0.1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.calendar_today_rounded,
+                                      color: _primaryColor,
+                                      size: 16,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          DateFormat('dd/MM/yyyy').format(createdAt),
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontSize: 14,
+                                            color: _onSurfaceColor,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          maxLines: 1,
+                                        ),
+                                        SizedBox(height: 2),
+                                        Text(
+                                          DateFormat('HH:mm').format(createdAt),
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontSize: 12,
+                                            color: _onSurfaceColor.withOpacity(0.6),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 12),
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: isWinner
+                                      ? _successColor.withOpacity(0.1)
+                                      : _errorColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: isWinner
+                                        ? _successColor.withOpacity(0.3)
+                                        : _errorColor.withOpacity(0.3),
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      isWinner ? Icons.emoji_events_rounded : Icons.sentiment_dissatisfied_rounded,
+                                      color: isWinner ? _successColor : _errorColor,
+                                      size: 16,
+                                    ),
+                                    SizedBox(width: 6),
+                                    Text(
+                                      isWinner ? 'Vitória' : 'Derrota',
+                                      style: TextStyle(
+                                        fontFamily: 'Inter',
+                                        color: isWinner ? _successColor : _errorColor,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    SizedBox(height: 16),
+                    
+                    // Linha 2: Tempo e Pontos
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: _backgroundColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.timer_rounded,
+                                    color: _primaryColor,
+                                    size: 14,
+                                  ),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    'Tempo',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 12,
+                                      color: _onSurfaceColor.withOpacity(0.6),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                '$totalResponseTime s',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 14,
+                                  color: _onSurfaceColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          
+                          Container(
+                            width: 1,
+                            height: 30,
+                            color: _outlineColor,
+                          ),
+                          
+                          Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.star_rounded,
+                                    color: _primaryColor,
+                                    size: 14,
+                                  ),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    'Pontos',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 12,
+                                      color: _onSurfaceColor.withOpacity(0.6),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                '$totalScore',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: _primaryColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Conteúdo Expandido
+              if (ranking.isExpanded ?? false) ...[
+                Divider(height: 1, color: _outlineColor),
+                Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      _buildPrizeInfoSection(ranking),
+                      SizedBox(height: 20),
+                      Text(
+                        'Detalhes das Perguntas',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          color: _onSurfaceColor,
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      _buildQuestionsList(),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    } else {
+      // Layout desktop com table-like
+      return Container(
+        margin: EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: _surfaceColor,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+          child: Column(
+            children: [
+              // Header do Card - Layout horizontal para desktop
+              Padding(
+                padding: EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    // Ícone de expandir NO LADO ESQUERDO
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: _backgroundColor,
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            ranking.isExpanded = !(ranking.isExpanded ?? false);
+                          });
+                          if (ranking.isExpanded ?? false) {
+                            _model.getHistoryUserdAsync(setState, ranking.matchId);
+                          }
+                        },
+                        icon: Icon(
+                          ranking.isExpanded ?? false
+                              ? Icons.expand_less_rounded
+                              : Icons.expand_more_rounded,
+                          color: _primaryColor,
+                          size: 20,
+                        ),
+                        padding: EdgeInsets.zero,
+                      ),
+                    ),
+                    
+                    SizedBox(width: 20),
+                    
+                    // DATA
+                    Container(
+                      width: 150,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            DateFormat('dd/MM/yyyy').format(createdAt),
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 14,
+                              color: _onSurfaceColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            DateFormat('HH:mm').format(createdAt),
                             style: TextStyle(
                               fontFamily: 'Inter',
                               fontSize: 13,
                               color: _onSurfaceColor.withOpacity(0.6),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: ranking.isWinner!
-                            ? _successColor.withOpacity(0.1)
-                            : _errorColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: ranking.isWinner!
-                              ? _successColor.withOpacity(0.3)
-                              : _errorColor.withOpacity(0.3),
-                          width: 1.5,
+                    
+                    SizedBox(width: 20),
+                    
+                    // RESULTADO
+                    Container(
+                      width: 150,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: isWinner
+                              ? _successColor.withOpacity(0.1)
+                              : _errorColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isWinner
+                                ? _successColor.withOpacity(0.3)
+                                : _errorColor.withOpacity(0.3),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(
+                              isWinner ? Icons.emoji_events_rounded : Icons.sentiment_dissatisfied_rounded,
+                              color: isWinner ? _successColor : _errorColor,
+                              size: 16,
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              isWinner ? 'Vitória' : 'Derrota',
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                color: isWinner ? _successColor : _errorColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                         ),
                       ),
+                    ),
+                    
+                    SizedBox(width: 20),
+                    
+                    // TEMPO
+                    Container(
+                      width: 80,
                       child: Column(
                         children: [
                           Icon(
-                            ranking.isWinner! ? Icons.emoji_events_rounded : Icons.sentiment_dissatisfied_rounded,
-                            color: ranking.isWinner! ? _successColor : _errorColor,
+                            Icons.timer_rounded,
+                            color: _primaryColor,
                             size: 16,
                           ),
-                          SizedBox(height: 2),
+                          SizedBox(height: 4),
                           Text(
-                            ranking.isWinner! ? 'Vitória' : 'Derrota',
+                            '$totalResponseTime s',
                             style: TextStyle(
                               fontFamily: 'Inter',
-                              color: ranking.isWinner! ? _successColor : _errorColor,
+                              fontSize: 14,
+                              color: _onSurfaceColor,
                               fontWeight: FontWeight.w600,
-                              fontSize: 12,
                             ),
                             textAlign: TextAlign.center,
                           ),
                         ],
                       ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.timer_rounded,
-                          color: _primaryColor,
-                          size: 16,
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          '${ranking.totalResponseTime ?? 0} s',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 14,
-                            color: _onSurfaceColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.star_rounded,
-                          color: _primaryColor,
-                          size: 16,
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          '${ranking.totalScore ?? 0}',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
+                    
+                    SizedBox(width: 20),
+                    
+                    // PONTOS
+                    Container(
+                      width: 80,
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.star_rounded,
                             color: _primaryColor,
+                            size: 16,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Ícone de expandir
-                  Container(
-                    decoration: BoxDecoration(
-                      color: _backgroundColor,
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          ranking.isExpanded = !(ranking.isExpanded ?? false);
-                        });
-                        if (ranking.isExpanded ?? false) {
-                          _model.getHistoryUserdAsync(setState, ranking.matchId);
-                        }
-                      },
-                      icon: Icon(
-                        ranking.isExpanded ?? false
-                            ? Icons.expand_less_rounded
-                            : Icons.expand_more_rounded,
-                        color: _primaryColor,
-                        size: 24,
-                      ),
-                      splashRadius: 20,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            // Conteúdo Expandido
-            if (ranking.isExpanded ?? false) ...[
-              Divider(height: 1, color: _outlineColor),
-              Padding(
-                padding: EdgeInsets.all(isMobile ? 16 : 20),
-                child: Column(
-                  children: [
-                    _buildPrizeInfoSection(ranking),
-                    SizedBox(height: 20),
-                    Text(
-                      'Detalhes das Perguntas',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 18,
-                        color: _onSurfaceColor,
+                          SizedBox(height: 4),
+                          Text(
+                            '$totalScore',
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: _primaryColor,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     ),
-                    SizedBox(height: 16),
-                    _buildQuestionsList(),
                   ],
                 ),
               ),
+              
+              // Conteúdo Expandido
+              if (ranking.isExpanded ?? false) ...[
+                Divider(height: 1, color: _outlineColor),
+                Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      _buildPrizeInfoSection(ranking),
+                      SizedBox(height: 20),
+                      Text(
+                        'Detalhes das Perguntas',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                          color: _onSurfaceColor,
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      _buildQuestionsList(),
+                    ],
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   Widget _buildPrizeInfoSection(RankingResponse ranking) {
+    final isWinner = ranking.isWinner ?? false;
+    
     return Column(
       children: [
         Container(
@@ -1316,10 +1642,11 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                 color: _infoColor,
                                 fontSize: 16,
                               ),
+                              maxLines: 1,
                             ),
                             SizedBox(height: 2),
                             Text(
-                              ranking.isWinner! ? 'Você venceu esta partida!' : 'Você não venceu esta partida',
+                              isWinner ? 'Você venceu esta partida!' : 'Você não venceu esta partida',
                               style: TextStyle(
                                 fontFamily: 'Inter',
                                 color: _onSurfaceColor.withOpacity(0.6),
@@ -1369,9 +1696,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                 SizedBox(height: 12),
                 _buildPrizeDetailRow(
                   'Ganho Líquido',
-                  '${!ranking.isWinner! ? 0 : _model.matchInfo!.matchPrize?.netPremium ?? 0} AOA',
+                  '${!isWinner ? 0 : _model.matchInfo!.matchPrize?.netPremium ?? 0} AOA',
                   Icons.account_balance_wallet_rounded,
-                  isHighlighted: ranking.isWinner!,
+                  isHighlighted: isWinner,
                 ),
               ],
             ),
@@ -1417,6 +1744,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
+              maxLines: 1,
             ),
           ),
           Text(
@@ -1427,6 +1755,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
               color: isHighlighted ? _successColor : _onSurfaceColor,
               fontSize: 16,
             ),
+            maxLines: 1,
           ),
         ],
       ),
@@ -1554,6 +1883,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
               color: _onSurfaceColor,
               fontWeight: FontWeight.w500,
             ),
+            maxLines: 2,
           ),
           trailing: Container(
             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -1561,107 +1891,108 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
               color: isCorrect
                   ? _successColor.withOpacity(0.1)
                   : _errorColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: isCorrect ? _successColor : _errorColor,
-                width: 1,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.timer_rounded,
-                  size: 12,
-                  color: isCorrect ? _successColor : _errorColor,
-                ),
-                SizedBox(width: 4),
-                Text(
-                  '$time s',
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    color: isCorrect ? _successColor : _errorColor,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isCorrect ? _successColor : _errorColor,
+              width: 1,
             ),
           ),
-          children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isCorrect ? _successColor.withOpacity(0.05) : _errorColor.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: isCorrect ? _successColor.withOpacity(0.2) : _errorColor.withOpacity(0.2),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          isCorrect ? Icons.check_circle_rounded : Icons.cancel_rounded,
-                          color: isCorrect ? _successColor : _errorColor,
-                          size: 16,
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Sua resposta: $answer',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              color: isCorrect ? _successColor : _errorColor,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.timer_rounded,
+                size: 12,
+                color: isCorrect ? _successColor : _errorColor,
+              ),
+              SizedBox(width: 4),
+              Text(
+                '$time s',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  color: isCorrect ? _successColor : _errorColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isCorrect ? _successColor.withOpacity(0.05) : _errorColor.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isCorrect ? _successColor.withOpacity(0.2) : _errorColor.withOpacity(0.2),
+                      width: 1,
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Row(
                     children: [
-                      Text(
-                        'Tempo de resposta: $time segundos',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          color: _onSurfaceColor.withOpacity(0.6),
-                          fontSize: 13,
-                        ),
+                      Icon(
+                        isCorrect ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                        color: isCorrect ? _successColor : _errorColor,
+                        size: 16,
                       ),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: _primaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
+                      SizedBox(width: 8),
+                      Expanded(
                         child: Text(
-                          'Pontos: ${isCorrect ? (_model.matchInfo!.room!.roomConfiguration!.timeToRespond - time) : 0}',
+                          'Sua resposta: $answer',
                           style: TextStyle(
                             fontFamily: 'Inter',
-                            fontWeight: FontWeight.w600,
-                            color: _primaryColor,
-                            fontSize: 12,
+                            color: isCorrect ? _successColor : _errorColor,
+                            fontWeight: FontWeight.w500,
                           ),
+                          maxLines: 2,
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+                SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Tempo de resposta: $time segundos',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        color: _onSurfaceColor.withOpacity(0.6),
+                        fontSize: 13,
+                      ),
+                      maxLines: 1,
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _primaryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'Pontos: ${isCorrect ? (_model.matchInfo?.room?.roomConfiguration?.timeToRespond ?? 30) - time : 0}',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w600,
+                          color: _primaryColor,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
+    ));
   }
 
   Widget _buildHeaderItem(String text, {int flex = 1}) {
@@ -1680,34 +2011,11 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontFamily: 'Inter',
-            color: _onSurfaceColor.withOpacity(0.6),
-            fontSize: 14,
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontWeight: FontWeight.w600,
-            color: _onSurfaceColor,
-            fontSize: 14,
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildPlayerTile(UserResponse? player,
-      {required UserResponse currentUser}) {
-    final isCurrentUser = player?.id == currentUser.id;
+      {required UserResponse? currentUser}) {
+    final isCurrentUser = player?.id == currentUser?.id;
+    final playerName = player?.name ?? 'Jogador sem nome';
+    final playerEmail = player?.email ?? '';
 
     return Container(
       margin: EdgeInsets.only(bottom: 8),
@@ -1732,8 +2040,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
               ),
               child: Center(
                 child: Text(
-                  player?.name != null && player!.name.isNotEmpty
-                      ? player.name[0].toUpperCase()
+                  playerName.isNotEmpty
+                      ? playerName[0].toUpperCase()
                       : '?',
                   style: TextStyle(
                     color: isCurrentUser ? Colors.white : _onSurfaceColor,
@@ -1765,13 +2073,14 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
         title: Row(
           children: [
             Text(
-              player?.name ?? 'Jogador sem nome',
+              playerName,
               style: TextStyle(
                 fontFamily: 'Inter',
                 fontWeight: isCurrentUser ? FontWeight.w700 : FontWeight.w500,
                 color: _onSurfaceColor,
                 fontSize: 14,
               ),
+              maxLines: 1,
             ),
             if (isCurrentUser)
               Padding(
@@ -1788,12 +2097,13 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
           ],
         ),
         subtitle: Text(
-          player?.email ?? '',
+          playerEmail,
           style: TextStyle(
             fontFamily: 'Inter',
             color: _onSurfaceColor.withOpacity(0.6),
             fontSize: 12,
           ),
+          maxLines: 1,
         ),
       ),
     );

@@ -109,7 +109,71 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
       ),
     );
 
+    // Inicializar validadores
+    _initializeValidators();
+
     _animationController.forward();
+  }
+
+  void _initializeValidators() {
+    // Validador para Nome Completo
+    _model.inputMomeCompletoTextControllerValidator = (context, value) {
+      if (value == null || value.isEmpty) {
+        return 'Por favor, insira seu nome completo';
+      }
+      if (value.trim().split(' ').length < 2) {
+        return 'Por favor, insira seu nome completo (nome e sobrenome)';
+      }
+      return null;
+    };
+
+    // Validador para Telefone
+    _model.inputTelefoneTextControllerValidator = (context, value) {
+      if (value == null || value.isEmpty) {
+        return 'Por favor, insira seu número de telefone';
+      }
+      // Remove espaços e caracteres especiais
+      final phoneDigits = value.replaceAll(RegExp(r'[^0-9]'), '');
+      if (phoneDigits.length < 9) {
+        return 'Por favor, insira um número de telefone válido (mínimo 9 dígitos)';
+      }
+      return null;
+    };
+
+    // Validador para Email
+    _model.inputEmailTextControllerValidator = (context, value) {
+      if (value == null || value.isEmpty) {
+        return 'Por favor, insira seu email';
+      }
+      final emailRegex =
+          RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+      if (!emailRegex.hasMatch(value.trim())) {
+        return 'Por favor, insira um email válido';
+      }
+      return null;
+    };
+
+    // Validador para Senha
+    _model.inputSenhaTextController1Validator = (context, value) {
+      if (value == null || value.isEmpty) {
+        return 'Por favor, insira uma senha';
+      }
+      if (value.length < 6) {
+        return 'A senha deve ter pelo menos 6 caracteres';
+      }
+      return null;
+    };
+
+    // Validador para Confirmar Senha
+    _model.inputSenhaTextController2Validator = (context, value) {
+      if (value == null || value.isEmpty) {
+        return 'Por favor, confirme sua senha';
+      }
+      if (value != _model.inputSenhaTextController1?.text) {
+        return 'As senhas não coincidem';
+      }
+      return null;
+    };
   }
 
   @override
@@ -755,9 +819,8 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            validator:
-                                _model.inputEmailTextControllerValidator
-                                    .asValidator(context),
+                            validator: _model.inputEmailTextControllerValidator
+                                .asValidator(context),
                             onTap: () => setState(() {}),
                           ),
                         ),
@@ -835,9 +898,8 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            validator:
-                                _model.inputSenhaTextController1Validator
-                                    .asValidator(context),
+                            validator: _model.inputSenhaTextController1Validator
+                                .asValidator(context),
                             onTap: () => setState(() {}),
                           ),
                         ),
@@ -935,9 +997,8 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            validator:
-                                _model.inputSenhaTextController2Validator
-                                    .asValidator(context),
+                            validator: _model.inputSenhaTextController2Validator
+                                .asValidator(context),
                             onTap: () => setState(() {}),
                           ),
                         ),
@@ -1176,6 +1237,8 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
     );
   }
 
+  // ... restante do código mantido ...
+
   Future<void> _registerUser() async {
     // Validação básica
     if (_model.formKey.currentState?.validate() ?? false) {
@@ -1211,12 +1274,15 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
         return;
       }
 
-      // Configuração do estado de carregamento para envio do OTP
-      setState(() {
-        _isSendingOtp = true;
-      });
+      // Variável para controlar o resultado do OTP
+      bool? otpResult = false;
 
       try {
+        // Configuração do estado de carregamento para envio do OTP
+        setState(() {
+          _isSendingOtp = true;
+        });
+
         // Envia OTP com loading
         String phoneNumber = '+244' + telefone;
         await UserService().sendOtp(phoneNumber);
@@ -1232,7 +1298,7 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
         });
 
         // Mostra modal de validação
-        bool? otpResult = await showModalBottomSheet<bool>(
+        otpResult = await showModalBottomSheet<bool>(
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
           enableDrag: false,
@@ -1249,7 +1315,15 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
           },
         );
 
-        if (otpResult != null && otpResult) {
+        // Verifica se o usuário cancelou o modal de OTP
+        if (otpResult == null) {
+          setState(() {
+            _model.isRegistering = false;
+          });
+          return;
+        }
+
+        if (otpResult) {
           // Cria usuário
           final user = CreateUserRequest(
             name: nomeCompleto,
@@ -1263,6 +1337,7 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
           var result = await UserService().createUser(user);
 
           // Finaliza loading da criação do usuário
+          print("result do cadastro: $result");
           setState(() {
             _model.isRegistering = false;
           });
@@ -1278,11 +1353,16 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
                 backgroundColor: Colors.transparent,
                 child: SuccessDialogWidget(
                   message: 'Cadastro realizado com sucesso!',
-                  onOk: () => context.pushNamed(Tela00LoginWidget.routeName),
+                  onOk: () {
+                    Navigator.of(context).pop(); // Fecha o diálogo de sucesso
+                    context.pushNamed(
+                        Tela00LoginWidget.routeName); // Vai para login
+                  },
                 ),
               ),
             );
           } else {
+            // Mostra diálogo de erro SEM fechar a tela de cadastro
             await showGeneralDialog(
               context: context,
               barrierDismissible: false,
@@ -1293,11 +1373,16 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
                 return Center(
                   child: ErrorDialogWidget(
                     message: 'Erro ao cadastrar. Tente novamente.',
-                    onOk: () => Navigator.of(context).pop(),
+                    onOk: () {
+                      Navigator.of(context)
+                          .pop(); // Apenas fecha o diálogo de erro
+                      // NÃO navega para outra tela
+                    },
                   ),
                 );
               },
-              transitionBuilder: (context, animation, secondaryAnimation, child) {
+              transitionBuilder:
+                  (context, animation, secondaryAnimation, child) {
                 return ScaleTransition(
                   scale: CurvedAnimation(
                     parent: animation,
@@ -1307,12 +1392,29 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
                 );
               },
             );
+
+            // Mantém o usuário na tela de cadastro para tentar novamente
+            setState(() {
+              _model.isRegistering = false;
+            });
           }
         } else {
-          // Se o usuário cancelou a validação OTP, remove o loading
+          // Se a validação OTP falhou (usuário inseriu código errado)
           setState(() {
             _model.isRegistering = false;
           });
+
+          // Mostra mensagem informativa
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Validação OTP falhou. Tente novamente.',
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: _warningColor,
+              duration: Duration(seconds: 3),
+            ),
+          );
         }
       } catch (e) {
         // Em caso de erro, remove todos os loadings
@@ -1320,14 +1422,16 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
           _isSendingOtp = false;
           _model.isRegistering = false;
         });
-        
+
+        // Se houve erro no envio do OTP ou outro erro, mostra mensagem SEM fechar a tela
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Erro ao processar cadastro: $e',
+              'Erro ao processar cadastro. Tente novamente.',
               style: TextStyle(color: Colors.white),
             ),
             backgroundColor: _errorColor,
+            duration: Duration(seconds: 3),
           ),
         );
       }

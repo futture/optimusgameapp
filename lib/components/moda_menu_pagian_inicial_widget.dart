@@ -56,10 +56,10 @@ class _ModaMenuPagianInicialWidgetState
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 600;
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     // Aumentando a largura do menu
     final dialogWidth = isMobile ? screenWidth * 0.88 : 440.0;
-    
+
     return Align(
       alignment: AlignmentDirectional(0.0, 0.0),
       child: Container(
@@ -175,7 +175,7 @@ class _ModaMenuPagianInicialWidgetState
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       SizedBox(height: isMobile ? 8.0 : 12.0),
-                      
+
                       // Menu items - NÃO fecha o menu, navega diretamente
                       _buildMenuItem(
                         icon: Icons.person_rounded,
@@ -185,7 +185,8 @@ class _ModaMenuPagianInicialWidgetState
                           colors: [_infoColor, Color(0xFF60A5FA)],
                         ),
                         iconColor: Colors.white,
-                        onTap: () => context.pushNamed(Tela04PerfilWidget.routeName),
+                        onTap: () =>
+                            context.pushNamed(Tela04PerfilWidget.routeName),
                         isMobile: isMobile,
                       ),
                       SizedBox(height: isMobile ? 12.0 : 14.0),
@@ -198,7 +199,8 @@ class _ModaMenuPagianInicialWidgetState
                           colors: [_successColor, Color(0xFF34D399)],
                         ),
                         iconColor: Colors.white,
-                        onTap: () => context.pushNamed(Tela07FinancasWidget.routeName),
+                        onTap: () =>
+                            context.pushNamed(Tela07FinancasWidget.routeName),
                         isMobile: isMobile,
                       ),
                       SizedBox(height: isMobile ? 12.0 : 14.0),
@@ -211,7 +213,8 @@ class _ModaMenuPagianInicialWidgetState
                           colors: [_primaryColor, Color(0xFFF59E0B)],
                         ),
                         iconColor: Colors.white,
-                        onTap: () => context.pushNamed(Tela08CarteiraWidget.routeName),
+                        onTap: () =>
+                            context.pushNamed(Tela08CarteiraWidget.routeName),
                         isMobile: isMobile,
                       ),
                       SizedBox(height: isMobile ? 12.0 : 14.0),
@@ -224,7 +227,8 @@ class _ModaMenuPagianInicialWidgetState
                           colors: [Color(0xFF8B5CF6), Color(0xFF7C3AED)],
                         ),
                         iconColor: Colors.white,
-                        onTap: () => context.pushNamed(Tela09HistoricoJodosWidget.routeName),
+                        onTap: () => context
+                            .pushNamed(Tela09HistoricoJodosWidget.routeName),
                         isMobile: isMobile,
                       ),
                       SizedBox(height: isMobile ? 12.0 : 14.0),
@@ -237,7 +241,8 @@ class _ModaMenuPagianInicialWidgetState
                           colors: [Color(0xFFEC4899), Color(0xFFDB2777)],
                         ),
                         iconColor: Colors.white,
-                        onTap: () => context.pushNamed(DepositHistoryScreenWidget.routeName),
+                        onTap: () => context
+                            .pushNamed(DepositHistoryScreenWidget.routeName),
                         isMobile: isMobile,
                       ),
 
@@ -250,7 +255,8 @@ class _ModaMenuPagianInicialWidgetState
                           description: 'Voltar para a página principal',
                           gradient: _primaryGradient,
                           iconColor: Colors.white,
-                          onTap: () => context.pushNamed(Tela03PrincipalWidget.routeName),
+                          onTap: () => context
+                              .pushNamed(Tela03PrincipalWidget.routeName),
                           isMobile: isMobile,
                         ),
                       ],
@@ -274,7 +280,7 @@ class _ModaMenuPagianInicialWidgetState
 
                       // Botão de logout - COM DIÁLOGO DE CONFIRMAÇÃO
                       _buildLogoutButton(isMobile),
-                      
+
                       SizedBox(height: isMobile ? 16.0 : 20.0),
                     ],
                   ),
@@ -379,86 +385,86 @@ class _ModaMenuPagianInicialWidgetState
 
   Widget _buildLogoutButton(bool isMobile) {
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isMobile ? 14.0 : 16.0),
-        boxShadow: [
-          BoxShadow(
-            color: _errorColor.withOpacity(0.1),
-            blurRadius: 15.0,
-            offset: Offset(0.0, 5.0),
-          ),
-        ],
-      ),
-      child: Material(
-        color: _cardColor,
-        borderRadius: BorderRadius.circular(isMobile ? 14.0 : 16.0),
-        child: InkWell(
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(isMobile ? 14.0 : 16.0),
-          onTap: () => _showLogoutConfirmationDialog(context),
-          child: Container(
-            padding: EdgeInsets.all(isMobile ? 14.0 : 16.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(isMobile ? 14.0 : 16.0),
-              border: Border.all(
-                color: _errorColor.withOpacity(0.2),
-                width: 1.5,
+          boxShadow: [
+            BoxShadow(
+              color: _errorColor.withOpacity(0.1),
+              blurRadius: 15.0,
+              offset: Offset(0.0, 5.0),
+            ),
+          ],
+        ),
+        child: Material(
+          color: _cardColor,
+          borderRadius: BorderRadius.circular(isMobile ? 14.0 : 16.0),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(isMobile ? 14.0 : 16.0),
+            onTap: () => _showLogoutConfirmationDialog(context),
+            child: Container(
+              padding: EdgeInsets.all(isMobile ? 14.0 : 16.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(isMobile ? 14.0 : 16.0),
+                border: Border.all(
+                  color: _errorColor.withOpacity(0.2),
+                  width: 1.5,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: isMobile ? 44.0 : 48.0,
+                    height: isMobile ? 44.0 : 48.0,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [_errorColor, Color(0xFFEF4444)],
+                      ),
+                      borderRadius:
+                          BorderRadius.circular(isMobile ? 12.0 : 14.0),
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.logout_rounded,
+                        color: Colors.white,
+                        size: isMobile ? 20.0 : 22.0,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: isMobile ? 12.0 : 16.0),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Terminar Sessão',
+                          style: TextStyle(
+                            fontSize: isMobile ? 15.0 : 16.0,
+                            fontWeight: FontWeight.w700,
+                            color: _textPrimary,
+                          ),
+                        ),
+                        SizedBox(height: isMobile ? 2.0 : 4.0),
+                        Text(
+                          'Sair da sua conta atual',
+                          style: TextStyle(
+                            fontSize: isMobile ? 12.0 : 13.0,
+                            color: _textSecondary,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: _errorColor,
+                    size: isMobile ? 14.0 : 16.0,
+                  ),
+                ],
               ),
             ),
-            child: Row(
-              children: [
-                Container(
-                  width: isMobile ? 44.0 : 48.0,
-                  height: isMobile ? 44.0 : 48.0,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [_errorColor, Color(0xFFEF4444)],
-                    ),
-                    borderRadius: BorderRadius.circular(isMobile ? 12.0 : 14.0),
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.logout_rounded,
-                      color: Colors.white,
-                      size: isMobile ? 20.0 : 22.0,
-                    ),
-                  ),
-                ),
-                SizedBox(width: isMobile ? 12.0 : 16.0),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Terminar Sessão',
-                        style: TextStyle(
-                          fontSize: isMobile ? 15.0 : 16.0,
-                          fontWeight: FontWeight.w700,
-                          color: _textPrimary,
-                        ),
-                      ),
-                      SizedBox(height: isMobile ? 2.0 : 4.0),
-                      Text(
-                        'Sair da sua conta atual',
-                        style: TextStyle(
-                          fontSize: isMobile ? 12.0 : 13.0,
-                          color: _textSecondary,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  color: _errorColor,
-                  size: isMobile ? 14.0 : 16.0,
-                ),
-              ],
-            ),
           ),
-        ),
-      )
-    );
+        ));
   }
 
   void _showLogoutConfirmationDialog(BuildContext context) {
@@ -589,7 +595,7 @@ class _ModaMenuPagianInicialWidgetState
                       ),
                     ),
                     SizedBox(height: 28.0),
-                    
+
                     // Botões de ação
                     Row(
                       children: [
@@ -609,7 +615,14 @@ class _ModaMenuPagianInicialWidgetState
                               borderRadius: BorderRadius.circular(14.0),
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(14.0),
-                                onTap: () => Navigator.pop(context),
+                                onTap: () async {
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                  if (Navigator.canPop(context)) {
+                                    Navigator.pop(context);
+                                  }
+                                  await _executeLogoutSilently(context);
+                                },
                                 child: Center(
                                   child: Text(
                                     'NÃO',
@@ -652,7 +665,7 @@ class _ModaMenuPagianInicialWidgetState
                                   if (Navigator.canPop(context)) {
                                     Navigator.pop(context); // fecha menu
                                   }
-                                  
+
                                   // Executa logout silenciosamente
                                   await _executeLogoutSilently(context);
                                 },
@@ -694,24 +707,25 @@ class _ModaMenuPagianInicialWidgetState
   }
 
   Future<void> _executeLogoutSilently(BuildContext context) async {
+    // Fecha apenas diálogos e menus
+    Navigator.of(context, rootNavigator: true).pop();
+
+    // Limpa token
+    await TokenUtil.removeToken();
+
+    // Logout API (async)
     try {
-      // Remove o token
-      TokenUtil.removeToken();
-      
-      // Executa logout sem feedback visual
       await _model.logoutAsync();
-      
-      // Direciona diretamente para login
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.pushNamed(Tela00LoginWidget.routeName);
-      });
-      
     } catch (e) {
-      print('Erro ao terminar sessão: $e');
-      // Se der erro, também direciona para login
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.pushNamed(Tela00LoginWidget.routeName);
-      });
+      print('API logout error: $e');
     }
+
+    // Navega para login, limpando toda a pilha
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        Tela00LoginWidget.routeName,
+        (route) => false,
+      );
+    });
   }
 }
