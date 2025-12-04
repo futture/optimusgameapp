@@ -5,16 +5,19 @@ import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 
 class RoomResponse {
   final String id;
+  final bool isFree;
   final String nameRoom;
   final RoomConfigurationResponse? roomConfiguration;
 
   RoomResponse(
       {required this.id,
+      required this.isFree,
       required this.nameRoom,
       required this.roomConfiguration});
 
   factory RoomResponse.fromJson(Map<String, dynamic> json) => RoomResponse(
         id: json["id"],
+        isFree: json["isFree"] == null ? false : json["isFree"],
         nameRoom: json["name"],
         roomConfiguration: json["roomConfiguration"] != null
             ? RoomConfigurationResponse.fromJson(json["roomConfiguration"])
@@ -171,24 +174,27 @@ class PlayerRankingResponse {
   final int position;
   final double accuracyRate;
   final double timeRate;
+  final double taxAmount;
   final double hitRateWeight;
   final double timeRateWeight;
 
-  PlayerRankingResponse(
-      {required this.playerName,
-      required this.playerId,
-      required this.hits,
-      required this.errors,
-      required this.totalResponseTime,
-      required this.timesInTop3,
-      required this.points,
-      required this.prize,
-      required this.winner,
-      required this.position,
-      required this.accuracyRate,
-      required this.timeRate,
-      required this.hitRateWeight,
-      required this.timeRateWeight,});
+  PlayerRankingResponse({
+    required this.playerName,
+    required this.playerId,
+    required this.hits,
+    required this.errors,
+    required this.totalResponseTime,
+    required this.timesInTop3,
+    required this.points,
+    required this.prize,
+    required this.winner,
+    required this.position,
+    required this.accuracyRate,
+    required this.timeRate,
+    required this.taxAmount,
+    required this.hitRateWeight,
+    required this.timeRateWeight,
+  });
 
   factory PlayerRankingResponse.fromJson(Map<String, dynamic> json) =>
       PlayerRankingResponse(
@@ -204,6 +210,9 @@ class PlayerRankingResponse {
           accuracyRate: json["accuracyRate"] is String
               ? double.parse(json["accuracyRate"])
               : (json["accuracyRate"] as num).toDouble(),
+          taxAmount: json["taxAmount"] is String
+              ? double.parse(json["taxAmount"])
+              : (json["taxAmount"] as num).toDouble(),
           timeRate: json["timeRate"] is String
               ? double.parse(json["timeRate"])
               : (json["timeRate"] as num).toDouble(),
@@ -212,7 +221,7 @@ class PlayerRankingResponse {
               : (json["hitRateWeight"] as num).toDouble(),
           timeRateWeight: json["timeRateWeight"] is String
               ? double.parse(json["timeRateWeight"])
-              : (json["timeRateWeight"] as num).toDouble(),                
+              : (json["timeRateWeight"] as num).toDouble(),
           prize: json["prize"] is String
               ? double.parse(json["prize"])
               : (json["prize"] as num).toDouble(),

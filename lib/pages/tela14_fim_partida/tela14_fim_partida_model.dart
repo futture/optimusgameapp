@@ -35,6 +35,7 @@ class Tela14FimPartidaViewModel
             timeRate: ranking.timeRate,
             timeRateWeight: ranking.timeRateWeight,
             isWinner: ranking.winner == true,
+            taxAmount: ranking.taxAmount,
           );
         }).toList() ??
         [];

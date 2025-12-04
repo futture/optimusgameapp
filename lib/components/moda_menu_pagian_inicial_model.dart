@@ -8,8 +8,9 @@ import 'package:flutter/material.dart';
 
 class ModaMenuPagianInicialModel
     extends FlutterFlowModel<ModaMenuPagianInicialWidget> {
-  String? userId = "";
+  String? userId;
   UserService _userService = UserService();
+  
   @override
   void initState(BuildContext context) {}
 
@@ -21,8 +22,22 @@ class ModaMenuPagianInicialModel
   }
 
   Future<void> logoutAsync() async {
-    var result = await _userService.logoutAsync(userId!);
-
+    // Garantir que o userId foi carregado antes de fazer logout
+    if (userId == null) {
+      await getUserIdAsync();
+    }
+    
+    // Verificar novamente se o userId não é null
+    if (userId == null || userId!.isEmpty) {
+      Warning00ErrorUtil.showDialogMessageError(
+        context!,
+        "Erro de sessão",
+        "Não foi possível obter o ID do usuário. Tente novamente.",
+      );
+      return;
+    }
+    
+    var result = await _userService.logoutAsync(userId!); 
     if (!result["isSuccess"]) {
       Warning00ErrorUtil.showDialogMessageError(
         context!,

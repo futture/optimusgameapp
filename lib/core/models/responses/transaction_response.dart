@@ -6,6 +6,7 @@ class TransactionResponse {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String status;
+  final int? reference;
 
   TransactionResponse({
     required this.id,
@@ -15,6 +16,7 @@ class TransactionResponse {
     required this.createdAt,
     required this.updatedAt,
     required this.status,
+    this.reference,
   });
 
   factory TransactionResponse.fromJson(Map<String, dynamic> json) =>
@@ -26,5 +28,6 @@ class TransactionResponse {
         createdAt: DateTime.parse(json["created_at"]),
         updatedAt: DateTime.parse(json["updated_at"]),
         status: json["status"],
+        reference: json["reference"] != null ? json["reference"] as int : null,
       );
 }

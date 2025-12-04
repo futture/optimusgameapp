@@ -206,9 +206,12 @@ class _ModaListadeSalaWidgetState extends State<ModaListadeSalaWidget> {
                                         e.roomConfiguration!.timeToRespond,
                                         e.id,
                                       );
+                                     
                                     },
-                                    text:
-                                        'Entrar na sala (${e.roomConfiguration!.numberOfPlayers} jogadores)'
+                                    text: e.isFree
+                                        ? 'Entrar na sala [Gratis (2 Jog.)]'
+                                            .toUpperCase()
+                                        : 'Entrar na sala (${e.roomConfiguration!.numberOfPlayers} jogadores)'
                                             .toUpperCase(),
                                     options: FFButtonOptions(
                                       width: double.infinity,

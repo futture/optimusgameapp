@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:projeto_game_quiz/core/api/utils/super_match_util.dart';
+import 'package:projeto_game_quiz/core/api/utils/web_socket_util.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_model.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
 import 'package:projeto_game_quiz/pages/tela03_principal/tela03_principal_widget.dart';
@@ -29,13 +30,14 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   int elapsedSeconds = 0;
   int secondsRemaining = 10;
   int currentposition = 0;
+  bool isConnected = false;
   String answerOptionId = "";
   String? lastQuestionHandled;
+  int reconnectAttempts = 0;
   bool isButtonDisabled = false;
   int questionsAlreadyPresented = 0;
   Map<String, double> totalScorePerPlayer = {};
-  int reconnectAttempts = 0; // Contador de tentativas de reconexão
-  final int maxReconnectAttempts = 2; // Número máximo de tentativas
+  final int maxReconnectAttempts = 2;
   FormFieldController<String>? radioGroupValueController;
 
   MatchResponse? matchInfo;
@@ -55,8 +57,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   }
 
   void dispose() {
-    countdownTimer?.cancel();
-    countupTimer?.cancel();
+    cancelarTimers();
     //_questionWebSocketService?.disconnect();
   }
 
@@ -86,6 +87,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
         result["error"].detail.code != "ERR_QUESTION_NOTFOUND") {
       if (result["error"].detail.code == "ERR_MATCH_PLAYER_INATIVE") {
         _questionWebSocketService?.disconnect();
+
         if (serverAllowedExit) {
           Navigator.of(currentContext!).push(
             MaterialPageRoute(builder: (_) => Tela03PrincipalWidget()),
@@ -151,7 +153,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
 
     countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (--secondsRemaining == 0) {
-        showDialogWaitingPlayer(currentContext!);
+        showDialogWaitingPlayer(currentContext!, setState);
         timer.cancel();
         await sendUserResponseAsync("", setState);
       }
@@ -171,8 +173,8 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
         question: question!,
         userId: userId!,
         onWaitingForPlayersResponse: (stats) {
-          closeDialogWaitingPlayer();
-          showDialogWaitingPlayer(currentContext!);
+          //closeDialogWaitingPlayer();
+          showDialogWaitingPlayer(currentContext!, setState);
 
           if (safetyTimeout?.isActive ?? false) {
             safetyTimeout?.cancel();
@@ -240,61 +242,35 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
         },
         onError: (e) {
           if (!gameFinished) {
-            closeDialogWaitingPlayer();
+            //closeDialogWaitingPlayer();
             showDialogErrorAndExit(
-                "Erro de conexão", "Perdemos a conexão com o servidor.");
+                "Erro de conexão", "Perdemos a conexão com o servidor.",
+                setState: setState);
           }
         },
         onDone: () async {
+          closeDialogWaitingPlayer();
           print("Conexão WebSocket encerrada.");
 
           if (!gameFinished) {
-            // if (reconnectAttempts < maxReconnectAttempts) {
-            //   reconnectAttempts++;
-            //   safetyTimeout?.cancel();
+            setState(() {
+              serverAllowedExit = true;
+            });
+            await WebSocketUtil.disconnect(matchInfo!.id);
 
-            //   print(
-            //       "Tentando reconectar (tentativa $reconnectAttempts/$maxReconnectAttempts)...");
-            //   closeDialogWaitingPlayer();
-            //   showDialog(
-            //     context: currentContext!,
-            //     barrierDismissible: false,
-            //     builder: (context) => AlertDialog(
-            //       title: Text("Reconectando..."),
-            //       content: Text(
-            //           "Tentativa $reconnectAttempts de $maxReconnectAttempts"),
-            //     ),
-            //   );
-
-            //   await Future.delayed(Duration(seconds: 2));
-
-            //   if (Navigator.canPop(currentContext!)) {
-            //     Navigator.of(currentContext!).pop();
-            //   }
-            //   var resultTryReconnect =
-            //       await _questionWebSocketService?.tryReconnect();
-
-            //   if (resultTryReconnect!) {
-            //     await _matchService.activatePlayerInMatchAsync(
-            //         matchInfo!.id, userId!);
-            //     reconnectAttempts = 0;
-            //     return;
-            //   }
-            // }
-
-            //if (!_questionWebSocketService!.isConnected) {
-            closeDialogWaitingPlayer();
             showDialogErrorAndExit("Conexão encerrada",
                 "Não foi possível reconectar ao servidor após $maxReconnectAttempts tentativas.",
                 showBackButton: true);
-            //}
           }
         });
 
     _questionWebSocketService?.connect();
+    setState(() {
+      serverAllowedExit = false;
+    });
   }
 
-  void showDialogWaitingPlayer(BuildContext context) {
+  void showDialogWaitingPlayer(BuildContext context, Function setState) {
     if (isDialogOpen) return;
 
     isDialogOpen = true;
@@ -418,7 +394,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
                       const SizedBox(height: 8),
                       OutlinedButton(
                         onPressed: isChecked
-                            ? () {
+                            ? () async {
                                 _questionWebSocketService?.disconnect();
                                 if (serverAllowedExit) {
                                   Navigator.of(currentContext!).push(
@@ -483,9 +459,14 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   }
 
   void closeDialogWaitingPlayer() {
-    if (isDialogOpen && Navigator.canPop(currentContext!)) {
-      Navigator.of(currentContext!).pop();
-      isDialogOpen = false;
+    if (isDialogOpen && currentContext != null) {
+      try {
+        Navigator.of(currentContext!).pop();
+        isDialogOpen = false;
+      } catch (e) {
+        print("Erro ao fechar diálogo: $e");
+        isDialogOpen = false;
+      }
     }
   }
 
@@ -493,7 +474,6 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
       {dynamic gameResultFromBackend}) async {
     gameFinished = true;
     cancelarTimers();
-    closeDialogWaitingPlayer();
     if (gameResultFromBackend == null) {
       var resultEndGame = await _matchService.endGameAsync(matchInfo!.id);
       if (resultEndGame["isSuccess"]) {
@@ -516,7 +496,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   }
 
   void showDialogErrorAndExit(String title, String message,
-      {bool showBackButton = false}) {
+      {bool showBackButton = false, Function? setState}) {
     showDialog(
       context: currentContext!,
       barrierDismissible: false,
@@ -582,7 +562,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
                       onPressed: () async {
                         Navigator.of(currentContext!).pop();
                         safetyTimeout?.cancel();
-                        await _tryReconnectWithFeedback();
+                        await _tryReconnectWithFeedback(setState!);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
@@ -663,7 +643,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
     );
   }
 
-  Future<void> _tryReconnectWithFeedback() async {
+  Future<void> _tryReconnectWithFeedback(Function setState) async {
     showDialog(
       context: currentContext!,
       barrierDismissible: false,
@@ -677,20 +657,20 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
       var result = await _questionWebSocketService?.tryReconnect();
       if (result!) {
         reconnectSuccess = true;
+        Navigator.of(currentContext!).pop();
+        setState(() {
+          serverAllowedExit = true;
+        });
         await _matchService.activatePlayerInMatchAsync(matchInfo!.id, userId!);
       }
     } catch (e) {
       print("Erro ao reconectar: $e");
     }
 
-    Navigator.of(currentContext!).pop();
-
     if (!reconnectSuccess) {
-      showDialogErrorAndExit(
-        "Falha na reconexão",
-        "Não foi possível reconectar à partida. Tente novamente mais tarde.",
-        showBackButton: true,
-      );
+      showDialogErrorAndExit("Falha na reconexão",
+          "Não foi possível reconectar à partida. Tente novamente mais tarde.",
+          showBackButton: true, setState: setState);
     }
   }
 

@@ -134,6 +134,7 @@ class JogadorResultado {
   final double timeRate;
   final double hitRateWeight;
   final double timeRateWeight;
+  final double taxAmount;
 
   JogadorResultado({
     required this.id,
@@ -146,6 +147,7 @@ class JogadorResultado {
     required this.posicao,
     required this.isWinner,
     required this.accuracyRate,
+    required this.taxAmount,
     required this.timeRate,
     required this.hitRateWeight,
     required this.timeRateWeight,

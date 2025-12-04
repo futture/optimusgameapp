@@ -34,10 +34,27 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  // Cores do tema premium alinhadas com sua app
+  final Color _primaryColor = Color(0xFFEC8D0D);
+  final Color _backgroundColor = Color(0xFFF8FAFC);
+  final Color _surfaceColor = Colors.white;
+  final Color _onSurfaceColor = Color(0xFF1E293B);
+  final Color _outlineColor = Color(0xFFE2E8F0);
+  final Color _successColor = Color(0xFF10B981);
+  final Color _errorColor = Color(0xFFEF4444);
+
+  // Gradientes premium
+  final LinearGradient _primaryGradient = LinearGradient(
+    colors: [Color(0xFFEC8D0D), Color(0xFFF59E0B)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => Tela08CarteiraModel());
+    
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if ((_model.textController1.text.isEmpty ||
               _model.textController1.text == '') ||
@@ -68,11 +85,13 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
     getUserInfoAndAccountInfoAsync(setState, context).then((_) {
       loadDepositHistory();
     });
+    
     _model.tabBarController = TabController(
       vsync: this,
       length: 2,
       initialIndex: 0,
     )..addListener(() => safeSetState(() {}));
+    
     _model.textController1 ??= TextEditingController();
     _model.textFieldFocusNode1 ??= FocusNode();
 
@@ -83,370 +102,791 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Builder(
-      builder: (context) => GestureDetector(
-        onTap: () {
-          FocusScope.of(context).unfocus();
-          FocusManager.instance.primaryFocus?.unfocus();
-        },
-        child: Scaffold(
-          key: scaffoldKey,
-          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-          appBar: AppBar(
-            backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-            automaticallyImplyLeading: false,
-            leading: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(18.0, 0.0, 0.0, 0.0),
-              child: FlutterFlowIconButton(
-                borderRadius: 8.0,
-                buttonSize: 45.0,
-                fillColor: FlutterFlowTheme.of(context).primaryBackground,
-                icon: Icon(
-                  Icons.arrow_back,
-                  color: FlutterFlowTheme.of(context).primaryText,
-                  size: 24.0,
-                ),
-                onPressed: () async {
-                  context.safePop();
-                },
-              ),
-            ),
-            title: Text(
-              'CARTEIRA',
-              style: FlutterFlowTheme.of(context).headlineSmall.override(
-                    fontFamily: 'Inter Tight',
-                    color: Color(0xFFEC8D0D),
-                    letterSpacing: 0.0,
-                  ),
-            ),
-            actions: [],
-            centerTitle: true,
-            elevation: 4.0,
-          ),
-          body: SafeArea(
-            top: true,
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Padding(
-                  padding:
-                      EdgeInsetsDirectional.fromSTEB(25.0, 25.0, 25.0, 10.0),
-                  child: Container(
-                    width: double.infinity,
-                    height: 80.0,
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).secondaryBackground,
-                      borderRadius: BorderRadius.circular(8.0),
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
+      child: Scaffold(
+        key: scaffoldKey,
+        backgroundColor: _backgroundColor,
+        body: SafeArea(
+          top: true,
+          child: Column(
+            children: [
+              // Header Premium
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: _primaryGradient,
+                  boxShadow: [
+                    BoxShadow(
+                      color: _primaryColor.withOpacity(0.3),
+                      blurRadius: 15,
+                      offset: Offset(0, 4),
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              15.0, 5.0, 15.0, 0.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Carteira Nº',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      fontFamily: 'Inter',
-                                      fontSize: 16.0,
-                                      letterSpacing: 0.0,
-                                    ),
-                              ),
-                              Text(
-                                userAccountInfo?.accountNumber.toString() ?? 'Não Informado',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      fontFamily: 'Inter',
-                                      fontSize: 16.0,
-                                      letterSpacing: 0.0,
-                                    ),
-                              ),
-                            ].divide(SizedBox(width: 10.0)),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              15.0, 0.0, 15.0, 10.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Saldo',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      fontFamily: 'Inter',
-                                      fontSize: 16.0,
-                                      letterSpacing: 0.0,
-                                    ),
-                              ),
-                              Text(
-                                (userAccountInfo?.availableBalance ?? 0.00).toStringAsFixed(2),
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      fontFamily: 'Inter',
-                                      fontSize: 16.0,
-                                      letterSpacing: 0.0,
-                                    ),
-                              ),
-                            ].divide(SizedBox(width: 10.0)),
-                          ),
-                        ),
-                      ]
-                          .divide(SizedBox(height: 10.0))
-                          .addToStart(SizedBox(height: 10.0))
-                          .addToEnd(SizedBox(height: 10.0)),
-                    ),
-                  ),
+                  ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 14.0, horizontal: 8.0),
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).primaryBackground,
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(12)),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 16 : 24,
+                    vertical: isMobile ? 12 : 16,
                   ),
                   child: Row(
-                    children: const [
+                    children: [
+                      // Botão Voltar Premium
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: IconButton(
+                          onPressed: () async {
+                            context.safePop();
+                          },
+                          icon: Icon(
+                            Icons.arrow_back_ios_rounded,
+                            color: Colors.white,
+                            size: isMobile ? 18 : 20,
+                          ),
+                          splashRadius: 20,
+                          padding: EdgeInsets.all(isMobile ? 8 : 12),
+                        ),
+                      ),
+                      SizedBox(width: isMobile ? 12 : 16),
                       Expanded(
-                        flex: 2,
                         child: Text(
-                          'Operação',
+                          'CARTEIRA',
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
+                            color: Colors.white,
+                            fontSize: isMobile ? 18 : 20,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
                           ),
                         ),
                       ),
-                      Expanded(
-                        flex: 1,
-                        child: Text(
-                          'Montante',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
+                      // Ícone de carteira
+                      Container(
+                        width: isMobile ? 40 : 44,
+                        height: isMobile ? 40 : 44,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          shape: BoxShape.circle,
                         ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          'Data e Hora',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Text(
-                          'Status',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
+                        child: Icon(
+                          Icons.account_balance_wallet_rounded,
+                          color: Colors.white,
+                          size: isMobile ? 20 : 22,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Divider(height: 1, thickness: 1),
-                Expanded(
-                  child: Align(
-                    alignment: AlignmentDirectional(0.0, -1.0),
-                    child: Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(25.0, 0.0, 25.0, 0.0),
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: depositHistory.isEmpty
-                                ? Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(24.0),
-                                      child: Text(
-                                        'Nenhum Histórico encontrado.',
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              fontFamily: 'Inter',
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.grey,
-                                            ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  )
-                                : ListView.separated(
-                                    itemCount: depositHistory.length,
-                                    separatorBuilder: (context, index) =>
-                                        const Divider(height: 1, thickness: 1),
-                                    itemBuilder: (context, index) {
-                                      final item = depositHistory[index];
-                                      final isRealizado =
-                                          item['status'] == 'Realizado';
+              ),
 
-                                      return Container(
-                                        color: index % 2 == 0
-                                            ? FlutterFlowTheme.of(context)
-                                                .primaryBackground
-                                            : FlutterFlowTheme.of(context)
-                                                .secondaryBackground,
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 16.0, horizontal: 8.0),
-                                        child: Row(
-                                          children: [
-                                            Expanded(
-                                              flex: 2,
-                                              child: Text(
-                                                item['operacao'],
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium,
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 1,
-                                              child: Text(
-                                                item['montante'],
-                                                textAlign: TextAlign.center,
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium,
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 2,
-                                              child: Text(
-                                                item['dataHora'],
-                                                textAlign: TextAlign.center,
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium,
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 1,
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 4.0,
-                                                        horizontal: 6.0),
-                                                decoration: BoxDecoration(
-                                                  color: isRealizado
-                                                      ? Colors.green.shade100
-                                                      : Colors.red.shade100,
-                                                  borderRadius:
-                                                      BorderRadius.circular(6),
-                                                ),
-                                                child: Text(
-                                                  item['status'],
-                                                  textAlign: TextAlign.center,
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium
-                                                      .override(
-                                                        fontFamily: 'Inter',
-                                                        color: isRealizado
-                                                            ? Colors
-                                                                .green.shade800
-                                                            : Colors
-                                                                .red.shade800,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  ),
+              // Card de Saldo Premium
+              Padding(
+                padding: EdgeInsets.all(isMobile ? 16 : 20),
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(isMobile ? 20 : 24),
+                  decoration: BoxDecoration(
+                    gradient: _primaryGradient,
+                    borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _primaryColor.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: isMobile ? 40 : 44,
+                            height: isMobile ? 40 : 44,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.account_balance_wallet_rounded,
+                              color: Colors.white,
+                              size: isMobile ? 20 : 22,
+                            ),
                           ),
-                          Align(
-                            alignment: Alignment(0.0, 0),
-                            child: FlutterFlowButtonTabBar(
-                              useToggleButtonStyle: true,
-                              labelStyle: FlutterFlowTheme.of(context)
-                                  .titleMedium
-                                  .override(
-                                    fontFamily: 'Inter Tight',
-                                    fontSize: 12.0,
-                                    letterSpacing: 0.0,
-                                  ),
-                              unselectedLabelStyle: FlutterFlowTheme.of(context)
-                                  .titleMedium
-                                  .override(
-                                    fontFamily: 'Inter Tight',
-                                    fontSize: 14.0,
-                                    letterSpacing: 0.0,
-                                  ),
-                              labelColor: Colors.black,
-                              unselectedLabelColor:
-                                  FlutterFlowTheme.of(context).secondaryText,
-                              backgroundColor: Color(0xFFEC8D0D),
-                              unselectedBackgroundColor:
-                                  FlutterFlowTheme.of(context).alternate,
-                              unselectedBorderColor:
-                                  FlutterFlowTheme.of(context).alternate,
-                              borderWidth: 2.0,
-                              borderRadius: 8.0,
-                              elevation: 0.0,
-                              labelPadding: EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 0.0, 10.0, 0.0),
-                              buttonMargin: EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 0.0, 8.0, 0.0),
-                              tabs: [
-                                Tab(
-                                  text: 'Histórico',
-                                ),
-                                Tab(
-                                  text: 'Transferir Saldo',
-                                ),
-                              ],
-                              controller: _model.tabBarController,
-                              onTap: (i) async {
-                                [() async {}, () async {}][i]();
-                              },
+                          SizedBox(width: isMobile ? 12 : 16),
+                          Expanded(
+                            child: Text(
+                              'Sua Carteira Digital',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: isMobile ? 15 : 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    ),
+                      SizedBox(height: isMobile ? 16 : 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Carteira Nº',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.8),
+                                  fontSize: isMobile ? 13 : 14,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                userAccountInfo?.accountNumber.toString() ?? 'Não Informado',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: isMobile ? 15 : 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                'Saldo Disponível',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.8),
+                                  fontSize: isMobile ? 13 : 14,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                '${(userAccountInfo?.availableBalance ?? 0.00).toStringAsFixed(2)} Kz',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: isMobile ? 18 : 20,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+
+              // TabBar Premium
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: _surfaceColor,
+                    borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 15,
+                        offset: Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: FlutterFlowButtonTabBar(
+                    useToggleButtonStyle: true,
+                    labelStyle: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: isMobile ? 12 : 14,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.0,
+                    ),
+                    unselectedLabelStyle: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: isMobile ? 12 : 14,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.0,
+                    ),
+                    labelColor: Colors.white,
+                    unselectedLabelColor: _onSurfaceColor.withOpacity(0.6),
+                    backgroundColor: _primaryColor,
+                    unselectedBackgroundColor: _surfaceColor,
+                    borderColor: _primaryColor,
+                    unselectedBorderColor: _outlineColor,
+                    borderWidth: 2.0,
+                    borderRadius: isMobile ? 10 : 12,
+                    elevation: 0.0,
+                    labelPadding: EdgeInsets.symmetric(
+                      horizontal: isMobile ? 16 : 20,
+                      vertical: isMobile ? 10 : 12,
+                    ),
+                    buttonMargin: EdgeInsets.all(4.0),
+                    tabs: [
+                      Tab(
+                        text: 'Histórico',
+                      ),
+                      Tab(
+                        text: 'Transferir Saldo',
+                      ),
+                    ],
+                    controller: _model.tabBarController,
+                    onTap: (i) async {
+                      [() async {}, () async {}][i]();
+                    },
+                  ),
+                ),
+              ),
+
+              SizedBox(height: isMobile ? 12 : 16),
+
+              // Conteúdo das Tabs
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 20),
+                  child: TabBarView(
+                    controller: _model.tabBarController,
+                    children: [
+                      // Tab 1: Histórico
+                      _buildHistoricoTab(isMobile),
+                      // Tab 2: Transferir Saldo
+                      _buildTransferirTab(isMobile),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Future<void> getUserAccountInfo(
-      void Function(VoidCallback fn) setState) async {
+  Widget _buildHistoricoTab(bool isMobile) {
+    if (isMobile) {
+      return _buildMobileHistorico();
+    } else {
+      return _buildDesktopHistorico();
+    }
+  }
+
+  Widget _buildMobileHistorico() {
+    return Container(
+      decoration: BoxDecoration(
+        color: _surfaceColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: depositHistory.isEmpty
+          ? Center(
+              child: Container(
+                padding: EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: _outlineColor.withOpacity(0.3),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.history_rounded,
+                        color: _onSurfaceColor.withOpacity(0.4),
+                        size: 24,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'Nenhum Histórico',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: _onSurfaceColor.withOpacity(0.6),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Suas transações aparecerão aqui',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 14,
+                        color: _onSurfaceColor.withOpacity(0.4),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : ListView.separated(
+              itemCount: depositHistory.length,
+              separatorBuilder: (context, index) => Divider(
+                height: 1,
+                thickness: 1,
+                color: _outlineColor,
+              ),
+              itemBuilder: (context, index) {
+                final item = depositHistory[index];
+                final isRealizado = item['status'] == 'Realizado';
+                final isDeposito = item['operacao'] == 'Depósito';
+
+                return Container(
+                  color: index % 2 == 0 ? _surfaceColor : _backgroundColor,
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Linha 1: Operação e Status
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: isDeposito
+                                      ? _successColor.withOpacity(0.1)
+                                      : _primaryColor.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  isDeposito
+                                      ? Icons.arrow_downward_rounded
+                                      : Icons.arrow_upward_rounded,
+                                  color: isDeposito ? _successColor : _primaryColor,
+                                  size: 16,
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                item['operacao'],
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  color: _onSurfaceColor,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 4, horizontal: 8),
+                            decoration: BoxDecoration(
+                              color: isRealizado
+                                  ? _successColor.withOpacity(0.1)
+                                  : _errorColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: isRealizado
+                                    ? _successColor.withOpacity(0.3)
+                                    : _errorColor.withOpacity(0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              item['status'],
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                color: isRealizado ? _successColor : _errorColor,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12),
+                      // Linha 2: Montante e Data
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Montante',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  color: _onSurfaceColor.withOpacity(0.6),
+                                  fontSize: 12,
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                item['montante'],
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  color: _onSurfaceColor,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                'Data',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  color: _onSurfaceColor.withOpacity(0.6),
+                                  fontSize: 12,
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                item['dataHora'],
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  color: _onSurfaceColor.withOpacity(0.8),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+    );
+  }
+
+  Widget _buildDesktopHistorico() {
+    return Container(
+      decoration: BoxDecoration(
+        color: _surfaceColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Cabeçalho da Tabela
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: _surfaceColor,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    'Operação',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w600,
+                      color: _onSurfaceColor,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    'Montante',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w600,
+                      color: _onSurfaceColor,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    'Data e Hora',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w600,
+                      color: _onSurfaceColor,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    'Status',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w600,
+                      color: _onSurfaceColor,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(height: 1, thickness: 1, color: _outlineColor),
+
+          // Lista de Histórico
+          Expanded(
+            child: depositHistory.isEmpty
+                ? Center(
+                    child: Container(
+                      padding: EdgeInsets.all(32),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: _outlineColor.withOpacity(0.3),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.history_rounded,
+                              color: _onSurfaceColor.withOpacity(0.4),
+                              size: 32,
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'Nenhum Histórico Encontrado',
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: _onSurfaceColor.withOpacity(0.6),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Suas transações aparecerão aqui',
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 14,
+                              color: _onSurfaceColor.withOpacity(0.4),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : ListView.separated(
+                    itemCount: depositHistory.length,
+                    separatorBuilder: (context, index) => Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: _outlineColor,
+                    ),
+                    itemBuilder: (context, index) {
+                      final item = depositHistory[index];
+                      final isRealizado = item['status'] == 'Realizado';
+
+                      return Container(
+                        color: index % 2 == 0 ? _surfaceColor : _backgroundColor,
+                        padding: EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      color: _primaryColor.withOpacity(0.1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      item['operacao'] == 'Depósito' 
+                                          ? Icons.arrow_downward_rounded 
+                                          : Icons.arrow_upward_rounded,
+                                      color: _primaryColor,
+                                      size: 16,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      item['operacao'],
+                                      style: TextStyle(
+                                        fontFamily: 'Inter',
+                                        color: _onSurfaceColor,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: Text(
+                                item['montante'],
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  color: _onSurfaceColor,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                item['dataHora'],
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  color: _onSurfaceColor.withOpacity(0.8),
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 6.0, horizontal: 8.0),
+                                decoration: BoxDecoration(
+                                  color: isRealizado
+                                      ? _successColor.withOpacity(0.1)
+                                      : _errorColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: isRealizado
+                                        ? _successColor.withOpacity(0.3)
+                                        : _errorColor.withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  item['status'],
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    color: isRealizado ? _successColor : _errorColor,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTransferirTab(bool isMobile) {
+    return Container(
+      decoration: BoxDecoration(
+        color: _surfaceColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.all(isMobile ? 20 : 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: isMobile ? 80 : 120,
+                height: isMobile ? 80 : 120,
+                decoration: BoxDecoration(
+                  color: _outlineColor.withOpacity(0.3),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.swap_horiz_rounded,
+                  color: _onSurfaceColor.withOpacity(0.4),
+                  size: isMobile ? 32 : 48,
+                ),
+              ),
+              SizedBox(height: isMobile ? 16 : 24),
+              Text(
+                'Funcionalidade de Transferência',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: isMobile ? 16 : 18,
+                  fontWeight: FontWeight.w600,
+                  color: _onSurfaceColor,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: isMobile ? 8 : 12),
+              Text(
+                'Em breve você poderá transferir seu saldo para outras contas',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: isMobile ? 13 : 14,
+                  color: _onSurfaceColor.withOpacity(0.6),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // MÉTODOS ORIGINAIS PRESERVADOS - 100% FUNCIONAIS
+  Future<void> getUserAccountInfo(void Function(VoidCallback fn) setState) async {
     var result = await accountService.getAccountByUserIdAsync(user!.id);
     if (result["isSuccess"]) {
       setState(() {
@@ -493,7 +933,6 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
       if (accountId != null) {
         final transactionsResult =
             await accountService.listDepositTransactionsAsync(accountId);
-        print(" Ai vou comer chobeee we $transactionsResult");
 
         if (transactionsResult['isSuccess']) {
           final List<TransactionResponse> transactions =

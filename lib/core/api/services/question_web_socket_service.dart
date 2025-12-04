@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:projeto_game_quiz/core/api/common/web_socket_api.dart';
+import 'package:projeto_game_quiz/core/api/utils/web_socket_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/question_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
@@ -90,6 +91,7 @@ class QuestionWebSocketService {
         await Future.delayed(delay);
         connect();
         if (_isConnected) {
+          await WebSocketUtil.setConnected(matchInfo.id);
           print('Reconectado com sucesso na tentativa ${i + 1}');
           return _isConnected;
         }

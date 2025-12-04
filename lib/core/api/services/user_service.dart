@@ -91,7 +91,7 @@ class UserService {
         successParser: (json) => UserResponse.FromJson(json),
       );
 
-      UserUtil.saveUserInfoData(successResult);
+      await UserUtil.saveUserInfoData(successResult);
 
       return {"isSuccess": true, "data": successResult};
     } catch (e) {
@@ -212,6 +212,7 @@ class UserService {
       );
       await TokenUtil.removeToken();
 
+      print(result);
       await TokenUtil.saveToken(result['access_token'], result['expires_in']);
 
       await getUserInfoAsync();
@@ -229,13 +230,12 @@ class UserService {
   }
 
   Future<Map<String, dynamic>> logoutAsync(String userId) async {
-    try {
+    try { 
       final result = await httpService.request(
         '/users/${userId}/logout',
         method: 'PATCH',
         body: {},
-      );
-
+      ); 
       await TokenUtil.removeToken();
 
       return {"isSuccess": true, "data": result};
