@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,7 +25,6 @@ class PaymentForm extends StatefulWidget {
 }
 
 class _PaymentFormState extends State<PaymentForm> {
-  final _refController = TextEditingController();
   final _phoneController = TextEditingController();
   final _amountController = TextEditingController();
   final _accountController = TextEditingController();
@@ -34,44 +34,54 @@ class _PaymentFormState extends State<PaymentForm> {
   final _formKey = GlobalKey<FormState>();
 
   bool _isLoading = false;
-  String? _entityName;
+  String _mensagemStatus = '';
+  bool _mostrarMensagem = false;
+  Color _corMensagem = Colors.transparent;
+  Timer? _timerMensagem;
+  final FocusNode _phoneFocusNode = FocusNode();
+  final FocusNode _amountFocusNode = FocusNode();
+  final FocusNode _accountFocusNode = FocusNode();
+
+  // Cores EXATAMENTE iguais ao MulticaixaDialog
+  final Color _primaryColor = Color(0xFFEC8D0D);
+  final Color _backgroundColor = Color(0xFFF8FAFC);
+  final Color _cardColor = Colors.white;
+  final Color _textPrimary = Color(0xFF1E293B);
+  final Color _textSecondary = Color(0xFF64748B);
+  final Color _borderColor = Color(0xFFE2E8F0);
+  final Color _successColor = Color(0xFF10B981);
+  final Color _errorColor = Color(0xFFEF4444);
 
   @override
   void initState() {
     super.initState();
-    _refController.addListener(_onRefChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
     getUserInfoAndAccountInfoAsync(setState, context);
   }
 
   @override
   void dispose() {
-    _refController.removeListener(_onRefChanged);
-    _refController.dispose();
     _phoneController.dispose();
     _amountController.dispose();
     _accountController.dispose();
+    _phoneFocusNode.dispose();
+    _amountFocusNode.dispose();
+    _accountFocusNode.dispose();
+    _timerMensagem?.cancel();
     super.dispose();
   }
 
-  void _onRefChanged() async {
-    final ref = _refController.text;
-
-    if (ref.isEmpty) {
-      setState(() => _entityName = null);
-      return;
-    }
-
-    await Future.delayed(const Duration(milliseconds: 300));
-
-    final mockEntities = {
-      '101': 'Ministério da Saúde',
-      '102': 'Administração Geral Tributária',
-      '103': 'Universidade Agostinho Neto',
-    };
+  void _mostrarMensagemTemporaria(String mensagem, Color cor) {
+    _timerMensagem?.cancel();
 
     setState(() {
-      _entityName = mockEntities[ref] ?? 'Entidade não encontrada';
+      _mensagemStatus = mensagem;
+      _corMensagem = cor;
+      _mostrarMensagem = true;
+    });
+
+    _timerMensagem = Timer(Duration(seconds: 3), () {
+      if (mounted) setState(() => _mostrarMensagem = false);
     });
   }
 
@@ -80,82 +90,35 @@ class _PaymentFormState extends State<PaymentForm> {
 
     setState(() => _isLoading = true);
 
-    final Map<String, dynamic> paymentData = {
-      'paymentMethod': widget.method,
-      if (_refController.text.isNotEmpty) 'Entidade': _refController.text,
-      if (_phoneController.text.isNotEmpty) 'phone': _phoneController.text,
-      if (_amountController.text.isNotEmpty) 'amount': _amountController.text,
-      if (_accountController.text.isNotEmpty)
-        'account': _accountController.text,
-      if (userAccountInfo?.id != null) 'id': userAccountInfo!.id,
-    };
-
-    final accountService = AccountService();
-
     try {
-      final String rawAmount = paymentData['amount']?.toString() ?? '0';
-      final double amount = double.tryParse(rawAmount) ?? 0.0;
-      final String accountId = paymentData['id'] ?? '';
+      final rawAmount = _amountController.text;
+      final amount = double.tryParse(rawAmount.replaceAll(',', '.')) ?? 0.0;
+
+      if (userAccountInfo?.id == null) {
+        throw Exception('Informações da conta não disponíveis');
+      }
 
       final transaction = TransactionRequest(
         type: 'credit',
         amount: amount,
-        account_id: accountId,
+        account_id: userAccountInfo!.id,
         transactionMethod: widget.method,
       );
 
       final response = await accountService.createTransactionAsync(transaction);
 
       if (response['isSuccess']) {
+        _mostrarMensagemTemporaria('Depósito realizado!', _successColor);
+        await Future.delayed(Duration(seconds: 1));
         if (mounted) {
-          await showDialog(
-            context: context,
-            builder: (_) => Dialog(
-              backgroundColor: Colors.transparent,
-              insetPadding: const EdgeInsets.all(20),
-              child: SuccessDialogWidget(
-                message: 'Depósito realizado com sucesso!',
-                onOk: () {
-                  context.pushNamed(Tela03PrincipalWidget.routeName);
-                },
-              ),
-            ),
-          );
+          context.pushNamed(Tela03PrincipalWidget.routeName);
         }
       } else {
         final error = response['message'] ?? 'Erro ao criar transação.';
-        if (mounted) {
-          await showDialog(
-            context: context,
-            builder: (_) => Dialog(
-              backgroundColor: Colors.transparent,
-              insetPadding: const EdgeInsets.all(20),
-              child: ErrorDialogWidget(
-                message: error,
-                onOk: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ),
-          );
-        }
+        _mostrarMensagemTemporaria(error, _errorColor);
       }
     } catch (e) {
-      if (mounted) {
-        await showDialog(
-          context: context,
-          builder: (_) => Dialog(
-            backgroundColor: Colors.transparent,
-            insetPadding: const EdgeInsets.all(20),
-            child: ErrorDialogWidget(
-              message: 'Ocorreu um erro inesperado.',
-              onOk: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ),
-        );
-      }
+      _mostrarMensagemTemporaria('Erro inesperado', _errorColor);
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -170,7 +133,7 @@ class _PaymentFormState extends State<PaymentForm> {
 
   String? _validatePhone(String? value) {
     if (value == null || value.isEmpty) return 'Campo obrigatório';
-    if (!RegExp(r'^\d+$').hasMatch(value)) {
+    if (!RegExp(r'^\d+$').hasMatch(value.replaceAll(RegExp(r'[^\d]'), ''))) {
       return 'Apenas números são permitidos';
     }
     return null;
@@ -179,118 +142,92 @@ class _PaymentFormState extends State<PaymentForm> {
   String? _validateAmount(String? value) {
     if (value == null || value.isEmpty) return 'Campo obrigatório';
     if (!RegExp(r'^\d+([.,]\d{1,2})?$').hasMatch(value)) {
-      return 'Insira um valor decimal válido';
+      return 'Valor decimal inválido';
     }
+    final valor = double.tryParse(value.replaceAll(',', '.'));
+    if (valor == null || valor <= 0) return 'Valor deve ser positivo';
+    if (valor < 500) return 'Mínimo 500 Kz';
     return null;
   }
 
-  Widget _buildTextField({
+  Widget _buildCompactField({
     required String label,
     required TextEditingController controller,
+    required FocusNode focusNode,
     TextInputType keyboardType = TextInputType.text,
     List<TextInputFormatter>? inputFormatters,
-    String? Function(String?)? customValidator,
+    String? Function(String?)? validator,
     String? hintText,
+    Widget? prefixIcon,
+    String? prefixText,
   }) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.only(bottom: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(
-              color: Color(0xFF2D3748),
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+          Padding(
+            padding: const EdgeInsets.only(left: 2, bottom: 4),
+            child: Text(
+              label,
+              style: TextStyle(
+                color: _textPrimary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
-          const SizedBox(height: 6),
           TextFormField(
             controller: controller,
+            focusNode: focusNode,
             enabled: !_isLoading,
             keyboardType: keyboardType,
             inputFormatters: inputFormatters,
-            validator: customValidator ?? _validateRequired,
-            style: const TextStyle(
-              color: Colors.black87,
-              fontSize: 16,
+            validator: validator,
+            style: TextStyle(
+              fontSize: 14,
               fontWeight: FontWeight.w500,
+              color: _textPrimary,
             ),
             decoration: InputDecoration(
               hintText: hintText,
-              hintStyle: const TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
+              hintStyle: TextStyle(
+                color: _textSecondary.withOpacity(0.5),
+                fontSize: 13,
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: _backgroundColor,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: _borderColor),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: _borderColor),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    const BorderSide(color: Color(0xFFEC8D0D), width: 2),
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: _primaryColor),
               ),
               errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Colors.red),
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: _errorColor),
               ),
               contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
+                horizontal: 12,
+                vertical: 10,
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEntityStatus() {
-    if (_entityName == null) return const SizedBox.shrink();
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: _entityName == 'Entidade não encontrada'
-            ? const Color(0xFFFEE2E2)
-            : const Color(0xFFD1FAE5),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: _entityName == 'Entidade não encontrada'
-              ? const Color(0xFFFECACA)
-              : const Color(0xFFA7F3D0),
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            _entityName == 'Entidade não encontrada'
-                ? Icons.error_outline
-                : Icons.check_circle_outline,
-            color: _entityName == 'Entidade não encontrada'
-                ? const Color(0xFFDC2626)
-                : const Color(0xFF059669),
-            size: 20,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              _entityName!,
-              style: TextStyle(
+              prefixIcon: prefixIcon,
+              prefixText: prefixText,
+              prefixStyle: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: _entityName == 'Entidade não encontrada'
-                    ? const Color(0xFFDC2626)
-                    : const Color(0xFF059669),
+                color: _textPrimary,
+              ),
+              errorStyle: TextStyle(
+                fontSize: 11,
+                color: _errorColor,
+                height: 0.8,
               ),
             ),
           ),
@@ -303,104 +240,115 @@ class _PaymentFormState extends State<PaymentForm> {
     switch (widget.method) {
       case 'Express':
         return [
-          _buildTextField(
-            label: 'Número de Telefone',
+          _buildCompactField(
+            label: 'Telefone',
             controller: _phoneController,
+            focusNode: _phoneFocusNode,
             keyboardType: TextInputType.phone,
-            inputFormatters: [
-              MaskedInputFormatter('### ### ###'),
-            ],
-            customValidator: (value) {
+            inputFormatters: [MaskedInputFormatter('### ### ###')],
+            validator: (value) {
               final clean = toNumericString(value ?? '');
-
               if (clean.length != 9 || !clean.startsWith('9')) {
-                return 'Número inválido. Deve começar com 9 e ter 9 dígitos.';
+                return 'Número inválido (9 dígitos, começa com 9)';
               }
-
               return null;
             },
             hintText: '9XX XXX XXX',
+            prefixIcon: Icon(Icons.phone, size: 18, color: _textSecondary),
           ),
-          _buildTextField(
+          _buildCompactField(
             label: 'Montante',
             controller: _amountController,
+            focusNode: _amountFocusNode,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'^\d+[\.,]?\d{0,2}'))
             ],
-            customValidator: _validateAmount,
+            validator: _validateAmount,
             hintText: '0,00',
+            prefixText: 'Kz ',
+            prefixIcon: Icon(Icons.attach_money, size: 18, color: _textSecondary),
           ),
         ];
       case 'Unitel Money':
       case 'Afrimoney':
         return [
-          _buildTextField(
-            label: 'Número de Telefone',
+          _buildCompactField(
+            label: 'Telefone',
             controller: _phoneController,
+            focusNode: _phoneFocusNode,
             keyboardType: TextInputType.phone,
-            inputFormatters: [
-              MaskedInputFormatter('+244 ### ### ###'),
-            ],
-            customValidator: (value) {
+            inputFormatters: [MaskedInputFormatter('+244 ### ### ###')],
+            validator: (value) {
               final clean = toNumericString(value ?? '');
               if (clean.length != 12 || !clean.startsWith('2449')) {
-                return 'Número inválido. Use o formato +244 9XX XXX XXX';
+                return 'Formato: +244 9XX XXX XXX';
               }
               return null;
             },
             hintText: '+244 9XX XXX XXX',
+            prefixIcon: Icon(Icons.phone, size: 18, color: _textSecondary),
           ),
-          _buildTextField(
+          _buildCompactField(
             label: 'Montante',
             controller: _amountController,
+            focusNode: _amountFocusNode,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'^\d+[\.,]?\d{0,2}'))
             ],
-            customValidator: _validateAmount,
+            validator: _validateAmount,
             hintText: '0,00',
+            prefixText: 'Kz ',
+            prefixIcon: Icon(Icons.attach_money, size: 18, color: _textSecondary),
           ),
         ];
       case 'Pay Pay':
         return [
-          _buildTextField(
+          _buildCompactField(
             label: 'Conta',
             controller: _accountController,
+            focusNode: _accountFocusNode,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            customValidator: _validatePhone,
-            hintText: 'Digite o número da conta',
+            validator: _validatePhone,
+            hintText: 'Número da conta',
+            prefixIcon: Icon(Icons.account_balance_wallet, size: 18, color: _textSecondary),
           ),
-          _buildTextField(
+          _buildCompactField(
             label: 'Montante',
             controller: _amountController,
+            focusNode: _amountFocusNode,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'^\d+[\.,]?\d{0,2}'))
             ],
-            customValidator: _validateAmount,
+            validator: _validateAmount,
             hintText: '0,00',
+            prefixText: 'Kz ',
+            prefixIcon: Icon(Icons.attach_money, size: 18, color: _textSecondary),
           ),
         ];
       default:
         return [
           Container(
-            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: const Color(0xFFFEF3C7),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(8),
               border: Border.all(color: const Color(0xFFF59E0B)),
             ),
             child: Row(
               children: [
-                const Icon(Icons.warning_amber, color: Color(0xFFD97706)),
-                const SizedBox(width: 12),
+                Icon(Icons.warning, size: 16, color: Color(0xFFD97706)),
+                SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    "Método de pagamento não suportado.",
+                    "Método não suportado",
                     style: TextStyle(
-                      color: const Color(0xFF92400E),
+                      fontSize: 12,
+                      color: Color(0xFF92400E),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -414,124 +362,202 @@ class _PaymentFormState extends State<PaymentForm> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 20,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                margin: const EdgeInsets.only(bottom: 24),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFEF6E6),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                      color: const Color(0xFFEC8D0D).withOpacity(0.3)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.payment,
-                      color: const Color(0xFFEC8D0D),
-                      size: 24,
+    return Container(
+      padding: EdgeInsets.all(12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Mensagem de status (igual ao Multicaixa)
+          if (_mostrarMensagem)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              margin: EdgeInsets.only(bottom: 10),
+              decoration: BoxDecoration(
+                color: _corMensagem.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: _corMensagem.withOpacity(0.2)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _corMensagem == _successColor ? Icons.check_circle : Icons.error,
+                    color: _corMensagem,
+                    size: 16,
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _mensagemStatus,
+                      style: TextStyle(
+                        color: _textPrimary,
+                        fontSize: 13,
+                      ),
                     ),
-                    const SizedBox(width: 12),
+                  ),
+                ],
+              ),
+            ),
+
+          // Header (igual ao Multicaixa)
+          Container(
+            margin: EdgeInsets.only(bottom: 12),
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: _backgroundColor,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: _borderColor),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: _primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: _primaryColor.withOpacity(0.2)),
+                  ),
+                  child: Center(
+                    child: Icon(Icons.payment, color: _primaryColor, size: 20),
+                  ),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Método',
+                        style: TextStyle(
+                          color: _textSecondary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        widget.method,
+                        style: TextStyle(
+                          color: _textPrimary,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Formulário
+          Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ..._buildFields(),
+
+                // Informação do valor mínimo (igual ao Multicaixa)
+                Padding(
+                  padding: EdgeInsets.only(bottom: 16),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info, size: 14, color: _primaryColor),
+                      SizedBox(width: 6),
+                      Text(
+                        'Mínimo: 500 Kz',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: _textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Botões (mesmo layout do Multicaixa)
+                Row(
+                  children: [
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Método selecionado',
-                            style: TextStyle(
-                              color: const Color(0xFF2D3748),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
+                      child: SizedBox(
+                        height: 42,
+                        child: OutlinedButton(
+                          onPressed: () {
+                            _phoneController.clear();
+                            _amountController.clear();
+                            _accountController.clear();
+                          },
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(vertical: 0),
+                            side: BorderSide(color: _borderColor),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          Text(
-                            widget.method,
-                            style: const TextStyle(
-                              color: Color(0xFFEC8D0D),
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.refresh, size: 16, color: _textSecondary),
+                              SizedBox(width: 6),
+                              Text('Limpar', style: TextStyle(fontSize: 13, color: _textSecondary)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      flex: 2,
+                      child: SizedBox(
+                        height: 42,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _submitForm,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _primaryColor,
+                            padding: EdgeInsets.symmetric(vertical: 0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                        ],
+                          child: _isLoading
+                              ? SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.send, size: 16),
+                                    SizedBox(width: 6),
+                                    Text(
+                                      'Depositar',
+                                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                    ),
+                                  ],
+                                ),
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-              ..._buildFields(),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFEC8D0D),
-                    foregroundColor: Colors.white,
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    shadowColor: const Color(0xFFEC8D0D).withOpacity(0.3),
-                  ),
-                  onPressed: _isLoading ? null : _submitForm,
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 22,
-                          width: 22,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 3,
-                          ),
-                        )
-                      : const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.send, size: 20),
-                            SizedBox(width: 12),
-                            Text(
-                              'Realizar Depósito',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Future<void> getUserAccountInfo(
-      void Function(VoidCallback fn) setState) async {
+  Future<void> getUserAccountInfo(void Function(VoidCallback fn) setState) async {
     var result = await accountService.getAccountByUserIdAsync(user!.id);
     if (result["isSuccess"]) {
-      setState(() {
-        userAccountInfo = result["data"];
-      });
+      setState(() => userAccountInfo = result["data"]);
     } else {
       Warning00ErrorUtil.showDialogMessageError(
         context,
@@ -549,8 +575,6 @@ class _PaymentFormState extends State<PaymentForm> {
 
   Future<void> getUserInfo(void Function(VoidCallback fn) setState) async {
     var _user = await UserUtil.getUserInfo();
-    setState(() {
-      user = _user!;
-    });
+    setState(() => user = _user);
   }
 }
