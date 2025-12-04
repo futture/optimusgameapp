@@ -1,3 +1,4 @@
+// imports...
 import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warning00_campo_vazio_widget.dart';
 import 'package:projeto_game_quiz/components/warnings/warning04_reducao_de_saldo/warning04_reducao_de_saldo_widget.dart';
 import 'package:projeto_game_quiz/core/api/services/fcm_token_service.dart';
@@ -31,13 +32,10 @@ class Tela03PrincipalWidget extends StatefulWidget {
 
 class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
   late Tela03PrincipalModel _model;
-  final matchService = MatchService(); 
-  Map<String, bool> _isLoadingMatchMap = {};
+  final matchService = MatchService();
+  bool _isLoadingMatchDetails = false;
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final FcmTokenService _fcmTokenService = FcmTokenService();
-  
-  // Flag para controlar se o widget foi descartado
-  bool _isDisposed = false;
 
   // Cores e gradientes do tema premium
   final Color _primaryColor = Color(0xFFEC8D0D);
@@ -61,34 +59,15 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
 
     _model = createModel(context, () => Tela03PrincipalModel());
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => _safeSetState(() {}));
-    
-    // Carrega dados iniciais de forma segura
-    Future.microtask(() {
-      if (!_isDisposed && mounted) {
-        _model.getUserInfoAndAccountInfoAsync(_safeSetState, context);
-        _model.loadMatches(_safeSetState);
-      }
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    _model.getUserInfoAndAccountInfoAsync(setState, context);
+    _model.loadMatches(setState);
   }
 
   @override
   void dispose() {
-    _isDisposed = true;
     _model.dispose();
     super.dispose();
-  }
-
-  // Método seguro para setState
-  void _safeSetState(VoidCallback fn) {
-    if (!_isDisposed && mounted) {
-      setState(fn);
-    }
-  }
-
-  // Método existente mantido para compatibilidade
-  void safeSetState(VoidCallback fn) {
-    _safeSetState(fn);
   }
 
   @override
@@ -232,29 +211,25 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
   }
 
   Future<void> _refreshData() async {
-    if (!_isDisposed && mounted) {
-      await _model.getUserInfoAndAccountInfoAsync(_safeSetState, context);
-      await _model.loadMatches(_safeSetState);
-    }
+    await _model.getUserInfoAndAccountInfoAsync(setState, context);
+    await _model.loadMatches(setState);
   }
 
   void _showMenuModal() async {
-    if (!_isDisposed && mounted) {
-      await showModalBottomSheet(
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        enableDrag: false,
-        context: context,
-        builder: (context) => GestureDetector(
-          onTap: () => FocusScope.of(context).unfocus(),
-          child: Padding(
-            padding: MediaQuery.viewInsetsOf(context),
-            child: const ModaMenuPagianInicialWidget(isMainScreen: true),
-          ),
+    await showModalBottomSheet(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      enableDrag: false,
+      context: context,
+      builder: (context) => GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Padding(
+          padding: MediaQuery.viewInsetsOf(context),
+          child: const ModaMenuPagianInicialWidget(isMainScreen: true),
         ),
-      );
-      _safeSetState(() {});
-    }
+      ),
+    );
+    safeSetState(() {});
   }
 
   Widget _buildUserProfileCard() {
@@ -281,19 +256,15 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
             Row(
               children: [
                 GestureDetector(
-                  onTap: () {
-                    if (!_isDisposed && mounted) {
-                      context.pushNamed(
-                        Tela04PerfilWidget.routeName,
-                        extra: <String, dynamic>{
-                          kTransitionInfoKey: const TransitionInfo(
-                            hasTransition: true,
-                            transitionType: PageTransitionType.rightToLeft,
-                          ),
-                        },
-                      );
-                    }
-                  },
+                  onTap: () => context.pushNamed(
+                    Tela04PerfilWidget.routeName,
+                    extra: <String, dynamic>{
+                      kTransitionInfoKey: const TransitionInfo(
+                        hasTransition: true,
+                        transitionType: PageTransitionType.rightToLeft,
+                      ),
+                    },
+                  ),
                   child: Container(
                     width: 70,
                     height: 70,
@@ -472,38 +443,32 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                   icon: Icons.add_circle_outlined,
                   label: 'DEPOSITAR',
                   color: Color(0xFF00B80E),
-                  onPressed: () {
-                    if (!_isDisposed && mounted) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => Tela10DepositoListaWidget(),
-                        ),
-                      );
-                    }
-                  },
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => Tela10DepositoListaWidget(),
+                    ),
+                  ),
                 ),
                 _buildActionButton(
                   icon: Icons.remove_circle_outlined,
                   label: 'SACAR',
                   color: _primaryColor,
                   onPressed: () async {
-                    if (!_isDisposed && mounted) {
-                      await showModalBottomSheet(
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        enableDrag: false,
-                        useSafeArea: true,
-                        context: context,
-                        builder: (context) => GestureDetector(
-                          onTap: () => FocusScope.of(context).unfocus(),
-                          child: Padding(
-                            padding: MediaQuery.viewInsetsOf(context),
-                            child: const ModalsSaqueWidget(),
-                          ),
+                    await showModalBottomSheet(
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      enableDrag: false,
+                      useSafeArea: true,
+                      context: context,
+                      builder: (context) => GestureDetector(
+                        onTap: () => FocusScope.of(context).unfocus(),
+                        child: Padding(
+                          padding: MediaQuery.viewInsetsOf(context),
+                          child: const ModalsSaqueWidget(),
                         ),
-                      );
-                      _safeSetState(() {});
-                    }
+                      ),
+                    );
+                    safeSetState(() {});
                   },
                 ),
               ],
@@ -664,22 +629,20 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
               color: Colors.transparent,
               child: InkWell(
                 onTap: () async {
-                  if (!_isDisposed && mounted) {
-                    await showModalBottomSheet(
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      enableDrag: false,
-                      context: context,
-                      builder: (context) => GestureDetector(
-                        onTap: () => FocusScope.of(context).unfocus(),
-                        child: Padding(
-                          padding: MediaQuery.viewInsetsOf(context),
-                          child: const ModaListadeSalaWidget(),
-                        ),
+                  await showModalBottomSheet(
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    enableDrag: false,
+                    context: context,
+                    builder: (context) => GestureDetector(
+                      onTap: () => FocusScope.of(context).unfocus(),
+                      child: Padding(
+                        padding: MediaQuery.viewInsetsOf(context),
+                        child: const ModaListadeSalaWidget(),
                       ),
-                    );
-                    _safeSetState(() {});
-                  }
+                    ),
+                  );
+                  safeSetState(() {});
                 },
                 borderRadius: BorderRadius.circular(14),
                 child: Container(
@@ -1063,9 +1026,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
             ),
             child: FFButtonWidget(
               onPressed: () async {
-                if (!_isDisposed && mounted) {
-                  await _model.loadMatches(_safeSetState);
-                }
+                await _model.loadMatches(setState);
               },
               text: 'ATUALIZAR',
               icon: const Icon(Icons.refresh_rounded, size: 18),
@@ -1114,43 +1075,36 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: () async {
-          if (_isLoadingMatchMap[match.id] == true || _isDisposed || !mounted) return;
+          if (_isLoadingMatchDetails) return;
 
-          _safeSetState(() => _isLoadingMatchMap[match.id] = true);
+          setState(() => _isLoadingMatchDetails = true);
 
           try {
-            await _model.getUsersByMatchId(_safeSetState, match.id);
-            
-            if (!_isDisposed && mounted) {
-              CommonDialogWidget.showMatchParticipantsDialog(
-                  context,
-                  List.empty(),
-                  null,
-                  match,
-                  _model.users,
-                  _model.user,
-                  buildMatchButton(
-                    isRegistered: isRegistered,
-                    match: match,
-                    onJoin: (m) => _handleMatchTap(m as MatchResponse),
-                    onLeave: (m) => _leaveMatch(m as MatchResponse),
-                    context: context,
-                  ),
-                  isPlaySound: false,
-                  isProgressBar: false);
-            }
-          } catch (e) {
-            if (!_isDisposed && mounted) {
-              Warning00ErrorUtil.showDialogMessageError(
+            await _model.getUsersByMatchId(setState, match.id);
+            CommonDialogWidget.showMatchParticipantsDialog(
                 context,
-                "Erro ao carregar partida",
-                "Ocorreu um erro ao carregar os detalhes da partida.",
-              );
-            }
+                List.empty(),
+                null,
+                match,
+                _model.users,
+                _model.user,
+                buildMatchButton(
+                  isRegistered: isRegistered,
+                  match: match,
+                  onJoin: (m) => _handleMatchTap(m as MatchResponse),
+                  onLeave: (m) => _leaveMatch(m as MatchResponse),
+                  context: context,
+                ),
+                isPlaySound: false,
+                isProgressBar: false);
+          } catch (e) {
+            Warning00ErrorUtil.showDialogMessageError(
+              context,
+              "Erro ao carregar partida",
+              "Ocorreu um erro ao carregar os detalhes da partida.",
+            );
           } finally {
-            if (!_isDisposed && mounted) {
-              _safeSetState(() => _isLoadingMatchMap[match.id] = false);
-            }
+            setState(() => _isLoadingMatchDetails = false);
           }
         },
         borderRadius: BorderRadius.circular(16),
@@ -1315,7 +1269,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                   ],
                 ),
               ),
-              if (_isLoadingMatchMap[match.id] == true)
+              if (_isLoadingMatchDetails)
                 Positioned.fill(
                   child: Container(
                     decoration: BoxDecoration(
@@ -1367,19 +1321,15 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
   }
 
   Future<void> _handleMatchTap(MatchResponse match) async {
-    if (_isDisposed || !mounted) return;
-
-    await _model.checkPlayerAlreadyRegisteredMatchAsync(_safeSetState, match.id);
+    await _model.checkPlayerAlreadyRegisteredMatchAsync(setState, match.id);
 
     if (!_model.isNotRegisteredMatch) {
-      if (!_isDisposed && mounted) {
-        Navigator.pop(context);
-        Warning00ErrorUtil.showDialogMessageError(
-          context,
-          "Falha ao se increver na partida",
-          "Jogador já inscrito na partida.",
-        );
-      }
+      Navigator.pop(context);
+      Warning00ErrorUtil.showDialogMessageError(
+        context,
+        "Falha ao se increver na partida",
+        "Jogador já inscrito na partida.",
+      );
     } else {
       final result = await showDialog<bool>(
         context: context,
@@ -1396,12 +1346,12 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
         },
       );
 
-      if (result == true && !_isDisposed && mounted) {
+      if (result == true) {
         Navigator.pop(context);
 
-        _safeSetState(() {
-          _model.getUserInfoAndAccountInfoAsync(_safeSetState, context);
-          _model.loadMatches(_safeSetState);
+        setState(() {
+          _model.getUserInfoAndAccountInfoAsync(setState, context);
+          _model.loadMatches(setState);
         });
       }
     }
@@ -1430,40 +1380,29 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
   }
 
   Future<void> _leaveMatch(MatchResponse match) async {
-    if (_isDisposed || !mounted) return;
-    
     try {
-      if (!_isDisposed && mounted) {
-        Navigator.pop(context);
-      }
-      
+      Navigator.pop(context);
       await _model.leaveMatchAsync(match.id);
-      
-      if (!_isDisposed && mounted) {
-        _safeSetState(() {
-          _model.getUserInfoAndAccountInfoAsync(_safeSetState, context);
-          _model.loadMatches(_safeSetState);
-        });
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Você saiu da partida com sucesso'),
-            backgroundColor: Color(0xFF4CAF50),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+      setState(() {
+        _model.getUserInfoAndAccountInfoAsync(setState, context);
+        _model.loadMatches(setState);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Você saiu da partida com sucesso'),
+          backgroundColor: Color(0xFF4CAF50),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-        );
-      }
+        ),
+      );
     } catch (e) {
-      if (!_isDisposed && mounted) {
-        Warning00ErrorUtil.showDialogMessageError(
-          context,
-          "Erro ao sair da partida",
-          "Ocorreu um erro ao tentar sair da partida. Tente novamente.",
-        );
-      }
+      Warning00ErrorUtil.showDialogMessageError(
+        context,
+        "Erro ao sair da partida",
+        "Ocorreu um erro ao tentar sair da partida. Tente novamente.",
+      );
     }
   }
 
@@ -1488,12 +1427,10 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
       ),
       child: FFButtonWidget(
         onPressed: () async {
-          if (!_isDisposed && mounted) {
-            if (isRegistered) {
-              await onLeave(match);
-            } else {
-              await onJoin(match);
-            }
+          if (isRegistered) {
+            await onLeave(match);
+          } else {
+            await onJoin(match);
           }
         },
         text: isRegistered ? 'SAIR DA PARTIDA' : 'INSCREVER-SE AGORA',
