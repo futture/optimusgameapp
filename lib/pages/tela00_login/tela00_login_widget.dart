@@ -77,10 +77,7 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
         parent: _animationController,
         curve: Curves.easeInOutCubic,
       ),
-    );
-
-    // CORREÇÃO AQUI: Usando TweenSequence correto
-    // USE ESTE CÓDIGO SIMPLES NO LUGAR:
+    ); 
     _scaleAnimation = Tween<double>(begin: 0.7, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
