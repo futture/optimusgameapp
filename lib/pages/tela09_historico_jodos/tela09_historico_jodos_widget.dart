@@ -1133,12 +1133,12 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                             shape: BoxShape.circle,
                           ),
                           child: IconButton(
-                            onPressed: () {
-                              setState(() {
+                            onPressed: () async {
+                              setState(()  {
                                 ranking.isExpanded = !(ranking.isExpanded ?? false);
                               });
-                              if (ranking.isExpanded ?? false) {
-                                _model.getHistoryUserdAsync(setState, ranking.matchId);
+                               if (ranking.isExpanded ?? false) {
+                                   await _model.getHistoryUserdAsync(setState, ranking.matchId);
                               }
                             },
                             icon: Icon(
