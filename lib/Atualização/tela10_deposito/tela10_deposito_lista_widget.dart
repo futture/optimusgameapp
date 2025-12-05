@@ -555,7 +555,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                 ),
               ),
             ],
-          ), 
+          ),
           SizedBox(height: isMobile ? 28 : 36),
           _buildFeaturesRow(isMobile),
         ],
@@ -1307,13 +1307,11 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
       },
       {
         'question': 'Existem taxas para depositar?',
-        'answer':
-            'Não cobramos taxas para depósitos.',
+        'answer': 'Não cobramos taxas para depósitos.',
       },
       {
         'question': 'Qual é o valor mínimo para depósito?',
-        'answer':
-            'O valor mínimo é 500,00 Kz',
+        'answer': 'O valor mínimo é 500,00 Kz',
       },
       {
         'question': 'Os meus dados estão seguros?',
@@ -1698,227 +1696,242 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
       builder: (context) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
         insetPadding: EdgeInsets.symmetric(
-          horizontal: MediaQuery.of(context).size.width > 600 ? 140 : 28,
-          vertical: 60,
+          horizontal: MediaQuery.of(context).size.width > 600 ? 140 : 20,
+          vertical: 24, // Reduzido de 60 para 24
         ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: _cardColor,
-            borderRadius: BorderRadius.circular(32),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.25),
-                blurRadius: 50,
-                offset: Offset(0, 25),
-              ),
-            ],
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height *
+                0.85, // Limitar altura máxima
+            minWidth: MediaQuery.of(context).size.width * 0.9,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header com gradiente
-              Container(
-                padding: EdgeInsets.all(28),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      method['color'] as Color,
-                      (method['color'] as Color).withOpacity(0.8),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(32),
-                    topRight: Radius.circular(32),
-                  ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: _cardColor,
+              borderRadius: BorderRadius.circular(32),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.25),
+                  blurRadius: 50,
+                  offset: Offset(0, 25),
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(16),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          onTap: () => Navigator.pop(context),
-                          child: Center(
-                            child: Icon(
-                              Icons.close_rounded,
-                              color: Colors.white,
-                              size: 26,
-                            ),
-                          ),
-                        ),
-                      ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min, // Usar MainAxisSize.min
+              children: [
+                // Header compacto
+                Container(
+                  padding: EdgeInsets.all(20), // Reduzido de 28
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        method['color'] as Color,
+                        (method['color'] as Color).withOpacity(0.8),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    SizedBox(width: 20),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            method['name'],
-                            style: TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                              letterSpacing: -0.8,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 4,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 6),
-                          Text(
-                            method['description'],
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: Colors.white.withOpacity(0.9),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(32),
+                      topRight: Radius.circular(32),
                     ),
-                    _buildPaymentMethodImage(method, 56, false),
-                  ],
-                ),
-              ),
-
-              // Formulário
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: BouncingScrollPhysics(),
-                  padding: EdgeInsets.all(28),
-                  child: PaymentForm(method: method['name']),
-                ),
-              ),
-
-              // Footer
-              Container(
-                padding: EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: _backgroundColor,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(32),
-                    bottomRight: Radius.circular(32),
                   ),
-                  border: Border(
-                    top: BorderSide(color: _borderColor, width: 2),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 60,
+                  child: Row(
+                    children: [
+                      // Botão de fechar mais compacto
+                      Container(
+                        width: 48, // Reduzido de 56
+                        height: 48, // Reduzido de 56
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: _borderColor, width: 2),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: Offset(0, 5),
-                            ),
-                          ],
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.3),
+                            width: 1.5,
+                          ),
                         ),
                         child: Material(
                           color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius: BorderRadius.circular(14),
                           child: InkWell(
-                            borderRadius: BorderRadius.circular(18),
+                            borderRadius: BorderRadius.circular(14),
                             onTap: () => Navigator.pop(context),
                             child: Center(
-                              child: Text(
-                                'CANCELAR',
-                                style: TextStyle(
-                                  color: _textSecondary,
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w800,
+                              child: Icon(
+                                Icons.close_rounded,
+                                color: Colors.white,
+                                size: 22, // Reduzido de 26
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 16), // Reduzido de 20
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              method['name'],
+                              style: TextStyle(
+                                fontSize: 22, // Reduzido de 26
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: -0.6, // Reduzido
+                              ),
+                            ),
+                            SizedBox(height: 4), // Reduzido de 6
+                            Text(
+                              method['description'],
+                              style: TextStyle(
+                                fontSize: 14, // Reduzido de 15
+                                color: Colors.white.withOpacity(0.9),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      _buildPaymentMethodImage(
+                          method, 48, false), // Reduzido de 56
+                    ],
+                  ),
+                ),
+
+                // Formulário com tamanho fixo
+                Flexible(
+                  fit: FlexFit.loose, // Usar Flexible em vez de Expanded
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height *
+                          0.5, // Limitar altura
+                    ),
+                    child: SingleChildScrollView(
+                      physics: BouncingScrollPhysics(),
+                      padding: EdgeInsets.all(20), // Reduzido de 28
+                      child: PaymentForm(method: method['name']),
+                    ),
+                  ),
+                ),
+
+                // Footer compacto
+                Container(
+                  padding: EdgeInsets.all(20), // Reduzido de 24
+                  decoration: BoxDecoration(
+                    color: _backgroundColor,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(32),
+                      bottomRight: Radius.circular(32),
+                    ),
+                    border: Border(
+                      top: BorderSide(
+                          color: _borderColor, width: 1.5), // Reduzido de 2
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 52, // Reduzido de 60
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                                BorderRadius.circular(16), // Reduzido de 18
+                            border: Border.all(
+                                color: _borderColor, width: 1.5), // Reduzido
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 8, // Reduzido de 10
+                                offset: Offset(0, 4), // Reduzido de 5
+                              ),
+                            ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(16),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(16),
+                              onTap: () => Navigator.pop(context),
+                              child: Center(
+                                child: Text(
+                                  'CANCELAR',
+                                  style: TextStyle(
+                                    color: _textSecondary,
+                                    fontSize: 15, // Reduzido de 17
+                                    fontWeight:
+                                        FontWeight.w700, // Reduzido de 800
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: 20),
-                    Expanded(
-                      flex: 2,
-                      child: Container(
-                        height: 60,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              method['color'] as Color,
-                              (method['color'] as Color).withOpacity(0.8),
+                      SizedBox(width: 16), // Reduzido de 20
+                      Expanded(
+                        flex: 2,
+                        child: Container(
+                          height: 52, // Reduzido de 60
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                method['color'] as Color,
+                                (method['color'] as Color).withOpacity(0.8),
+                              ],
+                            ),
+                            borderRadius:
+                                BorderRadius.circular(16), // Reduzido de 18
+                            boxShadow: [
+                              BoxShadow(
+                                color:
+                                    (method['color'] as Color).withOpacity(0.5),
+                                blurRadius: 20, // Reduzido de 25
+                                offset: Offset(0, 8), // Reduzido de 10
+                              ),
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: [
-                            BoxShadow(
-                              color:
-                                  (method['color'] as Color).withOpacity(0.5),
-                              blurRadius: 25,
-                              offset: Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(18),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(18),
-                            onTap: () {
-                              // Lógica de pagamento
-                              Navigator.pop(context);
-                            },
-                            child: Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.lock_rounded,
-                                    color: Colors.white,
-                                    size: 24,
-                                  ),
-                                  SizedBox(width: 12),
-                                  Text(
-                                    'CONFIRMAR',
-                                    style: TextStyle(
+                          child: Material(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(16),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(16),
+                              onTap: () {
+                                // Lógica de pagamento
+                                Navigator.pop(context);
+                              },
+                              child: Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.lock_rounded,
                                       color: Colors.white,
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w900,
+                                      size: 20, // Reduzido de 24
                                     ),
-                                  ),
-                                ],
+                                    SizedBox(width: 8), // Reduzido de 12
+                                    Text(
+                                      'CONFIRMAR',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15, // Reduzido de 17
+                                        fontWeight:
+                                            FontWeight.w800, // Reduzido de 900
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -1958,7 +1971,7 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
   Color _corMensagem = Colors.transparent;
   Timer? _timerMensagem;
 
-  // Cores atualizadas
+  // Cores simplificadas
   final Color _primaryColor = Color(0xFFEC8D0D);
   final Color _backgroundColor = Color(0xFFF8FAFC);
   final Color _cardColor = Colors.white;
@@ -1967,14 +1980,6 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
   final Color _borderColor = Color(0xFFE2E8F0);
   final Color _successColor = Color(0xFF10B981);
   final Color _errorColor = Color(0xFFEF4444);
-  final Color _infoColor = Color(0xFF3B82F6);
-  final Color _warningColor = Color(0xFFF59E0B);
-
-  final LinearGradient _primaryGradient = LinearGradient(
-    colors: [Color(0xFFEC8D0D), Color(0xFFF59E0B)],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
 
   @override
   void initState() {
@@ -2001,8 +2006,7 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
 
   bool _isMontanteValido() {
     if (_montanteController.text.isEmpty) return false;
-    final valor =
-        double.tryParse(_montanteController.text.replaceAll(',', '.'));
+    final valor = double.tryParse(_montanteController.text.replaceAll(',', '.'));
     return valor != null && valor >= 500;
   }
 
@@ -2011,20 +2015,13 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
       return 'Insira o montante';
     }
     final valor = double.tryParse(value.replaceAll(',', '.'));
-    if (valor == null) {
-      return 'Valor inválido. Use números (ex: 1000.50)';
-    }
-    if (valor < 500) {
-      return 'Mínimo 500 Kz';
-    }
-    if (valor > 1000000) {
-      return 'Máximo 1.000.000 Kz';
-    }
+    if (valor == null) return 'Valor inválido';
+    if (valor < 500) return 'Mínimo 500 Kz';
+    if (valor > 1000000) return 'Máximo 1.000.000 Kz';
     return null;
   }
 
-  void _mostrarMensagemTemporaria(String mensagem, Color cor,
-      {bool isSuccess = false}) {
+  void _mostrarMensagemTemporaria(String mensagem, Color cor) {
     _timerMensagem?.cancel();
 
     setState(() {
@@ -2035,9 +2032,7 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
 
     _timerMensagem = Timer(Duration(seconds: 4), () {
       if (mounted) {
-        setState(() {
-          _mostrarMensagem = false;
-        });
+        setState(() => _mostrarMensagem = false);
       }
     });
   }
@@ -2050,101 +2045,64 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
     setState(() {
       _isLoading = true;
       _mostrarMensagem = false;
-      _timerMensagem?.cancel();
     });
 
     try {
       final result = await widget.model.generateReference(
         _montanteController.text,
         () {
-          setState(() {
-            _referenciaGerada = widget.model.reference.isNotEmpty;
-            _isLoading = false;
-          });
+          setState(() => _referenciaGerada = widget.model.reference.isNotEmpty);
         },
         context,
       );
       
       print(result["isSuccess"]);
       if (result != null && result["isSuccess"] == true) {
-        if (!_referenciaGerada) {
-          setState(() {
-            _referenciaGerada = true;
-            _isLoading = false;
-          });
-        }
-
-        _mostrarMensagemTemporaria(
-          '✅ Referência gerada com sucesso! Válida por 24 horas.',
-          _successColor,
-          isSuccess: true,
-        );
-      } else if (result != null && result["isSuccess"] == false) {
         setState(() {
+          _referenciaGerada = true;
           _isLoading = false;
         });
 
+        _mostrarMensagemTemporaria(
+          'Referência gerada com sucesso!',
+          _successColor,
+        );
+      } else if (result != null && result["isSuccess"] == false) {
+        setState(() => _isLoading = false);
+
         final error = result["error"];
-        final message =
-            error?['detail']?['message'] ?? "Falha ao gerar referência";
+        final message = error?['detail']?['message'] ?? "Falha ao gerar referência";
         final details = error?['detail']?['details'] ?? "";
 
         _mostrarMensagemTemporaria(
-          '❌ $message${details.isNotEmpty ? ' — $details' : ''}',
+          '$message${details.isNotEmpty ? ' — $details' : ''}',
           _errorColor,
         );
       }
     } catch (e) {
-      print('Erro inesperado: $e');
-      setState(() {
-        _isLoading = false;
-      });
-
-      _mostrarMensagemTemporaria(
-        '❌ Erro inesperado: ${e.toString()}',
-        _errorColor,
-      );
+      print('Erro: $e');
+      setState(() => _isLoading = false);
+      _mostrarMensagemTemporaria('Erro inesperado', _errorColor);
     }
   }
 
   void _copiarReferencia() {
     if (widget.model.reference.isNotEmpty) {
       Clipboard.setData(ClipboardData(text: widget.model.reference));
-      _mostrarMensagemTemporaria(
-        '📋 Referência copiada para a área de transferência!',
-        _infoColor,
-      );
-    } else {
-      _mostrarMensagemTemporaria(
-        '⚠️ Gere uma referência primeiro',
-        _warningColor,
-      );
+      _mostrarMensagemTemporaria('Referência copiada', _primaryColor);
     }
   }
 
   void _copiarEntidade() {
     Clipboard.setData(ClipboardData(text: '11454'));
-    _mostrarMensagemTemporaria(
-      '📋 Entidade copiada para a área de transferência!',
-      _infoColor,
-    );
+    _mostrarMensagemTemporaria('Entidade copiada', _primaryColor);
   }
 
   void _copiarTudo() {
-    if (widget.model.reference.isNotEmpty &&
-        _montanteController.text.isNotEmpty) {
-      String tudo =
-          'Entidade: 11454\nReferência: ${widget.model.reference}\nValor: Kz ${_montanteController.text}';
+    if (widget.model.reference.isNotEmpty && _montanteController.text.isNotEmpty) {
+      String tudo = 'Entidade: 11454\nReferência: ${widget.model.reference}\nValor: Kz ${_montanteController.text}';
       Clipboard.setData(ClipboardData(text: tudo));
-      _mostrarMensagemTemporaria(
-        '📋 Todos os dados copiados para a área de transferência!',
-        _infoColor,
-      );
-    } else {
-      _mostrarMensagemTemporaria(
-        '⚠️ Preencha todos os campos primeiro',
-        _warningColor,
-      );
+      _mostrarMensagemTemporaria('Todos dados copiados', _primaryColor);
     }
   }
 
@@ -2160,407 +2118,239 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(36),
-      ),
-      insetPadding: EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width > 600 ? 140 : 28,
-        vertical: 40,
-      ),
-      child: Container(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.85,
-        ),
-        decoration: BoxDecoration(
-          color: _cardColor,
-          borderRadius: BorderRadius.circular(36),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 50,
-              offset: Offset(0, 25),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Header com gradiente
-            Container(
-              padding: EdgeInsets.all(28),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xFFEC8D0D),
-                    Color(0xFFF59E0B),
-                    Color(0xFFFBBF24),
-                  ],
-                  stops: [0.0, 0.7, 1.0],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(36),
-                  topRight: Radius.circular(36),
-                ),
-              ),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.close_rounded,
-                          color: Colors.white,
-                          size: 26,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 20),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Multicaixa',
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: -1.0,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 6,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          'Pagamento por referência ATM',
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: Colors.white.withOpacity(0.95),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
-                        width: 2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          blurRadius: 20,
-                          offset: Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: Image.asset(
-                      'assets/images/payment_methods/multicaixa.png',
-                      width: 32,
-                      height: 32,
-                      color: Colors.white,
-                      errorBuilder: (context, error, stackTrace) => Icon(
-                        Icons.atm_rounded,
-                        color: Colors.white,
-                        size: 32,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 400;
 
-            // Mensagem de status
-            if (_mostrarMensagem)
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: isSmallScreen ? 16 : 24,
+        vertical: 16,
+      ),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
+          maxWidth: 500,
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: _cardColor,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header simples
               Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 decoration: BoxDecoration(
-                  color: _corMensagem.withOpacity(0.15),
-                  border: Border(
-                    top: BorderSide(
-                        color: _corMensagem.withOpacity(0.3), width: 2),
-                    bottom: BorderSide(
-                        color: _corMensagem.withOpacity(0.3), width: 2),
+                  color: _primaryColor,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
                   ),
                 ),
                 child: Row(
                   children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: _corMensagem.withOpacity(0.25),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Icon(
-                          _corMensagem == _successColor
-                              ? Icons.check_circle_rounded
-                              : _corMensagem == _errorColor
-                                  ? Icons.error_rounded
-                                  : Icons.info_rounded,
-                          color: _corMensagem,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 14),
-                    Expanded(
-                      child: Text(
-                        _mensagemStatus,
-                        style: TextStyle(
-                          color: _textPrimary,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
                     GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _mostrarMensagem = false;
-                        });
-                        _timerMensagem?.cancel();
-                      },
+                      onTap: () => Navigator.pop(context),
                       child: Container(
-                        width: 36,
-                        height: 36,
+                        width: 40,
+                        height: 40,
                         decoration: BoxDecoration(
-                          color: _textSecondary.withOpacity(0.1),
-                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: Center(
-                          child: Icon(
-                            Icons.close_rounded,
-                            color: _textSecondary,
-                            size: 20,
+                          child: Icon(Icons.close, color: Colors.white, size: 20),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Multicaixa',
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 18 : 20,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'Pagamento por referência',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.white.withOpacity(0.9),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Image.asset(
+                      'assets/images/payment_methods/multicaixa.png',
+                      width: 40,
+                      height: 40,
+                      color: Colors.white,
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                        Icons.atm,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Mensagem de status
+              if (_mostrarMensagem)
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  color: _corMensagem.withOpacity(0.1),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _corMensagem == _successColor ? Icons.check_circle : Icons.error,
+                        color: _corMensagem,
+                        size: 18,
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _mensagemStatus,
+                          style: TextStyle(
+                            color: _textPrimary,
+                            fontSize: 14,
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                      GestureDetector(
+                        onTap: () {
+                          setState(() => _mostrarMensagem = false);
+                          _timerMensagem?.cancel();
+                        },
+                        child: Icon(Icons.close, size: 18, color: _textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+
+              // Conteúdo principal
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: BouncingScrollPhysics(),
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      // Entidade
+                      _buildInfoCard(
+                        title: 'Entidade',
+                        value: '11454',
+                        description: 'Código da empresa',
+                        onCopy: _copiarEntidade,
+                        icon: Icons.account_balance,
+                      ),
+                      SizedBox(height: 16),
+
+                      // Montante
+                      _buildAmountCard(),
+                      SizedBox(height: 16),
+
+                      // Referência
+                      _buildReferenceCard(),
+                      SizedBox(height: 20),
+
+                      // Botões principais
+                      _buildMainActionButtons(),
+
+                      if (_referenciaGerada) ...[
+                        SizedBox(height: 16),
+                        _buildCopyAllButton(),
+                      ],
+
+                      SizedBox(height: 20),
+
+                      // Instruções (somente quando referência gerada)
+                      if (_referenciaGerada) _buildInstructionsCard(),
+                    ],
+                  ),
                 ),
               ),
-
-            // Conteúdo principal
-            Expanded(
-              child: SingleChildScrollView(
-                physics: BouncingScrollPhysics(),
-                padding: EdgeInsets.all(28),
-                child: Column(
-                  children: [
-                    // Entidade
-                    _buildInfoCard(
-                      icon: Icons.account_balance_rounded,
-                      title: 'Entidade',
-                      value: '11454',
-                      description: 'Código da empresa',
-                      onCopy: _copiarEntidade,
-                      color: _primaryColor,
-                    ),
-                    SizedBox(height: 24),
-
-                    // Montante
-                    _buildAmountCard(),
-                    SizedBox(height: 24),
-
-                    // Referência
-                    _buildReferenceCard(),
-                    SizedBox(height: 28),
-
-                    // Botões principais
-                    _buildMainActionButtons(),
-                    SizedBox(height: 24),
-
-                    // Botão copiar tudo (apenas quando referência gerada)
-                    if (_referenciaGerada) _buildCopyAllButton(),
-
-                    if (_referenciaGerada) SizedBox(height: 24),
-
-                    // Instruções
-                    _buildInstructionsCard(),
-                  ],
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildInfoCard({
-    required IconData icon,
     required String title,
     required String value,
     required String description,
     required VoidCallback onCopy,
-    required Color color,
+    required IconData icon,
   }) {
     return Container(
-      padding: EdgeInsets.all(24),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: _backgroundColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: _borderColor.withOpacity(0.7),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 20,
-            offset: Offset(0, 8),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      color.withOpacity(0.15),
-                      color.withOpacity(0.05),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: color.withOpacity(0.25),
-                    width: 2,
-                  ),
-                ),
-                child: Center(
-                  child: Icon(
-                    icon,
-                    color: color,
-                    size: 28,
-                  ),
+              Icon(icon, color: _primaryColor, size: 20),
+              SizedBox(width: 10),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: _textPrimary,
                 ),
               ),
-              SizedBox(width: 20),
+            ],
+          ),
+          SizedBox(height: 12),
+          Row(
+            children: [
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
+                      value,
                       style: TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: _textPrimary,
+                        fontWeight: FontWeight.w700,
+                        color: _primaryColor,
                       ),
                     ),
-                    SizedBox(height: 6),
+                    SizedBox(height: 4),
                     Text(
                       description,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 12,
                         color: _textSecondary,
-                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-          SizedBox(height: 20),
-          Container(
-            padding: EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: color.withOpacity(0.2),
-                width: 2,
+              SizedBox(width: 12),
+              IconButton(
+                onPressed: onCopy,
+                icon: Icon(Icons.copy, color: _primaryColor, size: 20),
+                padding: EdgeInsets.all(8),
+                constraints: BoxConstraints(),
               ),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w900,
-                      color: color,
-                      letterSpacing: 1.5,
-                      fontFamily: 'Monospace',
-                    ),
-                  ),
-                ),
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        color.withOpacity(0.15),
-                        color.withOpacity(0.05),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: color.withOpacity(0.25),
-                      width: 2,
-                    ),
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(14),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(14),
-                      onTap: onCopy,
-                      child: Center(
-                        child: Icon(
-                          Icons.copy_rounded,
-                          color: color,
-                          size: 24,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            ],
           ),
         ],
       ),
@@ -2569,480 +2359,250 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
 
   Widget _buildAmountCard() {
     return Container(
-      padding: EdgeInsets.all(24),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: _backgroundColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: _borderColor.withOpacity(0.7),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 20,
-            offset: Offset(0, 8),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      _primaryColor.withOpacity(0.15),
-                      _primaryColor.withOpacity(0.05),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: _primaryColor.withOpacity(0.25),
-                    width: 2,
-                  ),
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.attach_money_rounded,
-                    color: _primaryColor,
-                    size: 28,
-                  ),
-                ),
-              ),
-              SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Montante a pagar',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: _textPrimary,
-                      ),
-                    ),
-                    SizedBox(height: 6),
-                    Text(
-                      'Valor mínimo: 500,00 Kz',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: _textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+              Icon(Icons.attach_money, color: _primaryColor, size: 20),
+              SizedBox(width: 10),
+              Text(
+                'Montante',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: _textPrimary,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 12),
           TextFormField(
             controller: _montanteController,
             focusNode: _montanteFocusNode,
             decoration: InputDecoration(
               hintText: 'Ex: 1000',
-              hintStyle: TextStyle(color: _textSecondary.withOpacity(0.5)),
+              hintStyle: TextStyle(color: _textSecondary),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color: _borderColor,
-                  width: 2,
-                ),
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: _borderColor),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color: _borderColor,
-                  width: 2,
-                ),
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: _borderColor),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color: _primaryColor,
-                  width: 2.5,
-                ),
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: _primaryColor),
               ),
               filled: true,
               fillColor: Colors.white,
-              contentPadding:
-                  EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+              contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               prefixText: 'Kz ',
               prefixStyle: TextStyle(
                 color: _textPrimary,
-                fontWeight: FontWeight.w800,
-                fontSize: 18,
-              ),
-              errorText: _validarMontante(_montanteController.text),
-              errorStyle: TextStyle(
-                color: _errorColor,
-                fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
+              errorText: _validarMontante(_montanteController.text),
+              errorStyle: TextStyle(fontSize: 12, color: _errorColor),
               suffixIcon: _montanteController.text.isNotEmpty
                   ? IconButton(
-                      icon: Icon(Icons.clear_rounded,
-                          color: _textSecondary, size: 24),
-                      onPressed: () {
-                        _montanteController.clear();
-                      },
+                      icon: Icon(Icons.clear, size: 18, color: _textSecondary),
+                      onPressed: () => _montanteController.clear(),
+                      padding: EdgeInsets.zero,
                     )
                   : null,
             ),
             style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
               color: _textPrimary,
             ),
             keyboardType: TextInputType.numberWithOptions(decimal: true),
             textInputAction: TextInputAction.done,
-            onFieldSubmitted: (_) =>
-                _isMontanteValido() ? _gerarReferencia() : null,
+            onFieldSubmitted: (_) => _isMontanteValido() ? _gerarReferencia() : null,
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Mínimo: 500,00 Kz • Máximo: 1.000.000 Kz',
+            style: TextStyle(fontSize: 12, color: _textSecondary),
           ),
         ],
       ),
     );
   }
 
-Widget _buildReferenceCard() {
-  return Container(
-    padding: EdgeInsets.all(24),
-    constraints: BoxConstraints( // ADD THIS: Limita a largura máxima
-      maxWidth: MediaQuery.of(context).size.width,
-    ),
-    decoration: BoxDecoration(
-      color: _backgroundColor,
-      borderRadius: BorderRadius.circular(24),
-      border: Border.all(
-        color: _borderColor.withOpacity(0.7),
-        width: 2,
+  Widget _buildReferenceCard() {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _referenciaGerada ? _successColor.withOpacity(0.3) : _borderColor,
+        ),
       ),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.06),
-          blurRadius: 20,
-          offset: Offset(0, 8),
-        ),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    _infoColor.withOpacity(0.15),
-                    _infoColor.withOpacity(0.05),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: _infoColor.withOpacity(0.25),
-                  width: 2,
-                ),
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.receipt_long_rounded,
-                  color: _infoColor,
-                  size: 28,
-                ),
-              ),
-            ),
-            SizedBox(width: 12), // REDUZIDO DE 20 PARA 12
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Referência de pagamento',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: _textPrimary,
-                    ),
-                    overflow: TextOverflow.ellipsis, // ADD THIS
-                    maxLines: 1, // ADD THIS
-                  ),
-                  SizedBox(height: 6),
-                  Text(
-                    'Use este código no terminal ATM, ou outro canal ou applicativo com serviço pagamento por referência',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: _textSecondary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    overflow: TextOverflow.ellipsis, // ADD THIS
-                    maxLines: 2, // ADD THIS
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 20),
-        Container(
-          padding: EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: _referenciaGerada
-                ? _successColor.withOpacity(0.08)
-                : Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: _referenciaGerada
-                  ? _successColor.withOpacity(0.25)
-                  : _borderColor,
-              width: 2,
-            ),
-          ),
-          child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (_referenciaGerada &&
-                        widget.model.reference.isNotEmpty)
-                      ConstrainedBox( // ADD THIS
-                        constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width - 180, // Reserva espaço para o botão
-                        ),
-                        child: Text(
-                          widget.model.reference,
-                          style: TextStyle(
-                            fontSize: 20, // REDUZIDO DE 22 PARA 20
-                            fontWeight: FontWeight.w900,
-                            color: _successColor,
-                            letterSpacing: 1.0, // REDUZIDO DE 1.5 PARA 1.0
-                            fontFamily: 'Monospace',
-                          ),
-                          overflow: TextOverflow.ellipsis, // ADD THIS
-                          maxLines: 1, // ADD THIS
-                        ),
-                      ),
-                    if (!_referenciaGerada || widget.model.reference.isEmpty)
-                      Text(
-                        'Aguardando geração da referência...',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: _textSecondary.withOpacity(0.5),
-                          fontStyle: FontStyle.italic,
-                        ),
-                        overflow: TextOverflow.ellipsis, // ADD THIS
-                        maxLines: 1, // ADD THIS
-                      ),
-                  ],
+              Icon(Icons.receipt_long, color: _successColor, size: 20),
+              SizedBox(width: 10),
+              Text(
+                'Referência',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: _textPrimary,
                 ),
               ),
-              SizedBox(width: 12), // REDUZIDO DE 16 PARA 12
-              if (_referenciaGerada && widget.model.reference.isNotEmpty)
-                Container(
-                  width: 48, // REDUZIDO DE 56 PARA 48
-                  height: 48, // REDUZIDO DE 56 PARA 48
-                  margin: EdgeInsets.only(bottom: 8), // REDUZIDO DE 16 PARA 8
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        _successColor.withOpacity(0.15),
-                        _successColor.withOpacity(0.05),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(12), // REDUZIDO DE 14 PARA 12
-                    border: Border.all(
-                      color: _successColor.withOpacity(0.25),
-                      width: 2,
-                    ),
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(12), // REDUZIDO DE 14 PARA 12
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(12), // REDUZIDO DE 14 PARA 12
-                      onTap: _copiarReferencia,
-                      child: Center(
-                        child: Icon(
-                          Icons.copy_rounded,
-                          color: _successColor,
-                          size: 20, // REDUZIDO DE 24 PARA 20
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
             ],
           ),
-        ),
-        if (_referenciaGerada && widget.model.reference.isNotEmpty)
-          Padding(
-            padding: EdgeInsets.only(top: 14),
+          SizedBox(height: 12),
+          Container(
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: _referenciaGerada ? _successColor.withOpacity(0.1) : Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: _referenciaGerada ? _successColor.withOpacity(0.2) : _borderColor,
+              ),
+            ),
             child: Row(
               children: [
-                Icon(
-                  Icons.access_time_rounded,
-                  color: _successColor,
-                  size: 16, // REDUZIDO DE 18 PARA 16
-                ),
-                SizedBox(width: 8), // REDUZIDO DE 10 PARA 8
                 Expanded(
-                  child: Text(
-                    'Válida por 24 horas a partir da geração',
-                    style: TextStyle(
-                      fontSize: 12, // REDUZIDO DE 13 PARA 12
-                      color: _successColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    overflow: TextOverflow.ellipsis, // ADD THIS
-                    maxLines: 1, // ADD THIS
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (_referenciaGerada && widget.model.reference.isNotEmpty)
+                        Text(
+                          widget.model.reference,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: _successColor,
+                            fontFamily: 'Monospace',
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      if (!_referenciaGerada || widget.model.reference.isEmpty)
+                        Text(
+                          'Gere uma referência primeiro',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: _textSecondary,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      if (_referenciaGerada && widget.model.reference.isNotEmpty)
+                        SizedBox(height: 4),
+                      if (_referenciaGerada && widget.model.reference.isNotEmpty)
+                        Row(
+                          children: [
+                            Icon(Icons.access_time, size: 14, color: _successColor),
+                            SizedBox(width: 4),
+                            Text(
+                              'Válida por 24 horas',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: _successColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
                   ),
                 ),
+                if (_referenciaGerada && widget.model.reference.isNotEmpty)
+                  IconButton(
+                    onPressed: _copiarReferencia,
+                    icon: Icon(Icons.copy, color: _successColor, size: 20),
+                    padding: EdgeInsets.all(8),
+                    constraints: BoxConstraints(),
+                  ),
               ],
             ),
           ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
   Widget _buildMainActionButtons() {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            height: 60,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: _borderColor,
-                width: 2,
+          child: OutlinedButton(
+            onPressed: _limparFormulario,
+            style: OutlinedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 14),
+              side: BorderSide(color: _borderColor),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: Offset(0, 5),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.refresh, size: 18, color: _textSecondary),
+                SizedBox(width: 8),
+                Text(
+                  'Limpar',
+                  style: TextStyle(color: _textSecondary),
                 ),
               ],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(18),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(18),
-                onTap: _limparFormulario,
-                child: Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.refresh_rounded,
-                        color: _textSecondary,
-                        size: 24,
-                      ),
-                      SizedBox(width: 10),
-                      Icon(
-                        Icons.clear,
-                        color: _textSecondary,
-                        size: 24,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ),
           ),
         ),
-        SizedBox(width: 20),
+        SizedBox(width: 12),
         Expanded(
           flex: 2,
-          child: Container(
-            height: 60,
-            decoration: BoxDecoration(
-              gradient: _referenciaGerada
-                  ? LinearGradient(
-                      colors: [_successColor, Color(0xFF0CA968)],
-                    )
-                  : _primaryGradient,
-              borderRadius: BorderRadius.circular(18),
-              boxShadow: [
-                BoxShadow(
-                  color: (_referenciaGerada ? _successColor : _primaryColor)
-                      .withOpacity(0.5),
-                  blurRadius: 20,
-                  offset: Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(18),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(18),
-                onTap: _referenciaGerada
-                    ? () {
-                        _mostrarMensagemTemporaria(
-                          '✅ Pagamento configurado com sucesso!',
-                          _successColor,
-                          isSuccess: true,
-                        );
-                        Future.delayed(Duration(seconds: 2), () {
-                          if (mounted) Navigator.pop(context);
-                        });
-                      }
-                    : (_isMontanteValido() && !_isLoading)
-                        ? _gerarReferencia
-                        : null,
-                child: Center(
-                  child: _isLoading
-                      ? SizedBox(
-                          width: 28,
-                          height: 28,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 3.5,
-                          ),
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              _referenciaGerada
-                                  ? Icons.check_circle_rounded
-                                  : Icons.arrow_forward_rounded,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                            SizedBox(width: 12),
-                            Text(
-                              _referenciaGerada ? 'Ok' : 'GERAR REFERÊNCIA',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ],
-                        ),
-                ),
+          child: ElevatedButton(
+            onPressed: _referenciaGerada
+                ? () {
+                    _mostrarMensagemTemporaria('Configuração concluída', _successColor);
+                    Future.delayed(Duration(seconds: 1), () {
+                      if (mounted) Navigator.pop(context);
+                    });
+                  }
+                : (_isMontanteValido() && !_isLoading) ? _gerarReferencia : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _referenciaGerada ? _successColor : _primaryColor,
+              padding: EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
+            child: _isLoading
+                ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        _referenciaGerada ? Icons.check : Icons.arrow_forward,
+                        size: 18,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        _referenciaGerada ? 'OK' : 'Gerar Referência',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
           ),
         ),
       ],
@@ -3050,121 +2610,49 @@ Widget _buildReferenceCard() {
   }
 
   Widget _buildCopyAllButton() {
-    return Container(
-      height: 56,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            _infoColor.withOpacity(0.08),
-            _infoColor.withOpacity(0.02),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return OutlinedButton.icon(
+      onPressed: _copiarTudo,
+      style: OutlinedButton.styleFrom(
+        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        side: BorderSide(color: _primaryColor),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
         ),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: _infoColor.withOpacity(0.2),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: Offset(0, 5),
-          ),
-        ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(18),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18),
-          onTap: _copiarTudo,
-          child: Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.copy_all_rounded,
-                  color: _infoColor,
-                  size: 24,
-                ),
-                SizedBox(width: 12),
-                Text(
-                  ' COPIAR TUDO',
-                  style: TextStyle(
-                    color: _infoColor,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+      icon: Icon(Icons.copy_all, size: 18, color: _primaryColor),
+      label: Text(
+        'Copiar tudo',
+        style: TextStyle(color: _primaryColor, fontWeight: FontWeight.w600),
       ),
     );
   }
 
   Widget _buildInstructionsCard() {
     return Container(
-      padding: EdgeInsets.all(24),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            _primaryColor.withOpacity(0.05),
-            _primaryColor.withOpacity(0.01),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: _primaryColor.withOpacity(0.15),
-          width: 2,
-        ),
+        color: _backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      _primaryColor.withOpacity(0.15),
-                      _primaryColor.withOpacity(0.05),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.phone_android_rounded,
-                    color: _primaryColor,
-                    size: 24,
-                  ),
-                ),
-              ),
-              SizedBox(width: 14),
-              Expanded(
-                child: Text(
-                  'Como realizar o pagamento',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: _textPrimary,
-                  ),
+              Icon(Icons.info, color: _primaryColor, size: 18),
+              SizedBox(width: 8),
+              Text(
+                'Como pagar',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: _textPrimary,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 24),
+          SizedBox(height: 12),
           ..._buildInstructionSteps(),
         ],
       ),
@@ -3173,23 +2661,11 @@ Widget _buildReferenceCard() {
 
   List<Widget> _buildInstructionSteps() {
     final steps = [
-      {
-        'title': 'Acesse um terminal Multicaixa',
-        'desc': 'ATM ou agência bancária com Multicaixa'
-      },
-      {
-        'title': 'Selecione "Pagamento por Referência"',
-        'desc': 'No menu principal do terminal'
-      },
-      {
-        'title': 'Insira os dados fornecidos',
-        'desc': 'Entidade e referência acima'
-      },
-      {
-        'title': 'Confirme o valor exato',
-        'desc': 'Verifique antes de confirmar'
-      },
-      {'title': 'Finalize a operação', 'desc': 'Guarde o comprovante'},
+      'Acesse um terminal Multicaixa (ATM)',
+      'Selecione "Pagamento por Referência"',
+      'Insira os dados fornecidos acima',
+      'Confirme o valor e finalize',
+      'Guarde o comprovante',
     ];
 
     return steps.asMap().entries.map((entry) {
@@ -3197,60 +2673,37 @@ Widget _buildReferenceCard() {
       final step = entry.value;
 
       return Padding(
-        padding: EdgeInsets.only(bottom: 20),
+        padding: EdgeInsets.only(bottom: 12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 36,
-              height: 36,
+              width: 24,
+              height: 24,
               decoration: BoxDecoration(
-                gradient: _primaryGradient,
+                color: _primaryColor,
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: _primaryColor.withOpacity(0.3),
-                    blurRadius: 10,
-                    offset: Offset(0, 5),
-                  ),
-                ],
               ),
               child: Center(
                 child: Text(
                   (index + 1).toString(),
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
             ),
-            SizedBox(width: 18),
+            SizedBox(width: 12),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    step['title']!,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: _textPrimary,
-                      height: 1.4,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    step['desc']!,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: _textSecondary,
-                      fontWeight: FontWeight.w400,
-                      height: 1.5,
-                    ),
-                  ),
-                ],
+              child: Text(
+                step,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: _textPrimary,
+                  height: 1.4,
+                ),
               ),
             ),
           ],
