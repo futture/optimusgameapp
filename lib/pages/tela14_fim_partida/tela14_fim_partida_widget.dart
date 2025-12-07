@@ -13,8 +13,11 @@ import 'package:projeto_game_quiz/pages/tela14_fim_partida/tela14_fim_partida_mo
 class Tela14FimPartidaViewWidget extends StatefulWidget {
   final dynamic gameResultInfo;
   final dynamic matchInfo;
-  const Tela14FimPartidaViewWidget(
-      {super.key, this.gameResultInfo, this.matchInfo});
+  const Tela14FimPartidaViewWidget({
+    super.key,
+    this.gameResultInfo,
+    this.matchInfo,
+  });
 
   static String routeName = 'Tela14FimPartidaView';
   static String routePath = '/tela14FimPartidaView';
@@ -33,6 +36,70 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
   final scaffoldKey = GlobalKey<ScaffoldState>();
   List<JogadorResultado> resultados = List.empty();
   late bool semVencedor;
+
+  // Cores premium com header laranja
+  final Color _primaryColor = Color(0xFFEC8D0D);
+  final Color _primaryDark = Color(0xFFD17A0A);
+  final Color _primaryLight = Color(0xFFFFF3E0);
+  final Color _backgroundColor = Colors.white;
+  final Color _surfaceColor = Colors.white;
+  final Color _cardColor = Color(0xFFF8FAFC);
+  final Color _onSurfaceColor = Color(0xFF1E293B);
+  final Color _onSurfaceLight = Color(0xFF64748B);
+  final Color _borderColor = Color(0xFFE2E8F0);
+  final Color _winnerGreen = Color(0xFF10B981);
+  final Color _winnerGreenLight = Color(0xFFD1FAE5);
+  final Color _loserRed = Color(0xFFEF4444);
+  final Color _loserRedLight = Color(0xFFFEE2E2);
+  final Color _warningColor = Color(0xFFF59E0B);
+  final Color _infoColor = Color(0xFF3B82F6);
+  final Color _successColor = Color(0xFF10B981);
+  final Color _goldColor = Color(0xFFFFD700);
+  final Color _silverColor = Color(0xFFC0C0C0);
+  final Color _bronzeColor = Color(0xFFCD7F32);
+
+  // Gradientes premium
+  final LinearGradient _primaryGradient = LinearGradient(
+    colors: [Color(0xFFEC8D0D), Color(0xFFF59E0B)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  final LinearGradient _headerGradient = LinearGradient(
+    colors: [Color(0xFFEC8D0D), Color(0xFFF59E0B)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
+  final LinearGradient _winnerGradient = LinearGradient(
+    colors: [Color(0xFF10B981), Color(0xFF34D399)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  final LinearGradient _loserGradient = LinearGradient(
+    colors: [Color(0xFFEF4444), Color(0xFFF87171)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  final LinearGradient _goldGradient = LinearGradient(
+    colors: [Color(0xFFFFD700), Color(0xFFFFED4E)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  final LinearGradient _silverGradient = LinearGradient(
+    colors: [Color(0xFFC0C0C0), Color(0xFFE5E4E2)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  final LinearGradient _bronzeGradient = LinearGradient(
+    colors: [Color(0xFFCD7F32), Color(0xFFE0A55F)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 
   @override
   void initState() {
@@ -69,185 +136,422 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-          automaticallyImplyLeading: false,
-          leading: Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(18.0, 0.0, 0.0, 0.0),
-            child: FlutterFlowIconButton(
-              borderRadius: 8.0,
-              buttonSize: 45.0,
-              fillColor: FlutterFlowTheme.of(context).primaryBackground,
-              icon: FaIcon(
-                FontAwesomeIcons.bars,
-                color: Colors.black,
-                size: 24.0,
+        backgroundColor: _backgroundColor,
+        body: Column(
+          children: [
+            // Header Laranja Premium (padrão das suas telas)
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: _headerGradient,
+                boxShadow: [
+                  BoxShadow(
+                    color: _primaryColor.withOpacity(0.3),
+                    blurRadius: 20,
+                    offset: Offset(0, 4),
+                    spreadRadius: 2,
+                  ),
+                ],
               ),
-              onPressed: () async {
-                await showModalBottomSheet(
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  enableDrag: false,
-                  context: context,
-                  builder: (context) {
-                    return GestureDetector(
-                      onTap: () {
-                        FocusScope.of(context).unfocus();
-                        FocusManager.instance.primaryFocus?.unfocus();
-                      },
-                      child: Padding(
-                        padding: MediaQuery.viewInsetsOf(context),
-                        child: ModaMenuPagianInicialWidget(),
-                      ),
-                    );
-                  },
-                ).then((value) => safeSetState(() {}));
-              },
-            ),
-          ),
-          title: Text(
-            'GAME QUIZ',
-            style: FlutterFlowTheme.of(context).headlineSmall.override(
-                  fontFamily: 'Inter Tight',
-                  color: Color(0xFFEC8D0D),
-                  letterSpacing: 0.0,
-                ),
-          ),
-          centerTitle: true,
-          elevation: 4.0,
-        ),
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF1A1A2E), // Azul escuro mais elegante
-                Color(0xFF16213E), // Degradê mais suave
-              ],
-            ),
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                physics: BouncingScrollPhysics(),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 600),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          // Header Section - Melhorado
-                          _buildHeaderSection(),
-                          const SizedBox(height: 24),
-
-                          // Players List - Com animação de entrada
-                          if (resultados.isNotEmpty) _buildPlayersList(),
-                          if (resultados.isEmpty) _buildEmptyResults(),
-
-                          // Bottom Button - Com efeito de destaque
-                          const SizedBox(height: 24),
-                          _buildGameRoomButton(),
+                          // Botão de menu premium
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(12),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(12),
+                                onTap: () async {
+                                  await showModalBottomSheet(
+                                    isScrollControlled: true,
+                                    backgroundColor: Colors.transparent,
+                                    enableDrag: false,
+                                    context: context,
+                                    builder: (context) {
+                                      return GestureDetector(
+                                        onTap: () {
+                                          FocusScope.of(context).unfocus();
+                                          FocusManager.instance.primaryFocus?.unfocus();
+                                        },
+                                        child: Padding(
+                                          padding: MediaQuery.viewInsetsOf(context),
+                                          child: ModaMenuPagianInicialWidget(),
+                                        ),
+                                      );
+                                    },
+                                  ).then((value) => safeSetState(() {}));
+                                },
+                                child: Center(
+                                  child: FaIcon(
+                                    FontAwesomeIcons.bars,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 16),
+                          
+                          // Título e subtítulo
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'RESULTADOS DA PARTIDA',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  'Análise detalhada do desempenho',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          
+                          // Ícone de troféu
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.emoji_events_rounded,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                          ),
                         ],
                       ),
+                      SizedBox(height: 8),
+                      
+                      // Barra de progresso decorativa
+                      Container(
+                        height: 3,
+                        width: 80,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(3),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white.withOpacity(0.3),
+                              blurRadius: 4,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFFF8FAFC),
+                      Colors.white,
+                    ],
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  physics: BouncingScrollPhysics(),
+                  child: Container(
+                    constraints: BoxConstraints(maxWidth: 600),
+                    padding: EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        // Card de Resumo Premium com destaque
+                        _buildSummaryCard(),
+                        SizedBox(height: 24),
+
+                        // Lista de Jogadores
+                        if (resultados.isNotEmpty) _buildPlayersList(),
+                        if (resultados.isEmpty) _buildEmptyResults(),
+
+                        // Botão Nova Partida com destaque
+                        SizedBox(height: 32),
+                        _buildGameRoomButton(),
+                        SizedBox(height: 20),
+                      ],
                     ),
                   ),
                 ),
-              );
-            },
-          ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildHeaderSection() {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
+  Widget _buildSummaryCard() {
+    return Container(
       padding: EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.3),
+        color: _surfaceColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Color(0xFFEC8D0D).withOpacity(0.5),
-          width: 2,
-        ),
         boxShadow: [
           BoxShadow(
-            color: Color(0xFFEC8D0D).withOpacity(0.2),
-            blurRadius: 20,
-            spreadRadius: 2,
-          )
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 25,
+            offset: Offset(0, 10),
+            spreadRadius: 1,
+          ),
         ],
+        border: Border.all(
+          color: _borderColor,
+          width: 1.5,
+        ),
       ),
       child: Column(
         children: [
-          Icon(
-            semVencedor
-                ? FontAwesomeIcons.exclamationTriangle
-                : FontAwesomeIcons.trophy,
-            size: 60,
-            color: semVencedor ? Colors.amber : Color(0xFFEC8D0D),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            textAlign: TextAlign.center,
-            semVencedor
-                ? 'Partida encerrada!'
-                : (matchInfo?.room?.roomConfiguration?.isSingleWinner ?? false)
-                    ? 'Parabéns ao campeão!'
-                    : 'Parabéns aos campeões!',
-            style: FlutterFlowTheme.of(context).headlineSmall.override(
-                  fontFamily: 'Inter',
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+          // Badge de status
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              gradient: semVencedor 
+                  ? LinearGradient(
+                      colors: [_onSurfaceLight.withOpacity(0.8), _onSurfaceLight.withOpacity(0.4)],
+                    )
+                  : _primaryGradient,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: (semVencedor ? _onSurfaceLight : _primaryColor).withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
                 ),
-          ),
-          const SizedBox(height: 8),
-          if (matchInfo != null)
-            RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: 'Duração: ',
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                  TextSpan(
-                    text:
-                        '${matchInfo!.room!.roomConfiguration!.timeToRespond * matchInfo!.room!.roomConfiguration!.numberOfQuestions} segundos',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+              ],
             ),
-          const SizedBox(height: 8),
-          if (matchInfo != null)
-            RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: 'Modo: ',
-                    style: TextStyle(color: Colors.white70),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  semVencedor ? Icons.groups_rounded : Icons.emoji_events_rounded,
+                  color: Colors.white,
+                  size: 16,
+                ),
+                SizedBox(width: 6),
+                Text(
+                  semVencedor ? 'PARTIDA CONCLUÍDA' : 'PARABÉNS!',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
                   ),
-                  TextSpan(
-                    text: matchInfo!.room!.roomConfiguration!.isSingleWinner
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 20),
+          
+          // Ícone principal
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              gradient: semVencedor 
+                  ? LinearGradient(
+                      colors: [_onSurfaceLight.withOpacity(0.3), _onSurfaceLight.withOpacity(0.1)],
+                    )
+                  : _primaryGradient,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: (semVencedor ? _onSurfaceLight : _primaryColor).withOpacity(0.15),
+                  blurRadius: 20,
+                  spreadRadius: 3,
+                ),
+              ],
+            ),
+            child: Icon(
+              semVencedor ? Icons.groups_rounded : Icons.emoji_events_rounded,
+              color: Colors.white,
+              size: 36,
+            ),
+          ),
+          SizedBox(height: 16),
+          
+          // Título principal
+          Text(
+            semVencedor
+                ? 'Partida Concluída'
+                : (matchInfo?.room?.roomConfiguration?.isSingleWinner ?? false)
+                    ? 'Parabéns ao Vencedor!'
+                    : 'Parabéns aos Vencedores!',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: _onSurfaceColor,
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+            ),
+          ),
+          SizedBox(height: 8),
+          
+          Text(
+            semVencedor
+                ? 'Todos os participantes foram eliminados nesta rodada'
+                : 'Excelente desempenho dos competidores',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: _onSurfaceLight,
+              fontSize: 14,
+              height: 1.5,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 24),
+          
+          // Informações da partida
+          if (matchInfo != null)
+            Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: _cardColor,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: _borderColor,
+                  width: 1.5,
+                ),
+              ),
+              child: Column(
+                children: [
+                  _buildInfoItem(
+                    icon: Icons.timer_rounded,
+                    title: 'Duração Total',
+                    value: '${matchInfo!.room!.roomConfiguration!.timeToRespond * matchInfo!.room!.roomConfiguration!.numberOfQuestions} seg',
+                    iconColor: _primaryColor,
+                  ),
+                  SizedBox(height: 12),
+                  _buildInfoItem(
+                    icon: Icons.group_rounded,
+                    title: 'Modo de Jogo',
+                    value: matchInfo!.room!.roomConfiguration!.isSingleWinner
                         ? 'Competição Individual'
                         : 'Time de Campeões',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    iconColor: _infoColor,
+                  ),
+                  SizedBox(height: 12),
+                  _buildInfoItem(
+                    icon: Icons.question_answer_rounded,
+                    title: 'Total de Perguntas',
+                    value: '${matchInfo!.room!.roomConfiguration!.numberOfQuestions}',
+                    iconColor: _successColor,
                   ),
                 ],
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoItem({
+    required IconData icon,
+    required String title,
+    required String value,
+    required Color iconColor,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _borderColor,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: iconColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: iconColor.withOpacity(0.2),
+                width: 1.5,
+              ),
+            ),
+            child: Icon(
+              icon,
+              color: iconColor,
+              size: 20,
+            ),
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: _onSurfaceLight,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: 2),
+                Text(
+                  value,
+                  style: TextStyle(
+                    color: _onSurfaceColor,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -255,34 +559,89 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
 
   Widget _buildPlayersList() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Classificação Final',
-          style: FlutterFlowTheme.of(context).titleLarge.override(
-                fontFamily: 'Inter',
-                color: Colors.white,
+        // Cabeçalho da classificação
+        Container(
+          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          decoration: BoxDecoration(
+            color: _primaryColor.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: _primaryColor.withOpacity(0.1),
+              width: 1.5,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.leaderboard_rounded,
+                color: _primaryColor,
+                size: 20,
               ),
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'CLASSIFICAÇÃO FINAL',
+                      style: TextStyle(
+                        color: _onSurfaceColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Toque em um jogador para ver estatísticas detalhadas',
+                      style: TextStyle(
+                        color: _onSurfaceLight,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '${resultados.length} jogadores',
+                  style: TextStyle(
+                    color: _primaryColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
+        
+        // Lista de jogadores
         ...List.generate(resultados.length, (index) {
           final jogador = resultados[index];
-          return AnimatedSwitcher(
-            duration: Duration(milliseconds: 300),
-            child: Padding(
-              key: ValueKey(jogador.id),
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    if (expandedIndices.contains(index)) {
-                      expandedIndices.remove(index);
-                    } else {
-                      expandedIndices.add(index);
-                    }
-                  });
-                },
-                child: _buildPlayerCard(jogador, index),
-              ),
+          return Padding(
+            key: ValueKey(jogador.id),
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  if (expandedIndices.contains(index)) {
+                    expandedIndices.remove(index);
+                  } else {
+                    expandedIndices.add(index);
+                  }
+                });
+              },
+              child: _buildPlayerCard(jogador, index),
             ),
           );
         }),
@@ -293,121 +652,202 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
   Widget _buildPlayerCard(JogadorResultado jogador, int index) {
     final bool isExpanded = expandedIndices.contains(index);
     final bool isWinner = jogador.isWinner;
+    final bool isTop3 = index < 3;
 
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-      margin: EdgeInsets.only(bottom: isExpanded ? 16 : 8),
+    return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: isExpanded ? 12 : 6,
-            offset: Offset(0, isExpanded ? 6 : 3),
-          )
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: isExpanded ? 20 : 10,
+            offset: Offset(0, isExpanded ? 8 : 4),
+          ),
         ],
       ),
-      child: ClipRRect(
+      child: Material(
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(16),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () {
-              setState(() {
-                if (expandedIndices.contains(index)) {
-                  expandedIndices.remove(index);
-                } else {
-                  expandedIndices.add(index);
-                }
-              });
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: isWinner
-                      ? [
-                          _getWinnerGradientStart(index),
-                          _getWinnerGradientEnd(index),
-                        ]
-                      : [
-                          Color(0xFFC62828), // Vermelho escuro
-                          Color(0xFFE53935), // Vermelho mais claro
-                        ],
-                ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            setState(() {
+              if (expandedIndices.contains(index)) {
+                expandedIndices.remove(index);
+              } else {
+                expandedIndices.add(index);
+              }
+            });
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: isWinner ? _winnerGreenLight : _loserRedLight,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isWinner 
+                    ? _winnerGreen.withOpacity(0.3)
+                    : _loserRed.withOpacity(0.3),
+                width: 1.5,
               ),
-              padding: EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Row(
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
                     children: [
-                      // Ícone de posição
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.black.withOpacity(0.3),
-                        ),
+                      // Posição com medalha
+                      Stack(
                         alignment: Alignment.center,
-                        child: Text(
-                          '${index + 1}',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              gradient: _getPositionGradient(index),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _getPositionColor(index).withOpacity(0.2),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
+                          Text(
+                            '${index + 1}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 2,
+                                  offset: Offset(1, 1),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 12),
+                      SizedBox(width: 16),
 
-                      // Avatar e nome
+                      // Informações do jogador
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              jogador.nome,
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    jogador.nome,
+                                    style: TextStyle(
+                                      color: _onSurfaceColor,
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w700,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ),
+                                if (isTop3) ...[
+                                  SizedBox(width: 8),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient: _getPositionGradient(index),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      _getPositionText(index),
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Taxa de Eficácia: ${jogador.pontos}%  ',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
-                              ),
+                            SizedBox(height: 8),
+                            Row(
+                              children: [
+                                _buildStatBadge(
+                                  icon: Icons.star_rounded,
+                                  value: '${jogador.pontos}%',
+                                  label: 'Eficácia',
+                                  color: _goldColor,
+                                ),
+                                SizedBox(width: 8),
+                                _buildStatBadge(
+                                  icon: Icons.currency_bitcoin_rounded,
+                                  value: '${jogador.premio.toStringAsFixed(0)}',
+                                  label: 'AOA',
+                                  color: _primaryColor,
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       ),
-                      FaIcon(
-                        isWinner
-                            ? _getWinnerIcon(index)
-                            : FontAwesomeIcons
-                                .sadTear, 
-                        color: isWinner
-                            ? _getWinnerIconColor(index)
-                            : Colors.white70,
+                      
+                      // Ícone e status
+                      Column(
+                        children: [
+                          Icon(
+                            isWinner ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                            color: isWinner ? _winnerGreen : _loserRed,
+                            size: 24,
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            isWinner ? 'Vencedor' : 'Eliminado',
+                            style: TextStyle(
+                              color: isWinner ? _winnerGreen : _loserRed,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(width: 8),
+                      Icon(
+                        isExpanded ? Icons.expand_less : Icons.expand_more,
+                        color: _onSurfaceLight,
                         size: 24,
                       ),
                     ],
                   ),
-                  if (isExpanded) ...[
-                    SizedBox(height: 16),
-                    Divider(color: Colors.white24),
-                    SizedBox(height: 12),
-                    _buildPlayerStats(jogador),
-                  ],
+                ),
+
+                // Seção expandida
+                if (isExpanded) ...[
+                  Container(
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(16),
+                        bottomRight: Radius.circular(16),
+                      ),
+                      border: Border(
+                        top: BorderSide(
+                          color: _borderColor,
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                    child: _buildPlayerStats(jogador),
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
         ),
@@ -415,133 +855,56 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
     );
   }
 
-  // Widget _buildPlayerCard(JogadorResultado jogador, int index) {
-  //   final bool isExpanded = expandedIndices.contains(index);
-  //   final bool isWinner = jogador.isWinner;
-
-  //   return AnimatedContainer(
-  //     duration: Duration(milliseconds: 300),
-  //     curve: Curves.easeInOut,
-  //     margin: EdgeInsets.only(bottom: isExpanded ? 16 : 8),
-  //     decoration: BoxDecoration(
-  //       borderRadius: BorderRadius.circular(16),
-  //       boxShadow: [
-  //         BoxShadow(
-  //           color: Colors.black.withOpacity(0.3),
-  //           blurRadius: isExpanded ? 12 : 6,
-  //           offset: Offset(0, isExpanded ? 6 : 3),
-  //         )
-  //       ],
-  //     ),
-  //     child: ClipRRect(
-  //       borderRadius: BorderRadius.circular(16),
-  //       child: Material(
-  //         color: Colors.transparent,
-  //         child: InkWell(
-  //           onTap: () {
-  //             setState(() {
-  //               if (expandedIndices.contains(index)) {
-  //                 expandedIndices.remove(index);
-  //               } else {
-  //                 expandedIndices.add(index);
-  //               }
-  //             });
-  //           },
-  //           child: Container(
-  //             decoration: BoxDecoration(
-  //               gradient: LinearGradient(
-  //                 begin: Alignment.topLeft,
-  //                 end: Alignment.bottomRight,
-  //                 colors: isWinner
-  //                     ? [
-  //                         _getWinnerGradientStart(index),
-  //                         _getWinnerGradientEnd(index),
-  //                       ]
-  //                     : [
-  //                         Color(0xFF424242),
-  //                         Color(0xFF212121),
-  //                       ],
-  //               ),
-  //             ),
-  //             padding: EdgeInsets.all(16),
-  //             child: Column(
-  //               children: [
-  //                 Row(
-  //                   children: [
-  //                     // Ícone de posição
-  //                     Container(
-  //                       width: 40,
-  //                       height: 40,
-  //                       decoration: BoxDecoration(
-  //                         shape: BoxShape.circle,
-  //                         color: Colors.black.withOpacity(0.3),
-  //                       ),
-  //                       alignment: Alignment.center,
-  //                       child: Text(
-  //                         '${index + 1}',
-  //                         style: TextStyle(
-  //                           color: Colors.white,
-  //                           fontWeight: FontWeight.bold,
-  //                           fontSize: 18,
-  //                         ),
-  //                       ),
-  //                     ),
-  //                     SizedBox(width: 12),
-
-  //                     // Avatar e nome
-  //                     Expanded(
-  //                       child: Column(
-  //                         crossAxisAlignment: CrossAxisAlignment.start,
-  //                         children: [
-  //                           Text(
-  //                             jogador.nome,
-  //                             style: TextStyle(
-  //                               fontFamily: 'Inter',
-  //                               fontSize: 18,
-  //                               fontWeight: FontWeight.bold,
-  //                               color: Colors.white,
-  //                             ),
-  //                           ),
-  //                           SizedBox(height: 4),
-  //                           Text(
-  //                             '${jogador.pontos} pontos',
-  //                             style: TextStyle(
-  //                               color: Colors.white70,
-  //                               fontSize: 14,
-  //                             ),
-  //                           ),
-  //                         ],
-  //                       ),
-  //                     ),
-
-  //                     // Ícone de status
-  //                     FaIcon(
-  //                       isWinner
-  //                           ? _getWinnerIcon(index)
-  //                           : FontAwesomeIcons.user,
-  //                       color: isWinner
-  //                           ? _getWinnerIconColor(index)
-  //                           : Colors.white70,
-  //                       size: 24,
-  //                     ),
-  //                   ],
-  //                 ),
-
-  //                 // Seção expandida
-  //                 if (isExpanded) ...[
-  //                   SizedBox(height: 16),
-  //                   Divider(color: Colors.white24),
-  //                   SizedBox(height: 12),
-  //                   _buildPlayerStats(jogador),
-  //                 ],
-  //               ],
-  //             ),
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
+  Widget _buildStatBadge({
+    required IconData icon,
+    required String value,
+    required String label,
+    required Color color,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            color: color,
+            size: 14,
+          ),
+          SizedBox(width: 6),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                value,
+                style: TextStyle(
+                  color: _onSurfaceColor,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Text(
+                label,
+                style: TextStyle(
+                  color: _onSurfaceLight,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildPlayerStats(JogadorResultado jogador) {
     return Column(
@@ -549,88 +912,121 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildStatTile(
-              icon: FontAwesomeIcons.coins,
-              value: '${jogador.premio.toStringAsFixed(0)}AOA',
-              label: 'Prêmio',
-              color: Colors.amber,
-            ),
-            _buildStatTile(
-              icon: Icons.star,
-              value: '${jogador.pontos}%',
-              label: 'Taxa de Eficácia',
-              color: Colors.blue[200]!,
-            ),
-            _buildStatTile(
-              icon: Icons.check_circle,
+            _buildStatCircle(
+              icon: Icons.check_circle_rounded,
               value: '${jogador.perguntasCertas}',
               label: 'Acertos',
-              color: Colors.green[300]!,
+              color: _successColor,
+              isPrimary: true,
+            ),
+            _buildStatCircle(
+              icon: Icons.cancel_rounded,
+              value: '${jogador.perguntasErradas}',
+              label: 'Erros',
+              color: _loserRed,
+              isPrimary: false,
+            ),
+            _buildStatCircle(
+              icon: Icons.percent_rounded,
+              value: '${(jogador.accuracyRate * 100).toStringAsFixed(1)}%',
+              label: 'Precisão',
+              color: _infoColor,
+              isPrimary: false,
             ),
           ],
         ),
-        SizedBox(height: 16),
-        _buildDetailedStats(jogador),
+        SizedBox(height: 20),
+        
+        // Tabela detalhada
+        Container(
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: _cardColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: _borderColor,
+              width: 1.5,
+            ),
+          ),
+          child: Table(
+            columnWidths: {
+              0: FlexColumnWidth(2.5),
+              1: FlexColumnWidth(1),
+            },
+            children: [
+              _buildTableRow('Respostas Certas', '${jogador.perguntasCertas}'),
+              _buildTableRow('Respostas Erradas', '${jogador.perguntasErradas}'),
+              _buildTableRow('Taxa de Acerto', '${(jogador.accuracyRate * 100).toStringAsFixed(1)}%'),
+              _buildTableRow('Desempenho Tempo', '${(jogador.timeRate * 100).toStringAsFixed(1)}%'),
+              _buildTableRow('Presenças Top 3', '${jogador.top3vezes ?? 0}'),
+            ],
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildStatTile({
+  Widget _buildStatCircle({
     required IconData icon,
     required String value,
     required String label,
     required Color color,
+    required bool isPrimary,
   }) {
     return Column(
       children: [
-        Icon(icon, color: color, size: 24),
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            gradient: isPrimary 
+                ? LinearGradient(
+                    colors: [color, color.withOpacity(0.8)],
+                  )
+                : null,
+            color: isPrimary ? null : color.withOpacity(0.1),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: color.withOpacity(isPrimary ? 0.3 : 0.2),
+              width: isPrimary ? 2 : 1.5,
+            ),
+            boxShadow: isPrimary
+                ? [
+                    BoxShadow(
+                      color: color.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Center(
+            child: Icon(
+              icon,
+              color: isPrimary ? Colors.white : color,
+              size: 24,
+            ),
+          ),
+        ),
         SizedBox(height: 8),
         Text(
           value,
           style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+            color: _onSurfaceColor,
             fontSize: 16,
+            fontWeight: FontWeight.w800,
           ),
         ),
-        SizedBox(height: 4),
+        SizedBox(height: 2),
         Text(
           label,
           style: TextStyle(
-            color: Colors.white70,
-            fontSize: 12,
+            color: _onSurfaceLight,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildDetailedStats(JogadorResultado jogador) {
-    return Container(
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Table(
-        columnWidths: {
-          0: FlexColumnWidth(2),
-          1: FlexColumnWidth(1),
-        },
-        children: [
-          _buildTableRow('Respostas certas', '${jogador.perguntasCertas}'),
-          _buildTableRow('Respostas Erradas', '${jogador.perguntasErradas}'),
-          _buildTableRow('Taxa de acerto',
-              '${(jogador.accuracyRate * 100).toStringAsFixed(1)}%'),
-          _buildTableRow('Desempenho por tempo de resposta',
-              '${(jogador.timeRate * 100).toStringAsFixed(1)}%'),
-          // _buildTableRow('Peso da taxa de acerto',
-          //     '${(jogador.hitRateWeight * 100).toStringAsFixed(1)}%'),
-          // _buildTableRow('Peso do desempenho por tempo',
-          //     '${(jogador.timeRateWeight * 100).toStringAsFixed(1)}%'),
-          _buildTableRow('Presenças no Top 3', '${jogador.top3vezes ?? 0}'),
-        ],
-      ),
     );
   }
 
@@ -638,22 +1034,25 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
     return TableRow(
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(vertical: 8),
+          padding: EdgeInsets.symmetric(vertical: 10),
           child: Text(
             label,
             style: TextStyle(
-              color: Colors.white70,
+              color: _onSurfaceColor,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
         Padding(
-          padding: EdgeInsets.symmetric(vertical: 8),
+          padding: EdgeInsets.symmetric(vertical: 10),
           child: Text(
             value,
             textAlign: TextAlign.end,
             style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+              color: _onSurfaceColor,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),
@@ -663,34 +1062,64 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
 
   Widget _buildEmptyResults() {
     return Container(
-      padding: EdgeInsets.all(24),
+      padding: EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(16),
+        color: _cardColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: _borderColor,
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 15,
+            offset: Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          Icon(
-            FontAwesomeIcons.exclamationCircle,
-            size: 48,
-            color: Colors.amber,
-          ),
-          SizedBox(height: 16),
-          Text(
-            'Nenhum resultado disponível',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [_warningColor.withOpacity(0.3), _warningColor.withOpacity(0.1)],
+              ),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: _warningColor.withOpacity(0.2),
+                width: 2,
+              ),
+            ),
+            child: Icon(
+              Icons.info_outline_rounded,
+              color: _warningColor,
+              size: 40,
             ),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 24),
           Text(
-            'Esta partida não teve vencedores ou os resultados não estão disponíveis',
+            'Resultados Indisponíveis',
+            style: TextStyle(
+              color: _onSurfaceColor,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+            ),
             textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 12),
+          Text(
+            'Esta partida não teve vencedores ou os resultados não estão disponíveis no momento.',
             style: TextStyle(
-              color: Colors.white70,
+              color: _onSurfaceLight,
+              fontSize: 14,
+              height: 1.6,
+              fontWeight: FontWeight.w500,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -700,28 +1129,21 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
   Widget _buildGameRoomButton() {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: 200),
+      child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFFEC8D0D).withOpacity(0.8),
-              Color(0xFFEC8D0D).withOpacity(0.6),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Color(0xFFEC8D0D).withOpacity(0.3),
-              blurRadius: 10,
-              offset: Offset(0, 4),
-            )
+              color: _primaryColor.withOpacity(0.3),
+              blurRadius: 20,
+              offset: Offset(0, 8),
+              spreadRadius: 2,
+            ),
           ],
         ),
         child: Material(
           color: Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
             onTap: () async {
@@ -740,14 +1162,31 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
               );
               safeSetState(() {});
             },
-            child: Padding(
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: _primaryGradient,
+                borderRadius: BorderRadius.circular(16),
+              ),
               padding: EdgeInsets.all(20),
               child: Row(
                 children: [
-                  Icon(
-                    FontAwesomeIcons.gamepad,
-                    color: Colors.white,
-                    size: 28,
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.3),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Icon(
+                      FontAwesomeIcons.gamepad,
+                      color: Colors.white,
+                      size: 22,
+                    ),
                   ),
                   SizedBox(width: 16),
                   Expanded(
@@ -755,27 +1194,30 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Pronto para outra partida?',
+                          'JOGAR NOVAMENTE',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
                           ),
                         ),
                         SizedBox(height: 4),
                         Text(
-                          'Clique para encontrar novas salas',
+                          'Encontre novas salas disponíveis',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withOpacity(0.9),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
                   ),
                   Icon(
-                    Icons.chevron_right,
+                    Icons.arrow_forward_ios_rounded,
                     color: Colors.white,
-                    size: 28,
+                    size: 20,
                   ),
                 ],
               ),
@@ -786,121 +1228,86 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
     );
   }
 
-// Funções auxiliares para definir cores e ícones baseados na posição
-  // Color _getWinnerColor(int posicao) {
-  //   return posicao == 0
-  //       ? Color(0xFF2E7D32) // 1º lugar - Verde mais escuro
-  //       : posicao == 1
-  //           ? Color(0xFF4527A0) // 2º lugar - Roxo
-  //           : posicao == 2
-  //               ? Color(0xFF5D4037) // 3º lugar - Marrom
-  //               : Color(0xFF424242); // Outros - Cinza escuro
-  // }
+  // Funções auxiliares para posições
+  Gradient _getPositionGradient(int posicao) {
+    switch (posicao) {
+      case 0:
+        return _goldGradient;
+      case 1:
+        return _silverGradient;
+      case 2:
+        return _bronzeGradient;
+      default:
+        return LinearGradient(
+          colors: [_onSurfaceLight.withOpacity(0.8), _onSurfaceLight.withOpacity(0.4)],
+        );
+    }
+  }
 
+  Color _getPositionColor(int posicao) {
+    switch (posicao) {
+      case 0:
+        return _goldColor;
+      case 1:
+        return _silverColor;
+      case 2:
+        return _bronzeColor;
+      default:
+        return _onSurfaceLight;
+    }
+  }
+
+  String _getPositionText(int posicao) {
+    switch (posicao) {
+      case 0:
+        return '🥇 1º';
+      case 1:
+        return '🥈 2º';
+      case 2:
+        return '🥉 3º';
+      default:
+        return '${posicao + 1}º';
+    }
+  }
+
+  // Funções auxiliares originais mantidas
   IconData _getWinnerIcon(int posicao) {
     return posicao == 0
-        ? FontAwesomeIcons.trophy // 1º lugar - Troféu
+        ? FontAwesomeIcons.trophy
         : posicao == 1
-            ? FontAwesomeIcons.medal // 2º lugar - Medalha
+            ? FontAwesomeIcons.medal
             : posicao == 2
-                ? FontAwesomeIcons.award // 3º lugar - Prêmio
-                : FontAwesomeIcons.smile; // Outros - Smile
+                ? FontAwesomeIcons.award
+                : FontAwesomeIcons.smile;
   }
 
   Color _getWinnerIconColor(int posicao) {
     return posicao == 0
-        ? Colors.amber // 1º lugar - Dourado
+        ? _goldColor
         : posicao == 1
-            ? Colors.grey[300]! // 2º lugar - Prata
+            ? _silverColor
             : posicao == 2
-                ? Color(0xFFD7CCC8) // 3º lugar - Bronze
-                : Colors.grey[400]!; // Outros - Cinza
+                ? _bronzeColor
+                : _onSurfaceLight;
   }
 
   Color _getWinnerGradientStart(int posicao) {
     return posicao == 0
-        ? Color(0xFF1B5E20) // Verde escuro
+        ? Color(0xFF1B5E20)
         : posicao == 1
-            ? Color(0xFF311B92) // Roxo escuro
+            ? Color(0xFF311B92)
             : posicao == 2
-                ? Color(0xFF3E2723) // Marrom escuro
-                : Color(0xFF212121); // Cinza escuro
+                ? Color(0xFF3E2723)
+                : Color(0xFF212121);
   }
 
   Color _getWinnerGradientEnd(int posicao) {
     return posicao == 0
-        ? Color(0xFF4CAF50) // Verde claro
+        ? Color(0xFF4CAF50)
         : posicao == 1
             ? Color(0xFF7C4DFF)
             : posicao == 2
-                ? Color(0xFF8D6E63) // Marrom claro
-                : Color(0xFF616161); // Cinza médio
+                ? Color(0xFF8D6E63)
+                : Color(0xFF616161);
   }
-
-  // Widget _buildStatItem({
-  //   required IconData icon,
-  //   required String value,
-  //   required Color color,
-  // }) {
-  //   return Row(
-  //     mainAxisSize: MainAxisSize.min,
-  //     children: [
-  //       Icon(icon, color: color, size: 18),
-  //       SizedBox(width: 4),
-  //       Text(
-  //         value,
-  //         style: TextStyle(
-  //           color: Colors.white,
-  //           fontWeight: FontWeight.w500,
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
-
-  // Widget _buildTabelaExpandida(JogadorResultado jogador) {
-  //   return Container(
-  //     padding: EdgeInsets.all(12),
-  //     decoration: BoxDecoration(
-  //       color: Colors.black.withOpacity(0.2),
-  //       borderRadius: BorderRadius.circular(8),
-  //     ),
-  //     child: Column(
-  //       children: [
-  //         _buildDetailRow('Perguntas Certas', '${jogador.perguntasCertas}'),
-  //         Divider(color: Colors.white24, height: 16),
-  //         _buildDetailRow('Perguntas Erradas', '${jogador.perguntasErradas}'),
-  //         Divider(color: Colors.white24, height: 16),
-  //         _buildDetailRow('Top 3 vezes', '${jogador.top3vezes ?? 0}'),
-  //         Divider(color: Colors.white24, height: 16),
-  //         _buildDetailRow('Pontos Totais', '${jogador.pontos}'),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  // Widget _buildDetailRow(String label, String value) {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(vertical: 4),
-  //     child: Row(
-  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //       children: [
-  //         Text(
-  //           label,
-  //           style: TextStyle(
-  //             color: Colors.white70,
-  //             fontWeight: FontWeight.w500,
-  //           ),
-  //         ),
-  //         Text(
-  //           value,
-  //           style: TextStyle(
-  //             color: Colors.white,
-  //             fontWeight: FontWeight.bold,
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 }

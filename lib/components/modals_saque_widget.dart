@@ -1,3 +1,6 @@
+import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
+import 'package:projeto_game_quiz/core/models/requests/transaction_request.dart';
+
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -7,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'modals_saque_model.dart';
 export 'modals_saque_model.dart';
+import 'package:projeto_game_quiz/core/api/services/account_service.dart';
 
 class ModalsSaqueWidget extends StatefulWidget {
   const ModalsSaqueWidget({super.key});
@@ -17,6 +21,8 @@ class ModalsSaqueWidget extends StatefulWidget {
 
 class _ModalsSaqueWidgetState extends State<ModalsSaqueWidget> {
   late ModalsSaqueModel _model;
+  final AccountService accountService = AccountService();
+  bool _isLoading = false;
 
   // Cores do tema premium alinhadas com sua app
   final Color _primaryColor = Color(0xFFEC8D0D);
@@ -49,13 +55,13 @@ class _ModalsSaqueWidgetState extends State<ModalsSaqueWidget> {
   // Função para formatar o valor enquanto digita (Angola: 1.000,00)
   String _formatCurrency(String value) {
     if (value.isEmpty) return '';
-    
+
     // Remove todos os caracteres não numéricos
     String digitsOnly = value.replaceAll(RegExp(r'[^\d]'), '');
-    
+
     // Se estiver vazio após limpar, retorna vazio
     if (digitsOnly.isEmpty) return '';
-    
+
     // Converte para número inteiro (centavos)
     double number;
     try {
@@ -63,15 +69,11 @@ class _ModalsSaqueWidgetState extends State<ModalsSaqueWidget> {
     } catch (e) {
       return value;
     }
-    
-    // Formata com separadores angolanos
+
     if (number < 1000) {
-      // Para números menores que 1000, mostra com 2 decimais
       return NumberFormat("#,##0.00", "pt_AO").format(number);
     } else {
-      // Para números maiores, formata com separador de milhar
       String formatted = NumberFormat("#,##0", "pt_AO").format(number.toInt());
-      // Adiciona os centavos se houver
       double cents = number - number.toInt();
       if (cents > 0) {
         String centsStr = (cents * 100).round().toString().padLeft(2, '0');
@@ -86,12 +88,12 @@ class _ModalsSaqueWidgetState extends State<ModalsSaqueWidget> {
   // Função para validar o valor
   bool _isValidAmount(String value) {
     if (value.isEmpty) return false;
-    
+
     try {
       // Remove formatação angolana
       String cleanValue = value.replaceAll('.', '').replaceAll(',', '.');
       double amount = double.parse(cleanValue);
-      
+
       // Verifica limites
       return amount >= 100.00 && amount <= 10000.00;
     } catch (e) {
@@ -102,13 +104,92 @@ class _ModalsSaqueWidgetState extends State<ModalsSaqueWidget> {
   // Extrai o valor numérico do texto formatado
   double? _parseAmount(String value) {
     if (value.isEmpty) return null;
-    
+
     try {
       String cleanValue = value.replaceAll('.', '').replaceAll(',', '.');
       return double.parse(cleanValue);
     } catch (e) {
       return null;
     }
+  }
+
+  // Função para enviar o saque para a API
+  Future<void> _enviarSaque() async {
+    if (!(_model.formKey.currentState?.validate() ?? false)) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final amount = _parseAmount(_model.textController.text);
+      if (amount == null) {
+        _showErrorDialog('Valor inválido');
+        return;
+      }
+      final accountId = await _getAccountId();
+      if (accountId == null) {
+        _showErrorDialog('Conta não encontrada');
+        return;
+      }
+
+      final transactionData = TransactionRequest(
+        type: 'debit',
+        amount: amount,
+        account_id: accountId,
+      );
+      final result =
+          await accountService.createTransactionAsync(transactionData);
+      if (result["isSuccess"]) {
+        await _showSuccessDialog();
+      } else {
+        final errorMessage =
+            result["error"]?.detail?.message ?? 'Erro ao processar solicitação';
+        _showErrorDialog(errorMessage);
+      }
+    } catch (e) {
+      _showErrorDialog('Erro inesperado: ${e.toString()}');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<String?> _getAccountId() async {
+    try {
+      final user = await UserUtil.getUserInfo();
+      if (user != null) {
+        final accountResult =
+            await accountService.getAccountByUserIdAsync(user.id);
+        if (accountResult["isSuccess"]) {
+          return accountResult["data"]?.id;
+        }
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (alertDialogContext) {
+        return AlertDialog(
+          title: Text('Erro'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(alertDialogContext),
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -249,7 +330,8 @@ class _ModalsSaqueWidgetState extends State<ModalsSaqueWidget> {
                                   fontSize: 14,
                                 ),
                                 border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(vertical: 14),
+                                contentPadding:
+                                    EdgeInsets.symmetric(vertical: 14),
                                 suffixIcon: Padding(
                                   padding: EdgeInsets.symmetric(vertical: 14),
                                   child: Text(
@@ -262,40 +344,48 @@ class _ModalsSaqueWidgetState extends State<ModalsSaqueWidget> {
                                     ),
                                   ),
                                 ),
-                                suffixIconConstraints: BoxConstraints(minWidth: 30),
+                                suffixIconConstraints:
+                                    BoxConstraints(minWidth: 30),
                               ),
                               keyboardType: TextInputType.numberWithOptions(
                                 decimal: true,
                                 signed: false,
                               ),
                               inputFormatters: [
-                                FilteringTextInputFormatter.allow(RegExp(r'[\d,\.]')),
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'[\d,\.]')),
                               ],
                               cursorColor: _primaryColor,
                               onChanged: (value) {
                                 // Salva a posição do cursor
-                                final cursorPosition = _model.textController?.selection.base.offset;
-                                
+                                final cursorPosition = _model
+                                    .textController?.selection.base.offset;
+
                                 // Formata o valor
                                 final formatted = _formatCurrency(value);
-                                
+
                                 // Atualiza o texto se diferente
                                 if (formatted != value) {
                                   _model.textController.text = formatted;
-                                  
+
                                   // Tenta manter o cursor na posição correta
                                   int? newPosition = cursorPosition;
                                   if (newPosition != null) {
                                     if (value.length > formatted.length) {
-                                      newPosition -= (value.length - formatted.length);
-                                    } else if (value.length < formatted.length) {
-                                      newPosition += (formatted.length - value.length);
+                                      newPosition -=
+                                          (value.length - formatted.length);
+                                    } else if (value.length <
+                                        formatted.length) {
+                                      newPosition +=
+                                          (formatted.length - value.length);
                                     }
-                                    
+
                                     // Garante que a posição está dentro dos limites
-                                    newPosition = newPosition.clamp(0, formatted.length);
-                                    
-                                    _model.textController?.selection = TextSelection.collapsed(
+                                    newPosition =
+                                        newPosition.clamp(0, formatted.length);
+
+                                    _model.textController?.selection =
+                                        TextSelection.collapsed(
                                       offset: newPosition,
                                     );
                                   }
@@ -315,12 +405,13 @@ class _ModalsSaqueWidgetState extends State<ModalsSaqueWidget> {
                         ),
                       ],
                     ),
-                    
+
                     SizedBox(height: 12),
-                    
+
                     // Informação de limite
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
                         color: _primaryColor.withOpacity(0.05),
                         borderRadius: BorderRadius.circular(8),
@@ -372,11 +463,7 @@ class _ModalsSaqueWidgetState extends State<ModalsSaqueWidget> {
                         borderRadius: BorderRadius.circular(12),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(12),
-                          onTap: () async {
-                            if (_model.formKey.currentState?.validate() ?? false) {
-                              await _showSuccessDialog();
-                            }
-                          },
+                          onTap: _isLoading ? null : _enviarSaque,
                           child: Container(
                             width: double.infinity,
                             height: 48,
@@ -389,26 +476,35 @@ class _ModalsSaqueWidgetState extends State<ModalsSaqueWidget> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Center(
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.send_rounded,
-                                    color: Colors.white,
-                                    size: 18,
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'ENVIAR SOLICITAÇÃO',
-                                    style: TextStyle(
-                                      fontFamily: 'Inter',
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
+                              child: _isLoading
+                                  ? SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.send_rounded,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'ENVIAR SOLICITAÇÃO',
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                ],
-                              ),
                             ),
                           ),
                         ),
@@ -426,10 +522,10 @@ class _ModalsSaqueWidgetState extends State<ModalsSaqueWidget> {
 
   Future<void> _showSuccessDialog() async {
     final amount = _parseAmount(_model.textController.text);
-    final formattedAmount = amount != null 
-        ? NumberFormat("#,##0.00", "pt_AO").format(amount) 
+    final formattedAmount = amount != null
+        ? NumberFormat("#,##0.00", "pt_AO").format(amount)
         : _model.textController.text;
-    
+
     await showDialog(
       context: context,
       barrierDismissible: false,

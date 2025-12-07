@@ -72,7 +72,7 @@ class Warning04ReducaoDeSaldoModel
           "START_MATCH", matchInfo.id);
     } else {
       if (result.containsKey("error")) {
-        Warning00ErrorUtil.showDialogMessageError(context,
+        await Warning00ErrorUtil.showDialogMessageError(context,
             result["error"].detail.message, result["error"].detail.details);
       } else {}
     }
