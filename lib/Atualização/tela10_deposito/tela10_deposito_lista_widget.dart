@@ -2055,7 +2055,8 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
         },
         context,
       );
-
+      
+      print(result["isSuccess"]);
       if (result != null && result["isSuccess"] == true) {
         setState(() {
           _referenciaGerada = true;

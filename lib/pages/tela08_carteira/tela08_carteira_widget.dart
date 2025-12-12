@@ -5,11 +5,11 @@ import 'package:projeto_game_quiz/core/models/responses/account_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/transaction_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 import '/flutter_flow/flutter_flow_button_tabbar.dart';
-import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:intl/intl.dart';
 import 'tela08_carteira_model.dart';
 export 'tela08_carteira_model.dart';
 
@@ -29,12 +29,22 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
   AccountResponse? userAccountInfo;
   UserResponse? user;
   List<Map<String, dynamic>> depositHistory = [];
+  List<TransactionResponse> withdrawalHistory = [];
   final AccountService accountService = AccountService();
   bool isLoading = true;
+  bool isLoadingWithdrawals = true;
+  String _selectedFilter = 'TODOS';
+  List<String> _filterOptions = [
+    'TODOS',
+    'PENDENTE',
+    'PROCESSANDO',
+    'CONCLUIDO',
+    'CANCELADO'
+  ];
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // Cores do tema premium alinhadas com sua app
+  // Cores do tema premium
   final Color _primaryColor = Color(0xFFEC8D0D);
   final Color _backgroundColor = Color(0xFFF8FAFC);
   final Color _surfaceColor = Colors.white;
@@ -42,8 +52,9 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
   final Color _outlineColor = Color(0xFFE2E8F0);
   final Color _successColor = Color(0xFF10B981);
   final Color _errorColor = Color(0xFFEF4444);
-
-  // Gradientes premium
+  final Color _warningColor = Color(0xFFF59E0B);
+  final Color _infoColor = Color(0xFF3B82F6);
+ 
   final LinearGradient _primaryGradient = LinearGradient(
     colors: [Color(0xFFEC8D0D), Color(0xFFF59E0B)],
     begin: Alignment.topLeft,
@@ -53,48 +64,28 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
   @override
   void initState() {
     super.initState();
-    _model = createModel(context, () => Tela08CarteiraModel());
-    
-    SchedulerBinding.instance.addPostFrameCallback((_) async {
-      if ((_model.textController1.text.isEmpty ||
-              _model.textController1.text == '') ||
-          (_model.textController2.text.isEmpty ||
-              _model.textController2.text == '')) {
-        await showDialog(
-          context: context,
-          builder: (dialogContext) {
-            return Dialog(
-              elevation: 0,
-              insetPadding: EdgeInsets.zero,
-              backgroundColor: Colors.transparent,
-              alignment: AlignmentDirectional(0.0, 0.0)
-                  .resolve(Directionality.of(context)),
-              child: GestureDetector(
-                onTap: () {
-                  FocusScope.of(dialogContext).unfocus();
-                  FocusManager.instance.primaryFocus?.unfocus();
-                },
-                child: Warning00CampoVazioWidget(titulo: "", detalhe: ""),
-              ),
-            );
-          },
-        );
+    _model = createModel(context, () => Tela08CarteiraModel()); 
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted &&
+          (_model.textController1?.text.isEmpty == true ||
+              _model.textController2?.text.isEmpty == true)) {
+          //await _showEmptyFieldWarning();
       }
     });
 
-    getUserInfoAndAccountInfoAsync(setState, context).then((_) {
-      loadDepositHistory();
-    });
-    
+    // Carregar dados do usuário
+    _loadUserData();
+
+    // Inicializar TabController
     _model.tabBarController = TabController(
       vsync: this,
       length: 2,
       initialIndex: 0,
-    )..addListener(() => safeSetState(() {}));
-    
+    )..addListener(() => setState(() {}));
+
+    // Inicializar controladores de texto
     _model.textController1 ??= TextEditingController();
     _model.textFieldFocusNode1 ??= FocusNode();
-
     _model.textController2 ??= TextEditingController();
     _model.textFieldFocusNode2 ??= FocusNode();
   }
@@ -105,860 +96,1332 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
     super.dispose();
   }
 
+  Future<void> _showEmptyFieldWarning() async {
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          elevation: 0,
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          alignment: AlignmentDirectional.center,
+          child: GestureDetector(
+            onTap: () => FocusScope.of(dialogContext).unfocus(),
+            child: Warning00CampoVazioWidget(titulo: "", detalhe: ""),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _loadUserData() async {
+    await getUserInfoAndAccountInfoAsync();
+    if (mounted) {
+      await loadDepositHistory();
+      await loadWithdrawalHistory();
+    }
+  }
+
+  Future<void> getUserInfoAndAccountInfoAsync() async {
+    await getUserInfo();
+    await getUserAccountInfo();
+  }
+
+  Future<void> getUserInfo() async {
+    final _user = await UserUtil.getUserInfo();
+    if (mounted) {
+      setState(() => user = _user);
+    }
+  }
+
+  Future<void> getUserAccountInfo() async {
+    if (user?.id == null) return;
+
+    final result = await accountService.getAccountByUserIdAsync(user!.id);
+    if (result["isSuccess"] && mounted) {
+      setState(() => userAccountInfo = result["data"]);
+    }
+  }
+
+  Future<void> loadDepositHistory() async {
+    if (user?.id == null) {
+      if (mounted) setState(() => isLoading = false);
+      return;
+    }
+
+    try {
+      final accountResult =
+          await accountService.getAccountByUserIdAsync(user!.id);
+      if (accountResult['isSuccess'] && accountResult['data']?.id != null) {
+        final transactionsResult = await accountService
+            .listDepositTransactionsAsync(accountResult['data']!.id!);
+
+        if (transactionsResult['isSuccess'] && mounted) {
+          final List<TransactionResponse> transactions =
+              List<TransactionResponse>.from(transactionsResult['data'] ?? []);
+
+          setState(() {
+            depositHistory = transactions.map((tx) {
+              return {
+                'operacao': tx.type == 'credit' ? 'Depósito' : 'Saque',
+                'montante':
+                    '${double.tryParse(tx.amount.toString())?.toStringAsFixed(2).replaceAll('.', ',') ?? '0,00'} Kz',
+                'dataHora': DateFormat('dd/MM/yyyy HH:mm')
+                    .format(_parseDateTime(tx.createdAt)),
+                'status': tx.status,
+                'raw': tx,
+              };
+            }).toList();
+            isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> loadWithdrawalHistory() async {
+    if (userAccountInfo?.id == null) {
+      if (mounted) setState(() => isLoadingWithdrawals = false);
+      return;
+    }
+
+    try {
+      final result = await accountService.listDebitTransactionsAsync(
+          userAccountInfo!.id!, 'debit');
+
+      if (result['isSuccess'] && mounted) {
+        final List<TransactionResponse> transactions =
+            List<TransactionResponse>.from(result['data'] ?? []);
+
+        setState(() {
+          withdrawalHistory = transactions;
+          isLoadingWithdrawals = false;
+        });
+      } else if (mounted) {
+        setState(() => isLoadingWithdrawals = false);
+      }
+    } catch (e) {
+      if (mounted) setState(() => isLoadingWithdrawals = false);
+    }
+  }
+
+  DateTime _parseDateTime(dynamic value) {
+    if (value == null) return DateTime.now();
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.parse(value);
+    return DateTime.now();
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toUpperCase()) {
+      case 'PENDENTE':
+        return _warningColor;
+      case 'PROCESSANDO':
+        return _infoColor;
+      case 'CONCLUIDO':
+      case 'REALIZADO':
+        return _successColor;
+      case 'CANCELADO':
+        return _errorColor;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _getStatusLabel(String status) {
+    switch (status.toUpperCase()) {
+      case 'PENDENTE':
+        return 'Pendente';
+      case 'PROCESSANDO':
+        return 'Processando';
+      case 'CONCLUIDO':
+      case 'REALIZADO':
+        return 'Concluído';
+      case 'CANCELADO':
+        return 'Cancelado';
+      default:
+        return status;
+    }
+  }
+
+  IconData _getStatusIcon(String status) {
+    switch (status.toUpperCase()) {
+      case 'PENDENTE':
+        return Icons.pending_rounded;
+      case 'PROCESSANDO':
+        return Icons.autorenew_rounded;
+      case 'CONCLUIDO':
+      case 'REALIZADO':
+        return Icons.check_circle_rounded;
+      case 'CANCELADO':
+        return Icons.cancel_rounded;
+      default:
+        return Icons.info_rounded;
+    }
+  }
+
+  List<TransactionResponse> _getFilteredWithdrawals() {
+    if (_selectedFilter == 'TODOS') return withdrawalHistory;
+
+    return withdrawalHistory.where((withdrawal) {
+      return withdrawal.status.toUpperCase() == _selectedFilter;
+    }).toList();
+  }
+
+  double _getFilteredTotal() {
+    return _getFilteredWithdrawals()
+        .fold(0.0, (sum, item) => sum + item.amount);
+  }
+
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 600;
-    
+
     return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-        FocusManager.instance.primaryFocus?.unfocus();
-      },
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: _backgroundColor,
         body: SafeArea(
-          top: true,
           child: Column(
             children: [
-              // Header Premium
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: _primaryGradient,
-                  boxShadow: [
-                    BoxShadow(
-                      color: _primaryColor.withOpacity(0.3),
-                      blurRadius: 15,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isMobile ? 16 : 24,
-                    vertical: isMobile ? 12 : 16,
-                  ),
-                  child: Row(
-                    children: [
-                      // Botão Voltar Premium
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: IconButton(
-                          onPressed: () async {
-                            context.safePop();
-                          },
-                          icon: Icon(
-                            Icons.arrow_back_ios_rounded,
-                            color: Colors.white,
-                            size: isMobile ? 18 : 20,
-                          ),
-                          splashRadius: 20,
-                          padding: EdgeInsets.all(isMobile ? 8 : 12),
-                        ),
-                      ),
-                      SizedBox(width: isMobile ? 12 : 16),
-                      Expanded(
-                        child: Text(
-                          'CARTEIRA',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: isMobile ? 18 : 20,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                      // Ícone de carteira
-                      Container(
-                        width: isMobile ? 40 : 44,
-                        height: isMobile ? 40 : 44,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.account_balance_wallet_rounded,
-                          color: Colors.white,
-                          size: isMobile ? 20 : 22,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              // Header
+              _buildHeader(isMobile),
 
-              // Card de Saldo Premium
-              Padding(
-                padding: EdgeInsets.all(isMobile ? 16 : 20),
-                child: Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(isMobile ? 20 : 24),
-                  decoration: BoxDecoration(
-                    gradient: _primaryGradient,
-                    borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: _primaryColor.withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: isMobile ? 40 : 44,
-                            height: isMobile ? 40 : 44,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.account_balance_wallet_rounded,
-                              color: Colors.white,
-                              size: isMobile ? 20 : 22,
-                            ),
-                          ),
-                          SizedBox(width: isMobile ? 12 : 16),
-                          Expanded(
-                            child: Text(
-                              'Sua Carteira Digital',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: isMobile ? 15 : 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: isMobile ? 16 : 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Carteira Nº',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.8),
-                                  fontSize: isMobile ? 13 : 14,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                userAccountInfo?.accountNumber.toString() ?? 'Não Informado',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: isMobile ? 15 : 16,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                'Saldo Disponível',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.8),
-                                  fontSize: isMobile ? 13 : 14,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                '${(userAccountInfo?.availableBalance ?? 0.00).toStringAsFixed(2)} Kz',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: isMobile ? 18 : 20,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              // Card de Saldo
+              _buildBalanceCard(isMobile),
 
-              // TabBar Premium
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 20),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: _surfaceColor,
-                    borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 15,
-                        offset: Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: FlutterFlowButtonTabBar(
-                    useToggleButtonStyle: true,
-                    labelStyle: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: isMobile ? 12 : 14,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.0,
-                    ),
-                    unselectedLabelStyle: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: isMobile ? 12 : 14,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.0,
-                    ),
-                    labelColor: Colors.white,
-                    unselectedLabelColor: _onSurfaceColor.withOpacity(0.6),
-                    backgroundColor: _primaryColor,
-                    unselectedBackgroundColor: _surfaceColor,
-                    borderColor: _primaryColor,
-                    unselectedBorderColor: _outlineColor,
-                    borderWidth: 2.0,
-                    borderRadius: isMobile ? 10 : 12,
-                    elevation: 0.0,
-                    labelPadding: EdgeInsets.symmetric(
-                      horizontal: isMobile ? 16 : 20,
-                      vertical: isMobile ? 10 : 12,
-                    ),
-                    buttonMargin: EdgeInsets.all(4.0),
-                    tabs: [
-                      Tab(
-                        text: 'Histórico',
-                      ),
-                      Tab(
-                        text: 'Transferir Saldo',
-                      ),
-                    ],
-                    controller: _model.tabBarController,
-                    onTap: (i) async {
-                      [() async {}, () async {}][i]();
-                    },
-                  ),
-                ),
-              ),
-
-              SizedBox(height: isMobile ? 12 : 16),
+              // TabBar
+              _buildTabBar(isMobile),
 
               // Conteúdo das Tabs
               Expanded(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 20),
+                  padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24),
                   child: TabBarView(
                     controller: _model.tabBarController,
                     children: [
-                      // Tab 1: Histórico
                       _buildHistoricoTab(isMobile),
-                      // Tab 2: Transferir Saldo
-                      _buildTransferirTab(isMobile),
+                      _buildSolicitacoesTab(isMobile),
                     ],
                   ),
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(bool isMobile) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: _primaryGradient,
+        boxShadow: [
+          BoxShadow(
+            color: _primaryColor.withOpacity(0.3),
+            blurRadius: 20,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 20 : 32,
+        vertical: isMobile ? 16 : 20,
+      ),
+      child: Row(
+        children: [
+          _buildBackButton(isMobile),
+          SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              'CARTEIRA DIGITAL',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: isMobile ? 20 : 24,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1,
+              ),
+            ),
+          ),
+          _buildWalletIcon(isMobile),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBackButton(bool isMobile) {
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: () => context.safePop(),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            Icons.arrow_back_ios_rounded,
+            color: Colors.white,
+            size: 20,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWalletIcon(bool isMobile) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(
+        Icons.account_balance_wallet_rounded,
+        color: Colors.white,
+        size: 22,
+      ),
+    );
+  }
+
+  Widget _buildBalanceCard(bool isMobile) {
+    return Padding(
+      padding: EdgeInsets.all(isMobile ? 20 : 24),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(isMobile ? 24 : 32),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF1E293B),
+              Color(0xFF0F172A),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 30,
+              offset: Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.account_balance_wallet_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
+                SizedBox(width: 12),
+                Text(
+                  'Saldo Disponível',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Total',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.6),
+                        fontSize: 14,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      '${(userAccountInfo?.availableBalance ?? 0.00).toStringAsFixed(2)} Kz',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: isMobile ? 32 : 40,
+                        fontWeight: FontWeight.w800,
+                        height: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Conta',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.6),
+                        fontSize: 14,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _primaryColor,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        userAccountInfo?.accountNumber?.toString() ?? '---',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: 8),
+            Divider(color: Colors.white.withOpacity(0.1), height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildInfoItem('Limite Diário', '100.000,00 Kz'),
+                _buildInfoItem('Última Atualização',
+                    DateFormat('dd/MM/yyyy').format(DateTime.now())),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoItem(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.6),
+            fontSize: 12,
+          ),
+        ),
+        SizedBox(height: 2),
+        Text(
+          value,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTabBar(bool isMobile) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 20 : 24),
+      child: Container(
+        decoration: BoxDecoration(
+          color: _surfaceColor,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 20,
+              offset: Offset(0, 8),
+            ),
+          ],
+        ),
+        child: FlutterFlowButtonTabBar(
+          useToggleButtonStyle: true,
+          labelStyle: TextStyle(
+            fontSize: isMobile ? 14 : 16,
+            fontWeight: FontWeight.w600,
+          ),
+          unselectedLabelStyle: TextStyle(
+            fontSize: isMobile ? 14 : 16,
+            fontWeight: FontWeight.w500,
+          ),
+          labelColor: Colors.white,
+          unselectedLabelColor: _onSurfaceColor.withOpacity(0.6),
+          backgroundColor: _primaryColor,
+          unselectedBackgroundColor: _surfaceColor,
+          borderColor: _primaryColor,
+          unselectedBorderColor: _outlineColor,
+          borderWidth: 2,
+          borderRadius: 12,
+          elevation: 0,
+          labelPadding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 24 : 32,
+            vertical: isMobile ? 14 : 16,
+          ),
+          buttonMargin: EdgeInsets.all(6),
+          tabs: [
+            Tab(text: 'Histórico'),
+            Tab(text: 'Solicitações'),
+          ],
+          controller: _model.tabBarController,
         ),
       ),
     );
   }
 
   Widget _buildHistoricoTab(bool isMobile) {
-    if (isMobile) {
-      return _buildMobileHistorico();
-    } else {
-      return _buildDesktopHistorico();
+    if (isLoading) {
+      return _buildLoadingState();
     }
-  }
 
-  Widget _buildMobileHistorico() {
-    return Container(
-      decoration: BoxDecoration(
-        color: _surfaceColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: depositHistory.isEmpty
-          ? Center(
+    if (depositHistory.isEmpty) {
+      return _buildEmptyState(
+        icon: Icons.history_rounded,
+        title: 'Nenhuma transação',
+        subtitle: 'Seu histórico de transações aparecerá aqui',
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 20),
+      child: ListView.separated(
+        itemCount: depositHistory.length,
+        separatorBuilder: (_, __) =>
+            Divider(height: 1, color: _outlineColor.withOpacity(0.3)),
+        itemBuilder: (context, index) {
+          final item = depositHistory[index];
+          final isDeposit = item['operacao'] == 'Depósito';
+          final statusColor = _getStatusColor(item['status']);
+
+          return Material(
+            color: Colors.transparent,
+            child: InkWell(
+              //onTap: () => _showTransactionDetails(item['raw']),
+              borderRadius: BorderRadius.circular(12),
               child: Container(
-                padding: EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: _surfaceColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
                   children: [
+                    // Ícone
                     Container(
-                      width: 60,
-                      height: 60,
+                      width: 48,
+                      height: 48,
                       decoration: BoxDecoration(
-                        color: _outlineColor.withOpacity(0.3),
-                        shape: BoxShape.circle,
+                        color: (isDeposit ? _successColor : _primaryColor)
+                            .withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
-                        Icons.history_rounded,
-                        color: _onSurfaceColor.withOpacity(0.4),
+                        isDeposit
+                            ? Icons.arrow_downward_rounded
+                            : Icons.arrow_upward_rounded,
+                        color: isDeposit ? _successColor : _primaryColor,
                         size: 24,
                       ),
                     ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Nenhum Histórico',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: _onSurfaceColor.withOpacity(0.6),
+                    SizedBox(width: 16),
+
+                    // Detalhes
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item['operacao'],
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                              color: _onSurfaceColor,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            item['dataHora'],
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: _onSurfaceColor.withOpacity(0.6),
+                            ),
+                          ),
+                        ],
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: 8),
-                    Text(
-                      'Suas transações aparecerão aqui',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 14,
-                        color: _onSurfaceColor.withOpacity(0.4),
-                      ),
-                      textAlign: TextAlign.center,
+
+                    // Montante e Status
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          item['montante'],
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            color: _onSurfaceColor,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: statusColor,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              SizedBox(width: 6),
+                              Text(
+                                _getStatusLabel(item['status']),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: statusColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-            )
-          : ListView.separated(
-              itemCount: depositHistory.length,
-              separatorBuilder: (context, index) => Divider(
-                height: 1,
-                thickness: 1,
-                color: _outlineColor,
-              ),
-              itemBuilder: (context, index) {
-                final item = depositHistory[index];
-                final isRealizado = item['status'] == 'Realizado';
-                final isDeposito = item['operacao'] == 'Depósito';
-
-                return Container(
-                  color: index % 2 == 0 ? _surfaceColor : _backgroundColor,
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Linha 1: Operação e Status
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 32,
-                                height: 32,
-                                decoration: BoxDecoration(
-                                  color: isDeposito
-                                      ? _successColor.withOpacity(0.1)
-                                      : _primaryColor.withOpacity(0.1),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  isDeposito
-                                      ? Icons.arrow_downward_rounded
-                                      : Icons.arrow_upward_rounded,
-                                  color: isDeposito ? _successColor : _primaryColor,
-                                  size: 16,
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                item['operacao'],
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  color: _onSurfaceColor,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 4, horizontal: 8),
-                            decoration: BoxDecoration(
-                              color: isRealizado
-                                  ? _successColor.withOpacity(0.1)
-                                  : _errorColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(
-                                color: isRealizado
-                                    ? _successColor.withOpacity(0.3)
-                                    : _errorColor.withOpacity(0.3),
-                                width: 1,
-                              ),
-                            ),
-                            child: Text(
-                              item['status'],
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                color: isRealizado ? _successColor : _errorColor,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 12),
-                      // Linha 2: Montante e Data
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Montante',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  color: _onSurfaceColor.withOpacity(0.6),
-                                  fontSize: 12,
-                                ),
-                              ),
-                              SizedBox(height: 2),
-                              Text(
-                                item['montante'],
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  color: _onSurfaceColor,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                'Data',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  color: _onSurfaceColor.withOpacity(0.6),
-                                  fontSize: 12,
-                                ),
-                              ),
-                              SizedBox(height: 2),
-                              Text(
-                                item['dataHora'],
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  color: _onSurfaceColor.withOpacity(0.8),
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
             ),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildDesktopHistorico() {
+  Widget _buildSolicitacoesTab(bool isMobile) {
+    final filteredWithdrawals = _getFilteredWithdrawals();
+
+    return Column(
+      children: [
+        // Filtros
+        _buildFiltersSection(isMobile),
+        SizedBox(height: 20),
+
+        // Estatísticas
+        if (filteredWithdrawals.isNotEmpty)
+          _buildStatsCard(filteredWithdrawals, isMobile),
+
+        SizedBox(height: 20),
+
+        // Lista
+        Expanded(
+          child: isLoadingWithdrawals
+              ? _buildLoadingState()
+              : filteredWithdrawals.isEmpty
+                  ? _buildEmptyState(
+                      icon: Icons.request_quote_rounded,
+                      title: 'Nenhuma solicitação',
+                      subtitle: _selectedFilter == 'TODOS'
+                          ? 'Você ainda não fez nenhum saque'
+                          : 'Nenhuma solicitação com este filtro',
+                    )
+                  : _buildWithdrawalsList(filteredWithdrawals, isMobile),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFiltersSection(bool isMobile) {
     return Container(
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: _surfaceColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: Offset(0, 2),
+            blurRadius: 15,
+            offset: Offset(0, 5),
           ),
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Cabeçalho da Tabela
+          Text(
+            'Filtrar por estado',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              color: _onSurfaceColor,
+            ),
+          ),
+          SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _filterOptions.map((filter) {
+              final isActive = _selectedFilter == filter;
+              final statusColor = _getStatusColor(filter);
+
+              return ChoiceChip(
+                label: Text(
+                  filter == 'TODOS' ? 'Todos' : _getStatusLabel(filter),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isActive ? Colors.white : statusColor,
+                  ),
+                ),
+                selected: isActive,
+                selectedColor: statusColor,
+                backgroundColor: statusColor.withOpacity(0.1),
+                side: BorderSide(
+                  color: statusColor.withOpacity(0.3),
+                  width: 1,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                onSelected: (selected) {
+                  if (selected) {
+                    setState(() => _selectedFilter = filter);
+                  }
+                },
+                avatar: isActive
+                    ? null
+                    : Icon(
+                        _getStatusIcon(filter),
+                        size: 16,
+                        color: statusColor,
+                      ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatsCard(List<TransactionResponse> withdrawals, bool isMobile) {
+    final total = _getFilteredTotal();
+
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: _primaryGradient,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: _primaryColor.withOpacity(0.2),
+            blurRadius: 20,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.analytics_rounded,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
+          SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Resumo do Filtro',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 14,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  '${withdrawals.length} solicitações',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'Valor Total',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.9),
+                  fontSize: 14,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                '${total.toStringAsFixed(2).replaceAll('.', ',')} Kz',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWithdrawalsList(
+      List<TransactionResponse> withdrawals, bool isMobile) {
+    return ListView.separated(
+      itemCount: withdrawals.length,
+      separatorBuilder: (_, __) => SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final withdrawal = withdrawals[index];
+        final statusColor = _getStatusColor(withdrawal.status);
+        final dateTime = _parseDateTime(withdrawal.createdAt);
+        final formattedDate = DateFormat('dd/MM/yyyy').format(dateTime);
+        final formattedTime = DateFormat('HH:mm').format(dateTime);
+        final amount =
+            '${withdrawal.amount.toStringAsFixed(2).replaceAll('.', ',')} Kz';
+
+        return Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            onTap: () => _showWithdrawalDetails(withdrawal),
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: _surfaceColor,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      // Ícone de status
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: statusColor.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          _getStatusIcon(withdrawal.status),
+                          color: statusColor,
+                          size: 20,
+                        ),
+                      ),
+                      SizedBox(width: 12),
+
+                      // Informações principais
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Saque #${withdrawal.id?.substring(0, 8) ?? '---'}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                                color: _onSurfaceColor,
+                              ),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              '$formattedDate às $formattedTime',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: _onSurfaceColor.withOpacity(0.6),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Valor
+                      Text(
+                        amount,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                          color: _primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 12),
+
+                  // Status badge
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: statusColor,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          _getStatusLabel(withdrawal.status),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                            color: statusColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 50,
+            height: 50,
+            child: CircularProgressIndicator(
+              strokeWidth: 3,
+              color: _primaryColor,
+            ),
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Carregando...',
+            style: TextStyle(
+              fontSize: 16,
+              color: _onSurfaceColor.withOpacity(0.6),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(
+      {required IconData icon,
+      required String title,
+      required String subtitle}) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: _outlineColor.withOpacity(0.3),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: _onSurfaceColor.withOpacity(0.4),
+                size: 40,
+              ),
+            ),
+            SizedBox(height: 24),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: _onSurfaceColor.withOpacity(0.8),
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: _onSurfaceColor.withOpacity(0.5),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showTransactionDetails(TransactionResponse transaction) {
+    showDialog(
+      context: context,
+      builder: (context) => _buildTransactionDialog(transaction),
+    );
+  }
+
+  void _showWithdrawalDetails(TransactionResponse withdrawal) {
+    showDialog(
+      context: context,
+      builder: (context) => _buildWithdrawalDialog(withdrawal),
+    );
+  }
+
+  AlertDialog _buildTransactionDialog(TransactionResponse transaction) {
+    final dateTime = _parseDateTime(transaction.createdAt);
+    final formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(dateTime);
+    final isDeposit = transaction.type == 'credit';
+
+    return AlertDialog(
+      title: Row(
+        children: [
+          Icon(
+            isDeposit
+                ? Icons.arrow_downward_rounded
+                : Icons.arrow_upward_rounded,
+            color: isDeposit ? _successColor : _primaryColor,
+          ),
+          SizedBox(width: 12),
+          Text(isDeposit ? 'Depósito' : 'Saque'),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildDetailItem(
+              'Valor:', '${transaction.amount.toStringAsFixed(2)} Kz'),
+          _buildDetailItem('Data:', formattedDate),
+          _buildDetailItem('Estado:', _getStatusLabel(transaction.status)),
+          if (transaction.reference != null)
+            _buildDetailItem('Referência:', transaction.reference! as String),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('FECHAR'),
+        ),
+      ],
+    );
+  }
+
+  AlertDialog _buildWithdrawalDialog(TransactionResponse withdrawal) {
+    final dateTime = _parseDateTime(withdrawal.createdAt);
+    final formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(dateTime);
+    final statusColor = _getStatusColor(withdrawal.status);
+
+    // Cores do tema premium
+    final Color _primaryColor = Color(0xFFEC8D0D);
+    final Color _backgroundColor = Colors.white;
+    final Color _surfaceColor = Colors.white;
+    final Color _onSurfaceColor = Color(0xFF1E293B);
+    final Color _onSurfaceLight = Color(0xFF64748B);
+    final Color _borderColor = Color(0xFFE2E8F0);
+
+    // Gradiente premium
+    final LinearGradient _primaryGradient = LinearGradient(
+      colors: [Color(0xFFEC8D0D), Color(0xFFF59E0B)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+
+    return AlertDialog(
+      backgroundColor: _backgroundColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: _borderColor,
+          width: 1.5,
+        ),
+      ),
+      elevation: 0,
+      titlePadding: EdgeInsets.all(24),
+      title: Container(
+        padding: EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: _borderColor,
+              width: 1.5,
+            ),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                gradient: _primaryGradient,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.currency_exchange_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+            SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                'DETALHES DO SAQUE',
+                style: TextStyle(
+                  color: _onSurfaceColor,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Status card premium
           Container(
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: _surfaceColor,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
+              color: statusColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: statusColor.withOpacity(0.2),
+                width: 1.5,
               ),
             ),
             child: Row(
               children: [
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    'Operação',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w600,
-                      color: _onSurfaceColor,
-                      fontSize: 14,
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: statusColor.withOpacity(0.25),
+                      width: 1.5,
                     ),
                   ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Text(
-                    'Montante',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w600,
-                      color: _onSurfaceColor,
-                      fontSize: 14,
-                    ),
+                  child: Icon(
+                    _getStatusIcon(withdrawal.status),
+                    color: statusColor,
+                    size: 20,
                   ),
                 ),
+                SizedBox(width: 12),
                 Expanded(
-                  flex: 2,
                   child: Text(
-                    'Data e Hora',
-                    textAlign: TextAlign.center,
+                    _getStatusLabel(withdrawal.status),
                     style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w600,
-                      color: _onSurfaceColor,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Text(
-                    'Status',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w600,
-                      color: _onSurfaceColor,
-                      fontSize: 14,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: statusColor,
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          Divider(height: 1, thickness: 1, color: _outlineColor),
+          SizedBox(height: 24),
 
-          // Lista de Histórico
-          Expanded(
-            child: depositHistory.isEmpty
-                ? Center(
-                    child: Container(
-                      padding: EdgeInsets.all(32),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              color: _outlineColor.withOpacity(0.3),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.history_rounded,
-                              color: _onSurfaceColor.withOpacity(0.4),
-                              size: 32,
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                          Text(
-                            'Nenhum Histórico Encontrado',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: _onSurfaceColor.withOpacity(0.6),
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Suas transações aparecerão aqui',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 14,
-                              color: _onSurfaceColor.withOpacity(0.4),
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                : ListView.separated(
-                    itemCount: depositHistory.length,
-                    separatorBuilder: (context, index) => Divider(
-                      height: 1,
-                      thickness: 1,
-                      color: _outlineColor,
-                    ),
-                    itemBuilder: (context, index) {
-                      final item = depositHistory[index];
-                      final isRealizado = item['status'] == 'Realizado';
-
-                      return Container(
-                        color: index % 2 == 0 ? _surfaceColor : _backgroundColor,
-                        padding: EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 32,
-                                    height: 32,
-                                    decoration: BoxDecoration(
-                                      color: _primaryColor.withOpacity(0.1),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      item['operacao'] == 'Depósito' 
-                                          ? Icons.arrow_downward_rounded 
-                                          : Icons.arrow_upward_rounded,
-                                      color: _primaryColor,
-                                      size: 16,
-                                    ),
-                                  ),
-                                  SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      item['operacao'],
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        color: _onSurfaceColor,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: Text(
-                                item['montante'],
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  color: _onSurfaceColor,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                item['dataHora'],
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  color: _onSurfaceColor.withOpacity(0.8),
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 6.0, horizontal: 8.0),
-                                decoration: BoxDecoration(
-                                  color: isRealizado
-                                      ? _successColor.withOpacity(0.1)
-                                      : _errorColor.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: isRealizado
-                                        ? _successColor.withOpacity(0.3)
-                                        : _errorColor.withOpacity(0.3),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Text(
-                                  item['status'],
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    color: isRealizado ? _successColor : _errorColor,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+          // Valor destacado
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: _primaryColor.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _primaryColor.withOpacity(0.1),
+                width: 1.5,
+              ),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  'Valor Solicitado',
+                  style: TextStyle(
+                    color: _onSurfaceLight,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
                   ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  '${withdrawal.amount.toStringAsFixed(2)} Kz',
+                  style: TextStyle(
+                    color: _onSurfaceColor,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
-    );
-  }
+          SizedBox(height: 16),
 
-  Widget _buildTransferirTab(bool isMobile) {
-    return Container(
-      decoration: BoxDecoration(
-        color: _surfaceColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: Offset(0, 2),
+          // Detalhes
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: _surfaceColor,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: _borderColor,
+                width: 1.5,
+              ),
+            ),
+            child: Column(
+              children: [
+                _buildDetailItem('Data:', formattedDate),
+                SizedBox(height: 12),
+                _buildDetailItem('ID:', withdrawal.id ?? '---'),
+                if (withdrawal.reference != null) ...[
+                  SizedBox(height: 12),
+                  _buildDetailItem(
+                      'Referência:', withdrawal.reference! as String),
+                ],
+              ],
+            ),
           ),
         ],
       ),
-      child: Center(
-        child: Padding(
-          padding: EdgeInsets.all(isMobile ? 20 : 24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: isMobile ? 80 : 120,
-                height: isMobile ? 80 : 120,
-                decoration: BoxDecoration(
-                  color: _outlineColor.withOpacity(0.3),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.swap_horiz_rounded,
-                  color: _onSurfaceColor.withOpacity(0.4),
-                  size: isMobile ? 32 : 48,
-                ),
-              ),
-              SizedBox(height: isMobile ? 16 : 24),
-              Text(
-                'Funcionalidade de Transferência',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: isMobile ? 16 : 18,
-                  fontWeight: FontWeight.w600,
-                  color: _onSurfaceColor,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: isMobile ? 8 : 12),
-              Text(
-                'Em breve você poderá transferir seu saldo para outras contas',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: isMobile ? 13 : 14,
-                  color: _onSurfaceColor.withOpacity(0.6),
-                ),
-                textAlign: TextAlign.center,
+      actionsPadding: EdgeInsets.only(bottom: 24, left: 24, right: 24),
+      actions: [
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: _primaryColor.withOpacity(0.2),
+                blurRadius: 10,
+                offset: Offset(0, 4),
               ),
             ],
           ),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  gradient: _primaryGradient,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 1.5,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    'FECHAR',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 
-  // MÉTODOS ORIGINAIS PRESERVADOS - 100% FUNCIONAIS
-  Future<void> getUserAccountInfo(void Function(VoidCallback fn) setState) async {
-    var result = await accountService.getAccountByUserIdAsync(user!.id);
-    if (result["isSuccess"]) {
-      setState(() {
-        userAccountInfo = result["data"];
-      });
-    } else {
-      Warning00ErrorUtil.showDialogMessageError(context,
-          result["error"].detail.message, result["error"].detail.details);
-    }
-  }
-
-  Future<void> getUserInfoAndAccountInfoAsync(
-      void Function(VoidCallback fn) setState, BuildContext context) async {
-    await getUserInfo(setState);
-    await getUserAccountInfo(setState);
-  }
-
-  Future<void> getUserInfo(void Function(VoidCallback fn) setState) async {
-    var _user = await UserUtil.getUserInfo();
-    setState(() {
-      user = _user!;
-    });
-  }
-
-  DateTime toDateTime(dynamic value) {
-    if (value == null) throw Exception('Data inválida: valor nulo');
-    if (value is DateTime) return value;
-    if (value is String) return DateTime.parse(value);
-    throw Exception('Data inválida: tipo inesperado');
-  }
-
-  Future<void> loadDepositHistory() async {
-    final userId = user?.id;
-
-    if (userId == null) {
-      setState(() => isLoading = false);
-      return;
-    }
-
-    final accountResult = await accountService.getAccountByUserIdAsync(userId);
-    if (accountResult['isSuccess']) {
-      final accountId = accountResult['data']?.id;
-
-      if (accountId != null) {
-        final transactionsResult =
-            await accountService.listDepositTransactionsAsync(accountId);
-
-        if (transactionsResult['isSuccess']) {
-          final List<TransactionResponse> transactions =
-              List<TransactionResponse>.from(transactionsResult['data']);
-
-          setState(() {
-            depositHistory = transactions.map((tx) {
-              return {
-                'operacao': (tx.type == 'credit') ? 'Depósito' : (tx.type),
-                'montante':
-                    '${double.tryParse(tx.amount.toString())?.toStringAsFixed(2).replaceAll('.', ',') ?? '0,00'} Kz',
-                'dataHora': DateFormat('dd/MM/yyyy HH:mm')
-                    .format(toDateTime(tx.createdAt)),
-                'status': tx.status,
-              };
-            }).toList();
-            isLoading = false;
-          });
-        } else {
-          setState(() => isLoading = false);
-        }
-      } else {
-        setState(() => isLoading = false);
-      }
-    } else {
-      setState(() => isLoading = false);
-    }
+  Widget _buildDetailItem(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: _onSurfaceColor.withOpacity(0.7),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                color: _onSurfaceColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

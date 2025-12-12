@@ -55,17 +55,16 @@ class Tela10DepositoListaModel
   // CORREÇÃO 1: Mudar o tipo do parâmetro para VoidCallback
   Future<Map<String, dynamic>> generateReference(
     String amount, 
-    VoidCallback updateUI, // Alterado de Function para VoidCallback
-    BuildContext context, // Adicionado contexto para mostrar erros
+    VoidCallback updateUI,
+    BuildContext context,
   ) async { 
     
-    try {
+    try { 
       var result = await accountTransactionService.generateReference(
-        GenerateReferenceRequest(Amount: amount, AccountId: userAccountInfo!.id)
+        GenerateReferenceRequest(Amount: amount, AccountId: userAccountInfo!.id, UserId: user!.id)
       );
-      
-      print("YOLANDA RESULT AQUI: $result");
-      
+       
+      print(result["isSuccess"]);
       if (result["isSuccess"]) { 
         reference = result["data"].Reference.toString(); 
         if (updateUI != null) {
@@ -76,8 +75,7 @@ class Tela10DepositoListaModel
           'isSuccess': true,
           'data': result["data"]
         };
-      } else {
-        // Mostra erro se necessário
+      } else { 
         Warning00ErrorUtil.showDialogMessageError(
           context,
           result["error"].detail.message,

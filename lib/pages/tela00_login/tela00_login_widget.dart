@@ -54,6 +54,10 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
   final String _heroImageUrl =
       'https://images.unsplash.com/photo-1604594849809-dfedbc827105?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHw3fHxtb25leXxlbnwwfHx8fDE3NDM2MjA1MTR8MA&ixlib=rb-4.0.3&q=80&w=1080';
 
+  // Controladores para o modal de recuperação de senha
+  final TextEditingController _emailRecuperacaoController = TextEditingController();
+  final FocusNode _emailRecuperacaoFocusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -99,7 +103,460 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
   void dispose() {
     _model.dispose();
     _animationController.dispose();
+    _emailRecuperacaoController.dispose();
+    _emailRecuperacaoFocusNode.dispose();
     super.dispose();
+  }
+
+  // Método para exibir modal de recuperação de senha
+  void _mostrarModalRecuperacaoSenha(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Container(
+            margin: EdgeInsets.only(
+              top: MediaQuery.of(context).viewInsets.top > 0 ? 0 : 50,
+            ),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: _buildModalRecuperacaoSenha(context),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Widget do modal de recuperação de senha
+  Widget _buildModalRecuperacaoSenha(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenWidth = mediaQuery.size.width;
+    final isMobile = screenWidth < 768;
+
+    return Container(
+      margin: EdgeInsets.all(isMobile ? 16 : 24),
+      decoration: BoxDecoration(
+        color: _surfaceColor,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 30,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Cabeçalho do modal
+          Container(
+            padding: EdgeInsets.all(isMobile ? 24 : 32),
+            decoration: BoxDecoration(
+              gradient: _primaryGradient,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(24),
+                topRight: Radius.circular(24),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: isMobile ? 48 : 56,
+                  height: isMobile ? 48 : 56,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.lock_reset_rounded,
+                      color: Colors.white,
+                      size: isMobile ? 24 : 28,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Recuperar Senha',
+                        style: TextStyle(
+                          fontSize: isMobile ? 20 : 24,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Enviaremos um link de recuperação para seu email',
+                        style: TextStyle(
+                          fontSize: isMobile ? 13 : 14,
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Conteúdo do modal
+          Padding(
+            padding: EdgeInsets.all(isMobile ? 24 : 32),
+            child: Column(
+              children: [
+                Text(
+                  'Digite o email associado à sua conta e enviaremos instruções para redefinir sua senha.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: isMobile ? 14 : 15,
+                    color: _textSecondary,
+                    height: 1.5,
+                  ),
+                ),
+                SizedBox(height: 24),
+
+                // Campo de email
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: _emailRecuperacaoFocusNode.hasFocus
+                          ? _primaryColor
+                          : _borderColor,
+                      width: _emailRecuperacaoFocusNode.hasFocus ? 2 : 1.5,
+                    ),
+                    boxShadow: _emailRecuperacaoFocusNode.hasFocus
+                        ? [
+                            BoxShadow(
+                              color: _primaryColor.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: Offset(0, 3),
+                            ),
+                          ]
+                        : [],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: isMobile ? 48 : 56,
+                        child: Center(
+                          child: Icon(
+                            Icons.email_outlined,
+                            color: _emailRecuperacaoFocusNode.hasFocus
+                                ? _primaryColor
+                                : _textSecondary,
+                            size: isMobile ? 20 : 22,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _emailRecuperacaoController,
+                          focusNode: _emailRecuperacaoFocusNode,
+                          keyboardType: TextInputType.emailAddress,
+                          style: TextStyle(
+                            fontSize: isMobile ? 15 : 16,
+                            fontWeight: FontWeight.w500,
+                            color: _textPrimary,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'seu@email.com',
+                            hintStyle: TextStyle(
+                              color: _textTertiary,
+                              fontSize: isMobile ? 14 : 15,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: isMobile ? 16 : 18,
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor, insira seu email';
+                            }
+                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                .hasMatch(value)) {
+                              return 'Por favor, insira um email válido';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 32),
+
+                // Botões de ação
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: isMobile ? 50 : 56,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: _borderColor,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(14),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(14),
+                            onTap: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Center(
+                              child: Text(
+                                'CANCELAR',
+                                style: TextStyle(
+                                  color: _textSecondary,
+                                  fontSize: isMobile ? 14 : 15,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Container(
+                        height: isMobile ? 50 : 56,
+                        decoration: BoxDecoration(
+                          gradient: _primaryGradient,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: _primaryColor.withOpacity(0.3),
+                              blurRadius: 15,
+                              offset: Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(14),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(14),
+                            onTap: () async {
+                              // Valida o email
+                              if (_emailRecuperacaoController.text.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Por favor, insira seu email'),
+                                    backgroundColor: _errorColor,
+                                  ),
+                                );
+                                return;
+                              }
+
+                              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                  .hasMatch(_emailRecuperacaoController.text)) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Por favor, insira um email válido'),
+                                    backgroundColor: _errorColor,
+                                  ),
+                                );
+                                return;
+                              }
+
+                              // Simula envio do email de recuperação
+                              await _simularEnvioEmailRecuperacao(context);
+                            },
+                            child: Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.send_rounded,
+                                    color: Colors.white,
+                                    size: isMobile ? 18 : 20,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'ENVIAR LINK',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: isMobile ? 14 : 15,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+
+                // Aviso adicional
+                Container(
+                  padding: EdgeInsets.all(isMobile ? 12 : 16),
+                  decoration: BoxDecoration(
+                    color: _primaryLight.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: _primaryColor.withOpacity(0.1),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline_rounded,
+                        color: _primaryColor,
+                        size: isMobile ? 16 : 18,
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Verifique sua caixa de spam se não receber o email em alguns minutos',
+                          style: TextStyle(
+                            fontSize: isMobile ? 12 : 13,
+                            color: _textSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Método para simular envio de email de recuperação
+  Future<void> _simularEnvioEmailRecuperacao(BuildContext context) async {
+    // Mostra indicador de carregamento
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(
+        child: Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            color: _surfaceColor,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 30,
+                height: 30,
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  color: _primaryColor,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Enviando...',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: _textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Simula delay de rede
+    await Future.delayed(Duration(seconds: 2));
+
+    // Fecha o diálogo de carregamento
+    Navigator.of(context).pop();
+
+    // Fecha o modal de recuperação
+    Navigator.of(context).pop();
+
+    // Mostra mensagem de sucesso
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: _successColor,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.check,
+                  size: 16,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Email enviado com sucesso!',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    'Verifique sua caixa de entrada',
+                    style: TextStyle(
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: _surfaceColor,
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: _successColor.withOpacity(0.2),
+          ),
+        ),
+        duration: Duration(seconds: 4),
+      ),
+    );
+
+    // Limpa o campo de email
+    _emailRecuperacaoController.clear();
   }
 
   @override
@@ -733,7 +1190,7 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
                       ),
                       GestureDetector(
                         onTap: () {
-                          // TODO: Implementar recuperação de senha
+                          _mostrarModalRecuperacaoSenha(context);
                         },
                         child: Text(
                           'Esqueceu a senha?',
