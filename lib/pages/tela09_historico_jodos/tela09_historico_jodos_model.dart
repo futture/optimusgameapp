@@ -27,6 +27,7 @@ class Tela09HistoricoJodosModel
   UserResponse? currentUser;
   bool isLoadingRanking = false;
   bool isLoadingHistory = false;
+  bool isLoadingAllMach = false;
   bool isLoadingLeave = false;
   List<MatchResponse> matches = List.empty();
   List<RankingResponse> rankings = List.empty();
@@ -50,12 +51,23 @@ class Tela09HistoricoJodosModel
       isLoadingRanking = true;
     });
     await getUserIdAsync();
-    await getMatchByUserIdAsync(setState, userId!);
+    await getMatchByUserIdAsync(setState);
     await getRankingByUserdAsync(setState);
   }
 
   Future<void> getRankingByUserdAsync(Function setState) async {
-    var result = await _rankingService.getRankingByUserdAsync(userId!);
+    setState(() {
+      isLoadingRanking = true;
+    });
+    var _dateTime = DateTime.now();
+
+    var startDate = param.startDate == null ? _dateTime : param.startDate;
+    var endDate = param.endDate == null
+        ? _dateTime.add(Duration(days: 1))
+        : param.endDate;
+
+    var result = await _rankingService.getRankingByUserdAsync(userId!,
+        startDate: startDate, endDate: endDate);
 
     if (result["isSuccess"]) {
       setState(() {
@@ -118,7 +130,15 @@ class Tela09HistoricoJodosModel
     }
   }
 
-  Future<void> getMatchByUserIdAsync(Function setState, matchId) async {
+  Future<void> getMatchByUserIdAsync(Function setState) async {
+    setState(() {
+      isLoadingAllMach = true;
+    });
+    var _dateTime = DateTime.now();
+
+    if (param.startDate == null) param.startDate = _dateTime;
+    if (param.endDate == null) param.endDate = _dateTime.add(Duration(days: 1));
+
     var result = await _matchService.getMatchByUserIdAsync(userId!,
         endDate: param.endDate,
         isEvent: param.isEvent,
@@ -130,8 +150,12 @@ class Tela09HistoricoJodosModel
         matches = result["data"];
 
         matches.sort((a, b) => (b.matchStartDate).compareTo(a.matchStartDate));
+        isLoadingAllMach = false;
       });
     } else {
+      setState(() {
+        isLoadingAllMach = false;
+      });
       Warning00ErrorUtil.showDialogMessageError(
         context!,
         result["error"].detail.message,
@@ -147,7 +171,7 @@ class Tela09HistoricoJodosModel
     var result = await _matchService.leaveTheMatchAsync(matchId, userId!);
 
     if (result["isSuccess"]) {
-      await getMatchByUserIdAsync(setState, matchId);
+      await getMatchByUserIdAsync(setState);
       setState(() {
         isLoadingLeave = false;
       });

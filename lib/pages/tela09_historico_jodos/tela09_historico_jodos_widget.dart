@@ -31,6 +31,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
   String _filterResult = 'all'; // 'all', 'winner', 'loser'
   String _filterStatus = 'all'; // 'all', 'pending', 'in_progress'
   DateTimeRange? _dateRange;
+  DateTimeRange? _dateRangeRanking;
   int _currentIndex = 0;
   final List<String> _statusOptions = [
     'PENDING',
@@ -112,24 +113,48 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
     return matches;
   }
 
-  Future<void> _selectDateRange(BuildContext context) async {
-    final DateTimeRange? picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-      initialDateRange: _dateRange,
-    );
+  Future<void> _selectDateRange(BuildContext context,
+      {bool isRanking = false}) async {
+    final DateTimeRange? picked;
+    if (!isRanking) {
+      picked = await showDateRangePicker(
+        context: context,
+        firstDate: DateTime(2020),
+        lastDate: DateTime.now().add(const Duration(days: 365)),
+        initialDateRange: _dateRange,
+      );
+    } else {
+      picked = await showDateRangePicker(
+        context: context,
+        firstDate: DateTime(2020),
+        lastDate: DateTime.now().add(const Duration(days: 365)),
+        initialDateRange: _dateRangeRanking,
+      );
+    }
+
     if (picked != null) {
       setState(() {
-        _dateRange = picked;
+        if (!isRanking) {
+          _dateRange = picked;
+          _model.param.endDate = _dateRange?.end;
+          _model.param.startDate = _dateRange?.start;
+        } else {
+          _dateRangeRanking = picked;
+          _model.param.endDate = _dateRangeRanking?.end;
+          _model.param.startDate = _dateRangeRanking?.start;
+        }
       });
+      if (!isRanking)
+        await _model.getMatchByUserIdAsync(setState);
+      else
+        await _model.getRankingByUserdAsync(setState);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 600;
-    
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -267,22 +292,32 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
             ),
 
             Expanded(
-              child: _model.isLoadingRanking
+              child: _model.isLoadingRanking || _model.isLoadingAllMach
                   ? const Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFEC8D0D)),
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Color(0xFFEC8D0D)),
                       ),
                     )
                   : _model.rankings.isEmpty && _model.matches.isEmpty
-                      ? _buildEmptyState()
+                      ? Column(
+                          children: [
+                            if (_currentIndex == 0)
+                              _buildCompletedFilters(isMobile)
+                            else
+                              _buildPendingFilters(isMobile),
+                            SizedBox(height: isMobile ? 12 : 16),
+                            _buildEmptyState(isMobile: isMobile)
+                          ],
+                        )
                       : Column(
                           children: [
                             // Filtros
-                            if (_currentIndex == 0) 
+                            if (_currentIndex == 0)
                               _buildCompletedFilters(isMobile)
-                            else 
+                            else
                               _buildPendingFilters(isMobile),
-                            
+
                             SizedBox(height: isMobile ? 12 : 16),
 
                             // Conteúdo das Tabs
@@ -304,140 +339,248 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState({bool isMobile = false}) {
     return Center(
-      child: Container(
-        padding: EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: _outlineColor.withOpacity(0.3),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.videogame_asset_outlined,
-                color: _onSurfaceColor.withOpacity(0.4),
-                size: 32,
-              ),
+        child: Container(
+      padding: EdgeInsets.all(32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: _outlineColor.withOpacity(0.3),
+              shape: BoxShape.circle,
             ),
-            SizedBox(height: 16),
-            Text(
-              'Nenhum histórico de jogos encontrado',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: _onSurfaceColor.withOpacity(0.6),
-              ),
-              textAlign: TextAlign.center,
+            child: Icon(
+              Icons.videogame_asset_outlined,
+              color: _onSurfaceColor.withOpacity(0.4),
+              size: 32,
             ),
-            SizedBox(height: 16),
-            Container(
-              decoration: BoxDecoration(
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Nenhum histórico de jogos encontrado',
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: _onSurfaceColor.withOpacity(0.6),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 16),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: _primaryColor.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
+              child: InkWell(
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: _primaryColor.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
+                onTap: () => _model.load(setState),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: _primaryGradient,
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(16),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: () => _model.load(setState),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    decoration: BoxDecoration(
-                      gradient: _primaryGradient,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.refresh_rounded,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.refresh_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'RECARREGAR',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
                           color: Colors.white,
-                          size: 20,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                         ),
-                        SizedBox(width: 8),
-                        Text(
-                          'RECARREGAR',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-          ],
-        ),
-      ));
+          ),
+        ],
+      ),
+    ));
   }
 
   Widget _buildCompletedFilters(bool isMobile) {
     return Container(
-      padding: EdgeInsets.all(isMobile ? 12 : 16),
-      decoration: BoxDecoration(
-        color: _surfaceColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _buildFilterChip(
-              label: 'Todas',
-              selected: _filterResult == 'all',
-              onSelected: (selected) {
-                setState(() {
-                  _filterResult = selected ? 'all' : _filterResult;
-                });
-              },
-            ),
-            SizedBox(width: 8),
-            _buildFilterChip(
-              label: 'Vitórias',
-              selected: _filterResult == 'winner',
-              onSelected: (selected) {
-                setState(() {
-                  _filterResult = selected ? 'winner' : _filterResult;
-                });
-              },
-            ),
-            SizedBox(width: 8),
-            _buildFilterChip(
-              label: 'Derrotas',
-              selected: _filterResult == 'loser',
-              onSelected: (selected) {
-                setState(() {
-                  _filterResult = selected ? 'loser' : _filterResult;
-                });
-              },
+        padding: EdgeInsets.all(isMobile ? 12 : 16),
+        decoration: BoxDecoration(
+          color: _surfaceColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: Offset(0, 2),
             ),
           ],
         ),
-      ),
-    );
+        child: Column(
+          children: [
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildFilterChip(
+                    label: 'Todas',
+                    selected: _filterResult == 'all',
+                    onSelected: (selected) {
+                      setState(() {
+                        _filterResult = selected ? 'all' : _filterResult;
+                      });
+                    },
+                  ),
+                  SizedBox(width: 8),
+                  _buildFilterChip(
+                    label: 'Vitórias',
+                    selected: _filterResult == 'winner',
+                    onSelected: (selected) {
+                      setState(() {
+                        _filterResult = selected ? 'winner' : _filterResult;
+                      });
+                    },
+                  ),
+                  SizedBox(width: 8),
+                  _buildFilterChip(
+                    label: 'Derrotas',
+                    selected: _filterResult == 'loser',
+                    onSelected: (selected) {
+                      setState(() {
+                        _filterResult = selected ? 'loser' : _filterResult;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _primaryColor.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () => _selectDateRange(context, isRanking: true),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: _surfaceColor,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _outlineColor,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.calendar_today_rounded,
+                                size: 16,
+                                color: _primaryColor,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                _dateRangeRanking == null
+                                    ? 'Filtrar por data'
+                                    : '${DateFormat('dd/MM/yyyy').format(_dateRangeRanking!.start)} - ${DateFormat('dd/MM/yyyy').format(_dateRangeRanking!.end)}',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: _onSurfaceColor,
+                                ),
+                                maxLines: 1,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                if (_dateRangeRanking != null) ...[
+                  SizedBox(width: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _errorColor.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          setState(() {
+                            _dateRange = null;
+                          });
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: _surfaceColor,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _errorColor,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.clear_rounded,
+                            color: _errorColor,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ));
   }
 
   Widget _buildPendingFilters(bool isMobile) {
@@ -508,7 +651,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                       borderRadius: BorderRadius.circular(12),
                       onTap: () => _selectDateRange(context),
                       child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                        padding:
+                            EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                         decoration: BoxDecoration(
                           color: _surfaceColor,
                           borderRadius: BorderRadius.circular(12),
@@ -768,26 +912,32 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
       physics: BouncingScrollPhysics(),
       child: Padding(
         padding: EdgeInsets.all(isMobile ? 16 : 20),
-        child: Column(
-          children: [
-            ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: filteredMatches.length,
-              itemBuilder: (context, index) {
-                final match = filteredMatches[index];
-                return _buildPendingMatchCard(match, isMobile);
-              },
-            ),
-          ],
-        ),
+        child: _model.isLoadingAllMach
+            ? const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFEC8D0D)),
+                ),
+              )
+            : Column(
+                children: [
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: filteredMatches.length,
+                    itemBuilder: (context, index) {
+                      final match = filteredMatches[index];
+                      return _buildPendingMatchCard(match, isMobile);
+                    },
+                  ),
+                ],
+              ),
       ),
     );
   }
 
   Widget _buildPendingMatchCard(MatchResponse match, bool isMobile) {
     final matchStartDate = match.matchStartDate ?? DateTime.now();
-    
+
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -837,9 +987,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                       splashRadius: 20,
                     ),
                   ),
-                  
+
                   SizedBox(width: 12),
-                  
+
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -866,7 +1016,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    DateFormat('dd/MM/yyyy').format(matchStartDate),
+                                    DateFormat('dd/MM/yyyy')
+                                        .format(matchStartDate),
                                     style: TextStyle(
                                       fontFamily: 'Inter',
                                       fontWeight: FontWeight.w700,
@@ -890,12 +1041,15 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         ),
                         SizedBox(height: 12),
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: _getStatusColor(match.statusMatch).withOpacity(0.1),
+                            color: _getStatusColor(match.statusMatch)
+                                .withOpacity(0.1),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: _getStatusColor(match.statusMatch).withOpacity(0.3),
+                              color: _getStatusColor(match.statusMatch)
+                                  .withOpacity(0.3),
                               width: 1.5,
                             ),
                           ),
@@ -916,7 +1070,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                 ],
               ),
             ),
-            
+
             // Conteúdo expandido
             if (match.isExpanded ?? false) ...[
               Divider(height: 1, color: _outlineColor),
@@ -927,15 +1081,18 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                     _buildMatchInfoRow(
                       icon: Icons.people_rounded,
                       label: 'Jogadores',
-                      value: '${match.matchPlayers?.length ?? 0}/${match.room?.roomConfiguration?.numberOfPlayers ?? 0}',
+                      value:
+                          '${match.matchPlayers?.length ?? 0}/${match.room?.roomConfiguration?.numberOfPlayers ?? 0}',
                     ),
                     SizedBox(height: 12),
                     _buildMatchInfoRow(
                       icon: Icons.emoji_events_rounded,
                       label: 'Prêmio Total',
-                      value: '${match.matchPrize?.totalGain?.toStringAsFixed(2) ?? '0.00'} AOA',
+                      value:
+                          '${match.matchPrize?.totalGain?.toStringAsFixed(2) ?? '0.00'} AOA',
                     ),
-                    if (match.matchPlayers != null && match.matchPlayers!.isNotEmpty) ...[
+                    if (match.matchPlayers != null &&
+                        match.matchPlayers!.isNotEmpty) ...[
                       SizedBox(height: 20),
                       Text(
                         'Jogadores Participantes',
@@ -974,11 +1131,13 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                           child: InkWell(
                             borderRadius: BorderRadius.circular(16),
                             onTap: () async {
-                              await _model.leaveTheMatchAsync(setState, match.id);
+                              await _model.leaveTheMatchAsync(
+                                  setState, match.id);
                             },
                             child: Container(
                               width: double.infinity,
-                              padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 16, horizontal: 24),
                               decoration: BoxDecoration(
                                 color: _errorColor,
                                 borderRadius: BorderRadius.circular(16),
@@ -990,14 +1149,18 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                         height: 20,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  Colors.white),
                                         ),
                                       ),
                                     )
                                   : Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.exit_to_app_rounded, color: Colors.white, size: 20),
+                                        Icon(Icons.exit_to_app_rounded,
+                                            color: Colors.white, size: 20),
                                         SizedBox(width: 8),
                                         Text(
                                           'SAIR DA PARTIDA',
@@ -1095,7 +1258,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
     final isWinner = ranking.isWinner ?? false;
     final totalScore = ranking.totalScore ?? 0;
     final totalResponseTime = ranking.totalResponseTime ?? 0;
-    
+
     if (isMobile) {
       // Layout mobile otimizado
       return Container(
@@ -1133,12 +1296,14 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                             shape: BoxShape.circle,
                           ),
                           child: IconButton(
-                            onPressed: () {
+                            onPressed: () async {
                               setState(() {
-                                ranking.isExpanded = !(ranking.isExpanded ?? false);
+                                ranking.isExpanded =
+                                    !(ranking.isExpanded ?? false);
                               });
                               if (ranking.isExpanded ?? false) {
-                                _model.getHistoryUserdAsync(setState, ranking.matchId);
+                                await _model.getHistoryUserdAsync(
+                                    setState, ranking.matchId);
                               }
                             },
                             icon: Icon(
@@ -1151,9 +1316,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                             padding: EdgeInsets.zero,
                           ),
                         ),
-                        
+
                         SizedBox(width: 12),
-                        
+
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1176,10 +1341,12 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                   SizedBox(width: 8),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          DateFormat('dd/MM/yyyy').format(createdAt),
+                                          DateFormat('dd/MM/yyyy')
+                                              .format(createdAt),
                                           style: TextStyle(
                                             fontFamily: 'Inter',
                                             fontSize: 14,
@@ -1194,7 +1361,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                           style: TextStyle(
                                             fontFamily: 'Inter',
                                             fontSize: 12,
-                                            color: _onSurfaceColor.withOpacity(0.6),
+                                            color: _onSurfaceColor
+                                                .withOpacity(0.6),
                                           ),
                                         ),
                                       ],
@@ -1204,7 +1372,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                               ),
                               SizedBox(height: 12),
                               Container(
-                                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
                                   color: isWinner
                                       ? _successColor.withOpacity(0.1)
@@ -1221,8 +1390,13 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
-                                      isWinner ? Icons.emoji_events_rounded : Icons.sentiment_dissatisfied_rounded,
-                                      color: isWinner ? _successColor : _errorColor,
+                                      isWinner
+                                          ? Icons.emoji_events_rounded
+                                          : Icons
+                                              .sentiment_dissatisfied_rounded,
+                                      color: isWinner
+                                          ? _successColor
+                                          : _errorColor,
                                       size: 16,
                                     ),
                                     SizedBox(width: 6),
@@ -1230,7 +1404,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                       isWinner ? 'Vitória' : 'Derrota',
                                       style: TextStyle(
                                         fontFamily: 'Inter',
-                                        color: isWinner ? _successColor : _errorColor,
+                                        color: isWinner
+                                            ? _successColor
+                                            : _errorColor,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 12,
                                       ),
@@ -1243,12 +1419,13 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         ),
                       ],
                     ),
-                    
+
                     SizedBox(height: 16),
-                    
+
                     // Linha 2: Tempo e Pontos
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                       decoration: BoxDecoration(
                         color: _backgroundColor,
                         borderRadius: BorderRadius.circular(12),
@@ -1288,13 +1465,11 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                               ),
                             ],
                           ),
-                          
                           Container(
                             width: 1,
                             height: 30,
                             color: _outlineColor,
                           ),
-                          
                           Column(
                             children: [
                               Row(
@@ -1333,7 +1508,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                   ],
                 ),
               ),
-              
+
               // Conteúdo Expandido
               if (ranking.isExpanded ?? false) ...[
                 Divider(height: 1, color: _outlineColor),
@@ -1401,7 +1576,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                             ranking.isExpanded = !(ranking.isExpanded ?? false);
                           });
                           if (ranking.isExpanded ?? false) {
-                            _model.getHistoryUserdAsync(setState, ranking.matchId);
+                            _model.getHistoryUserdAsync(
+                                setState, ranking.matchId);
                           }
                         },
                         icon: Icon(
@@ -1414,9 +1590,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         padding: EdgeInsets.zero,
                       ),
                     ),
-                    
+
                     SizedBox(width: 20),
-                    
+
                     // DATA
                     Container(
                       width: 150,
@@ -1445,14 +1621,15 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         ],
                       ),
                     ),
-                    
+
                     SizedBox(width: 20),
-                    
+
                     // RESULTADO
                     Container(
                       width: 150,
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
                           color: isWinner
                               ? _successColor.withOpacity(0.1)
@@ -1468,7 +1645,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         child: Column(
                           children: [
                             Icon(
-                              isWinner ? Icons.emoji_events_rounded : Icons.sentiment_dissatisfied_rounded,
+                              isWinner
+                                  ? Icons.emoji_events_rounded
+                                  : Icons.sentiment_dissatisfied_rounded,
                               color: isWinner ? _successColor : _errorColor,
                               size: 16,
                             ),
@@ -1487,9 +1666,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         ),
                       ),
                     ),
-                    
+
                     SizedBox(width: 20),
-                    
+
                     // TEMPO
                     Container(
                       width: 80,
@@ -1514,9 +1693,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         ],
                       ),
                     ),
-                    
+
                     SizedBox(width: 20),
-                    
+
                     // PONTOS
                     Container(
                       width: 80,
@@ -1544,7 +1723,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                   ],
                 ),
               ),
-              
+
               // Conteúdo Expandido
               if (ranking.isExpanded ?? false) ...[
                 Divider(height: 1, color: _outlineColor),
@@ -1578,7 +1757,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
 
   Widget _buildPrizeInfoSection(RankingResponse ranking) {
     final isWinner = ranking.isWinner ?? false;
-    
+
     return Column(
       children: [
         Container(
@@ -1646,7 +1825,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                             ),
                             SizedBox(height: 2),
                             Text(
-                              isWinner ? 'Você venceu esta partida!' : 'Você não venceu esta partida',
+                              isWinner
+                                  ? 'Você venceu esta partida!'
+                                  : 'Você não venceu esta partida',
                               style: TextStyle(
                                 fontFamily: 'Inter',
                                 color: _onSurfaceColor.withOpacity(0.6),
@@ -1658,7 +1839,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                       ],
                     ),
                     Icon(
-                      _expandPremioInfo ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+                      _expandPremioInfo
+                          ? Icons.expand_less_rounded
+                          : Icons.expand_more_rounded,
                       color: _infoColor,
                       size: 24,
                     ),
@@ -1708,7 +1891,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
     );
   }
 
-  Widget _buildPrizeDetailRow(String label, String value, IconData icon, {bool isHighlighted = false}) {
+  Widget _buildPrizeDetailRow(String label, String value, IconData icon,
+      {bool isHighlighted = false}) {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1725,7 +1909,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: isHighlighted ? _successColor.withOpacity(0.1) : _primaryColor.withOpacity(0.1),
+              color: isHighlighted
+                  ? _successColor.withOpacity(0.1)
+                  : _primaryColor.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -1845,154 +2031,163 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
   Widget _buildQuestionItem(
       String question, String answer, bool isCorrect, int time) {
     return Container(
-      margin: EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: isCorrect
-            ? _successColor.withOpacity(0.05)
-            : _errorColor.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
+        margin: EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
           color: isCorrect
-              ? _successColor.withOpacity(0.2)
-              : _errorColor.withOpacity(0.2),
-          width: 1.5,
+              ? _successColor.withOpacity(0.05)
+              : _errorColor.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isCorrect
+                ? _successColor.withOpacity(0.2)
+                : _errorColor.withOpacity(0.2),
+            width: 1.5,
+          ),
         ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        child: ExpansionTile(
-          leading: Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: isCorrect ? _successColor : _errorColor,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              isCorrect ? Icons.check_rounded : Icons.close_rounded,
-              color: Colors.white,
-              size: 18,
-            ),
-          ),
-          title: Text(
-            question.length > 80 ? '${question.substring(0, 80)}...' : question,
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 14,
-              color: _onSurfaceColor,
-              fontWeight: FontWeight.w500,
-            ),
-            maxLines: 2,
-          ),
-          trailing: Container(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: isCorrect
-                  ? _successColor.withOpacity(0.1)
-                  : _errorColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isCorrect ? _successColor : _errorColor,
-              width: 1,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.timer_rounded,
-                size: 12,
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          child: ExpansionTile(
+            leading: Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
                 color: isCorrect ? _successColor : _errorColor,
+                shape: BoxShape.circle,
               ),
-              SizedBox(width: 4),
-              Text(
-                '$time s',
-                style: TextStyle(
-                  fontFamily: 'Inter',
+              child: Icon(
+                isCorrect ? Icons.check_rounded : Icons.close_rounded,
+                color: Colors.white,
+                size: 18,
+              ),
+            ),
+            title: Text(
+              question.length > 80
+                  ? '${question.substring(0, 80)}...'
+                  : question,
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 14,
+                color: _onSurfaceColor,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 2,
+            ),
+            trailing: Container(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: isCorrect
+                    ? _successColor.withOpacity(0.1)
+                    : _errorColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
                   color: isCorrect ? _successColor : _errorColor,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.timer_rounded,
+                    size: 12,
+                    color: isCorrect ? _successColor : _errorColor,
+                  ),
+                  SizedBox(width: 4),
+                  Text(
+                    '$time s',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      color: isCorrect ? _successColor : _errorColor,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isCorrect
+                            ? _successColor.withOpacity(0.05)
+                            : _errorColor.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isCorrect
+                              ? _successColor.withOpacity(0.2)
+                              : _errorColor.withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            isCorrect
+                                ? Icons.check_circle_rounded
+                                : Icons.cancel_rounded,
+                            color: isCorrect ? _successColor : _errorColor,
+                            size: 16,
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Sua resposta: $answer',
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                color: isCorrect ? _successColor : _errorColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Tempo de resposta: $time segundos',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            color: _onSurfaceColor.withOpacity(0.6),
+                            fontSize: 13,
+                          ),
+                          maxLines: 1,
+                        ),
+                        Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: _primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            'Pontos: ${isCorrect ? (_model.matchInfo?.room?.roomConfiguration?.timeToRespond ?? 30) - time : 0}',
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontWeight: FontWeight.w600,
+                              color: _primaryColor,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-        ),
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isCorrect ? _successColor.withOpacity(0.05) : _errorColor.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isCorrect ? _successColor.withOpacity(0.2) : _errorColor.withOpacity(0.2),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        isCorrect ? Icons.check_circle_rounded : Icons.cancel_rounded,
-                        color: isCorrect ? _successColor : _errorColor,
-                        size: 16,
-                      ),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Sua resposta: $answer',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            color: isCorrect ? _successColor : _errorColor,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          maxLines: 2,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Tempo de resposta: $time segundos',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        color: _onSurfaceColor.withOpacity(0.6),
-                        fontSize: 13,
-                      ),
-                      maxLines: 1,
-                    ),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _primaryColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        'Pontos: ${isCorrect ? (_model.matchInfo?.room?.roomConfiguration?.timeToRespond ?? 30) - time : 0}',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w600,
-                          color: _primaryColor,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ));
+        ));
   }
 
   Widget _buildHeaderItem(String text, {int flex = 1}) {
@@ -2040,9 +2235,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
               ),
               child: Center(
                 child: Text(
-                  playerName.isNotEmpty
-                      ? playerName[0].toUpperCase()
-                      : '?',
+                  playerName.isNotEmpty ? playerName[0].toUpperCase() : '?',
                   style: TextStyle(
                     color: isCurrentUser ? Colors.white : _onSurfaceColor,
                     fontWeight: FontWeight.w600,
@@ -2124,7 +2317,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                isCompleted ? Icons.emoji_events_rounded : Icons.hourglass_empty_rounded,
+                isCompleted
+                    ? Icons.emoji_events_rounded
+                    : Icons.hourglass_empty_rounded,
                 color: _onSurfaceColor.withOpacity(0.4),
                 size: 32,
               ),
