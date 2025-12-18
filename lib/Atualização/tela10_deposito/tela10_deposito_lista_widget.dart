@@ -1814,122 +1814,6 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                     ),
                   ),
                 ),
-
-                // Footer compacto
-                Container(
-                  padding: EdgeInsets.all(20), // Reduzido de 24
-                  decoration: BoxDecoration(
-                    color: _backgroundColor,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(32),
-                      bottomRight: Radius.circular(32),
-                    ),
-                    border: Border(
-                      top: BorderSide(
-                          color: _borderColor, width: 1.5), // Reduzido de 2
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 52, // Reduzido de 60
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius:
-                                BorderRadius.circular(16), // Reduzido de 18
-                            border: Border.all(
-                                color: _borderColor, width: 1.5), // Reduzido
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 8, // Reduzido de 10
-                                offset: Offset(0, 4), // Reduzido de 5
-                              ),
-                            ],
-                          ),
-                          child: Material(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(16),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(16),
-                              onTap: () => Navigator.pop(context),
-                              child: Center(
-                                child: Text(
-                                  'CANCELAR',
-                                  style: TextStyle(
-                                    color: _textSecondary,
-                                    fontSize: 15, // Reduzido de 17
-                                    fontWeight:
-                                        FontWeight.w700, // Reduzido de 800
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 16), // Reduzido de 20
-                      Expanded(
-                        flex: 2,
-                        child: Container(
-                          height: 52, // Reduzido de 60
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                method['color'] as Color,
-                                (method['color'] as Color).withOpacity(0.8),
-                              ],
-                            ),
-                            borderRadius:
-                                BorderRadius.circular(16), // Reduzido de 18
-                            boxShadow: [
-                              BoxShadow(
-                                color:
-                                    (method['color'] as Color).withOpacity(0.5),
-                                blurRadius: 20, // Reduzido de 25
-                                offset: Offset(0, 8), // Reduzido de 10
-                              ),
-                            ],
-                          ),
-                          child: Material(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(16),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(16),
-                              onTap: () {
-                                // Lógica de pagamento
-                                Navigator.pop(context);
-                              },
-                              child: Center(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.lock_rounded,
-                                      color: Colors.white,
-                                      size: 20, // Reduzido de 24
-                                    ),
-                                    SizedBox(width: 8), // Reduzido de 12
-                                    Text(
-                                      'CONFIRMAR',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15, // Reduzido de 17
-                                        fontWeight:
-                                            FontWeight.w800, // Reduzido de 900
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
@@ -2430,7 +2314,7 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
           ),
           SizedBox(height: 8),
           Text(
-            'Mínimo: 500,00 Kz • Máximo: 1.000.000 Kz',
+            'Mínimo: 500,00 Kz',
             style: TextStyle(fontSize: 12, color: _textSecondary),
           ),
         ],
