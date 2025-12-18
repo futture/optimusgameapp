@@ -438,7 +438,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
       {
         'title': 'Prêmio',
         'icon': Icons.wine_bar_rounded,
-        'value': '${matchInfo.matchPrize?.totalGain ?? 0} KZ',
+        'value': '${matchInfo.matchPrize?.netPremium ?? 0} KZ',
       },
       {
         'title': 'Nº Questões',
