@@ -1,7 +1,5 @@
 import 'package:projeto_game_quiz/core/api/utils/token_util.dart';
 import 'package:projeto_game_quiz/pages/deposit_history/deposit_history_widget.dart';
-import '/flutter_flow/flutter_flow_icon_button.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
@@ -24,8 +22,7 @@ class _ModaMenuPagianInicialWidgetState
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   // Cores premium
-  final Color _primaryColor = Color(0xFFEC8D0D);
-  final Color _backgroundColor = Color(0xFFF8FAFC);
+  final Color _primaryColor = Color(0xFFEC8D0D); 
   final Color _cardColor = Colors.white;
   final Color _textPrimary = Color(0xFF1E293B);
   final Color _textSecondary = Color(0xFF64748B);
