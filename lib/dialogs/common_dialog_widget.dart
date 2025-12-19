@@ -45,7 +45,7 @@ class CommonDialogWidget {
           'title': 'Prêmio',
           'icon': Icons.wine_bar_rounded,
           'value':
-              '${match.room!.roomConfiguration!.minimumAmountToPlay * participants.length} KZ',
+              '${match.matchPrize?.netPremium} KZ',
         },
         {
           'title': 'Horário',

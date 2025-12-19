@@ -407,45 +407,7 @@ class _ModalsSaqueWidgetState extends State<ModalsSaqueWidget> {
                     ),
 
                     SizedBox(height: 12),
-
-                    // Informação de limite
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: _primaryColor.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: _primaryColor.withOpacity(0.1),
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.info_outline_rounded,
-                            color: _primaryColor,
-                            size: 14,
-                          ),
-                          SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              'Limite: 100,00 Kz a 10.000,00 Kz',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                color: _onSurfaceColor.withOpacity(0.7),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    SizedBox(height: 20),
-
+ 
                     // Botão de Enviar
                     Container(
                       decoration: BoxDecoration(

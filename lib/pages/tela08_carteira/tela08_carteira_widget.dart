@@ -485,7 +485,7 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        userAccountInfo?.accountNumber?.toString() ?? '---',
+                        userAccountInfo?.accountNumber.toString() ?? 'Número não encontrado',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -499,14 +499,14 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
             ),
             SizedBox(height: 8),
             Divider(color: Colors.white.withOpacity(0.1), height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildInfoItem('Limite Diário', '100.000,00 Kz'),
-                _buildInfoItem('Última Atualização',
-                    DateFormat('dd/MM/yyyy').format(DateTime.now())),
-              ],
-            ),
+            //Row(
+            //  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //  children: [
+            //    _buildInfoItem('Limite Diário', '100.000,00 Kz'),
+            //    _buildInfoItem('Última Atualização',
+            //        DateFormat('dd/MM/yyyy').format(DateTime.now())),
+            //  ],
+            //),
           ],
         ),
       ),

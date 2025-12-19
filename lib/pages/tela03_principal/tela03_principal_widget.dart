@@ -8,8 +8,6 @@ import 'package:projeto_game_quiz/utils.dart';
 import '/components/moda_listade_sala_widget.dart';
 import '/components/moda_menu_pagian_inicial_widget.dart';
 import '/components/modals_saque_widget.dart';
-import '/flutter_flow/flutter_flow_icon_button.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/index.dart';
@@ -32,21 +30,19 @@ class Tela03PrincipalWidget extends StatefulWidget {
 class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
   late Tela03PrincipalModel _model;
   final matchService = MatchService();
-  
+
   // Mapa para controlar loading individual de cada partida
   final Map<String, bool> _matchLoadingStates = {};
-  
+
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final FcmTokenService _fcmTokenService = FcmTokenService();
 
   // Cores e gradientes do tema premium
   final Color _primaryColor = Color(0xFFEC8D0D);
-  final Color _primaryDark = Color(0xFFD17A0A);
   final Color _backgroundColor = Color(0xFFF8FAFC);
   final Color _surfaceColor = Colors.white;
   final Color _onSurfaceColor = Color(0xFF1E293B);
   final Color _outlineColor = Color(0xFFE2E8F0);
-  final Color _successColor = Color(0xFF10B981);
 
   // Cores mais suaves para os cards
   final Color _cardLightOrange = Color(0xFFFFA726); // Laranja mais suave
@@ -268,7 +264,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
 
   Widget _buildUserProfileCard(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 400;
-    
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -535,7 +531,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
     required VoidCallback onPressed,
   }) {
     final isSmallScreen = MediaQuery.of(context).size.width < 400;
-    
+
     return Expanded(
       child: Material(
         borderRadius: BorderRadius.circular(16),
@@ -600,7 +596,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
 
   Widget _buildGameRoomButton(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 400;
-    
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -759,7 +755,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
 
   Widget _buildSuperLeagueHeader(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 400;
-    
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -1031,8 +1027,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
             width: 50,
             height: 50,
             child: CircularProgressIndicator(
-              valueColor:
-                  AlwaysStoppedAnimation<Color>(Color(0xFFEC8D0D)),
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFEC8D0D)),
               strokeWidth: 3,
             ),
           ),
@@ -1053,7 +1048,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
 
   Widget _buildEmptyMatchesState(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 400;
-    
+
     return Container(
       padding: EdgeInsets.all(isSmallScreen ? 24 : 32),
       decoration: BoxDecoration(
@@ -1176,381 +1171,646 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 400;
     final isVerySmallScreen = screenWidth < 350;
-    
-    // Formata o valor da aposta
+
     final entryAmount = match.room?.roomConfiguration?.minimumAmountToPlay ?? 0;
     final formattedAmount = '${entryAmount}KZ';
 
+    final isNextMatch = _model.nextMatch?.id == match.id;
+
     return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        onTap: () async {
-          if (isThisCardLoading) return;
-
-          // Ativa loading apenas para este card
-          setState(() {
-            _matchLoadingStates[match.id] = true;
-          });
-
-          try {
-            await _model.getUsersByMatchId(setState, match.id);
-            CommonDialogWidget.showMatchParticipantsDialog(
-                context,
-                List.empty(),
-                null,
-                match,
-                _model.users,
-                _model.user,
-                buildMatchButton(
-                  isRegistered: isRegistered,
-                  match: match,
-                  onJoin: (m) => _handleMatchTap(m as MatchResponse),
-                  onLeave: (m) => _leaveMatch(m as MatchResponse),
-                  context: context,
-                ),
-                isPlaySound: false,
-                isProgressBar: false);
-          } catch (e) {
-            Warning00ErrorUtil.showDialogMessageError(
-              context,
-              "Erro ao carregar partida",
-              "Ocorreu um erro ao carregar os detalhes da partida.",
-            );
-          } finally {
-            // Desativa loading apenas para este card
-            setState(() {
-              _matchLoadingStates[match.id] = false;
-            });
-          }
-        },
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(20),
-        child: Container(
-          constraints: BoxConstraints(
-            minHeight: isSmallScreen ? 140 : 160,
-          ),
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: isRegistered
-                  ? [
-                      Color(0xFF4CAF50),
-                      Color(0xFF2E7D32),
-                    ]
-                  : [
-                      _cardLightOrange, // Laranja mais suave
-                      _cardDarkOrange,  // Laranja escuro mais suave
-                    ],
+        child: InkWell(
+          onTap: () async {
+            if (isThisCardLoading) return;
+
+            setState(() {
+              _matchLoadingStates[match.id] = true;
+            });
+
+            try {
+              await _model.getUsersByMatchId(setState, match.id);
+              CommonDialogWidget.showMatchParticipantsDialog(
+                  context,
+                  List.empty(),
+                  null,
+                  match,
+                  _model.users,
+                  _model.user,
+                  buildMatchButton(
+                    isRegistered: isRegistered,
+                    match: match,
+                    onJoin: (m) => _handleMatchTap(m as MatchResponse),
+                    onLeave: (m) => _leaveMatch(m as MatchResponse),
+                    context: context,
+                  ),
+                  isPlaySound: false,
+                  isProgressBar: false);
+            } catch (e) {
+              Warning00ErrorUtil.showDialogMessageError(
+                context,
+                "Erro ao carregar partida",
+                "Ocorreu um erro ao carregar os detalhes da partida.",
+              );
+            } finally {
+              setState(() {
+                _matchLoadingStates[match.id] = false;
+              });
+            }
+          },
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            constraints: BoxConstraints(
+              minHeight: isSmallScreen ? 140 : 160,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: (isRegistered
-                        ? Color(0xFF4CAF50)
-                        : _cardLightOrange)
-                    .withOpacity(0.25),
-                blurRadius: 15,
-                offset: const Offset(0, 6),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isRegistered
+                    ? [
+                        Color(0xFF4CAF50),
+                        Color(0xFF2E7D32),
+                      ]
+                    : isNextMatch
+                        ? [
+                            Color(0xFFEC8D0D),
+                            Color(0xFFD2691E),
+                          ]
+                        : [
+                            _cardLightOrange,
+                            _cardDarkOrange,
+                          ],
               ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              Padding(
-                padding: EdgeInsets.all(isVerySmallScreen ? 12 : isSmallScreen ? 14 : 18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Cabeçalho do card: Título e valor da aposta
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                width: isVerySmallScreen ? 32 : isSmallScreen ? 36 : 42,
-                                height: isVerySmallScreen ? 32 : isSmallScreen ? 36 : 42,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white.withOpacity(0.25),
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(0.4),
-                                    width: 2,
+              boxShadow: [
+                BoxShadow(
+                  color: (isRegistered
+                          ? Color(0xFF4CAF50)
+                          : isNextMatch
+                              ? Color(0xFFEC8D0D)
+                              : _cardLightOrange)
+                      .withOpacity(isNextMatch ? 0.35 : 0.25),
+                  blurRadius: 15,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(isVerySmallScreen
+                      ? 12
+                      : isSmallScreen
+                          ? 14
+                          : 18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: isVerySmallScreen
+                                      ? 32
+                                      : isSmallScreen
+                                          ? 36
+                                          : 42,
+                                  height: isVerySmallScreen
+                                      ? 32
+                                      : isSmallScreen
+                                          ? 36
+                                          : 42,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.white.withOpacity(0.25),
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.4),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    isNextMatch
+                                        ? Icons.bolt_rounded
+                                        : Icons.emoji_events_rounded,
+                                    color: Colors.white,
+                                    size: isVerySmallScreen
+                                        ? 16
+                                        : isSmallScreen
+                                            ? 18
+                                            : 22,
                                   ),
                                 ),
-                                child: Icon(
-                                  Icons.emoji_events_rounded,
-                                  color: Colors.white,
-                                  size: isVerySmallScreen ? 16 : isSmallScreen ? 18 : 22,
+                                SizedBox(
+                                    width: isVerySmallScreen
+                                        ? 6
+                                        : isSmallScreen
+                                            ? 8
+                                            : 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        isNextMatch
+                                            ? 'PRÓXIMA PARTIDA'
+                                            : 'SUPER PARTIDA',
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontSize: isVerySmallScreen
+                                              ? 9.0
+                                              : isSmallScreen
+                                                  ? 10.0
+                                                  : 12.0,
+                                          color: Colors.white.withOpacity(0.95),
+                                          letterSpacing: 0.5,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      SizedBox(
+                                          height: isVerySmallScreen
+                                              ? 1
+                                              : isSmallScreen
+                                                  ? 1
+                                                  : 2),
+                                      Text(
+                                        'das ${formatHour(match.matchStartDate)}',
+                                        style: TextStyle(
+                                          fontFamily: 'Inter Tight',
+                                          color: Colors.white,
+                                          fontSize: isVerySmallScreen
+                                              ? 14.0
+                                              : isSmallScreen
+                                                  ? 15.0
+                                                  : 17.0,
+                                          letterSpacing: 0.0,
+                                          fontWeight: FontWeight.w800,
+                                          height: 1.2,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                              width: isVerySmallScreen
+                                  ? 6
+                                  : isSmallScreen
+                                      ? 8
+                                      : 10),
+                          Container(
+                            constraints: BoxConstraints(
+                              maxWidth: isVerySmallScreen
+                                  ? 70
+                                  : isSmallScreen
+                                      ? 80
+                                      : 100,
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isVerySmallScreen
+                                  ? 8
+                                  : isSmallScreen
+                                      ? 10
+                                      : 14,
+                              vertical: isVerySmallScreen
+                                  ? 5
+                                  : isSmallScreen
+                                      ? 6
+                                      : 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.25),
+                              borderRadius:
+                                  BorderRadius.circular(isVerySmallScreen
+                                      ? 10
+                                      : isSmallScreen
+                                          ? 12
+                                          : 14),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.4),
+                                width: 1.5,
                               ),
-                              SizedBox(width: isVerySmallScreen ? 6 : isSmallScreen ? 8 : 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'SUPER PARTIDA',
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontSize: isVerySmallScreen ? 9.0 : isSmallScreen ? 10.0 : 12.0,
-                                        color: Colors.white.withOpacity(0.95),
-                                        letterSpacing: 0.5,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    SizedBox(height: isVerySmallScreen ? 1 : isSmallScreen ? 1 : 2),
-                                    Text(
-                                      'das ${formatHour(match.matchStartDate)}',
-                                      style: TextStyle(
-                                        fontFamily: 'Inter Tight',
-                                        color: Colors.white,
-                                        fontSize: isVerySmallScreen ? 14.0 : isSmallScreen ? 15.0 : 17.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.w800,
-                                        height: 1.2,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Entrada',
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontSize: isVerySmallScreen
+                                        ? 8.0
+                                        : isSmallScreen
+                                            ? 9.0
+                                            : 10.0,
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.5,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                SizedBox(
+                                    height: isVerySmallScreen
+                                        ? 1
+                                        : isSmallScreen
+                                            ? 1
+                                            : 2),
+                                Text(
+                                  formattedAmount,
+                                  style: TextStyle(
+                                    fontFamily: 'Inter Tight',
+                                    color: Colors.white,
+                                    fontSize: isVerySmallScreen
+                                        ? 12.0
+                                        : isSmallScreen
+                                            ? 14.0
+                                            : 16.0,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.5,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ), 
+                      // CRONÔMETRO APENAS PARA PRÓXIMA PARTIDA
+                      if (isNextMatch)
+                        Padding(
+                          padding: EdgeInsets.only(
+                            top: isVerySmallScreen
+                                ? 6
+                                : isSmallScreen
+                                    ? 8
+                                    : 10,
+                          ),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: isVerySmallScreen
+                                    ? 8
+                                    : isSmallScreen
+                                        ? 10
+                                        : 12,
+                                vertical: isVerySmallScreen
+                                    ? 3
+                                    : isSmallScreen
+                                        ? 4
+                                        : 5,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Color(0xFFD4AF37), // Dourado
+                                    Color(0xFFB8860B), // Dourado escuro
                                   ],
                                 ),
+                                borderRadius:
+                                    BorderRadius.circular(isVerySmallScreen
+                                        ? 8
+                                        : isSmallScreen
+                                            ? 10
+                                            : 12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color(0xFFD4AF37).withOpacity(0.3),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.3),
+                                  width: 1,
+                                ),
                               ),
-                            ],
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.timer_rounded,
+                                    size: isVerySmallScreen
+                                        ? 12
+                                        : isSmallScreen
+                                            ? 14
+                                            : 16,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(
+                                      width: isVerySmallScreen
+                                          ? 4
+                                          : isSmallScreen
+                                              ? 5
+                                              : 6),
+                                  Text(
+                                    'COMEÇA EM:',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: isVerySmallScreen
+                                          ? 8.0
+                                          : isSmallScreen
+                                              ? 9.0
+                                              : 10.0,
+                                      color: Colors.white.withOpacity(0.95),
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                      width: isVerySmallScreen
+                                          ? 2
+                                          : isSmallScreen
+                                              ? 3
+                                              : 4),
+                                  Text(
+                                    _formatCountdown(_model.timerMilliseconds),
+                                    style: TextStyle(
+                                      fontFamily: 'Inter Tight',
+                                      color: Colors.white,
+                                      fontSize: isVerySmallScreen
+                                          ? 12.0
+                                          : isSmallScreen
+                                              ? 13.0
+                                              : 14.0,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
-                        SizedBox(width: isVerySmallScreen ? 6 : isSmallScreen ? 8 : 10),
-                        // Valor da aposta em um container destacado
-                        Container(
-                          constraints: BoxConstraints(
-                            maxWidth: isVerySmallScreen ? 70 : isSmallScreen ? 80 : 100,
+
+                      SizedBox(
+                          height: isVerySmallScreen
+                              ? (isNextMatch
+                                  ? 8
+                                  : 10) // Espaço menor se tiver cronômetro
+                              : isSmallScreen
+                                  ? (isNextMatch ? 10 : 12)
+                                  : (isNextMatch ? 12 : 16)),
+
+                      // Informações da partida - Mantendo layout horizontal sempre
+                      Container(
+                        padding: EdgeInsets.all(isVerySmallScreen
+                            ? 8
+                            : isSmallScreen
+                                ? 10
+                                : 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(isVerySmallScreen
+                              ? 10
+                              : isSmallScreen
+                                  ? 12
+                                  : 14),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.25),
+                            width: 1,
                           ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _buildInfoItem(
+                              isVerySmallScreen: isVerySmallScreen,
+                              isSmallScreen: isSmallScreen,
+                              icon: Icons.people_alt_rounded,
+                              label: 'JOGADORES',
+                              value: '${match.matchPlayers?.length ?? 0}',
+                            ),
+                            Container(
+                              height: isVerySmallScreen
+                                  ? 20
+                                  : isSmallScreen
+                                      ? 24
+                                      : 30,
+                              width: 1,
+                              color: Colors.white.withOpacity(0.3),
+                            ),
+                            _buildInfoItem(
+                              isVerySmallScreen: isVerySmallScreen,
+                              isSmallScreen: isSmallScreen,
+                              icon: Icons.schedule_rounded,
+                              label: 'HORÁRIO',
+                              value: formatHour(match.matchStartDate),
+                            ),
+                            Container(
+                              height: isVerySmallScreen
+                                  ? 20
+                                  : isSmallScreen
+                                      ? 24
+                                      : 30,
+                              width: 1,
+                              color: Colors.white.withOpacity(0.3),
+                            ),
+                            _buildInfoItem(
+                              isVerySmallScreen: isVerySmallScreen,
+                              isSmallScreen: isSmallScreen,
+                              icon: Icons.calendar_today_rounded,
+                              label: 'DATA',
+                              value: _formatDate(match.matchStartDate),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      SizedBox(
+                          height: isVerySmallScreen
+                              ? 10
+                              : isSmallScreen
+                                  ? 12
+                                  : 16),
+
+                      // Status do usuário na partida
+                      if (isRegistered)
+                        Container(
+                          width: double.infinity,
                           padding: EdgeInsets.symmetric(
-                            horizontal: isVerySmallScreen ? 8 : isSmallScreen ? 10 : 14,
-                            vertical: isVerySmallScreen ? 5 : isSmallScreen ? 6 : 8,
+                            horizontal: isVerySmallScreen
+                                ? 10
+                                : isSmallScreen
+                                    ? 12
+                                    : 16,
+                            vertical: isVerySmallScreen
+                                ? 7
+                                : isSmallScreen
+                                    ? 8
+                                    : 10,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.25),
-                            borderRadius: BorderRadius.circular(isVerySmallScreen ? 10 : isSmallScreen ? 12 : 14),
+                            borderRadius:
+                                BorderRadius.circular(isVerySmallScreen
+                                    ? 10
+                                    : isSmallScreen
+                                        ? 12
+                                        : 14),
                             border: Border.all(
                               color: Colors.white.withOpacity(0.4),
                               width: 1.5,
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 8,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
                           ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                'ENTRADA',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: isVerySmallScreen ? 8.0 : isSmallScreen ? 9.0 : 10.0,
-                                  color: Colors.white.withOpacity(0.9),
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.5,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                              Icon(
+                                Icons.check_circle_rounded,
+                                color: Colors.white,
+                                size: isVerySmallScreen
+                                    ? 14
+                                    : isSmallScreen
+                                        ? 16
+                                        : 18,
                               ),
-                              SizedBox(height: isVerySmallScreen ? 1 : isSmallScreen ? 1 : 2),
-                              Text(
-                                formattedAmount,
-                                style: TextStyle(
-                                  fontFamily: 'Inter Tight',
-                                  color: Colors.white,
-                                  fontSize: isVerySmallScreen ? 14.0 : isSmallScreen ? 16.0 : 18.0,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 0.5,
+                              SizedBox(
+                                  width: isVerySmallScreen
+                                      ? 4
+                                      : isSmallScreen
+                                          ? 6
+                                          : 8),
+                              Flexible(
+                                child: Text(
+                                  'VOCÊ ESTÁ INSCRITO',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: isVerySmallScreen
+                                        ? 10.0
+                                        : isSmallScreen
+                                            ? 11.0
+                                            : 13.0,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.3,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isVerySmallScreen
+                                ? 10
+                                : isSmallScreen
+                                    ? 12
+                                    : 16,
+                            vertical: isVerySmallScreen
+                                ? 7
+                                : isSmallScreen
+                                    ? 8
+                                    : 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.15),
+                            borderRadius:
+                                BorderRadius.circular(isVerySmallScreen
+                                    ? 10
+                                    : isSmallScreen
+                                        ? 12
+                                        : 14),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.info_outline_rounded,
+                                color: Colors.white.withOpacity(0.9),
+                                size: isVerySmallScreen
+                                    ? 12
+                                    : isSmallScreen
+                                        ? 14
+                                        : 16,
+                              ),
+                              SizedBox(
+                                  width: isVerySmallScreen
+                                      ? 4
+                                      : isSmallScreen
+                                          ? 6
+                                          : 8),
+                              Expanded(
+                                child: Text(
+                                  'Clique para ver detalhes',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontSize: isVerySmallScreen
+                                        ? 10.0
+                                        : isSmallScreen
+                                            ? 11.0
+                                            : 12.5,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.2,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                ),
                               ),
                             ],
                           ),
                         ),
-                      ],
-                    ),
-                    
-                    SizedBox(height: isVerySmallScreen ? 10 : isSmallScreen ? 12 : 16),
-                    
-                    // Informações da partida - Mantendo layout horizontal sempre
-                    Container(
-                      padding: EdgeInsets.all(isVerySmallScreen ? 8 : isSmallScreen ? 10 : 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(isVerySmallScreen ? 10 : isSmallScreen ? 12 : 14),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.25),
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _buildInfoItem(
-                            isVerySmallScreen: isVerySmallScreen,
-                            isSmallScreen: isSmallScreen,
-                            icon: Icons.people_alt_rounded,
-                            label: 'JOGADORES',
-                            value: '${match.matchPlayers?.length ?? 0}',
-                          ),
-                          Container(
-                            height: isVerySmallScreen ? 20 : isSmallScreen ? 24 : 30,
-                            width: 1,
-                            color: Colors.white.withOpacity(0.3),
-                          ),
-                          _buildInfoItem(
-                            isVerySmallScreen: isVerySmallScreen,
-                            isSmallScreen: isSmallScreen,
-                            icon: Icons.schedule_rounded,
-                            label: 'HORÁRIO',
-                            value: formatHour(match.matchStartDate),
-                          ),
-                          Container(
-                            height: isVerySmallScreen ? 20 : isSmallScreen ? 24 : 30,
-                            width: 1,
-                            color: Colors.white.withOpacity(0.3),
-                          ),
-                          _buildInfoItem(
-                            isVerySmallScreen: isVerySmallScreen,
-                            isSmallScreen: isSmallScreen,
-                            icon: Icons.calendar_today_rounded,
-                            label: 'DATA',
-                            value: _formatDate(match.matchStartDate),
-                          ),
-                        ],
-                      ),
-                    ),
-                    
-                    SizedBox(height: isVerySmallScreen ? 10 : isSmallScreen ? 12 : 16),
-                    
-                    // Status do usuário na partida
-                    if (isRegistered)
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isVerySmallScreen ? 10 : isSmallScreen ? 12 : 16,
-                          vertical: isVerySmallScreen ? 7 : isSmallScreen ? 8 : 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.25),
-                          borderRadius: BorderRadius.circular(isVerySmallScreen ? 10 : isSmallScreen ? 12 : 14),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.4),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.check_circle_rounded,
-                              color: Colors.white,
-                              size: isVerySmallScreen ? 14 : isSmallScreen ? 16 : 18,
-                            ),
-                            SizedBox(width: isVerySmallScreen ? 4 : isSmallScreen ? 6 : 8),
-                            Flexible(
-                              child: Text(
-                                'VOCÊ ESTÁ INSCRITO',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: isVerySmallScreen ? 10.0 : isSmallScreen ? 11.0 : 13.0,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.3,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isVerySmallScreen ? 10 : isSmallScreen ? 12 : 16,
-                          vertical: isVerySmallScreen ? 7 : isSmallScreen ? 8 : 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(isVerySmallScreen ? 10 : isSmallScreen ? 12 : 14),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.3),
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.info_outline_rounded,
-                              color: Colors.white.withOpacity(0.9),
-                              size: isVerySmallScreen ? 12 : isSmallScreen ? 14 : 16,
-                            ),
-                            SizedBox(width: isVerySmallScreen ? 4 : isSmallScreen ? 6 : 8),
-                            Expanded(
-                              child: Text(
-                                'Clique para ver detalhes',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.9),
-                                  fontSize: isVerySmallScreen ? 10.0 : isSmallScreen ? 11.0 : 12.5,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.2,
-                                ),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              
-              // Loading overlay apenas para este card
-              if (isThisCardLoading)
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.6),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Center(
-                      child: Container(
-                        padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.7),
-                          shape: BoxShape.circle,
-                        ),
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          strokeWidth: 3,
+
+                // Loading overlay apenas para este card
+                if (isThisCardLoading)
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.6),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Center(
+                        child: Container(
+                          padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.7),
+                            shape: BoxShape.circle,
+                          ),
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            strokeWidth: 3,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   Widget _buildInfoItem({
@@ -1569,16 +1829,29 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
             children: [
               Icon(
                 icon,
-                size: isVerySmallScreen ? 10 : isSmallScreen ? 12 : 14,
+                size: isVerySmallScreen
+                    ? 10
+                    : isSmallScreen
+                        ? 12
+                        : 14,
                 color: Colors.white.withOpacity(0.9),
               ),
-              SizedBox(width: isVerySmallScreen ? 2 : isSmallScreen ? 3 : 4),
+              SizedBox(
+                  width: isVerySmallScreen
+                      ? 2
+                      : isSmallScreen
+                          ? 3
+                          : 4),
               Flexible(
                 child: Text(
                   label,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
-                    fontSize: isVerySmallScreen ? 8.0 : isSmallScreen ? 9.0 : 10.0,
+                    fontSize: isVerySmallScreen
+                        ? 8.0
+                        : isSmallScreen
+                            ? 9.0
+                            : 10.0,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.3,
                   ),
@@ -1588,12 +1861,21 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
               ),
             ],
           ),
-          SizedBox(height: isVerySmallScreen ? 1 : isSmallScreen ? 2 : 4),
+          SizedBox(
+              height: isVerySmallScreen
+                  ? 1
+                  : isSmallScreen
+                      ? 2
+                      : 4),
           Text(
             value,
             style: TextStyle(
               color: Colors.white,
-              fontSize: isVerySmallScreen ? 10.0 : isSmallScreen ? 11.0 : 13.0,
+              fontSize: isVerySmallScreen
+                  ? 10.0
+                  : isSmallScreen
+                      ? 11.0
+                      : 13.0,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.2,
             ),
