@@ -29,6 +29,14 @@ class _Tela15SalaCustomizadaViewWidgetState
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  // Cores do tema
+  final Color _primaryColor = Color(0xFFEC8D0D);
+  final Color _backgroundColor = Color(0xFFF8FAFC);
+  final Color _surfaceColor = Colors.white;
+  final Color _onSurfaceColor = Color(0xFF1E293B);
+  final Color _outlineColor = Color(0xFFE2E8F0);
+  final Color _textColor = Color(0xFF334155);
+
   @override
   void initState() {
     super.initState();
@@ -58,12 +66,10 @@ class _Tela15SalaCustomizadaViewWidgetState
   Widget build(BuildContext context) {
     if (!_isInitialized) {
       return Scaffold(
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        backgroundColor: _backgroundColor,
         body: Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(
-              FlutterFlowTheme.of(context).primary,
-            ),
+            valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
           ),
         ),
       );
@@ -79,283 +85,375 @@ class _Tela15SalaCustomizadaViewWidgetState
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-          automaticallyImplyLeading: false,
-          leading: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(18.0, 0.0, 0.0, 0.0),
-            child: FlutterFlowIconButton(
-              borderRadius: 8.0,
-              buttonSize: 45.0,
-              //fillColor: FlutterFlowTheme.of(context).primary.withOpacity(0.1),
-              icon: FaIcon(
-                FontAwesomeIcons.bars,
-                color: FlutterFlowTheme.of(context).primaryText,
-                size: 20.0,
+        backgroundColor: _backgroundColor,
+        body: Column(
+          children: [
+            // Header
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [_primaryColor, Color(0xFFF59E0B)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: _primaryColor.withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
               ),
-              onPressed: () async {
-                await showModalBottomSheet(
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  enableDrag: false,
-                  context: context,
-                  builder: (context) {
-                    return GestureDetector(
-                      onTap: () => FocusScope.of(context).unfocus(),
-                      child: Padding(
-                        padding: MediaQuery.viewInsetsOf(context),
-                        child: ModaMenuPagianInicialWidget(),
-                      ),
-                    );
-                  },
-                ).then((value) => safeSetState(() {}));
-              },
-            ),
-          ),
-          title: Text(
-            'GAME QUIZ',
-            style: FlutterFlowTheme.of(context).headlineSmall.override(
-                  fontFamily: 'Inter Tight',
-                  color: const Color(0xFFEC8D0D),
-                  letterSpacing: 0.0,
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          centerTitle: true,
-          elevation: 0,
-          shape: Border(
-            bottom: BorderSide(
-              color: FlutterFlowTheme.of(context).alternate,
-              width: 1,
-            ),
-          ),
-        ),
-        body: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Form(
-            key: _model.formKey,
-            child: Column(
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).secondaryBackground,
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(20),
-                      bottomRight: Radius.circular(20),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: FlutterFlowTheme.of(context)
-                              .primary
-                              .withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.people_alt_rounded,
-                          size: 40,
-                          color: const Color(0xFFEC8D0D),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'CRIAR PARTIDA PERSONALIZADA',
-                        style: FlutterFlowTheme.of(context)
-                            .titleMedium
-                            .override(
-                              fontFamily: 'Inter Tight',
-                              color: FlutterFlowTheme.of(context).primaryText,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Configure sua partida e convide amigos',
-                        style: FlutterFlowTheme.of(context).bodySmall.override(
-                              fontFamily: 'Inter Tight',
-                              color: FlutterFlowTheme.of(context).secondaryText,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildSectionTitle(
-                        title: 'Configurações Básicas',
-                        icon: Icons.settings,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildInputCard(
-                        context: context,
-                        label: 'Número de Jogadores',
-                        hintText: 'Ex.: 10',
-                        controller: _model.numberPlayerTextController,
-                        focusNode: _model.numberPlayerFocusNode,
-                        validator: (val) =>
-                            _model.validateNumberPlayer(context, val),
-                        maxLength: 2,
-                        keyboardType: TextInputType.number,
-                        icon: Icons.people_outline,
-                        onChanged: (value) => setState(() {}),
-                      ),
-                      if (_model
-                          .numberPlayerTextController.text.isNotEmpty) ...[
-                        const SizedBox(height: 1),
-                        _buildSectionTitle(
-                          title: 'Adicionar Jogadores',
-                          icon: Icons.group_add,
-                        ),
-                        const SizedBox(height: 10),
-                        _buildPlayerAutocomplete(context),
-                        if (_model.addedUsers.isNotEmpty) ...[
-                          const SizedBox(height: 16),
-                          _buildAddedPlayersSection(context),
-                        ],
-                        const SizedBox(height: 10),
-                        _buildSectionTitle(
-                          title: 'Configurações do Jogo',
-                          icon: Icons.gamepad,
-                        ),
-                        const SizedBox(height: 10),
-                        Column(
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    constraints: BoxConstraints(
-                                      minHeight: 100,
-                                      maxHeight: 120,
-                                    ),
-                                    child: _buildCompactInputCard(
-                                      context: context,
-                                      label: 'Nº de Questões (*)',
-                                      hintText: 'Ex.: 10',
-                                      controller:
-                                          _model.numberQuestionTextController,
-                                      focusNode: _model.numberQuestionFocusNode,
-                                      validator: (val) => _model
-                                          .validateNumberQuestion(context, val),
-                                      maxLength: 2,
-                                      keyboardType: TextInputType.number,
-                                      icon: Icons.quiz_outlined,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Container(
-                                    constraints: BoxConstraints(
-                                      minHeight: 100,
-                                      maxHeight: 120,
-                                    ),
-                                    child: _buildCompactInputCard(
-                                      context: context,
-                                      label: 'Nº Opções Resposta (*)',
-                                      hintText: 'Ex.: 4',
-                                      controller: _model
-                                          .numberOptionAnswerTextController,
-                                      focusNode:
-                                          _model.numberOptionAnswerFocusNode,
-                                      validator: (val) =>
-                                          _model.validateNumberOptionAnswer(
-                                              context, val),
-                                      maxLength: 1,
-                                      keyboardType: TextInputType.number,
-                                      icon: Icons.format_list_numbered,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                      Row(
+                        children: [
+                          // Botão Voltar
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            const SizedBox(height: 16),
-                          ],
+                            child: IconButton(
+                              onPressed: () {
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(builder: (_) => Tela03PrincipalWidget()),
+                                );
+                              },
+                              icon: Icon(
+                                Icons.arrow_back_rounded,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              splashRadius: 20,
+                            ),
+                          ),
+                          SizedBox(width: 16),
+                          Expanded(
+                            child: Text(
+                              'CRIAR PARTIDA',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.5,
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 8),
+                      Container(
+                        height: 2,
+                        width: 60,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.4),
+                          borderRadius: BorderRadius.circular(2),
                         ),
-                        _buildInputCard(
-                          context: context,
-                          label: 'Valor da Aposta',
-                          hintText: 'Ex.: 1500',
-                          controller: _model.montanteTextController,
-                          focusNode: _model.montanteFocusNode,
-                          validator: (val) =>
-                              _model.validateMontante(context, val),
-                          maxLength: 10,
-                          keyboardType: TextInputType.number,
-                          icon: Icons.attach_money,
-                          prefixText: 'AOA ',
-                          onChanged: (value) {},
-                        ),
-                        const SizedBox(height: 8),
-                        _buildAdvancedSettingsSection(context),
-                        const SizedBox(height: 32),
-                        _buildStartGameButton(context),
-                        const SizedBox(height: 16),
-                      ],
+                      ),
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
+
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Form(
+                  key: _model.formKey,
+                  child: Column(
+                    children: [
+                      // Cabeçalho melhorado da criação
+                      Container(
+                        margin: EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              _surfaceColor,
+                              Color(0xFFFEF7E6)
+                            ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                          border: Border.all(
+                            color: _outlineColor,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            // Ícone e título
+                            Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [_primaryColor, Color(0xFFF59E0B)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: _primaryColor.withOpacity(0.3),
+                                    blurRadius: 15,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.group_add_rounded,
+                                size: 36,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            
+                            // Título principal
+                            Text(
+                              'CRIAR PARTIDA PERSONALIZADA',
+                              style: TextStyle(
+                                fontFamily: 'Inter Tight',
+                                color: _onSurfaceColor,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.3,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            
+                            SizedBox(height: 8),
+                            
+                            // Subtítulo
+                            Text(
+                              'Configure regras, convide amigos e crie uma experiência única de jogo',
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                color: Colors.grey.shade600,
+                                fontSize: 14,
+                                height: 1.5,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            
+                            SizedBox(height: 20),
+                            
+                            // Badge informativo
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: _primaryColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: _primaryColor.withOpacity(0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.info_outline_rounded,
+                                    size: 16,
+                                    color: _primaryColor,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Convide até 50 jogadores',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      color: _primaryColor,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Título da seção
+                            _buildSectionTitle(
+                              title: 'Configurações Básicas',
+                              icon: Icons.settings_rounded,
+                            ),
+                            SizedBox(height: 16),
+                            
+                            // Campo: Número de Jogadores
+                            _buildInputField(
+                              label: 'Número de Jogadores',
+                              hintText: 'Ex: 10',
+                              controller: _model.numberPlayerTextController,
+                              focusNode: _model.numberPlayerFocusNode,
+                              validator: (val) => _model.validateNumberPlayer(context, val),
+                              maxLength: 2,
+                              keyboardType: TextInputType.number,
+                              icon: Icons.people_alt_rounded,
+                              onChanged: (value) => setState(() {}),
+                            ),
+                            
+                            if (_model.numberPlayerTextController.text.isNotEmpty) ...[
+                              SizedBox(height: 24),
+                              
+                              // Título: Adicionar Jogadores
+                              _buildSectionTitle(
+                                title: 'Adicionar Jogadores',
+                                icon: Icons.person_add_alt_1_rounded,
+                              ),
+                              SizedBox(height: 16),
+                              
+                              // Campo de busca de jogadores
+                              _buildPlayerAutocomplete(context),
+                              
+                              if (_model.addedUsers.isNotEmpty) ...[
+                                SizedBox(height: 20),
+                                _buildAddedPlayersSection(context),
+                              ],
+                              
+                              SizedBox(height: 24),
+                              
+                              // Título: Configurações do Jogo
+                              _buildSectionTitle(
+                                title: 'Configurações do Jogo',
+                                icon: Icons.videogame_asset_rounded,
+                              ),
+                              SizedBox(height: 16),
+                              
+                              // Campos de configuração em linha
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildCompactInputField(
+                                      label: 'Nº de Questões',
+                                      hintText: 'Ex: 10',
+                                      controller: _model.numberQuestionTextController,
+                                      focusNode: _model.numberQuestionFocusNode,
+                                      validator: (val) => _model.validateNumberQuestion(context, val),
+                                      maxLength: 2,
+                                      keyboardType: TextInputType.number,
+                                      icon: Icons.quiz_rounded,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12),
+                                  Expanded(
+                                    child: _buildCompactInputField(
+                                      label: 'Opções por Questão',
+                                      hintText: 'Ex: 4',
+                                      controller: _model.numberOptionAnswerTextController,
+                                      focusNode: _model.numberOptionAnswerFocusNode,
+                                      validator: (val) => _model.validateNumberOptionAnswer(context, val),
+                                      maxLength: 1,
+                                      keyboardType: TextInputType.number,
+                                      icon: Icons.format_list_numbered_rounded,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              
+                              SizedBox(height: 16),
+                              
+                              // Campo: Valor da Aposta
+                              _buildInputField(
+                                label: 'Valor da Aposta',
+                                hintText: 'Ex: 1500',
+                                controller: _model.montanteTextController,
+                                focusNode: _model.montanteFocusNode,
+                                validator: (val) => _model.validateMontante(context, val),
+                                maxLength: 10,
+                                keyboardType: TextInputType.number,
+                                icon: Icons.account_balance_wallet_rounded,
+                                onChanged: (value) {},
+                                prefixText: 'AOA ',
+                              ),
+                              
+                              SizedBox(height: 24),
+                              
+                              // Configurações Avançadas
+                              _buildAdvancedSettingsSection(context),
+                              
+                              SizedBox(height: 32),
+                              
+                              // Botão de Iniciar Partida
+                              _buildStartGameButton(context),
+                              
+                              SizedBox(height: 20),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildSectionTitle({required String title, required IconData icon}) {
-    return Row(
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: FlutterFlowTheme.of(context).primary.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            icon,
-            size: 16,
-            color: const Color(0xFFEC8D0D),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Text(
-          title,
-          style: FlutterFlowTheme.of(context).titleMedium.override(
-                fontFamily: 'Inter Tight',
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: _primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _primaryColor.withOpacity(0.2),
+                width: 1.5,
               ),
-        ),
-      ],
+            ),
+            child: Icon(
+              icon,
+              size: 20,
+              color: _primaryColor,
+            ),
+          ),
+          SizedBox(width: 12),
+          Text(
+            title,
+            style: TextStyle(
+              fontFamily: 'Inter',
+              color: _onSurfaceColor,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildInputCard({
-    required BuildContext context,
+  Widget _buildInputField({
     required String label,
     required String hintText,
     required TextEditingController controller,
@@ -370,72 +468,102 @@ class _Tela15SalaCustomizadaViewWidgetState
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(12),
+        color: _surfaceColor,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
+        border: Border.all(
+          color: _outlineColor,
+          width: 1.5,
+        ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(
-                  icon,
-                  size: 20,
-                  color: const Color(0xFFEC8D0D),
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: _primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 18,
+                    color: _primaryColor,
+                  ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 12),
                 Text(
                   label,
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto',
-                      ),
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    color: _textColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 16),
             TextFormField(
               controller: controller,
               focusNode: focusNode,
               decoration: InputDecoration(
                 hintText: hintText,
+                hintStyle: TextStyle(
+                  color: Colors.grey.shade500,
+                  fontFamily: 'Inter',
+                ),
                 prefixText: prefixText,
+                prefixStyle: TextStyle(
+                  color: _primaryColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: FlutterFlowTheme.of(context).alternate,
-                    width: 1,
+                    color: _outlineColor,
+                    width: 1.5,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: FlutterFlowTheme.of(context).alternate,
-                    width: 1,
+                    color: _outlineColor,
+                    width: 1.5,
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
-                    color: FlutterFlowTheme.of(context).primary,
-                    width: 1,
+                    color: _primaryColor,
+                    width: 2,
                   ),
                 ),
                 filled: true,
-                fillColor: FlutterFlowTheme.of(context).secondaryBackground,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                fillColor: _backgroundColor,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
               ),
-              style: FlutterFlowTheme.of(context).bodyLarge,
+              style: TextStyle(
+                fontFamily: 'Inter',
+                color: _textColor,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
               maxLength: maxLength,
               keyboardType: keyboardType,
               validator: validator,
@@ -450,39 +578,53 @@ class _Tela15SalaCustomizadaViewWidgetState
   Widget _buildPlayerAutocomplete(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(12),
+        color: _surfaceColor,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
+        border: Border.all(
+          color: _outlineColor,
+          width: 1.5,
+        ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.search,
-                  size: 20,
-                  color: const Color(0xFFEC8D0D),
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: _primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.search_rounded,
+                    size: 18,
+                    color: _primaryColor,
+                  ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 12),
                 Text(
                   'Buscar Jogador',
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto',
-                      ),
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    color: _textColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 16),
             buildAutocompleteUsuario(
               context: context,
               model: _model,
@@ -502,65 +644,148 @@ class _Tela15SalaCustomizadaViewWidgetState
   Widget _buildAddedPlayersSection(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(12),
+        color: _surfaceColor,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
-      ),
-      child: ExpansionTile(
-        initiallyExpanded: true,
-        tilePadding: const EdgeInsets.symmetric(horizontal: 16),
-        title: Row(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: FlutterFlowTheme.of(context).primary.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.group,
-                size: 16,
-                color: FlutterFlowTheme.of(context).primary,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Jogadores Adicionados (${_model.addedUsers.length})',
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    fontWeight: FontWeight.w500,
-                    fontFamily: 'Roboto',
-                  ),
-            ),
-          ],
+        border: Border.all(
+          color: _outlineColor,
+          width: 1.5,
         ),
-        children: _model.addedUsers.map((usuario) {
-          return ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            leading: CircleAvatar(
-              backgroundColor: FlutterFlowTheme.of(context).primary,
-              child: Text(
-                usuario['nome']!.substring(0, 1).toUpperCase(),
-                style: const TextStyle(color: Colors.white),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: _primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.group_rounded,
+                    size: 18,
+                    color: _primaryColor,
+                  ),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Jogadores Adicionados',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      color: _textColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: _primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: _primaryColor.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    '${_model.addedUsers.length}',
+                    style: TextStyle(
+                      color: _primaryColor,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ..._model.addedUsers.map((usuario) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: _primaryColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        usuario['nome']!.substring(0, 1).toUpperCase(),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          usuario['nome']!,
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            color: _textColor,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          usuario['telefone'] ?? '',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            color: Colors.grey.shade600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: Colors.red.shade100,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: IconButton(
+                      icon: Icon(Icons.close_rounded, size: 18),
+                      color: Colors.red.shade500,
+                      onPressed: () {
+                        setState(() {
+                          _model.addedUsers.remove(usuario);
+                        });
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ),
-            title: Text(usuario['nome']!),
-            trailing: IconButton(
-              icon: Icon(Icons.close, size: 20, color: Colors.red[400]),
-              onPressed: () {
-                setState(() {
-                  _model.addedUsers.remove(usuario);
-                });
-              },
-            ),
-          );
-        }).toList(),
+            );
+          }),
+        ],
       ),
     );
   }
@@ -568,148 +793,206 @@ class _Tela15SalaCustomizadaViewWidgetState
   Widget _buildAdvancedSettingsSection(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(12),
+        color: _surfaceColor,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
-      ),
-      child: ExpansionTile(
-        tilePadding: const EdgeInsets.symmetric(horizontal: 16),
-        title: Row(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: FlutterFlowTheme.of(context).primary.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.settings,
-                size: 16,
-                color: const Color(0xFFEC8D0D),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Configurações Avançadas',
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                    fontWeight: FontWeight.w500,
-                    fontFamily: 'Roboto',
-                  ),
-            ),
-          ],
+        border: Border.all(
+          color: _outlineColor,
+          width: 1.5,
         ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: _primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.settings_rounded,
+                    size: 18,
+                    color: _primaryColor,
+                  ),
+                ),
+                SizedBox(width: 12),
                 Text(
-                  'Tipo de Pergunta:',
-                  style: FlutterFlowTheme.of(context).bodyMedium,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: RadioListTile<bool>(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          'Simples',
-                          style: FlutterFlowTheme.of(context).bodyMedium,
-                        ),
-                        value: true,
-                        groupValue: _model.isSimpleQuestion,
-                        activeColor: FlutterFlowTheme.of(context).primary,
-                        onChanged: (value) {
-                          setState(() => _model.isSimpleQuestion = value!);
-                        },
-                      ),
-                    ),
-                    Expanded(
-                      child: RadioListTile<bool>(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          'Completa',
-                          style: FlutterFlowTheme.of(context).bodyMedium,
-                        ),
-                        value: false,
-                        groupValue: _model.isSimpleQuestion,
-                        activeColor: FlutterFlowTheme.of(context).primary,
-                        onChanged: (value) {
-                          setState(() => _model.isSimpleQuestion = value!);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Vencedores:',
-                  style: FlutterFlowTheme.of(context).bodyMedium,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: RadioListTile<bool>(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          'Apenas 1',
-                          style: FlutterFlowTheme.of(context).bodyMedium,
-                        ),
-                        value: true,
-                        groupValue: _model.onlyOneWinner,
-                        activeColor: FlutterFlowTheme.of(context).primary,
-                        onChanged: (value) {
-                          setState(() => _model.onlyOneWinner = value!);
-                        },
-                      ),
-                    ),
-                    Expanded(
-                      child: RadioListTile<bool>(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          'Múltiplos',
-                          style: FlutterFlowTheme.of(context).bodyMedium,
-                        ),
-                        value: false,
-                        groupValue: _model.onlyOneWinner,
-                        activeColor: FlutterFlowTheme.of(context).primary,
-                        onChanged: (value) {
-                          setState(() => _model.onlyOneWinner = value!);
-                        },
-                      ),
-                    ),
-                  ],
+                  'Configurações Avançadas',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    color: _textColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
+            SizedBox(height: 20),
+            
+            // Tipo de Pergunta
+            Text(
+              'Tipo de Pergunta:',
+              style: TextStyle(
+                fontFamily: 'Inter',
+                color: _textColor,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildRadioOption(
+                    title: 'Simples',
+                    value: true,
+                    groupValue: _model.isSimpleQuestion,
+                    onChanged: (value) {
+                      setState(() => _model.isSimpleQuestion = value!);
+                    },
+                  ),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: _buildRadioOption(
+                    title: 'Completa',
+                    value: false,
+                    groupValue: _model.isSimpleQuestion,
+                    onChanged: (value) {
+                      setState(() => _model.isSimpleQuestion = value!);
+                    },
+                  ),
+                ),
+              ],
+            ),
+            
+            SizedBox(height: 20),
+            
+            // Vencedores
+            Text(
+              'Vencedores:',
+              style: TextStyle(
+                fontFamily: 'Inter',
+                color: _textColor,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildRadioOption(
+                    title: 'Apenas 1',
+                    value: true,
+                    groupValue: _model.onlyOneWinner,
+                    onChanged: (value) {
+                      setState(() => _model.onlyOneWinner = value!);
+                    },
+                  ),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: _buildRadioOption(
+                    title: 'Múltiplos',
+                    value: false,
+                    groupValue: _model.onlyOneWinner,
+                    onChanged: (value) {
+                      setState(() => _model.onlyOneWinner = value!);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRadioOption({
+    required String title,
+    required bool value,
+    required bool? groupValue,
+    required Function(bool?) onChanged,
+  }) {
+    final isSelected = groupValue == value;
+    
+    return InkWell(
+      onTap: () => onChanged(value),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? _primaryColor.withOpacity(0.1) : _backgroundColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? _primaryColor : _outlineColor,
+            width: isSelected ? 2 : 1.5,
           ),
-        ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? _primaryColor : Colors.grey.shade400,
+                  width: isSelected ? 6 : 2,
+                ),
+              ),
+            ),
+            SizedBox(width: 12),
+            Text(
+              title,
+              style: TextStyle(
+                fontFamily: 'Inter',
+                color: isSelected ? _primaryColor : _textColor,
+                fontSize: 14,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildStartGameButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: _primaryColor.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFEC8D0D),
-          padding: const EdgeInsets.symmetric(vertical: 18),
+          backgroundColor: _primaryColor,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 20),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
           ),
-          elevation: 2,
-          shadowColor: const Color(0xFFEC8D0D).withOpacity(0.3),
+          elevation: 0,
         ),
         onPressed: _model.isLoadingStartMatch
             ? null
@@ -747,9 +1030,9 @@ class _Tela15SalaCustomizadaViewWidgetState
                 }
               },
         child: _model.isLoadingStartMatch
-            ? const SizedBox(
-                width: 24,
-                height: 24,
+            ? SizedBox(
+                width: 28,
+                height: 28,
                 child: CircularProgressIndicator(
                   strokeWidth: 3,
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -758,16 +1041,25 @@ class _Tela15SalaCustomizadaViewWidgetState
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.play_arrow, color: Colors.white),
-                  const SizedBox(width: 8),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.play_arrow_rounded, size: 22),
+                  ),
+                  SizedBox(width: 16),
                   Text(
                     'INICIAR PARTIDA',
-                    style: FlutterFlowTheme.of(context).titleMedium.override(
-                          fontFamily: 'Inter Tight',
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
+                    style: TextStyle(
+                      fontFamily: 'Inter Tight',
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ],
               ),
@@ -810,25 +1102,63 @@ class _Tela15SalaCustomizadaViewWidgetState
                   focusNode: focusNode,
                   decoration: InputDecoration(
                     hintText: 'Digite nome ou telefone',
+                    hintStyle: TextStyle(
+                      color: Colors.grey.shade500,
+                      fontFamily: 'Inter',
+                    ),
                     suffixIcon: textEditingController.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.close, size: 20),
-                            onPressed: () {
-                              textEditingController.clear();
-                              setState(() {});
-                            },
+                        ? Container(
+                            width: 36,
+                            height: 36,
+                            margin: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                              icon: Icon(Icons.close_rounded, size: 18),
+                              color: Colors.grey.shade600,
+                              onPressed: () {
+                                textEditingController.clear();
+                                setState(() {});
+                              },
+                            ),
                           )
                         : null,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: _outlineColor,
+                        width: 1.5,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: _outlineColor,
+                        width: 1.5,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: _primaryColor,
+                        width: 2,
+                      ),
                     ),
                     filled: true,
-                    fillColor: FlutterFlowTheme.of(context).secondaryBackground,
+                    fillColor: _backgroundColor,
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 14),
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
                   ),
-                  style: FlutterFlowTheme.of(context).bodyLarge,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    color: _textColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
                   maxLength: 14,
                   keyboardType: TextInputType.phone,
                   onChanged: (value) => setState(() {}),
@@ -841,16 +1171,25 @@ class _Tela15SalaCustomizadaViewWidgetState
                             .contains(
                                 textEditingController.text.toLowerCase()))))
                   Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
+                    padding: const EdgeInsets.only(top: 12.0),
                     child: ElevatedButton.icon(
-                      icon: const Icon(Icons.person_add, size: 18),
-                      label: const Text('Adicionar Jogador'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFEC8D0D),
-                        minimumSize: const Size(double.infinity, 40),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                      icon: Icon(Icons.person_add_rounded, size: 18),
+                      label: Text(
+                        'Adicionar Jogador',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w600,
                         ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _primaryColor,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 2,
+                        shadowColor: _primaryColor.withOpacity(0.3),
                       ),
                       onPressed: () {
                         final text = textEditingController.text.trim();
@@ -869,61 +1208,27 @@ class _Tela15SalaCustomizadaViewWidgetState
             final hasNoMatch = options.isEmpty && text.isNotEmpty;
             final isWeb = !kIsWeb ? false : true;
 
-            if (isWeb && usuarios.isEmpty) {
-              return Align(
-                alignment: Alignment.topCenter,
-                child: Material(
-                  elevation: 4,
-                  child: Container(
-                    width: 300,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).secondaryBackground,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.contacts,
-                            size: 40, color: Colors.grey),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Nenhum contato encontrado',
-                          style: FlutterFlowTheme.of(context).bodyMedium,
-                        ),
-                        const SizedBox(height: 8),
-                        if (text.isNotEmpty)
-                          ElevatedButton.icon(
-                            icon: const Icon(Icons.person_add, size: 18),
-                            label: Text('Adicionar "$text"'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFFEC8D0D),
-                              minimumSize: const Size(double.infinity, 40),
-                            ),
-                            onPressed: () {
-                              model.idTextController.text = text;
-                              onUsuarioSelecionado(text);
-                            },
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            }
-
             return Align(
               alignment: Alignment.topCenter,
               child: Material(
-                elevation: 4,
+                elevation: 8,
+                borderRadius: BorderRadius.circular(16),
                 child: Container(
-                  width: 300,
-                  constraints: const BoxConstraints(maxHeight: 200),
+                  width: 320,
+                  constraints: const BoxConstraints(maxHeight: 240),
                   decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).secondaryBackground,
-                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       if (options.isNotEmpty)
                         Expanded(
@@ -933,30 +1238,72 @@ class _Tela15SalaCustomizadaViewWidgetState
                             itemBuilder: (BuildContext context, int index) {
                               final String option = options.elementAt(index);
                               return ListTile(
-                                dense: true,
+                                dense: false,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
                                 leading: CircleAvatar(
-                                  backgroundColor:
-                                      FlutterFlowTheme.of(context).primary,
+                                  backgroundColor: _primaryColor,
+                                  foregroundColor: Colors.white,
                                   child: Text(
                                     usuarios[option]!
                                         .substring(0, 1)
                                         .toUpperCase(),
-                                    style: const TextStyle(color: Colors.white),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
-                                title: Text(usuarios[option] ?? option),
-                                subtitle: Text(option),
+                                title: Text(
+                                  usuarios[option] ?? option,
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    color: _textColor,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  option,
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    color: Colors.grey.shade600,
+                                    fontSize: 13,
+                                  ),
+                                ),
                                 onTap: () => onSelected(option),
                               );
                             },
                           ),
                         ),
-                      if (hasNoMatch) const Divider(height: 1),
+                      if (hasNoMatch) Divider(height: 1, color: _outlineColor),
                       if (hasNoMatch)
                         ListTile(
-                          leading:
-                              const Icon(Icons.person_add, color: Colors.green),
-                          title: Text('Adicionar "$text"'),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          leading: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade50,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.green.shade100,
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.person_add_rounded,
+                              size: 20,
+                              color: Colors.green.shade600,
+                            ),
+                          ),
+                          title: Text(
+                            'Adicionar "$text"',
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              color: _textColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                           onTap: () {
                             model.idTextController.text = text;
                             onUsuarioSelecionado(text);
@@ -973,8 +1320,7 @@ class _Tela15SalaCustomizadaViewWidgetState
     );
   }
 
-  Widget _buildCompactInputCard({
-    required BuildContext context,
+  Widget _buildCompactInputField({
     required String label,
     required String hintText,
     required TextEditingController controller,
@@ -986,85 +1332,100 @@ class _Tela15SalaCustomizadaViewWidgetState
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(12),
+        color: _surfaceColor,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
+        border: Border.all(
+          color: _outlineColor,
+          width: 1.5,
+        ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Label compacto
             Row(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  icon,
-                  size: 18,
-                  color: const Color(0xFFEC8D0D),
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: _primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 16,
+                    color: _primaryColor,
+                  ),
                 ),
-                const SizedBox(width: 6),
-                Flexible(
+                SizedBox(width: 8),
+                Expanded(
                   child: Text(
                     label,
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          fontFamily: 'Roboto',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      color: _textColor,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            // Campo de texto compacto
+            SizedBox(height: 12),
             SizedBox(
-              height: 56, // Altura fixa
+              height: 52,
               child: TextFormField(
                 controller: controller,
                 focusNode: focusNode,
                 decoration: InputDecoration(
                   hintText: hintText,
-                  isDense: true,
+                  hintStyle: TextStyle(
+                    color: Colors.grey.shade500,
+                    fontFamily: 'Inter',
+                  ),
                   contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 12,
+                    horizontal: 14,
+                    vertical: 14,
                   ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide(
-                      color: FlutterFlowTheme.of(context).alternate,
-                      width: 1,
+                      color: _outlineColor,
+                      width: 1.5,
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide(
-                      color: FlutterFlowTheme.of(context).alternate,
-                      width: 1,
+                      color: _outlineColor,
+                      width: 1.5,
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide(
-                      color: FlutterFlowTheme.of(context).primary,
-                      width: 1,
+                      color: _primaryColor,
+                      width: 2,
                     ),
                   ),
                   filled: true,
-                  fillColor: FlutterFlowTheme.of(context).secondaryBackground,
+                  fillColor: _backgroundColor,
                 ),
-                style: FlutterFlowTheme.of(context).bodyMedium,
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  color: _textColor,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
                 maxLength: maxLength,
                 keyboardType: keyboardType,
                 validator: validator,

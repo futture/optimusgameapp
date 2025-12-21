@@ -1,4 +1,3 @@
-// imports...
 import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warning00_campo_vazio_widget.dart';
 import 'package:projeto_game_quiz/components/warnings/warning04_reducao_de_saldo/warning04_reducao_de_saldo_widget.dart';
 import 'package:projeto_game_quiz/core/api/services/fcm_token_service.dart';
@@ -33,7 +32,10 @@ class Tela03PrincipalWidget extends StatefulWidget {
 class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
   late Tela03PrincipalModel _model;
   final matchService = MatchService();
-  bool _isLoadingMatchDetails = false;
+  
+  // Mapa para controlar loading individual de cada partida
+  final Map<String, bool> _matchLoadingStates = {};
+  
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final FcmTokenService _fcmTokenService = FcmTokenService();
 
@@ -45,6 +47,10 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
   final Color _onSurfaceColor = Color(0xFF1E293B);
   final Color _outlineColor = Color(0xFFE2E8F0);
   final Color _successColor = Color(0xFF10B981);
+
+  // Cores mais suaves para os cards
+  final Color _cardLightOrange = Color(0xFFFFA726); // Laranja mais suave
+  final Color _cardDarkOrange = Color(0xFFFB8C00); // Laranja escuro mais suave
 
   final LinearGradient _primaryGradient = LinearGradient(
     colors: [Color(0xFFEC8D0D), Color(0xFFF59E0B)],
@@ -97,7 +103,10 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                 child: SafeArea(
                   bottom: false,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: _getResponsivePadding(context),
+                      vertical: 16,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -105,6 +114,8 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                           children: [
                             // Botão Menu Premium
                             Container(
+                              width: _getIconSize(context),
+                              height: _getIconSize(context),
                               decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(12),
@@ -114,7 +125,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                 icon: Icon(
                                   FontAwesomeIcons.bars,
                                   color: Colors.white,
-                                  size: 16,
+                                  size: _getIconSize(context) - 28,
                                 ),
                                 splashRadius: 20,
                               ),
@@ -125,7 +136,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                 'GAME QUIZ',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 20,
+                                  fontSize: _getFontSize(context, baseSize: 20),
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 0.5,
                                 ),
@@ -133,8 +144,8 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                             ),
                             // Ícone de notificações
                             Container(
-                              width: 44,
-                              height: 44,
+                              width: _getIconSize(context),
+                              height: _getIconSize(context),
                               decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(0.15),
                                 shape: BoxShape.circle,
@@ -143,7 +154,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                                 icon: Icon(
                                   Icons.notifications_outlined,
                                   color: Colors.white,
-                                  size: 20,
+                                  size: _getIconSize(context) - 24,
                                 ),
                                 onPressed: () {
                                   // Adicionar funcionalidade de notificações aqui
@@ -181,21 +192,21 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                       backgroundColor: _backgroundColor,
                       child: SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.all(20.0),
+                        padding: EdgeInsets.all(_getResponsivePadding(context)),
                         child: Column(
                           children: [
-                            _buildUserProfileCard(),
+                            _buildUserProfileCard(context),
                             const SizedBox(height: 24),
-                            _buildGameRoomButton(),
+                            _buildGameRoomButton(context),
                             const SizedBox(height: 24),
-                            _buildSuperLeagueHeader(),
+                            _buildSuperLeagueHeader(context),
                             const SizedBox(height: 20),
                             if (_model.isLoadingMatches)
                               _buildLoadingState()
                             else if (_model.matchList.isEmpty)
-                              _buildEmptyMatchesState()
+                              _buildEmptyMatchesState(context)
                             else
-                              _buildMatchList(),
+                              _buildMatchList(context),
                           ],
                         ),
                       ),
@@ -208,6 +219,29 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
         ),
       ),
     );
+  }
+
+  // Métodos auxiliares para responsividade
+  double _getResponsivePadding(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width < 350) return 12;
+    if (width < 400) return 14;
+    if (width < 500) return 16;
+    return 20;
+  }
+
+  double _getIconSize(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width < 350) return 38;
+    if (width < 400) return 40;
+    return 44;
+  }
+
+  double _getFontSize(BuildContext context, {required double baseSize}) {
+    final width = MediaQuery.of(context).size.width;
+    if (width < 350) return baseSize * 0.85;
+    if (width < 400) return baseSize * 0.9;
+    return baseSize;
   }
 
   Future<void> _refreshData() async {
@@ -232,7 +266,9 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
     safeSetState(() {});
   }
 
-  Widget _buildUserProfileCard() {
+  Widget _buildUserProfileCard(BuildContext context) {
+    final isSmallScreen = MediaQuery.of(context).size.width < 400;
+    
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -250,7 +286,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
         child: Column(
           children: [
             Row(
@@ -266,8 +302,8 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                     },
                   ),
                   child: Container(
-                    width: 70,
-                    height: 70,
+                    width: isSmallScreen ? 60 : 70,
+                    height: isSmallScreen ? 60 : 70,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
@@ -304,7 +340,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: isSmallScreen ? 12 : 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -313,7 +349,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                         _model.user?.name ?? "Carregando...",
                         style: TextStyle(
                           fontFamily: 'Inter',
-                          fontSize: 18.0,
+                          fontSize: isSmallScreen ? 16.0 : 18.0,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.0,
                           color: _onSurfaceColor,
@@ -323,8 +359,10 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                       ),
                       const SizedBox(height: 6),
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isSmallScreen ? 10 : 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.grey.shade100,
                           borderRadius: BorderRadius.circular(12),
@@ -334,20 +372,24 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                           children: [
                             Icon(
                               Icons.badge_outlined,
-                              size: 14,
+                              size: isSmallScreen ? 12 : 14,
                               color: Colors.grey.shade600,
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              _model.userAccountInfo != null
-                                  ? 'ID: ${_model.userAccountInfo!.accountNumber}'
-                                  : "Carregando...",
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 13.0,
-                                letterSpacing: 0.0,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey.shade700,
+                            SizedBox(width: isSmallScreen ? 4 : 6),
+                            Flexible(
+                              child: Text(
+                                _model.userAccountInfo != null
+                                    ? 'ID: ${_model.userAccountInfo!.accountNumber}'
+                                    : "Carregando...",
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: isSmallScreen ? 12.0 : 13.0,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey.shade700,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
@@ -360,7 +402,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
             ),
             const SizedBox(height: 20),
             Container(
-              padding: const EdgeInsets.all(18),
+              padding: EdgeInsets.all(isSmallScreen ? 14 : 18),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 color: _primaryColor.withOpacity(0.05),
@@ -372,49 +414,52 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'SALDO DISPONÍVEL',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 12.0,
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey.shade600,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'SALDO DISPONÍVEL',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: isSmallScreen ? 11.0 : 12.0,
+                            letterSpacing: 0.0,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade600,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _model.userAccountInfo != null
-                            ? CurrencyUtil.formatKwanza(
-                                    _model.userAccountInfo!.balance)
-                                .toString()
-                            : "0,00",
-                        style: TextStyle(
-                          fontFamily: 'Inter Tight',
-                          fontSize: 28.0,
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.w800,
-                          color: _primaryColor,
+                        const SizedBox(height: 8),
+                        Text(
+                          _model.userAccountInfo != null
+                              ? CurrencyUtil.formatKwanza(
+                                      _model.userAccountInfo!.balance)
+                                  .toString()
+                              : "0,00",
+                          style: TextStyle(
+                            fontFamily: 'Inter Tight',
+                            fontSize: isSmallScreen ? 22.0 : 28.0,
+                            letterSpacing: 0.0,
+                            fontWeight: FontWeight.w800,
+                            color: _primaryColor,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Kwanza (AOA)',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 12.0,
-                          letterSpacing: 0.0,
-                          color: Colors.grey.shade600,
+                        const SizedBox(height: 4),
+                        Text(
+                          'Kwanza (AOA)',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: isSmallScreen ? 11.0 : 12.0,
+                            letterSpacing: 0.0,
+                            color: Colors.grey.shade600,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                  SizedBox(width: 10),
                   Container(
-                    width: 44,
-                    height: 44,
+                    width: isSmallScreen ? 40 : 44,
+                    height: isSmallScreen ? 40 : 44,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: _primaryColor,
@@ -426,10 +471,10 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                         ),
                       ],
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.account_balance_wallet_rounded,
                       color: Colors.white,
-                      size: 22,
+                      size: isSmallScreen ? 20 : 22,
                     ),
                   ),
                 ],
@@ -440,6 +485,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _buildActionButton(
+                  context: context,
                   icon: Icons.add_circle_outlined,
                   label: 'DEPOSITAR',
                   color: Color(0xFF00B80E),
@@ -449,7 +495,9 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                     ),
                   ),
                 ),
+                SizedBox(width: 12),
                 _buildActionButton(
+                  context: context,
                   icon: Icons.remove_circle_outlined,
                   label: 'SACAR',
                   color: _primaryColor,
@@ -480,66 +528,69 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
   }
 
   Widget _buildActionButton({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required Color color,
     required VoidCallback onPressed,
   }) {
+    final isSmallScreen = MediaQuery.of(context).size.width < 400;
+    
     return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6.0),
-        child: Material(
+      child: Material(
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
           borderRadius: BorderRadius.circular(16),
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onPressed,
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                color: color.withOpacity(0.1),
-                border: Border.all(
-                  color: color.withOpacity(0.3),
-                  width: 1.5,
+          child: Container(
+            padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              color: color.withOpacity(0.1),
+              border: Border.all(
+                color: color.withOpacity(0.3),
+                width: 1.5,
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: isSmallScreen ? 36 : 44,
+                  height: isSmallScreen ? 36 : 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: color,
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withOpacity(0.3),
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    icon,
+                    color: Colors.white,
+                    size: isSmallScreen ? 18 : 22,
+                  ),
                 ),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: color,
-                      boxShadow: [
-                        BoxShadow(
-                          color: color.withOpacity(0.3),
-                          blurRadius: 6,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      icon,
-                      color: Colors.white,
-                      size: 22,
-                    ),
+                SizedBox(height: isSmallScreen ? 6 : 10),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: isSmallScreen ? 12.0 : 14.0,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.0,
+                    color: Colors.grey.shade800,
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.0,
-                      color: Colors.grey.shade800,
-                    ),
-                  ),
-                ],
-              ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
         ),
@@ -547,7 +598,9 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
     );
   }
 
-  Widget _buildGameRoomButton() {
+  Widget _buildGameRoomButton(BuildContext context) {
+    final isSmallScreen = MediaQuery.of(context).size.width < 400;
+    
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -568,14 +621,15 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Flexible(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -583,30 +637,32 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                         'SALA DE JOGO',
                         style: TextStyle(
                           fontFamily: 'Inter',
-                          fontSize: 12.0,
+                          fontSize: isSmallScreen ? 11.0 : 12.0,
                           color: Colors.white.withOpacity(0.9),
                           letterSpacing: 1.0,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: isSmallScreen ? 2 : 4),
                       Text(
                         'Escolha sua sala e comece a ganhar!',
                         style: TextStyle(
                           fontFamily: 'Inter Tight',
-                          fontSize: 18.0,
+                          fontSize: isSmallScreen ? 16.0 : 18.0,
                           color: Colors.white,
                           letterSpacing: 0.0,
                           fontWeight: FontWeight.w700,
                         ),
                         maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
+                SizedBox(width: 10),
                 Container(
-                  width: 56,
-                  height: 56,
+                  width: isSmallScreen ? 48 : 56,
+                  height: isSmallScreen ? 48 : 56,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.white.withOpacity(0.2),
@@ -615,15 +671,15 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                       width: 2,
                     ),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.videogame_asset_rounded,
                     color: Colors.white,
-                    size: 26,
+                    size: isSmallScreen ? 22 : 26,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: isSmallScreen ? 16 : 20),
             Material(
               borderRadius: BorderRadius.circular(14),
               color: Colors.transparent,
@@ -647,7 +703,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                 borderRadius: BorderRadius.circular(14),
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(18),
+                  padding: EdgeInsets.all(isSmallScreen ? 14 : 18),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
                     color: Colors.white,
@@ -663,27 +719,31 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        width: 36,
-                        height: 36,
+                        width: isSmallScreen ? 32 : 36,
+                        height: isSmallScreen ? 32 : 36,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Color(0xFF00B80E).withOpacity(0.1),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.play_arrow_rounded,
                           color: Color(0xFF00B80E),
-                          size: 20,
+                          size: isSmallScreen ? 18 : 20,
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'ESCOLHER PARTIDA',
-                        style: TextStyle(
-                          fontFamily: 'Inter Tight',
-                          color: Color(0xFF00B80E),
-                          fontSize: 16.0,
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.w800,
+                      SizedBox(width: isSmallScreen ? 8 : 12),
+                      Flexible(
+                        child: Text(
+                          'ESCOLHER PARTIDA',
+                          style: TextStyle(
+                            fontFamily: 'Inter Tight',
+                            color: Color(0xFF00B80E),
+                            fontSize: isSmallScreen ? 14.0 : 16.0,
+                            letterSpacing: 0.0,
+                            fontWeight: FontWeight.w800,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -697,7 +757,9 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
     );
   }
 
-  Widget _buildSuperLeagueHeader() {
+  Widget _buildSuperLeagueHeader(BuildContext context) {
+    final isSmallScreen = MediaQuery.of(context).size.width < 400;
+    
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -718,82 +780,83 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: Colors.white.withOpacity(0.15),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
-                          width: 1,
-                        ),
+                Flexible(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 10 : 14,
+                      vertical: isSmallScreen ? 6 : 8,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.white.withOpacity(0.15),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.3),
+                        width: 1,
                       ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.bolt_rounded,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.bolt_rounded,
+                          color: Colors.white,
+                          size: isSmallScreen ? 16 : 20,
+                        ),
+                        SizedBox(width: isSmallScreen ? 6 : 8),
+                        Flexible(
+                          child: Text(
                             'SUPER LIGA',
                             style: TextStyle(
                               fontFamily: 'Inter Tight',
-                              fontSize: 18.0,
+                              fontSize: isSmallScreen ? 14.0 : 18.0,
                               color: Colors.white,
                               letterSpacing: 0.0,
                               fontWeight: FontWeight.w800,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
                 if (_model.nextMatch != null)
-                  _buildCountdownTimer()
+                  _buildCountdownTimer(isSmallScreen)
                 else
-                  _buildPlaceholderTimer(),
+                  _buildPlaceholderTimer(isSmallScreen),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: isSmallScreen ? 12 : 16),
             Text(
               'Habilita-se a ganhar grandes prêmios participando nas partidas abaixo. '
               'Basta clicar na partida para se inscrever.',
               style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 14.0,
+                fontSize: isSmallScreen ? 13.0 : 14.0,
                 color: Colors.white.withOpacity(0.95),
                 letterSpacing: 0.0,
                 height: 1.5,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: isSmallScreen ? 12 : 16),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: isSmallScreen ? 6 : 8,
+              runSpacing: isSmallScreen ? 6 : 8,
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isSmallScreen ? 10 : 12,
+                    vertical: isSmallScreen ? 5 : 6,
+                  ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     color: Colors.white.withOpacity(0.15),
@@ -805,25 +868,34 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.emoji_events_rounded,
-                          size: 16, color: Colors.white),
-                      const SizedBox(width: 6),
-                      Text(
-                        'PRÊMIOS EXCLUSIVOS',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 12.0,
-                          color: Colors.white,
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.w600,
+                      Icon(
+                        Icons.emoji_events_rounded,
+                        size: isSmallScreen ? 14 : 16,
+                        color: Colors.white,
+                      ),
+                      SizedBox(width: isSmallScreen ? 4 : 6),
+                      Flexible(
+                        child: Text(
+                          'PRÊMIOS EXCLUSIVOS',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: isSmallScreen ? 11.0 : 12.0,
+                            color: Colors.white,
+                            letterSpacing: 0.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isSmallScreen ? 10 : 12,
+                    vertical: isSmallScreen ? 5 : 6,
+                  ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     color: Colors.white.withOpacity(0.15),
@@ -835,17 +907,24 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.star_rounded,
-                          size: 16, color: Colors.white),
-                      const SizedBox(width: 6),
-                      Text(
-                        'TORNEIOS',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 12.0,
-                          color: Colors.white,
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.w600,
+                      Icon(
+                        Icons.star_rounded,
+                        size: isSmallScreen ? 14 : 16,
+                        color: Colors.white,
+                      ),
+                      SizedBox(width: isSmallScreen ? 4 : 6),
+                      Flexible(
+                        child: Text(
+                          'TORNEIOS',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: isSmallScreen ? 11.0 : 12.0,
+                            color: Colors.white,
+                            letterSpacing: 0.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -859,9 +938,12 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
     );
   }
 
-  Widget _buildCountdownTimer() {
+  Widget _buildCountdownTimer(bool isSmallScreen) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: isSmallScreen ? 10 : 14,
+        vertical: isSmallScreen ? 6 : 8,
+      ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -881,24 +963,33 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.timer_rounded, size: 18, color: Colors.white),
-          const SizedBox(width: 6),
+          Icon(
+            Icons.timer_rounded,
+            size: isSmallScreen ? 16 : 18,
+            color: Colors.white,
+          ),
+          SizedBox(width: isSmallScreen ? 4 : 6),
           Text(
             _formatCountdown(_model.timerMilliseconds),
-            style: const TextStyle(
-              fontSize: 14,
+            style: TextStyle(
+              fontSize: isSmallScreen ? 12 : 14,
               fontWeight: FontWeight.w800,
               color: Colors.white,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPlaceholderTimer() {
+  Widget _buildPlaceholderTimer(bool isSmallScreen) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: isSmallScreen ? 10 : 14,
+        vertical: isSmallScreen ? 6 : 8,
+      ),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.15),
         borderRadius: BorderRadius.circular(12),
@@ -907,18 +998,24 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
           width: 1,
         ),
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.timer_rounded, size: 18, color: Colors.white),
-          SizedBox(width: 6),
+          Icon(
+            Icons.timer_rounded,
+            size: isSmallScreen ? 16 : 18,
+            color: Colors.white,
+          ),
+          SizedBox(width: isSmallScreen ? 4 : 6),
           Text(
             "EM BREVE",
             style: TextStyle(
-              fontSize: 14,
+              fontSize: isSmallScreen ? 12 : 14,
               fontWeight: FontWeight.w700,
               color: Colors.white,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -954,9 +1051,11 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
     );
   }
 
-  Widget _buildEmptyMatchesState() {
+  Widget _buildEmptyMatchesState(BuildContext context) {
+    final isSmallScreen = MediaQuery.of(context).size.width < 400;
+    
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(isSmallScreen ? 24 : 32),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: _surfaceColor,
@@ -976,8 +1075,8 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 80,
-            height: 80,
+            width: isSmallScreen ? 60 : 80,
+            height: isSmallScreen ? 60 : 80,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.grey.shade100,
@@ -988,31 +1087,32 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
             ),
             child: Icon(
               Icons.videogame_asset_outlined,
-              size: 40,
+              size: isSmallScreen ? 30 : 40,
               color: Colors.grey.shade500,
             ),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: isSmallScreen ? 16 : 20),
           Text(
             'Nenhuma partida disponível',
             style: TextStyle(
               fontFamily: 'Inter',
-              fontSize: 18.0,
+              fontSize: isSmallScreen ? 16.0 : 18.0,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.0,
               color: _onSurfaceColor,
             ),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: isSmallScreen ? 6 : 8),
           Text(
             'Novas partidas serão anunciadas em breve',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: isSmallScreen ? 12 : 14,
               color: Colors.grey.shade600,
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: isSmallScreen ? 20 : 24),
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
@@ -1029,16 +1129,19 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                 await _model.loadMatches(setState);
               },
               text: 'ATUALIZAR',
-              icon: const Icon(Icons.refresh_rounded, size: 18),
+              icon: Icon(
+                Icons.refresh_rounded,
+                size: isSmallScreen ? 16 : 18,
+              ),
               options: FFButtonOptions(
-                width: 180,
-                height: 48,
+                width: isSmallScreen ? 150 : 180,
+                height: isSmallScreen ? 44 : 48,
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 color: _primaryColor,
                 textStyle: TextStyle(
                   fontFamily: 'Inter Tight',
                   color: Colors.white,
-                  fontSize: 15,
+                  fontSize: isSmallScreen ? 14 : 15,
                   letterSpacing: 0.0,
                   fontWeight: FontWeight.w700,
                 ),
@@ -1056,28 +1159,39 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
     );
   }
 
-  Widget _buildMatchList() {
+  Widget _buildMatchList(BuildContext context) {
     return Column(
       children: _model.matchList.map((match) {
         return Padding(
-          padding: const EdgeInsets.only(bottom: 12.0),
-          child: _buildMatchCard(match),
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: _buildMatchCard(match, context),
         );
       }).toList(),
     );
   }
 
-  Widget _buildMatchCard(MatchResponse match) {
+  Widget _buildMatchCard(MatchResponse match, BuildContext context) {
     final isRegistered = match.isUserRegistered ?? false;
+    final isThisCardLoading = _matchLoadingStates[match.id] ?? false;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 400;
+    final isVerySmallScreen = screenWidth < 350;
+    
+    // Formata o valor da aposta
+    final entryAmount = match.room?.roomConfiguration?.minimumAmountToPlay ?? 0;
+    final formattedAmount = '${entryAmount}KZ';
 
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: () async {
-          if (_isLoadingMatchDetails) return;
+          if (isThisCardLoading) return;
 
-          setState(() => _isLoadingMatchDetails = true);
+          // Ativa loading apenas para este card
+          setState(() {
+            _matchLoadingStates[match.id] = true;
+          });
 
           try {
             await _model.getUsersByMatchId(setState, match.id);
@@ -1104,13 +1218,20 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
               "Ocorreu um erro ao carregar os detalhes da partida.",
             );
           } finally {
-            setState(() => _isLoadingMatchDetails = false);
+            // Desativa loading apenas para este card
+            setState(() {
+              _matchLoadingStates[match.id] = false;
+            });
           }
         },
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         child: Container(
+          constraints: BoxConstraints(
+            minHeight: isSmallScreen ? 140 : 160,
+          ),
+          width: double.infinity,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -1120,75 +1241,81 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                       Color(0xFF2E7D32),
                     ]
                   : [
-                      Color(0xFFEC8D0D),
-                      Color(0xFFD2691E),
+                      _cardLightOrange, // Laranja mais suave
+                      _cardDarkOrange,  // Laranja escuro mais suave
                     ],
             ),
             boxShadow: [
               BoxShadow(
                 color: (isRegistered
                         ? Color(0xFF4CAF50)
-                        : Color(0xFFEC8D0D))
-                    .withOpacity(0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+                        : _cardLightOrange)
+                    .withOpacity(0.25),
+                blurRadius: 15,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
           child: Stack(
             children: [
               Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(isVerySmallScreen ? 12 : isSmallScreen ? 14 : 18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Cabeçalho do card: Título e valor da aposta
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Flexible(
+                        Expanded(
                           child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
-                                width: 44,
-                                height: 44,
+                                width: isVerySmallScreen ? 32 : isSmallScreen ? 36 : 42,
+                                height: isVerySmallScreen ? 32 : isSmallScreen ? 36 : 42,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Colors.white.withOpacity(0.2),
+                                  color: Colors.white.withOpacity(0.25),
                                   border: Border.all(
-                                    color: Colors.white.withOpacity(0.3),
+                                    color: Colors.white.withOpacity(0.4),
                                     width: 2,
                                   ),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.emoji_events_rounded,
                                   color: Colors.white,
-                                  size: 22,
+                                  size: isVerySmallScreen ? 16 : isSmallScreen ? 18 : 22,
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Flexible(
+                              SizedBox(width: isVerySmallScreen ? 6 : isSmallScreen ? 8 : 12),
+                              Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Super Partida',
+                                      'SUPER PARTIDA',
                                       style: TextStyle(
                                         fontFamily: 'Inter',
-                                        fontSize: 12.0,
-                                        color: Colors.white.withOpacity(0.9),
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.w600,
+                                        fontSize: isVerySmallScreen ? 9.0 : isSmallScreen ? 10.0 : 12.0,
+                                        color: Colors.white.withOpacity(0.95),
+                                        letterSpacing: 0.5,
+                                        fontWeight: FontWeight.w700,
                                       ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    const SizedBox(height: 2),
+                                    SizedBox(height: isVerySmallScreen ? 1 : isSmallScreen ? 1 : 2),
                                     Text(
                                       'das ${formatHour(match.matchStartDate)}',
                                       style: TextStyle(
                                         fontFamily: 'Inter Tight',
                                         color: Colors.white,
-                                        fontSize: 16.0,
+                                        fontSize: isVerySmallScreen ? 14.0 : isSmallScreen ? 15.0 : 17.0,
                                         letterSpacing: 0.0,
                                         fontWeight: FontWeight.w800,
+                                        height: 1.2,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -1199,87 +1326,222 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                             ],
                           ),
                         ),
+                        SizedBox(width: isVerySmallScreen ? 6 : isSmallScreen ? 8 : 10),
+                        // Valor da aposta em um container destacado
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 8.0),
+                          constraints: BoxConstraints(
+                            maxWidth: isVerySmallScreen ? 70 : isSmallScreen ? 80 : 100,
+                          ),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isVerySmallScreen ? 8 : isSmallScreen ? 10 : 14,
+                            vertical: isVerySmallScreen ? 5 : isSmallScreen ? 6 : 8,
+                          ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(12.0),
+                            color: Colors.white.withOpacity(0.25),
+                            borderRadius: BorderRadius.circular(isVerySmallScreen ? 10 : isSmallScreen ? 12 : 14),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withOpacity(0.4),
                               width: 1.5,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 8,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
                           ),
-                          child: Text(
-                            '${match.room?.roomConfiguration?.minimumAmountToPlay ?? 0}KZ',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16,
-                            ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'ENTRADA',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: isVerySmallScreen ? 8.0 : isSmallScreen ? 9.0 : 10.0,
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.5,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              SizedBox(height: isVerySmallScreen ? 1 : isSmallScreen ? 1 : 2),
+                              Text(
+                                formattedAmount,
+                                style: TextStyle(
+                                  fontFamily: 'Inter Tight',
+                                  color: Colors.white,
+                                  fontSize: isVerySmallScreen ? 14.0 : isSmallScreen ? 16.0 : 18.0,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.5,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildMatchStat(
-                          icon: Icons.people_alt_rounded,
-                          value: '${match.matchPlayers?.length ?? 0} Jogadores',
+                    
+                    SizedBox(height: isVerySmallScreen ? 10 : isSmallScreen ? 12 : 16),
+                    
+                    // Informações da partida - Mantendo layout horizontal sempre
+                    Container(
+                      padding: EdgeInsets.all(isVerySmallScreen ? 8 : isSmallScreen ? 10 : 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(isVerySmallScreen ? 10 : isSmallScreen ? 12 : 14),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.25),
+                          width: 1,
                         ),
-                        _buildMatchStat(
-                          icon: Icons.schedule_rounded,
-                          value: formatHour(match.matchStartDate),
-                        ),
-                        if (isRegistered)
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildInfoItem(
+                            isVerySmallScreen: isVerySmallScreen,
+                            isSmallScreen: isSmallScreen,
+                            icon: Icons.people_alt_rounded,
+                            label: 'JOGADORES',
+                            value: '${match.matchPlayers?.length ?? 0}',
+                          ),
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14.0, vertical: 6.0),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(20.0),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.4),
-                                width: 1.5,
+                            height: isVerySmallScreen ? 20 : isSmallScreen ? 24 : 30,
+                            width: 1,
+                            color: Colors.white.withOpacity(0.3),
+                          ),
+                          _buildInfoItem(
+                            isVerySmallScreen: isVerySmallScreen,
+                            isSmallScreen: isSmallScreen,
+                            icon: Icons.schedule_rounded,
+                            label: 'HORÁRIO',
+                            value: formatHour(match.matchStartDate),
+                          ),
+                          Container(
+                            height: isVerySmallScreen ? 20 : isSmallScreen ? 24 : 30,
+                            width: 1,
+                            color: Colors.white.withOpacity(0.3),
+                          ),
+                          _buildInfoItem(
+                            isVerySmallScreen: isVerySmallScreen,
+                            isSmallScreen: isSmallScreen,
+                            icon: Icons.calendar_today_rounded,
+                            label: 'DATA',
+                            value: _formatDate(match.matchStartDate),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    SizedBox(height: isVerySmallScreen ? 10 : isSmallScreen ? 12 : 16),
+                    
+                    // Status do usuário na partida
+                    if (isRegistered)
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isVerySmallScreen ? 10 : isSmallScreen ? 12 : 16,
+                          vertical: isVerySmallScreen ? 7 : isSmallScreen ? 8 : 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.25),
+                          borderRadius: BorderRadius.circular(isVerySmallScreen ? 10 : isSmallScreen ? 12 : 14),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.4),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.check_circle_rounded,
+                              color: Colors.white,
+                              size: isVerySmallScreen ? 14 : isSmallScreen ? 16 : 18,
+                            ),
+                            SizedBox(width: isVerySmallScreen ? 4 : isSmallScreen ? 6 : 8),
+                            Flexible(
+                              child: Text(
+                                'VOCÊ ESTÁ INSCRITO',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: isVerySmallScreen ? 10.0 : isSmallScreen ? 11.0 : 13.0,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.3,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            child: const Row(
-                              children: [
-                                Icon(
-                                  Icons.check_circle_rounded,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
-                                SizedBox(width: 6),
-                                Text(
-                                  'INSCRITO',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isVerySmallScreen ? 10 : isSmallScreen ? 12 : 16,
+                          vertical: isVerySmallScreen ? 7 : isSmallScreen ? 8 : 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(isVerySmallScreen ? 10 : isSmallScreen ? 12 : 14),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.3),
+                            width: 1,
                           ),
-                      ],
-                    ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.info_outline_rounded,
+                              color: Colors.white.withOpacity(0.9),
+                              size: isVerySmallScreen ? 12 : isSmallScreen ? 14 : 16,
+                            ),
+                            SizedBox(width: isVerySmallScreen ? 4 : isSmallScreen ? 6 : 8),
+                            Expanded(
+                              child: Text(
+                                'Clique para ver detalhes',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontSize: isVerySmallScreen ? 10.0 : isSmallScreen ? 11.0 : 12.5,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.2,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                   ],
                 ),
               ),
-              if (_isLoadingMatchDetails)
+              
+              // Loading overlay apenas para este card
+              if (isThisCardLoading)
                 Positioned.fill(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(16),
+                      color: Colors.black.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        strokeWidth: 3,
+                    child: Center(
+                      child: Container(
+                        padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.7),
+                          shape: BoxShape.circle,
+                        ),
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          strokeWidth: 3,
+                        ),
                       ),
                     ),
                   ),
@@ -1291,29 +1553,52 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
     );
   }
 
-  Widget _buildMatchStat({required IconData icon, required String value}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: Row(
+  Widget _buildInfoItem({
+    required bool isVerySmallScreen,
+    required bool isSmallScreen,
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Expanded(
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: Colors.white),
-          const SizedBox(width: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: isVerySmallScreen ? 10 : isSmallScreen ? 12 : 14,
+                color: Colors.white.withOpacity(0.9),
+              ),
+              SizedBox(width: isVerySmallScreen ? 2 : isSmallScreen ? 3 : 4),
+              Flexible(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: isVerySmallScreen ? 8.0 : isSmallScreen ? 9.0 : 10.0,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: isVerySmallScreen ? 1 : isSmallScreen ? 2 : 4),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+              fontSize: isVerySmallScreen ? 10.0 : isSmallScreen ? 11.0 : 13.0,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.2,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -1358,11 +1643,17 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
   }
 
   String formatHour(DateTime? dateTime) {
-    if (dateTime == null) return '';
-    final hour = dateTime.hour;
-    final period = hour >= 12 ? 'PM' : 'AM';
-    final formattedHour = hour > 12 ? hour - 12 : hour;
-    return '${formattedHour}h$period';
+    if (dateTime == null) return '--:--';
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+
+  String _formatDate(DateTime? dateTime) {
+    if (dateTime == null) return '--/--';
+    final day = dateTime.day.toString().padLeft(2, '0');
+    final month = dateTime.month.toString().padLeft(2, '0');
+    return '$day/$month';
   }
 
   String _formatCountdown(int milliseconds) {

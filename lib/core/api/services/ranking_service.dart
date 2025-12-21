@@ -9,10 +9,24 @@ class RankingService {
 
   final httpService = HttpClientService();
 
-  Future<dynamic> getRankingByUserdAsync(String userId) async {
+  Future<dynamic> getRankingByUserdAsync(String userId, {DateTime? startDate,
+      DateTime? endDate}) async {
     try {
+      final queryParams = <String, String>{};
+      if (startDate != null) {
+        queryParams['startDate'] = startDate.toIso8601String();
+      }
+      if (endDate != null) {
+        queryParams['endDate'] = endDate.toString();
+      }
+      String queryString = Uri(queryParameters: queryParams).query;
+
+      var route = queryString.isNotEmpty
+          ? "/user/${userId}/ranking?$queryString"
+          : "/user/${userId}/ranking";
+
       final successResult = await httpService.request<List<RankingResponse>>(
-        '/user/${userId}/ranking',
+        route,
         method: 'GET',
         successParser: (json) => (json as List)
             .map((item) => RankingResponse.fromJson(item))

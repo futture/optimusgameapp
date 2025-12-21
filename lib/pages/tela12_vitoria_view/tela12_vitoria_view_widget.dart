@@ -213,15 +213,21 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
     required String avatarUrl,
     required double height,
     bool isFirst = false,
+    required BuildContext context,
+    required bool isSmallScreen,
+    required bool isVerySmallScreen,
   }) {
-    const double cardWidth = 110.0;
-
+    double cardWidth = isVerySmallScreen ? 75 : isSmallScreen ? 85 : 110;
+    double avatarSize = isVerySmallScreen ? 36 : isSmallScreen ? 40 : (isFirst ? 60 : 50);
+    double fontSize = isVerySmallScreen ? 9 : isSmallScreen ? 10 : (isFirst ? 13 : 12);
+    double pointsFontSize = isVerySmallScreen ? 9 : isSmallScreen ? 10 : (isFirst ? 14 : 12);
+    
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         if (isFirst)
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(isVerySmallScreen ? 6 : isSmallScreen ? 8 : 12),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: _goldGradient,
@@ -233,17 +239,17 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                 )
               ],
             ),
-            child: const FaIcon(
+            child: FaIcon(
               FontAwesomeIcons.crown,
               color: Colors.white,
-              size: 26,
+              size: isVerySmallScreen ? 16 : isSmallScreen ? 20 : 26,
             ),
           ),
-        const SizedBox(height: 12),
+        SizedBox(height: isVerySmallScreen ? 6 : isSmallScreen ? 8 : 12),
         Container(
           width: cardWidth,
           height: height,
-          margin: const EdgeInsets.symmetric(horizontal: 6),
+          margin: EdgeInsets.symmetric(horizontal: isVerySmallScreen ? 2 : isSmallScreen ? 3 : 6),
           decoration: BoxDecoration(
             gradient: _getPositionGradient(position),
             borderRadius: BorderRadius.circular(16),
@@ -259,12 +265,12 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
             children: [
               // Badge de posição
               Positioned(
-                top: 12,
+                top: isVerySmallScreen ? 6 : isSmallScreen ? 8 : 12,
                 left: 0,
                 right: 0,
                 child: Container(
-                  width: 32,
-                  height: 32,
+                  width: isVerySmallScreen ? 24 : isSmallScreen ? 26 : 32,
+                  height: isVerySmallScreen ? 24 : isSmallScreen ? 26 : 32,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
@@ -282,7 +288,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                       style: TextStyle(
                         color: _getPositionTextColor(position),
                         fontWeight: FontWeight.w800,
-                        fontSize: 14,
+                        fontSize: isVerySmallScreen ? 10 : isSmallScreen ? 11 : 14,
                       ),
                     ),
                   ),
@@ -290,19 +296,19 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
               ),
               // Conteúdo principal
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(isVerySmallScreen ? 8 : isSmallScreen ? 10 : 16),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     // Avatar
                     Container(
-                      width: isFirst ? 60 : 50,
-                      height: isFirst ? 60 : 50,
+                      width: avatarSize,
+                      height: avatarSize,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: Colors.white,
-                          width: 3,
+                          width: isVerySmallScreen ? 1.5 : isSmallScreen ? 2 : 3,
                         ),
                         boxShadow: [
                           BoxShadow(
@@ -313,7 +319,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                         ],
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(avatarSize / 2),
                         child: Image.network(
                           avatarUrl,
                           fit: BoxFit.cover,
@@ -326,32 +332,36 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                               child: Icon(
                                 Icons.person,
                                 color: Colors.white,
-                                size: isFirst ? 24 : 20,
+                                size: isVerySmallScreen ? 14 : isSmallScreen ? 16 : (isFirst ? 24 : 20),
                               ),
                             );
                           },
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: isVerySmallScreen ? 4 : isSmallScreen ? 6 : 12),
                     // Nome
-                    Text(
-                      name,
-                      style: TextStyle(
-                        fontSize: isFirst ? 13 : 12,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                        height: 1.2,
+                    Flexible(
+                      child: Text(
+                        name,
+                        style: TextStyle(
+                          fontSize: fontSize,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          height: 1.2,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: isVerySmallScreen ? 2 : isSmallScreen ? 4 : 6),
                     // Pontuação
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isVerySmallScreen ? 4 : isSmallScreen ? 5 : 8,
+                        vertical: isVerySmallScreen ? 2 : isSmallScreen ? 3 : 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(20),
@@ -359,7 +369,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                       child: Text(
                         points,
                         style: TextStyle(
-                          fontSize: isFirst ? 14 : 12,
+                          fontSize: pointsFontSize,
                           color: Colors.white,
                           fontWeight: FontWeight.w800,
                         ),
@@ -375,7 +385,9 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
     );
   }
 
-  Widget _buildRankingList() {
+  Widget _buildRankingList(BuildContext context) {
+    final isSmallScreen = MediaQuery.of(context).size.width < 400;
+    
     if (isLoading) {
       return Center(
         child: Column(
@@ -405,7 +417,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
     if (fullRankingList.isEmpty) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          padding: EdgeInsets.symmetric(horizontal: 32.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -440,7 +452,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       itemCount: fullRankingList.length,
       itemBuilder: (context, index) {
         final ranking = fullRankingList[index];
@@ -472,13 +484,13 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
                   child: Row(
                     children: [
                       // Posição
                       Container(
-                        width: 44,
-                        height: 44,
+                        width: isSmallScreen ? 36 : 44,
+                        height: isSmallScreen ? 36 : 44,
                         decoration: BoxDecoration(
                           gradient: isTop3 
                               ? _getPositionGradient(ranking.position)
@@ -504,12 +516,12 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                               color: isTop3 
                                   ? _getPositionTextColor(ranking.position)
                                   : _primaryColor,
-                              fontSize: 16,
+                              fontSize: isSmallScreen ? 14 : 16,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      SizedBox(width: isSmallScreen ? 12 : 16),
                       // Informações do jogador
                       Expanded(
                         child: Column(
@@ -520,17 +532,17 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: _onSurfaceColor,
-                                fontSize: 16,
+                                fontSize: isSmallScreen ? 14 : 16,
                               ),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: 4),
                             Text(
                               'Jogador ${isTop3 ? 'Premium' : 'Ativo'}',
                               style: TextStyle(
                                 color: _onSurfaceColor.withOpacity(0.6),
-                                fontSize: 12,
+                                fontSize: isSmallScreen ? 11 : 12,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -539,8 +551,13 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                       ),
                       // Pontuação
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
+                        constraints: BoxConstraints(
+                          minWidth: isSmallScreen ? 60 : 70,
+                        ),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isSmallScreen ? 12 : 16,
+                          vertical: isSmallScreen ? 6 : 8,
+                        ),
                         decoration: BoxDecoration(
                           gradient: _primaryGradient,
                           borderRadius: BorderRadius.circular(20),
@@ -554,11 +571,14 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                         ),
                         child: Text(
                           ranking.totalScore.toString(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w800,
-                            fontSize: 14,
+                            fontSize: isSmallScreen ? 12 : 14,
                           ),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -582,171 +602,189 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: _backgroundColor,
-        body: Column(
-          children: [
-            // Header Premium
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: _primaryGradient,
-                boxShadow: [
-                  BoxShadow(
-                    color: _primaryColor.withOpacity(0.3),
-                    blurRadius: 15,
-                    offset: Offset(0, 4),
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final screenWidth = constraints.maxWidth;
+            final isSmallScreen = screenWidth < 400;
+            final isVerySmallScreen = screenWidth < 350;
+            
+            return Column(
+              children: [
+                // Header Premium
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: _primaryGradient,
+                    boxShadow: [
+                      BoxShadow(
+                        color: _primaryColor.withOpacity(0.3),
+                        blurRadius: 15,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isVerySmallScreen ? 12 : isSmallScreen ? 16 : 20,
+                        vertical: 16,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Botão Voltar Premium
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: IconButton(
-                              onPressed: () {
-                                context.safePop();
-                              },
-                              icon: Icon(
-                                Icons.arrow_back_ios_rounded,
-                                color: Colors.white,
-                                size: 20,
+                          Row(
+                            children: [
+                              // Botão Voltar Premium
+                              Container(
+                                width: isVerySmallScreen ? 36 : isSmallScreen ? 40 : 44,
+                                height: isVerySmallScreen ? 36 : isSmallScreen ? 40 : 44,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: IconButton(
+                                  onPressed: () {
+                                    context.safePop();
+                                  },
+                                  icon: Icon(
+                                    Icons.arrow_back_ios_rounded,
+                                    color: Colors.white,
+                                    size: isVerySmallScreen ? 16 : isSmallScreen ? 18 : 20,
+                                  ),
+                                  splashRadius: 20,
+                                ),
                               ),
-                              splashRadius: 20,
-                            ),
-                          ),
-                          SizedBox(width: 16),
-                          Expanded(
-                            child: Text(
-                              'Ranking de Jogadores',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.5,
+                              SizedBox(width: isVerySmallScreen ? 8 : isSmallScreen ? 12 : 16),
+                              Expanded(
+                                child: Text(
+                                  'Ranking de Jogadores',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: isVerySmallScreen ? 18 : isSmallScreen ? 20 : 24,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.5,
+                                  ),
+                                  maxLines: 2,
+                                ),
                               ),
-                            ),
+                              // Ícone de troféu
+                              Container(
+                                width: isVerySmallScreen ? 36 : isSmallScreen ? 40 : 44,
+                                height: isVerySmallScreen ? 36 : isSmallScreen ? 40 : 44,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.emoji_events_rounded,
+                                  color: Colors.white,
+                                  size: isVerySmallScreen ? 18 : isSmallScreen ? 20 : 22,
+                                ),
+                              ),
+                            ],
                           ),
-                          // Ícone de troféu
+                          SizedBox(height: 8),
+                          // Barra de progresso sutil
                           Container(
-                            width: 44,
-                            height: 44,
+                            height: 2,
+                            width: 60,
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.emoji_events_rounded,
-                              color: Colors.white,
-                              size: 22,
+                              color: Colors.white.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(2),
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 8),
-                      // Barra de progresso sutil
-                      Container(
-                        height: 2,
-                        width: 60,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ),
 
-            Expanded(
-              child: Container(
-                constraints: BoxConstraints(
-                  maxWidth: isWeb ? 1000 : double.infinity,
-                ),
-                child: Column(
-                  children: [
-                    // Tabs Modernas
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: _surfaceColor,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: FlutterFlowButtonTabBar(
-                          useToggleButtonStyle: true,
-                          labelStyle: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 14.0,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.0,
-                          ),
-                          unselectedLabelStyle: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 14.0,
-                            letterSpacing: 0.0,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          labelColor: Colors.white,
-                          unselectedLabelColor: _primaryColor,
-                          backgroundColor: _primaryColor,
-                          unselectedBackgroundColor: _surfaceColor,
-                          borderColor: Colors.transparent,
-                          unselectedBorderColor: _outlineColor,
-                          borderWidth: 1,
-                          borderRadius: 12.0,
-                          elevation: 0,
-                          buttonMargin: const EdgeInsets.all(4),
-                          padding: const EdgeInsets.all(8),
-                          tabs: const [
-                            Tab(
-                              text: 'Hoje',
-                              icon: Icon(Icons.today_rounded, size: 18),
-                            ),
-                            Tab(
-                              text: 'Semana',
-                              icon: Icon(Icons.date_range_rounded, size: 18),
-                            ),
-                            Tab(
-                              text: 'Mês',
-                              icon: Icon(Icons.calendar_month_rounded, size: 18),
-                            ),
-                          ],
-                          controller: _model.tabBarController,
-                          onTap: (i) {
-                            _handleTabChange();
-                          },
-                        ),
-                      ),
+                Expanded(
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: isWeb ? 1000 : double.infinity,
                     ),
+                    child: Column(
+                      children: [
+                        // Tabs Modernas
+                        Padding(
+                          padding: EdgeInsets.all(isVerySmallScreen ? 12 : isSmallScreen ? 16 : 20),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: _surfaceColor,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: FlutterFlowButtonTabBar(
+                              useToggleButtonStyle: true,
+                              labelStyle: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: isVerySmallScreen ? 12.0 : isSmallScreen ? 13.0 : 14.0,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.0,
+                              ),
+                              unselectedLabelStyle: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: isVerySmallScreen ? 12.0 : isSmallScreen ? 13.0 : 14.0,
+                                letterSpacing: 0.0,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              labelColor: Colors.white,
+                              unselectedLabelColor: _primaryColor,
+                              backgroundColor: _primaryColor,
+                              unselectedBackgroundColor: _surfaceColor,
+                              borderColor: Colors.transparent,
+                              unselectedBorderColor: _outlineColor,
+                              borderWidth: 1,
+                              borderRadius: 12.0,
+                              elevation: 0,
+                              buttonMargin: EdgeInsets.all(isVerySmallScreen ? 2 : isSmallScreen ? 3 : 4),
+                              padding: EdgeInsets.all(isVerySmallScreen ? 4 : isSmallScreen ? 6 : 8),
+                              tabs: [
+                                Tab(
+                                  text: 'Hoje',
+                                  icon: Icon(
+                                    Icons.today_rounded,
+                                    size: isVerySmallScreen ? 14 : isSmallScreen ? 16 : 18,
+                                  ),
+                                ),
+                                Tab(
+                                  text: 'Semana',
+                                  icon: Icon(
+                                    Icons.date_range_rounded,
+                                    size: isVerySmallScreen ? 14 : isSmallScreen ? 16 : 18,
+                                  ),
+                                ),
+                                Tab(
+                                  text: 'Mês',
+                                  icon: Icon(
+                                    Icons.calendar_month_rounded,
+                                    size: isVerySmallScreen ? 14 : isSmallScreen ? 16 : 18,
+                                  ),
+                                ),
+                              ],
+                              controller: _model.tabBarController,
+                              onTap: (i) {
+                                _handleTabChange();
+                              },
+                            ),
+                          ),
+                        ),
 
-                    // Pódio
-                    Expanded(
-                      flex: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Stack(
-                          children: [
-                            // Container do pódio
-                            Container(
-                              height: 280,
+                        // Pódio
+                        Expanded(
+                          flex: 2,
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: isVerySmallScreen ? 12 : isSmallScreen ? 16 : 20),
+                            child: Container(
+                              height: isVerySmallScreen ? 220 : isSmallScreen ? 240 : 280,
                               decoration: BoxDecoration(
                                 color: _surfaceColor,
                                 borderRadius: BorderRadius.circular(20),
@@ -787,180 +825,207 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                                         children: [
                                           Icon(
                                             Icons.emoji_events_outlined,
-                                            size: 48,
+                                            size: isVerySmallScreen ? 36 : isSmallScreen ? 40 : 48,
                                             color: _primaryColor.withOpacity(0.3),
                                           ),
-                                          const SizedBox(height: 16),
-                                          Text(
-                                            'Nenhum classificado',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              color: _onSurfaceColor.withOpacity(0.5),
+                                          SizedBox(height: isVerySmallScreen ? 8 : isSmallScreen ? 12 : 16),
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(horizontal: isVerySmallScreen ? 12 : isSmallScreen ? 16 : 24),
+                                            child: Text(
+                                              'Nenhum classificado',
+                                              style: TextStyle(
+                                                fontSize: isVerySmallScreen ? 13 : isSmallScreen ? 14 : 16,
+                                                fontWeight: FontWeight.w600,
+                                                color: _onSurfaceColor.withOpacity(0.5),
+                                              ),
+                                              textAlign: TextAlign.center,
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
 
-                                  // Posições do pódio
-                                  if (secondPlaceName.isNotEmpty)
-                                    Positioned(
-                                      left: 30,
-                                      bottom: 40,
-                                      child: _buildPodiumUser(
-                                        position: secondPlacePosition,
-                                        name: secondPlaceName,
-                                        points: (double.tryParse(secondPlacePoints) ?? 0).toStringAsFixed(2),
-                                        avatarUrl: 'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
-                                        height: 160,
-                                      ),
-                                    ),
+                                  if (firstPlaceName.isNotEmpty || 
+                                      secondPlaceName.isNotEmpty || 
+                                      thirdPlaceName.isNotEmpty)
+                                    SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      physics: isVerySmallScreen ? AlwaysScrollableScrollPhysics() : NeverScrollableScrollPhysics(),
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: isVerySmallScreen ? 10 : isSmallScreen ? 15 : 20,
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                            // Segundo lugar
+                                            if (secondPlaceName.isNotEmpty)
+                                              _buildPodiumUser(
+                                                position: secondPlacePosition,
+                                                name: secondPlaceName,
+                                                points: (double.tryParse(secondPlacePoints) ?? 0).toStringAsFixed(2),
+                                                avatarUrl: 'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
+                                                height: isVerySmallScreen ? 120 : isSmallScreen ? 140 : 160,
+                                                isFirst: false,
+                                                context: context,
+                                                isSmallScreen: isSmallScreen,
+                                                isVerySmallScreen: isVerySmallScreen,
+                                              ),
 
-                                  if (firstPlaceName.isNotEmpty)
-                                    Align(
-                                      alignment: Alignment.bottomCenter,
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(bottom: 30),
-                                        child: _buildPodiumUser(
-                                          position: firstPlacePosition,
-                                          name: firstPlaceName,
-                                          points: (double.tryParse(firstPlacePoints) ?? 0).toStringAsFixed(2),
-                                          avatarUrl: 'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
-                                          height: 190,
-                                          isFirst: true,
+                                            // Primeiro lugar
+                                            if (firstPlaceName.isNotEmpty)
+                                              _buildPodiumUser(
+                                                position: firstPlacePosition,
+                                                name: firstPlaceName,
+                                                points: (double.tryParse(firstPlacePoints) ?? 0).toStringAsFixed(2),
+                                                avatarUrl: 'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
+                                                height: isVerySmallScreen ? 150 : isSmallScreen ? 170 : 190,
+                                                isFirst: true,
+                                                context: context,
+                                                isSmallScreen: isSmallScreen,
+                                                isVerySmallScreen: isVerySmallScreen,
+                                              ),
+
+                                            // Terceiro lugar
+                                            if (thirdPlaceName.isNotEmpty)
+                                              _buildPodiumUser(
+                                                position: thirdPlacePosition,
+                                                name: thirdPlaceName,
+                                                points: (double.tryParse(thirdPlacePoints) ?? 0).toStringAsFixed(2),
+                                                avatarUrl: 'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
+                                                height: isVerySmallScreen ? 110 : isSmallScreen ? 130 : 150,
+                                                isFirst: false,
+                                                context: context,
+                                                isSmallScreen: isSmallScreen,
+                                                isVerySmallScreen: isVerySmallScreen,
+                                              ),
+                                          ],
                                         ),
                                       ),
                                     ),
 
-                                  if (thirdPlaceName.isNotEmpty)
-                                    Positioned(
-                                      right: 30,
-                                      bottom: 30,
-                                      child: _buildPodiumUser(
-                                        position: thirdPlacePosition,
-                                        name: thirdPlaceName,
-                                        points: (double.tryParse(thirdPlacePoints) ?? 0).toStringAsFixed(2),
-                                        avatarUrl: 'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
-                                        height: 150,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-
-                            // Loading overlay
-                            if (isLoading)
-                              Positioned.fill(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.8),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Center(
-                                    child: Container(
-                                      padding: const EdgeInsets.all(20),
-                                      decoration: BoxDecoration(
-                                        color: _surfaceColor,
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withOpacity(0.1),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 4),
+                                  // Loading overlay
+                                  if (isLoading)
+                                    Positioned.fill(
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.8),
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: Center(
+                                          child: Container(
+                                            padding: EdgeInsets.all(isVerySmallScreen ? 12 : isSmallScreen ? 16 : 20),
+                                            decoration: BoxDecoration(
+                                              color: _surfaceColor,
+                                              shape: BoxShape.circle,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withOpacity(0.1),
+                                                  blurRadius: 8,
+                                                  offset: const Offset(0, 4),
+                                                ),
+                                              ],
+                                            ),
+                                            child: SizedBox(
+                                              width: isVerySmallScreen ? 24 : isSmallScreen ? 28 : 32,
+                                              height: isVerySmallScreen ? 24 : isSmallScreen ? 28 : 32,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 3,
+                                                valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
+                                              ),
+                                            ),
                                           ),
-                                        ],
-                                      ),
-                                      child: SizedBox(
-                                        width: 32,
-                                        height: 32,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 3,
-                                          valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ),
+                                ],
                               ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // Lista de Ranking
-                    Expanded(
-                      flex: 3,
-                      child: Container(
-                        margin: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: _surfaceColor,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
                             ),
-                          ],
+                          ),
                         ),
-                        child: Column(
-                          children: [
-                            // Header da lista
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                              decoration: BoxDecoration(
-                                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                                gradient: LinearGradient(
-                                  begin: Alignment.centerLeft,
-                                  end: Alignment.centerRight,
-                                  colors: [
-                                    _primaryColor.withOpacity(0.1),
-                                    _primaryColor.withOpacity(0.05),
-                                  ],
+
+                        // Lista de Ranking
+                        Expanded(
+                          flex: 3,
+                          child: Container(
+                            margin: EdgeInsets.all(isVerySmallScreen ? 12 : isSmallScreen ? 16 : 20),
+                            decoration: BoxDecoration(
+                              color: _surfaceColor,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 8),
                                 ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.leaderboard_rounded,
-                                    size: 22,
-                                    color: _primaryColor,
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                // Header da lista
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: isVerySmallScreen ? 12 : isSmallScreen ? 16 : 24,
+                                    vertical: isVerySmallScreen ? 10 : isSmallScreen ? 12 : 16,
                                   ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    'CLASSIFICAÇÃO COMPLETA',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 0.5,
-                                      color: _primaryColor,
+                                  decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                                    gradient: LinearGradient(
+                                      begin: Alignment.centerLeft,
+                                      end: Alignment.centerRight,
+                                      colors: [
+                                        _primaryColor.withOpacity(0.1),
+                                        _primaryColor.withOpacity(0.05),
+                                      ],
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.leaderboard_rounded,
+                                        size: isVerySmallScreen ? 18 : isSmallScreen ? 20 : 22,
+                                        color: _primaryColor,
+                                      ),
+                                      SizedBox(width: isVerySmallScreen ? 6 : isSmallScreen ? 8 : 12),
+                                      Flexible(
+                                        child: Text(
+                                          'CLASSIFICAÇÃO COMPLETA',
+                                          style: TextStyle(
+                                            fontSize: isVerySmallScreen ? 12 : isSmallScreen ? 13 : 14,
+                                            fontWeight: FontWeight.w700,
+                                            letterSpacing: 0.5,
+                                            color: _primaryColor,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
 
-                            // Conteúdo das tabs
-                            Expanded(
-                              child: TabBarView(
-                                controller: _model.tabBarController,
-                                children: [
-                                  _buildRankingList(),
-                                  _buildRankingList(),
-                                  _buildRankingList(),
-                                ],
-                              ),
+                                // Conteúdo das tabs
+                                Expanded(
+                                  child: TabBarView(
+                                    controller: _model.tabBarController,
+                                    children: [
+                                      _buildRankingList(context),
+                                      _buildRankingList(context),
+                                      _buildRankingList(context),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         ),
       ),
     );

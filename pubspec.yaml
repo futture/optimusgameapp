@@ -82,7 +82,14 @@ dependencies:
   flutter_contacts: ^1.1.9+2
   lottie: ^3.3.1
   audioplayers: ^6.4.0
+  flutter_launcher_icons: ^0.14.4
 
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/optimusgame.png"
+  adaptive_icon_foreground: "assets/images/optimusgame.png"
+  adaptive_icon_background: "assets/images/backgroundImage.png"
 dependency_overrides:
   http: 1.2.2
   uuid: ^4.0.0

@@ -169,7 +169,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
 
     Timer.periodic(Duration(seconds: 1), (timer) async {
       final remaining = match.matchStartDate.difference(DateTime.now());
-      
+
       setState(() {
         timerMilliseconds = remaining.inMilliseconds;
       });
@@ -438,7 +438,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
       {
         'title': 'Prêmio',
         'icon': Icons.wine_bar_rounded,
-        'value': '${matchInfo.matchPrize?.totalGain ?? 0} KZ',
+        'value': '${matchInfo.matchPrize?.netPremium ?? 0} KZ',
       },
       {
         'title': 'Nº Questões',

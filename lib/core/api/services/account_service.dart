@@ -62,6 +62,22 @@ class AccountService {
     }
   }
 
+  Future<dynamic> listDebitTransactionsAsync(String accountId, String transaction_type) async {
+    try {
+      final successResult =
+          await httpService.request<List<TransactionResponse>>(
+        '/accounts/$accountId/transactions/$transaction_type',
+        method: 'GET',
+        successParser: (json) => (json as List)
+            .map((item) => TransactionResponse.fromJson(item))
+            .toList(),
+      );
+      return {"isSuccess": true, "data": successResult};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
   Future<Map<String, dynamic>> listTransactionsByStatusAsync(
       String accountId, String status) async {
     try {
