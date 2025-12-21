@@ -169,7 +169,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
 
     Timer.periodic(Duration(seconds: 1), (timer) async {
       final remaining = match.matchStartDate.difference(DateTime.now());
-      
+
       setState(() {
         timerMilliseconds = remaining.inMilliseconds;
       });
