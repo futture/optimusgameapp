@@ -316,20 +316,16 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(35),
-                      child: Image.network(
-                        'https://images.unsplash.com/photo-1507679799987-c73779587ccf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwxfHxwcm98ZW58MHx8fHwxNzQzNTg0NTYxfDA&ixlib=rb-4.0.3&q=80&w=1080',
+                      child: Image.asset(
+                        'assets/images/profile.jpeg',
                         fit: BoxFit.cover,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                  : null,
-                              strokeWidth: 2,
-                              color: _primaryColor,
-                            ),
+                        frameBuilder:
+                            (context, child, frame, wasSynchronouslyLoaded) {
+                          if (wasSynchronouslyLoaded) return child;
+                          return AnimatedOpacity(
+                            opacity: frame == null ? 0 : 1,
+                            duration: const Duration(milliseconds: 300),
+                            child: child,
                           );
                         },
                       ),
@@ -367,7 +363,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              Icons.badge_outlined,
+                              Icons.phone_rounded,
                               size: isSmallScreen ? 12 : 14,
                               color: Colors.grey.shade600,
                             ),
@@ -375,7 +371,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                             Flexible(
                               child: Text(
                                 _model.userAccountInfo != null
-                                    ? 'ID: ${_model.userAccountInfo!.accountNumber}'
+                                    ? '${_model.user!.phone_number}'
                                     : "Carregando...",
                                 style: TextStyle(
                                   fontFamily: 'Inter',
@@ -1456,7 +1452,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                             ),
                           ),
                         ],
-                      ), 
+                      ),
                       // CRONÔMETRO APENAS PARA PRÓXIMA PARTIDA
                       if (isNextMatch)
                         Padding(

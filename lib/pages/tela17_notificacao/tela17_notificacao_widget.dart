@@ -39,39 +39,39 @@ class _Tela17NotificacaoViewWidgetState
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
-  // Sistema de cores premium
-  final Color _primaryColor = Color(0xFF1A237E);
-  final Color _accentColor = Color(0xFFEC8D0D);
-  final Color _backgroundColor = Color(0xFFF8FAFC);
-  final Color _surfaceColor = Colors.white;
-  final Color _onSurfaceColor = Color(0xFF1E293B);
-  final Color _outlineColor = Color(0xFFE2E8F0);
-  final Color _successColor = Color(0xFF10B981);
-  final Color _warningColor = Color(0xFFF59E0B);
-  final Color _errorColor = Color(0xFFEF4444);
-  final Color _infoColor = Color(0xFF3B82F6);
+  // Sistema de cores da aplicação (laranja/dourado)
+  final Color _primaryColor = Color(0xFFEC8D0D); // Laranja principal
+  final Color _primaryDarkColor = Color(0xFFD87C00); // Laranja escuro
+  final Color _backgroundColor = Color(0xFFF8FAFC); // Fundo claro
+  final Color _surfaceColor = Colors.white; // Superfície
+  final Color _onSurfaceColor = Color(0xFF1E293B); // Texto escuro
+  final Color _outlineColor = Color(0xFFE2E8F0); // Bordas
+  final Color _successColor = Color(0xFF10B981); // Verde
+  final Color _warningColor = Color(0xFFF59E0B); // Laranja de aviso
+  final Color _errorColor = Color(0xFFEF4444); // Vermelho
+  final Color _infoColor = Color(0xFF3B82F6); // Azul
 
-  // Gradientes premium
+  // Gradientes premium com cores da aplicação
   final LinearGradient _premiumGradient = LinearGradient(
-    colors: [Color(0xFF1A237E), Color(0xFF283593)],
+    colors: [Color(0xFFEC8D0D), Color(0xFFF59E0B)], // Laranja
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   final LinearGradient _accentGradient = LinearGradient(
-    colors: [Color(0xFFEC8D0D), Color(0xFFF59E0B)],
+    colors: [Color(0xFFF59E0B), Color(0xFFD87C00)], // Laranja mais escuro
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   final LinearGradient _successGradient = LinearGradient(
-    colors: [Color(0xFF10B981), Color(0xFF059669)],
+    colors: [Color(0xFF10B981), Color(0xFF059669)], // Verde
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   final LinearGradient _errorGradient = LinearGradient(
-    colors: [Color(0xFFEF4444), Color(0xFFDC2626)],
+    colors: [Color(0xFFEF4444), Color(0xFFDC2626)], // Vermelho
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -139,13 +139,13 @@ class _Tela17NotificacaoViewWidgetState
     if (isNew) {
       switch (code) {
         case 'Desafio':
-          return Color(0xFFEFF6FF);
+          return Color(0xFFFFF7ED); // Fundo laranja claro para desafio
         case 'Desqualificação':
-          return Color(0xFFFFFBEB);
+          return Color(0xFFFFFBEB); // Fundo amarelo claro para desqualificação
         case 'Erro ao inicio de super partida':
-          return Color(0xFFFEF2F2);
+          return Color(0xFFFEF2F2); // Fundo vermelho claro para erro
         default:
-          return Color(0xFFF0F9FF);
+          return Color(0xFFFEFCE8); // Fundo amarelo muito claro padrão
       }
     }
     return _surfaceColor;
@@ -156,24 +156,24 @@ class _Tela17NotificacaoViewWidgetState
       switch (code) {
         case 'Desafio':
           return LinearGradient(
-            colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
+            colors: [Color(0xFFEC8D0D), Color(0xFFD87C00)], // Laranja
           );
         case 'Desqualificação':
           return LinearGradient(
-            colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
+            colors: [Color(0xFFF59E0B), Color(0xFFD97706)], // Laranja escuro
           );
         case 'Erro ao inicio de super partida':
           return LinearGradient(
-            colors: [Color(0xFFEF4444), Color(0xFFDC2626)],
+            colors: [Color(0xFFEF4444), Color(0xFFDC2626)], // Vermelho
           );
         default:
-          return _premiumGradient;
+          return _premiumGradient; // Laranja principal
       }
     }
     return LinearGradient(
-      colors: [Color(0xFF94A3B8), Color(0xFF64748B)],
+      colors: [Color(0xFF94A3B8), Color(0xFF64748B)], // Cinza para não lidas
     );
-  } 
+  }
 
   Widget _buildStatusBadge(String text, Color color, IconData icon) {
     return Container(
@@ -602,7 +602,7 @@ class _Tela17NotificacaoViewWidgetState
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: _premiumGradient,
+        gradient: _premiumGradient, // Gradiente laranja
         boxShadow: [
           BoxShadow(
             color: _primaryColor.withOpacity(0.3),
@@ -620,7 +620,7 @@ class _Tela17NotificacaoViewWidgetState
             children: [
               Row(
                 children: [
-                  // Botão Voltar Premium
+                  // Botão Voltar
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.15),
@@ -644,7 +644,7 @@ class _Tela17NotificacaoViewWidgetState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Central de Notificações',
+                          'Notificações',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 24,
@@ -687,7 +687,7 @@ class _Tela17NotificacaoViewWidgetState
                 height: 2,
                 width: 60,
                 decoration: BoxDecoration(
-                  color: _accentColor,
+                  color: Colors.white.withOpacity(0.6), // Branco translúcido
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -718,7 +718,7 @@ class _Tela17NotificacaoViewWidgetState
         return false;
       },
       child: RefreshIndicator(
-        color: _primaryColor,
+        color: _primaryColor, // Laranja principal
         backgroundColor: _surfaceColor,
         displacement: 40,
         onRefresh: () async {
@@ -800,7 +800,7 @@ class _Tela17NotificacaoViewWidgetState
                         onPressed: _loadMoreNotifications,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _surfaceColor,
-                          foregroundColor: _primaryColor,
+                          foregroundColor: _primaryColor, // Texto laranja
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -1154,11 +1154,11 @@ class _Tela17NotificacaoViewWidgetState
       height: 10,
       margin: const EdgeInsets.only(left: 8, top: 6),
       decoration: BoxDecoration(
-        gradient: _accentGradient,
+        gradient: _accentGradient, // Gradiente laranja
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: _accentColor.withOpacity(0.4),
+            color: _primaryColor.withOpacity(0.4),
             blurRadius: 6,
             spreadRadius: 1,
           ),
@@ -1176,7 +1176,7 @@ class _Tela17NotificacaoViewWidgetState
             width: 100,
             height: 100,
             decoration: BoxDecoration(
-              gradient: _premiumGradient,
+              gradient: _premiumGradient, // Gradiente laranja
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
@@ -1283,7 +1283,7 @@ class _Tela17NotificacaoViewWidgetState
                 child: ElevatedButton(
                   onPressed: _loadInitialData,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _primaryColor,
+                    backgroundColor: _primaryColor, // Laranja
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(

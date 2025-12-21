@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:projeto_game_quiz/Atualiza%C3%A7%C3%A3o/tela10_deposito/tela10_deposito_lista_widget.dart';
+import 'package:projeto_game_quiz/core/enum/password_mode.dart';
 import 'package:projeto_game_quiz/pages/deposit_history/deposit_history_widget.dart';
 import 'package:projeto_game_quiz/pages/support/support_screen.dart';
 import 'package:projeto_game_quiz/pages/password_change/password_change.dart';
@@ -122,18 +123,29 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: Tela17NotificacaoViewWidget.routePath,
           builder: (context, params) => Tela17NotificacaoViewWidget(),
         ),
-         FFRoute(
+        FFRoute(
           name: TelaSuporteWidget.routeName,
           path: TelaSuporteWidget.routePath,
           builder: (context, params) => TelaSuporteWidget(),
         ),
-         FFRoute(
+        FFRoute(
           name: PasswordChangeScreen.routeName,
           path: PasswordChangeScreen.routePath,
-          builder: (context, params) => PasswordChangeScreen(),
-        )
+          builder: (context, params) {
+            final token = params.getParam(
+              'token',
+              ParamType.String,
+            );
+
+            return PasswordChangeScreen(
+              mode: token != null ? PasswordMode.reset : PasswordMode.change,
+              resetToken: token,
+            );
+          },
+        ),
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
+
 extension NavParamExtensions on Map<String, String?> {
   Map<String, String> get withoutNulls => Map.fromEntries(
         entries

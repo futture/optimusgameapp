@@ -421,6 +421,9 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
                                     vertical: isMobile ? 16 : 18,
                                   ),
                                 ),
+                                onChanged: (value) {
+                                  // Atualiza em tempo real se quiser validação
+                                },
                               ),
                             ),
                           ],
@@ -511,6 +514,9 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
                                 borderRadius: BorderRadius.circular(14),
                                 onTap: () {
                                   Navigator.of(context).pop();
+                                  // Limpa os campos
+                                  _model.emailRecoveryController?.clear();
+                                  _model.phoneRecoveryController?.clear();
                                 },
                                 child: Center(
                                   child: Text(
@@ -549,57 +555,90 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
                                 onTap: _model.isSendingRecoveryCode
                                     ? null
                                     : () async {
-                                        final validationError = _model
-                                            .validateRecoveryInput(context);
-                                        if (validationError != null) {
+                                        // VALIDAÇÃO DIRETA
+                                        if (_model.isRecoveryEmailSelected) {
+                                          final email = _model
+                                                  .emailRecoveryController?.text
+                                                  .trim() ??
+                                              '';
+
+                                          if (email.isEmpty) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                content:
+                                                    Text('Informe seu email'),
+                                                backgroundColor: _errorColor,
+                                              ),
+                                            );
+                                            return;
+                                          }
+
+                                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                                              .hasMatch(email)) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                content: Text('Email inválido'),
+                                                backgroundColor: _errorColor,
+                                              ),
+                                            );
+                                            return;
+                                          }
+
+                                          // INICIA LOADING
+                                          _model.setSendingRecoveryCode(
+                                              setModalState, true);
+
+                                          try {
+                                            // CHAMA O USER SERVICE DIRETO
+                                            final result = await _model
+                                                .userService
+                                                .requestPasswordReset(email);
+
+                                            // FECHA O MODAL
+                                            Navigator.of(context).pop();
+
+                                            // VERIFICA RESPOSTA
+                                            if (result['isSuccess'] == true ||
+                                                result['success'] == true) {
+                                              _showSuccessMessage(
+                                                context,
+                                                '✅ Email enviado!',
+                                                'Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.',
+                                              );
+                                              print(
+                                                  '✅ Recuperação enviada para: $email');
+                                            } else {
+                                              _showErrorMessage(
+                                                context,
+                                                result['message'] ??
+                                                    'Falha ao enviar email',
+                                              );
+                                              print(
+                                                  '❌ Erro: ${result['message']}');
+                                            }
+                                          } catch (e) {
+                                            Navigator.of(context).pop();
+                                            _showErrorMessage(
+                                              context,
+                                              'Erro: ${e.toString()}',
+                                            );
+                                            print('❌ Exception: $e');
+                                          } finally {
+                                            _model.setSendingRecoveryCode(
+                                                setModalState, false);
+                                          }
+                                        } else {
+                                          // PARA TELEFONE (EM DESENVOLVIMENTO)
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
                                             SnackBar(
-                                              content: Text(validationError),
-                                              backgroundColor: _errorColor,
+                                              content: Text(
+                                                  'Recuperação por SMS em desenvolvimento'),
+                                              backgroundColor: _primaryColor,
                                             ),
                                           );
-                                          return;
-                                        }
-
-                                        _model.setSendingRecoveryCode(
-                                            setModalState, true);
-
-                                        try {
-                                          if (_model.isRecoveryEmailSelected) {
-                                            final result = await _model
-                                                .sendEmailRecoveryCode();
-                                            if (result['success'] == true) {
-                                              Navigator.of(context).pop();
-                                              _showSuccessMessage(
-                                                  context,
-                                                  'Email enviado com sucesso!',
-                                                  'Verifique sua caixa de entrada');
-                                            } else {
-                                              _showErrorMessage(
-                                                  context,
-                                                  result['message'] ??
-                                                      'Erro ao enviar email');
-                                            }
-                                          } else {
-                                            final result = await _model
-                                                .sendSMSRecoveryCode();
-                                            if (result['success'] == true) {
-                                              Navigator.of(context).pop();
-                                              _showSuccessMessage(
-                                                  context,
-                                                  'Código enviado!',
-                                                  'Verifique seu telefone');
-                                            } else {
-                                              _showErrorMessage(
-                                                  context,
-                                                  result['message'] ??
-                                                      'Erro ao enviar SMS');
-                                            }
-                                          }
-                                        } finally {
-                                          _model.setSendingRecoveryCode(
-                                              setModalState, false);
                                         }
                                       },
                                 child: Center(
@@ -644,8 +683,7 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
                       ],
                     ),
                     SizedBox(height: 16),
-
-                    // Aviso adicional dinâmico
+                    
                     Container(
                       padding: EdgeInsets.all(isMobile ? 12 : 16),
                       decoration: BoxDecoration(
@@ -666,7 +704,7 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
                           Expanded(
                             child: Text(
                               _model.isRecoveryEmailSelected
-                                  ? 'Verifique sua caixa de spam se não receber o email em alguns minutos'
+                                  ? 'Verifique sua caixa de spam se não receber o email em alguns minutos. O link expira em 1 hora.'
                                   : 'O código SMS pode levar alguns minutos para chegar. Certifique-se de que o número está correto.',
                               style: TextStyle(
                                 fontSize: isMobile ? 12 : 13,
@@ -752,7 +790,6 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
     );
   }
 
-  // Método para simular envio de email de recuperação
   Future<void> _simularEnvioEmailRecuperacao(BuildContext context) async {
     // Mostra indicador de carregamento
     showDialog(
@@ -1054,18 +1091,6 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
                     color: _textPrimary,
                     letterSpacing: -0.5,
                     height: 1.1,
-                  ),
-                ),
-                SizedBox(height: isMobile ? 12 : 16),
-
-                Text(
-                  'Faça login para acessar sua conta e continuar sua jornada',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: isMobile ? 15 : 16,
-                    color: _textSecondary,
-                    fontWeight: FontWeight.w500,
-                    height: 1.5,
                   ),
                 ),
                 SizedBox(height: isMobile ? 24 : 32),

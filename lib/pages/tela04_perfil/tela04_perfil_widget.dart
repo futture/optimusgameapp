@@ -20,7 +20,7 @@ class Tela04PerfilWidget extends StatefulWidget {
   State<Tela04PerfilWidget> createState() => _Tela04PerfilWidgetState();
 }
 
-class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget> 
+class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget>
     with SingleTickerProviderStateMixin {
   late Tela04PerfilModel _model;
   late AnimationController _animationController;
@@ -56,20 +56,20 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget>
   void initState() {
     super.initState();
     _model = createModel(context, () => Tela04PerfilModel());
-    
+
     // Configuração das animações
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: Curves.easeInOut,
       ),
     );
-    
+
     _slideAnimation = Tween<double>(begin: 30.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _animationController,
@@ -134,15 +134,16 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget>
                 ),
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20.0, vertical: 16.0),
                 child: Row(
                   children: [
                     Container(
                       width: 44.0,
                       height: 44.0,
                       decoration: BoxDecoration(
-                        color: isPremium 
-                            ? Colors.white.withOpacity(0.2) 
+                        color: isPremium
+                            ? Colors.white.withOpacity(0.2)
                             : _primaryColor.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
@@ -174,8 +175,8 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget>
                               subtitle,
                               style: TextStyle(
                                 fontFamily: 'Inter',
-                                color: isPremium 
-                                    ? Colors.white.withOpacity(0.8) 
+                                color: isPremium
+                                    ? Colors.white.withOpacity(0.8)
                                     : _onSurfaceColor.withOpacity(0.6),
                                 fontSize: 12.0,
                                 fontWeight: FontWeight.w500,
@@ -188,7 +189,9 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget>
                     if (showArrow)
                       Icon(
                         Icons.arrow_forward_ios_rounded,
-                        color: isPremium ? Colors.white : _onSurfaceColor.withOpacity(0.5),
+                        color: isPremium
+                            ? Colors.white
+                            : _onSurfaceColor.withOpacity(0.5),
                         size: 16.0,
                       ),
                   ],
@@ -298,7 +301,8 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget>
               child: SafeArea(
                 bottom: false,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -408,34 +412,22 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget>
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(40.0),
-                              child: CachedNetworkImage(
-                                imageUrl:
-                                    'https://images.unsplash.com/photo-1531123414780-f74242c2b052?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NDV8fHByb2ZpbGV8ZW58MHx8MHx8&auto=format&fit=crop&w=900&q=60',
+                              child: Image.asset(
+                                'assets/images/profile.jpeg',
                                 fit: BoxFit.cover,
-                                placeholder: (context, url) =>
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        color: _primaryColor.withOpacity(0.1),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        Icons.person,
-                                        color: _primaryColor,
-                                        size: 30,
-                                      ),
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                      color: _primaryColor.withOpacity(0.1),
+                                      shape: BoxShape.circle,
                                     ),
-                                errorWidget: (context, url, error) =>
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        color: _primaryColor.withOpacity(0.1),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        Icons.person,
-                                        color: _primaryColor,
-                                        size: 30,
-                                      ),
+                                    child: Icon(
+                                      Icons.person,
+                                      color: _primaryColor,
+                                      size: 30,
                                     ),
+                                  );
+                                },
                               ),
                             ),
                           ),
@@ -460,7 +452,8 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget>
                                 ),
                                 const SizedBox(height: 6.0),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 4),
                                   decoration: BoxDecoration(
                                     color: _successColor.withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(12),
@@ -468,7 +461,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget>
                                   child: Text(
                                     _model.userAccountInfo == null
                                         ? "Carregando..."
-                                        : 'ID: ${_model.userAccountInfo!.availableBalance}',
+                                        : '${_model.user?.phone_number}',
                                     style: TextStyle(
                                       fontFamily: 'Inter',
                                       fontSize: 12.0,
@@ -479,7 +472,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget>
                                 ),
                                 const SizedBox(height: 8.0),
                                 Text(
-                                  'Jogador Premium',
+                                  '${_model.user?.email}',
                                   style: TextStyle(
                                     fontFamily: 'Inter',
                                     fontSize: 14.0,
@@ -501,7 +494,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget>
                         children: [
                           Expanded(
                             child: _buildStatCard(
-                              value: '1.2K',
+                              value: _model.rankingMetrics == null ? '0' : _model.rankingMetrics!.totalScoreFormatted,
                               label: 'Pontos',
                               icon: Icons.emoji_events_rounded,
                             ),
@@ -509,7 +502,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget>
                           const SizedBox(width: 12),
                           Expanded(
                             child: _buildStatCard(
-                              value: '156',
+                              value: _model.rankingMetrics == null ? '0' : _model.rankingMetrics!.totalWins.toString(),
                               label: 'Vitórias',
                               icon: Icons.workspace_premium_rounded,
                             ),
@@ -517,7 +510,7 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget>
                           const SizedBox(width: 12),
                           Expanded(
                             child: _buildStatCard(
-                              value: '89%',
+                              value: _model.rankingMetrics == null ? '0' : '${_model.rankingMetrics!.winRate.toStringAsFixed(0)}%',
                               label: 'Taxa de Vitória',
                               icon: Icons.trending_up_rounded,
                             ),
@@ -564,9 +557,10 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget>
                     _buildProfileItem(
                       icon: Icons.notifications_active_rounded,
                       title: 'Notificações',
-                      subtitle: 'Central de notificações',
+                      subtitle: 'Central de Notificações',
                       onTap: () {
-                        context.pushNamed(Tela17NotificacaoViewWidget.routeName);
+                        context
+                            .pushNamed(Tela17NotificacaoViewWidget.routeName);
                       },
                     ),
 
@@ -621,7 +615,8 @@ class _Tela04PerfilWidgetState extends State<Tela04PerfilWidget>
 
                     // Item de Logout
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20.0, vertical: 12.0),
                       child: Material(
                         color: Colors.transparent,
                         child: InkWell(

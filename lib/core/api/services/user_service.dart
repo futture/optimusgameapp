@@ -7,6 +7,7 @@ import 'package:projeto_game_quiz/core/api/utils/token_util.dart';
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/user_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/otp_code_response.dart';
+import 'package:projeto_game_quiz/core/models/responses/user_ranking_metrics_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 
 class UserService {
@@ -230,12 +231,12 @@ class UserService {
   }
 
   Future<Map<String, dynamic>> logoutAsync(String userId) async {
-    try { 
+    try {
       final result = await httpService.request(
         '/users/${userId}/logout',
         method: 'PATCH',
         body: {},
-      ); 
+      );
       await TokenUtil.removeToken();
 
       return {"isSuccess": true, "data": result};
@@ -277,6 +278,91 @@ class UserService {
           }
         }
       };
+    }
+  }
+
+  Future<Map<String, dynamic>> getUserRankingMetricsAsync(String userId) async {
+    try {
+      final successResult =
+          await httpService.request<UserRankingMetricsResponse>(
+        '/user/$userId/ranking/metrics',
+        method: 'GET',
+        successParser: (json) => UserRankingMetricsResponse.fromJson(json),
+      );
+
+      return {
+        "isSuccess": true,
+        "data": successResult,
+      };
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await httpService.request(
+        '/users/reset-password',
+        method: 'POST',
+        body: {
+          'token': token,
+          'new_password': newPassword,
+        },
+      );
+
+      if (response != null) {
+        return response;
+      } else {
+        return {
+          "isSuccess": false,
+          "error": {
+            "detail": {"message": "Resposta inválida do servidor"}
+          }
+        };
+      }
+    } catch (e) {
+      return {
+        "isSuccess": false,
+        "error": {
+          "detail": {
+            "message": "Erro na comunicação com o servidor",
+            "details": e.toString()
+          }
+        }
+      };
+    }
+  }
+
+  Future<bool> validateResetToken(String token) async {
+    try {
+      final response = await httpService.request(
+        '/users/validate-reset-token?token=$token',
+        method: 'POST',
+      );
+      print("response para saber se validou o link: $response");
+      return response != null && response['isValid'] == true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<dynamic> requestPasswordReset(String email) async {
+    try {
+      final successResult = await httpService.request(
+        '/users/email-request-password-reset?email=$email',
+        method: 'POST',
+      );
+
+      return {
+        "isSuccess": true,
+        "message": successResult['message'] ??
+            "Se o email existir, enviaremos as instruções.",
+      };
+    } catch (e) {
+      return _errorUtil.handleError(e);
     }
   }
 }
