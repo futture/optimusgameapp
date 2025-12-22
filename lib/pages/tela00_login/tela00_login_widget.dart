@@ -1,6 +1,4 @@
-import 'dart:math';
 import 'package:projeto_game_quiz/pages/tela01_criar_conta/tela01_criar_conta_widget.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'tela00_login_model.dart';
@@ -24,14 +22,12 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
   // Cores modernas alinhadas com o tema
   final Color _primaryColor = Color(0xFFEC8D0D);
   final Color _primaryLight = Color(0xFFFDE68A);
-  final Color _primaryDark = Color(0xFFD97706);
   final Color _backgroundColor = Color(0xFFFAFAFA);
   final Color _surfaceColor = Color(0xFFFFFFFF);
   final Color _textPrimary = Color(0xFF1F2937);
   final Color _textSecondary = Color(0xFF6B7280);
   final Color _textTertiary = Color(0xFF9CA3AF);
   final Color _borderColor = Color(0xFFE5E7EB);
-  final Color _successColor = Color(0xFF10B981);
   final Color _errorColor = Color(0xFFEF4444);
 
   // Gradiente
@@ -58,7 +54,7 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
   final TextEditingController _emailRecuperacaoController =
       TextEditingController();
   final FocusNode _emailRecuperacaoFocusNode = FocusNode();
-
+  late OverlayEntry overlayEntry;
   @override
   void initState() {
     super.initState();
@@ -134,8 +130,6 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
     );
   }
 
-  // Widget do modal de recuperação de senha
-  // Widget do modal de recuperação de senha (ATUALIZADO)
   Widget _buildPasswordRecoveryModal(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
@@ -143,14 +137,245 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
 
     return StatefulBuilder(
       builder: (context, setModalState) {
+        void _showStatusDialog(bool isSuccess, String title, String message) {
+          final overlay = Overlay.of(context);
+          late OverlayEntry overlayEntry;
+
+          overlayEntry = OverlayEntry(
+            builder: (context) => Center(
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  margin: EdgeInsets.all(20),
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: 400,
+                      maxHeight: 400,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _surfaceColor,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 25,
+                          spreadRadius: 5,
+                          offset: Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Cabeçalho do Dialog
+                        Container(
+                          padding: EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            gradient: isSuccess
+                                ? LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Color(0xFF4CAF50),
+                                      Color(0xFF2E7D32),
+                                    ],
+                                  )
+                                : LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      _errorColor,
+                                      Colors.red.shade700,
+                                    ],
+                                  ),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              topRight: Radius.circular(20),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Center(
+                                  child: Icon(
+                                    isSuccess
+                                        ? Icons.check_circle_rounded
+                                        : Icons.error_outline_rounded,
+                                    color: Colors.white,
+                                    size: 28,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      title,
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      isSuccess ? 'Sucesso' : 'Erro',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.white.withOpacity(0.9),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  overlayEntry.remove();
+                                },
+                                icon: Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Conteúdo do Dialog
+                        Expanded(
+                          child: SingleChildScrollView(
+                            padding: EdgeInsets.all(24),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    color: isSuccess
+                                        ? Color(0xFF4CAF50).withOpacity(0.1)
+                                        : _errorColor.withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: Icon(
+                                      isSuccess
+                                          ? Icons.email_rounded
+                                          : Icons.warning_amber_rounded,
+                                      color: isSuccess
+                                          ? Color(0xFF4CAF50)
+                                          : _errorColor,
+                                      size: 40,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 20),
+                                Text(
+                                  message,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: _textPrimary,
+                                    height: 1.5,
+                                  ),
+                                ),
+                                SizedBox(height: 24),
+                                if (isSuccess)
+                                  Container(
+                                    padding: EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFFE8F5E9),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: Color(0xFF4CAF50),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.info_outline_rounded,
+                                          color: Color(0xFF4CAF50),
+                                          size: 20,
+                                        ),
+                                        SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            'O link expira em 1 hora',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Color(0xFF2E7D32),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                SizedBox(height: 32),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 56,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      overlayEntry.remove();
+                                      if (isSuccess) {
+                                        Navigator.of(context).pop();
+                                        _model.emailRecoveryController?.clear();
+                                        _model.phoneRecoveryController?.clear();
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: isSuccess
+                                          ? Color(0xFF4CAF50)
+                                          : _errorColor,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      elevation: 0,
+                                      shadowColor: Colors.transparent,
+                                    ),
+                                    child: Text(
+                                      isSuccess
+                                          ? 'ENTENDIDO'
+                                          : 'TENTAR NOVAMENTE',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+
+          overlay.insert(overlayEntry);
+        }
+
         return Center(
           child: SingleChildScrollView(
             padding: EdgeInsets.all(isMobile ? 16 : 24),
             child: Container(
               constraints: BoxConstraints(
-                maxWidth: isMobile
-                    ? double.infinity // Em mobile ocupa toda largura disponível
-                    : 500, // Largura máxima fixa para web
+                maxWidth: isMobile ? double.infinity : 500,
               ),
               decoration: BoxDecoration(
                 color: _surfaceColor,
@@ -524,7 +749,6 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
                                     borderRadius: BorderRadius.circular(14),
                                     onTap: () {
                                       Navigator.of(context).pop();
-                                      // Limpa os campos
                                       _model.emailRecoveryController?.clear();
                                       _model.phoneRecoveryController?.clear();
                                     },
@@ -565,7 +789,6 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
                                     onTap: _model.isSendingRecoveryCode
                                         ? null
                                         : () async {
-                                            // VALIDAÇÃO DIRETA
                                             if (_model
                                                 .isRecoveryEmailSelected) {
                                               final email = _model
@@ -575,14 +798,10 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
                                                   '';
 
                                               if (email.isEmpty) {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                        'Informe seu email'),
-                                                    backgroundColor:
-                                                        _errorColor,
-                                                  ),
+                                                _showStatusDialog(
+                                                  false,
+                                                  'Email obrigatório',
+                                                  'Por favor, informe o email associado à sua conta para continuar com a recuperação de senha.',
                                                 );
                                                 return;
                                               }
@@ -590,73 +809,56 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
                                               if (!RegExp(
                                                       r'^[^@]+@[^@]+\.[^@]+')
                                                   .hasMatch(email)) {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  SnackBar(
-                                                    content:
-                                                        Text('Email inválido'),
-                                                    backgroundColor:
-                                                        _errorColor,
-                                                  ),
+                                                _showStatusDialog(
+                                                  false,
+                                                  'Email inválido',
+                                                  'O formato do email informado não é válido. Por favor, verifique e tente novamente.',
                                                 );
                                                 return;
                                               }
 
-                                              // INICIA LOADING
                                               _model.setSendingRecoveryCode(
                                                   setModalState, true);
 
                                               try {
-                                                // CHAMA O USER SERVICE DIRETO
                                                 final result = await _model
                                                     .userService
                                                     .requestPasswordReset(
                                                         email);
 
-                                                // FECHA O MODAL
-                                                Navigator.of(context).pop();
-
-                                                // VERIFICA RESPOSTA
                                                 if (result['isSuccess'] ==
                                                         true ||
                                                     result['success'] == true) {
-                                                  _showSuccessMessage(
-                                                    context,
-                                                    '✅ Email enviado!',
-                                                    'Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.',
+                                                  // Mostra dialog de sucesso
+                                                  _showStatusDialog(
+                                                    true,
+                                                    'Email enviado!',
+                                                    'Se o email **$email** existir, você receberá um link para redefinir sua senha.\n\n'
+                                                        'Verifique sua caixa de entrada ou a pasta de spam.',
                                                   );
-                                                  print(
-                                                      '✅ Recuperação enviada para: $email');
                                                 } else {
-                                                  _showErrorMessage(
-                                                    context,
+                                                  _showStatusDialog(
+                                                    false,
+                                                    'Falha no envio',
                                                     result['message'] ??
-                                                        'Falha ao enviar email',
+                                                        'Não foi possível enviar o email de recuperação. Por favor, verifique se o email está correto e tente novamente.',
                                                   );
-                                                  print(
-                                                      '❌ Erro: ${result['message']}');
                                                 }
                                               } catch (e) {
-                                                Navigator.of(context).pop();
-                                                _showErrorMessage(
-                                                  context,
-                                                  'Erro: ${e.toString()}',
+                                                _showStatusDialog(
+                                                  false,
+                                                  'Erro no sistema',
+                                                  'Ocorreu um erro ao tentar enviar o email de recuperação. Por favor, tente novamente mais tarde.\n\nErro: ${e.toString()}',
                                                 );
-                                                print('❌ Exception: $e');
                                               } finally {
                                                 _model.setSendingRecoveryCode(
                                                     setModalState, false);
                                               }
                                             } else {
-                                              // PARA TELEFONE (EM DESENVOLVIMENTO)
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                SnackBar(
-                                                  content: Text(
-                                                      'Recuperação por SMS em desenvolvimento'),
-                                                  backgroundColor:
-                                                      _primaryColor,
-                                                ),
+                                              _showStatusDialog(
+                                                false,
+                                                'Funcionalidade em desenvolvimento',
+                                                'A recuperação de senha por SMS ainda está em desenvolvimento. Por favor, utilize a opção de recuperação por email.',
                                               );
                                             }
                                           },
@@ -724,7 +926,7 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
                               Expanded(
                                 child: Text(
                                   _model.isRecoveryEmailSelected
-                                      ? 'Verifique sua caixa de spam se não receber o email em alguns minutos. O link expira em 1 hora.'
+                                      ? 'Verifique sua caixa de spam se não receber o email em alguns minutos. O link expira em 30 minutos.'
                                       : 'O código SMS pode levar alguns minutos para chegar. Certifique-se de que o número está correto.',
                                   style: TextStyle(
                                     fontSize: isMobile ? 12 : 13,
@@ -745,183 +947,6 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
         );
       },
     );
-  }
-
-  void _showSuccessMessage(BuildContext context, String title, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                color: _successColor,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.check,
-                  size: 16,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    message,
-                    style: TextStyle(
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: _surfaceColor,
-        elevation: 0,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: _successColor.withOpacity(0.2),
-          ),
-        ),
-        duration: Duration(seconds: 4),
-      ),
-    );
-  }
-
-  void _showErrorMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: _errorColor,
-      ),
-    );
-  }
-
-  Future<void> _simularEnvioEmailRecuperacao(BuildContext context) async {
-    // Mostra indicador de carregamento
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => Center(
-        child: Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            color: _surfaceColor,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 20,
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: 30,
-                height: 30,
-                child: CircularProgressIndicator(
-                  strokeWidth: 3,
-                  color: _primaryColor,
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Enviando...',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: _textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    // Simula delay de rede
-    await Future.delayed(Duration(seconds: 2));
-
-    // Fecha o diálogo de carregamento
-    Navigator.of(context).pop();
-
-    // Fecha o modal de recuperação
-    Navigator.of(context).pop();
-
-    // Mostra mensagem de sucesso
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                color: _successColor,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.check,
-                  size: 16,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Email enviado com sucesso!',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    'Verifique sua caixa de entrada',
-                    style: TextStyle(
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: _surfaceColor,
-        elevation: 0,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: _successColor.withOpacity(0.2),
-          ),
-        ),
-        duration: Duration(seconds: 4),
-      ),
-    );
-
-    // Limpa o campo de email
-    _emailRecuperacaoController.clear();
   }
 
   @override
@@ -1688,52 +1713,25 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
     );
   }
 
-  // MÉTODO DE DECORAÇÃO ORIGINAL PRESERVADO (caso ainda seja usado em algum lugar)
-  InputDecoration _inputDecoration(
-    BuildContext context,
-    String hintText, {
-    Widget? prefixIcon,
-    Widget? suffixIcon,
-  }) {
-    return InputDecoration(
-      hintText: hintText,
-      hintStyle: FlutterFlowTheme.of(context).bodySmall.override(
-            fontFamily: 'Inter',
-            color: FlutterFlowTheme.of(context).secondaryText,
+  void showOverlay(BuildContext context) {
+    late OverlayEntry overlayEntry;
+
+    overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: 100,
+        left: 50,
+        child: Material(
+          color: Colors.transparent,
+          child: ElevatedButton(
+            onPressed: () {
+              overlayEntry.remove();
+            },
+            child: const Text('Fechar'),
           ),
-      filled: true,
-      fillColor: FlutterFlowTheme.of(context).secondaryBackground,
-      prefixIcon: prefixIcon,
-      suffixIcon: suffixIcon,
-      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: FlutterFlowTheme.of(context).primary,
-          width: 2,
-        ),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: FlutterFlowTheme.of(context).error,
-        ),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: FlutterFlowTheme.of(context).error,
-          width: 2,
         ),
       ),
     );
+
+    Overlay.of(context).insert(overlayEntry);
   }
 }
