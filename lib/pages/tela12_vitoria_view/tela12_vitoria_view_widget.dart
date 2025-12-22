@@ -27,24 +27,73 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
     with TickerProviderStateMixin {
   late Tela12VitoriaViewModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  dynamic rankingData;
-  RankingPeriod _selectedPeriod = RankingPeriod.daily;
-  List<RankingItem> fullRankingList = [];
-  bool isLoading = false;
-  String firstPlaceName = '';
-  String firstPlacePoints = '';
-  int firstPlacePosition = 0;
-  String firstPlaceAvatarUrl = '';
 
-  String secondPlaceName = '';
-  String secondPlacePoints = '';
-  int secondPlacePosition = 0;
-  String secondPlaceAvatarUrl = '';
+  // VARIÁVEIS SEPARADAS PARA CADA PERÍODO
+  Map<RankingPeriod, List<RankingItem>> _rankingLists = {
+    RankingPeriod.daily: [],
+    RankingPeriod.weekly: [],
+    RankingPeriod.monthly: [],
+  };
 
-  String thirdPlaceName = '';
-  String thirdPlacePoints = '';
-  int thirdPlacePosition = 0;
-  String thirdPlaceAvatarUrl = '';
+  Map<RankingPeriod, bool> _isLoading = {
+    RankingPeriod.daily: false,
+    RankingPeriod.weekly: false,
+    RankingPeriod.monthly: false,
+  };
+
+  Map<RankingPeriod, String> _firstPlaceNames = {
+    RankingPeriod.daily: '',
+    RankingPeriod.weekly: '',
+    RankingPeriod.monthly: '',
+  };
+
+  Map<RankingPeriod, String> _firstPlacePoints = {
+    RankingPeriod.daily: '',
+    RankingPeriod.weekly: '',
+    RankingPeriod.monthly: '',
+  };
+
+  Map<RankingPeriod, int> _firstPlacePositions = {
+    RankingPeriod.daily: 0,
+    RankingPeriod.weekly: 0,
+    RankingPeriod.monthly: 0,
+  };
+
+  Map<RankingPeriod, String> _secondPlaceNames = {
+    RankingPeriod.daily: '',
+    RankingPeriod.weekly: '',
+    RankingPeriod.monthly: '',
+  };
+
+  Map<RankingPeriod, String> _secondPlacePoints = {
+    RankingPeriod.daily: '',
+    RankingPeriod.weekly: '',
+    RankingPeriod.monthly: '',
+  };
+
+  Map<RankingPeriod, int> _secondPlacePositions = {
+    RankingPeriod.daily: 0,
+    RankingPeriod.weekly: 0,
+    RankingPeriod.monthly: 0,
+  };
+
+  Map<RankingPeriod, String> _thirdPlaceNames = {
+    RankingPeriod.daily: '',
+    RankingPeriod.weekly: '',
+    RankingPeriod.monthly: '',
+  };
+
+  Map<RankingPeriod, String> _thirdPlacePoints = {
+    RankingPeriod.daily: '',
+    RankingPeriod.weekly: '',
+    RankingPeriod.monthly: '',
+  };
+
+  Map<RankingPeriod, int> _thirdPlacePositions = {
+    RankingPeriod.daily: 0,
+    RankingPeriod.weekly: 0,
+    RankingPeriod.monthly: 0,
+  };
 
   // Cores do tema premium com laranja como primária
   final Color _primaryColor = Color(0xFFEC8D0D);
@@ -88,11 +137,8 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
       vsync: this,
       length: 3,
       initialIndex: 0,
-    )..addListener(() => safeSetState(() {
-          _handleTabChange();
-        }));
-    _fetchRanking(_selectedPeriod);
-    print(rankingData);
+    )..addListener(() => safeSetState(() {}));
+    _fetchRanking(RankingPeriod.daily);
   }
 
   @override
@@ -115,49 +161,73 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
   }
 
   Future<void> _fetchRanking(RankingPeriod period) async {
+    if (_rankingLists[period]!.isNotEmpty || _isLoading[period] == true) {
+      return;
+    }
+
     setState(() {
-      isLoading = true;
-      rankingData = 'Carregando...';
+      _isLoading[period] = true;
     });
 
-    final service = RankingService();
-    final response = await service.getRankingByPeriodAsync(period);
-    if (response['isSuccess']) {
-      final rankingResponse = response['data'] as RankingWithTopWinnersResponse;
+    try {
+      final service = RankingService();
+      final response = await service.getRankingByPeriodAsync(period);
+
+      if (response['isSuccess']) {
+        final rankingResponse =
+            response['data'] as RankingWithTopWinnersResponse;
+
+        setState(() {
+          final top3 = rankingResponse.top3 ?? [];
+
+          // Limpa dados anteriores deste período
+          _firstPlaceNames[period] = '';
+          _firstPlacePoints[period] = '';
+          _firstPlacePositions[period] = 0;
+          _secondPlaceNames[period] = '';
+          _secondPlacePoints[period] = '';
+          _secondPlacePositions[period] = 0;
+          _thirdPlaceNames[period] = '';
+          _thirdPlacePoints[period] = '';
+          _thirdPlacePositions[period] = 0;
+
+          // CORREÇÃO: Acessar elementos apenas se existirem
+          for (int i = 0; i < top3.length && i < 3; i++) {
+            final item = top3[i];
+
+            switch (i) {
+              case 0:
+                _firstPlaceNames[period] = item.user.name;
+                _firstPlacePoints[period] = item.totalScore.toString();
+                _firstPlacePositions[period] = item.position;
+                break;
+              case 1:
+                _secondPlaceNames[period] = item.user.name;
+                _secondPlacePoints[period] = item.totalScore.toString();
+                _secondPlacePositions[period] = item.position;
+                break;
+              case 2:
+                _thirdPlaceNames[period] = item.user.name;
+                _thirdPlacePoints[period] = item.totalScore.toString();
+                _thirdPlacePositions[period] = item.position;
+                break;
+            }
+          }
+
+          _rankingLists[period] = rankingResponse.allRankings ?? []
+            ..sort((a, b) => b.totalScore.compareTo(a.totalScore));
+
+          _isLoading[period] = false;
+        });
+      } else {
+        setState(() {
+          _isLoading[period] = false;
+        });
+      }
+    } catch (e) {
+      print('Erro ao buscar ranking para período $period: $e');
       setState(() {
-        final top3 = rankingResponse.top3;
-        if (top3.isNotEmpty) {
-          if (top3.length > 0) {
-            firstPlaceName = top3[0].user.name;
-            firstPlacePoints = top3[0].totalScore.toString();
-            firstPlacePosition = top3[0].position;
-          }
-
-          if (top3.length > 1) {
-            secondPlaceName = top3[1].user.name;
-            secondPlacePoints = top3[1].totalScore.toString();
-            secondPlacePosition = top3[1].position;
-          }
-
-          if (top3.length > 2) {
-            thirdPlaceName = top3[2].user.name;
-            thirdPlacePoints = top3[2].totalScore.toString();
-            thirdPlacePosition = top3[2].position;
-          }
-        }
-        fullRankingList = rankingResponse.allRankings
-          ..sort((a, b) => b.totalScore.compareTo(a.totalScore));
-        rankingData = fullRankingList
-            .map((e) =>
-                'ID: ${e.id}, Nome: ${e.user.name}, Posição: ${e.position}, Pontuação: ${e.totalScore}')
-            .join('\n');
-
-        isLoading = false;
-      });
-    } else {
-      setState(() {
-        rankingData = 'Erro ao buscar ranking';
-        isLoading = false;
+        _isLoading[period] = false;
       });
     }
   }
@@ -177,6 +247,43 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
         _fetchRanking(RankingPeriod.daily);
     }
   }
+
+  // Métodos para obter dados do período atual
+  RankingPeriod get _currentPeriod {
+    switch (_model.tabBarController?.index) {
+      case 0:
+        return RankingPeriod.daily;
+      case 1:
+        return RankingPeriod.weekly;
+      case 2:
+        return RankingPeriod.monthly;
+      default:
+        return RankingPeriod.daily;
+    }
+  }
+
+  bool get _isCurrentLoading => _isLoading[_currentPeriod] ?? false;
+
+  String get _currentFirstPlaceName => _firstPlaceNames[_currentPeriod] ?? '';
+  String get _currentFirstPlacePoints =>
+      _firstPlacePoints[_currentPeriod] ?? '';
+  int get _currentFirstPlacePosition =>
+      _firstPlacePositions[_currentPeriod] ?? 0;
+
+  String get _currentSecondPlaceName => _secondPlaceNames[_currentPeriod] ?? '';
+  String get _currentSecondPlacePoints =>
+      _secondPlacePoints[_currentPeriod] ?? '';
+  int get _currentSecondPlacePosition =>
+      _secondPlacePositions[_currentPeriod] ?? 0;
+
+  String get _currentThirdPlaceName => _thirdPlaceNames[_currentPeriod] ?? '';
+  String get _currentThirdPlacePoints =>
+      _thirdPlacePoints[_currentPeriod] ?? '';
+  int get _currentThirdPlacePosition =>
+      _thirdPlacePositions[_currentPeriod] ?? 0;
+
+  List<RankingItem> get _currentRankingList =>
+      _rankingLists[_currentPeriod] ?? [];
 
   LinearGradient _getPositionGradient(int position) {
     switch (position) {
@@ -217,17 +324,37 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
     required bool isSmallScreen,
     required bool isVerySmallScreen,
   }) {
-    double cardWidth = isVerySmallScreen ? 75 : isSmallScreen ? 85 : 110;
-    double avatarSize = isVerySmallScreen ? 36 : isSmallScreen ? 40 : (isFirst ? 60 : 50);
-    double fontSize = isVerySmallScreen ? 9 : isSmallScreen ? 10 : (isFirst ? 13 : 12);
-    double pointsFontSize = isVerySmallScreen ? 9 : isSmallScreen ? 10 : (isFirst ? 14 : 12);
-    
+    double cardWidth = isVerySmallScreen
+        ? 75
+        : isSmallScreen
+            ? 85
+            : 110;
+    double avatarSize = isVerySmallScreen
+        ? 36
+        : isSmallScreen
+            ? 40
+            : (isFirst ? 60 : 50);
+    double fontSize = isVerySmallScreen
+        ? 9
+        : isSmallScreen
+            ? 10
+            : (isFirst ? 13 : 12);
+    double pointsFontSize = isVerySmallScreen
+        ? 9
+        : isSmallScreen
+            ? 10
+            : (isFirst ? 14 : 12);
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         if (isFirst)
           Container(
-            padding: EdgeInsets.all(isVerySmallScreen ? 6 : isSmallScreen ? 8 : 12),
+            padding: EdgeInsets.all(isVerySmallScreen
+                ? 6
+                : isSmallScreen
+                    ? 8
+                    : 12),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: _goldGradient,
@@ -242,14 +369,28 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
             child: FaIcon(
               FontAwesomeIcons.crown,
               color: Colors.white,
-              size: isVerySmallScreen ? 16 : isSmallScreen ? 20 : 26,
+              size: isVerySmallScreen
+                  ? 16
+                  : isSmallScreen
+                      ? 20
+                      : 26,
             ),
           ),
-        SizedBox(height: isVerySmallScreen ? 6 : isSmallScreen ? 8 : 12),
+        SizedBox(
+            height: isVerySmallScreen
+                ? 6
+                : isSmallScreen
+                    ? 8
+                    : 12),
         Container(
           width: cardWidth,
           height: height,
-          margin: EdgeInsets.symmetric(horizontal: isVerySmallScreen ? 2 : isSmallScreen ? 3 : 6),
+          margin: EdgeInsets.symmetric(
+              horizontal: isVerySmallScreen
+                  ? 2
+                  : isSmallScreen
+                      ? 3
+                      : 6),
           decoration: BoxDecoration(
             gradient: _getPositionGradient(position),
             borderRadius: BorderRadius.circular(16),
@@ -265,12 +406,24 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
             children: [
               // Badge de posição
               Positioned(
-                top: isVerySmallScreen ? 6 : isSmallScreen ? 8 : 12,
+                top: isVerySmallScreen
+                    ? 6
+                    : isSmallScreen
+                        ? 8
+                        : 12,
                 left: 0,
                 right: 0,
                 child: Container(
-                  width: isVerySmallScreen ? 24 : isSmallScreen ? 26 : 32,
-                  height: isVerySmallScreen ? 24 : isSmallScreen ? 26 : 32,
+                  width: isVerySmallScreen
+                      ? 24
+                      : isSmallScreen
+                          ? 26
+                          : 32,
+                  height: isVerySmallScreen
+                      ? 24
+                      : isSmallScreen
+                          ? 26
+                          : 32,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
@@ -288,7 +441,11 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                       style: TextStyle(
                         color: _getPositionTextColor(position),
                         fontWeight: FontWeight.w800,
-                        fontSize: isVerySmallScreen ? 10 : isSmallScreen ? 11 : 14,
+                        fontSize: isVerySmallScreen
+                            ? 10
+                            : isSmallScreen
+                                ? 11
+                                : 14,
                       ),
                     ),
                   ),
@@ -296,7 +453,11 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
               ),
               // Conteúdo principal
               Padding(
-                padding: EdgeInsets.all(isVerySmallScreen ? 8 : isSmallScreen ? 10 : 16),
+                padding: EdgeInsets.all(isVerySmallScreen
+                    ? 8
+                    : isSmallScreen
+                        ? 10
+                        : 16),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -308,7 +469,11 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: Colors.white,
-                          width: isVerySmallScreen ? 1.5 : isSmallScreen ? 2 : 3,
+                          width: isVerySmallScreen
+                              ? 1.5
+                              : isSmallScreen
+                                  ? 2
+                                  : 3,
                         ),
                         boxShadow: [
                           BoxShadow(
@@ -332,14 +497,23 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                               child: Icon(
                                 Icons.person,
                                 color: Colors.white,
-                                size: isVerySmallScreen ? 14 : isSmallScreen ? 16 : (isFirst ? 24 : 20),
+                                size: isVerySmallScreen
+                                    ? 14
+                                    : isSmallScreen
+                                        ? 16
+                                        : (isFirst ? 24 : 20),
                               ),
                             );
                           },
                         ),
                       ),
                     ),
-                    SizedBox(height: isVerySmallScreen ? 4 : isSmallScreen ? 6 : 12),
+                    SizedBox(
+                        height: isVerySmallScreen
+                            ? 4
+                            : isSmallScreen
+                                ? 6
+                                : 12),
                     // Nome
                     Flexible(
                       child: Text(
@@ -355,12 +529,25 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    SizedBox(height: isVerySmallScreen ? 2 : isSmallScreen ? 4 : 6),
+                    SizedBox(
+                        height: isVerySmallScreen
+                            ? 2
+                            : isSmallScreen
+                                ? 4
+                                : 6),
                     // Pontuação
                     Container(
                       padding: EdgeInsets.symmetric(
-                        horizontal: isVerySmallScreen ? 4 : isSmallScreen ? 5 : 8,
-                        vertical: isVerySmallScreen ? 2 : isSmallScreen ? 3 : 4,
+                        horizontal: isVerySmallScreen
+                            ? 4
+                            : isSmallScreen
+                                ? 5
+                                : 8,
+                        vertical: isVerySmallScreen
+                            ? 2
+                            : isSmallScreen
+                                ? 3
+                                : 4,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.2),
@@ -387,8 +574,8 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
 
   Widget _buildRankingList(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 400;
-    
-    if (isLoading) {
+
+    if (_isCurrentLoading) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -414,7 +601,8 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
         ),
       );
     }
-    if (fullRankingList.isEmpty) {
+
+    if (_currentRankingList.isEmpty) {
       return Center(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 32.0),
@@ -453,11 +641,42 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
 
     return ListView.builder(
       padding: EdgeInsets.all(16),
-      itemCount: fullRankingList.length,
+      itemCount: _currentRankingList.length,
       itemBuilder: (context, index) {
-        final ranking = fullRankingList[index];
+        // VERIFICAÇÃO ADICIONAL DE SEGURANÇA
+        if (index >= _currentRankingList.length) {
+          return SizedBox.shrink();
+        }
+
+        final ranking = _currentRankingList[index];
+        if (ranking == null) {
+          return SizedBox.shrink();
+        }
+
         final isTop3 = ranking.position <= 3;
-        
+
+        // Formata a pontuação com 2 casas decimais
+        String formattedScore;
+        try {
+          // Tenta converter para double e formatar
+          final score = ranking.totalScore is double
+              ? ranking.totalScore as double
+              : double.tryParse(ranking.totalScore.toString()) ?? 0.0;
+          formattedScore = score.toStringAsFixed(2);
+
+          // Remove zeros desnecessários após a vírgula (opcional)
+          if (formattedScore.endsWith('.00')) {
+            formattedScore =
+                formattedScore.substring(0, formattedScore.length - 3);
+          } else if (formattedScore.endsWith('0')) {
+            formattedScore =
+                formattedScore.substring(0, formattedScore.length - 1);
+          }
+        } catch (e) {
+          // Se houver erro, mostra o valor original
+          formattedScore = ranking.totalScore.toString();
+        }
+
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Material(
@@ -492,7 +711,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                         width: isSmallScreen ? 36 : 44,
                         height: isSmallScreen ? 36 : 44,
                         decoration: BoxDecoration(
-                          gradient: isTop3 
+                          gradient: isTop3
                               ? _getPositionGradient(ranking.position)
                               : LinearGradient(
                                   colors: [
@@ -502,8 +721,8 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                                 ),
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: isTop3 
-                                ? Colors.transparent 
+                            color: isTop3
+                                ? Colors.transparent
                                 : _primaryColor.withOpacity(0.3),
                             width: 2,
                           ),
@@ -513,7 +732,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                             ranking.position.toString(),
                             style: TextStyle(
                               fontWeight: FontWeight.w800,
-                              color: isTop3 
+                              color: isTop3
                                   ? _getPositionTextColor(ranking.position)
                                   : _primaryColor,
                               fontSize: isSmallScreen ? 14 : 16,
@@ -549,7 +768,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                           ],
                         ),
                       ),
-                      // Pontuação
+                      // Pontuação formatada
                       Container(
                         constraints: BoxConstraints(
                           minWidth: isSmallScreen ? 60 : 70,
@@ -570,7 +789,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                           ],
                         ),
                         child: Text(
-                          ranking.totalScore.toString(),
+                          formattedScore,
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w800,
@@ -607,7 +826,7 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
             final screenWidth = constraints.maxWidth;
             final isSmallScreen = screenWidth < 400;
             final isVerySmallScreen = screenWidth < 350;
-            
+
             return Column(
               children: [
                 // Header Premium
@@ -627,7 +846,11 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                     bottom: false,
                     child: Padding(
                       padding: EdgeInsets.symmetric(
-                        horizontal: isVerySmallScreen ? 12 : isSmallScreen ? 16 : 20,
+                        horizontal: isVerySmallScreen
+                            ? 12
+                            : isSmallScreen
+                                ? 16
+                                : 20,
                         vertical: 16,
                       ),
                       child: Column(
@@ -637,8 +860,16 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                             children: [
                               // Botão Voltar Premium
                               Container(
-                                width: isVerySmallScreen ? 36 : isSmallScreen ? 40 : 44,
-                                height: isVerySmallScreen ? 36 : isSmallScreen ? 40 : 44,
+                                width: isVerySmallScreen
+                                    ? 36
+                                    : isSmallScreen
+                                        ? 40
+                                        : 44,
+                                height: isVerySmallScreen
+                                    ? 36
+                                    : isSmallScreen
+                                        ? 40
+                                        : 44,
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.15),
                                   borderRadius: BorderRadius.circular(12),
@@ -650,18 +881,31 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                                   icon: Icon(
                                     Icons.arrow_back_ios_rounded,
                                     color: Colors.white,
-                                    size: isVerySmallScreen ? 16 : isSmallScreen ? 18 : 20,
+                                    size: isVerySmallScreen
+                                        ? 16
+                                        : isSmallScreen
+                                            ? 18
+                                            : 20,
                                   ),
                                   splashRadius: 20,
                                 ),
                               ),
-                              SizedBox(width: isVerySmallScreen ? 8 : isSmallScreen ? 12 : 16),
+                              SizedBox(
+                                  width: isVerySmallScreen
+                                      ? 8
+                                      : isSmallScreen
+                                          ? 12
+                                          : 16),
                               Expanded(
                                 child: Text(
                                   'Ranking de Jogadores',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: isVerySmallScreen ? 18 : isSmallScreen ? 20 : 24,
+                                    fontSize: isVerySmallScreen
+                                        ? 18
+                                        : isSmallScreen
+                                            ? 20
+                                            : 24,
                                     fontWeight: FontWeight.w800,
                                     letterSpacing: -0.5,
                                   ),
@@ -670,8 +914,16 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                               ),
                               // Ícone de troféu
                               Container(
-                                width: isVerySmallScreen ? 36 : isSmallScreen ? 40 : 44,
-                                height: isVerySmallScreen ? 36 : isSmallScreen ? 40 : 44,
+                                width: isVerySmallScreen
+                                    ? 36
+                                    : isSmallScreen
+                                        ? 40
+                                        : 44,
+                                height: isVerySmallScreen
+                                    ? 36
+                                    : isSmallScreen
+                                        ? 40
+                                        : 44,
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.15),
                                   shape: BoxShape.circle,
@@ -679,7 +931,11 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                                 child: Icon(
                                   Icons.emoji_events_rounded,
                                   color: Colors.white,
-                                  size: isVerySmallScreen ? 18 : isSmallScreen ? 20 : 22,
+                                  size: isVerySmallScreen
+                                      ? 18
+                                      : isSmallScreen
+                                          ? 20
+                                          : 22,
                                 ),
                               ),
                             ],
@@ -709,7 +965,11 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                       children: [
                         // Tabs Modernas
                         Padding(
-                          padding: EdgeInsets.all(isVerySmallScreen ? 12 : isSmallScreen ? 16 : 20),
+                          padding: EdgeInsets.all(isVerySmallScreen
+                              ? 12
+                              : isSmallScreen
+                                  ? 16
+                                  : 20),
                           child: Container(
                             decoration: BoxDecoration(
                               color: _surfaceColor,
@@ -726,13 +986,21 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                               useToggleButtonStyle: true,
                               labelStyle: TextStyle(
                                 fontFamily: 'Inter',
-                                fontSize: isVerySmallScreen ? 12.0 : isSmallScreen ? 13.0 : 14.0,
+                                fontSize: isVerySmallScreen
+                                    ? 12.0
+                                    : isSmallScreen
+                                        ? 13.0
+                                        : 14.0,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.0,
                               ),
                               unselectedLabelStyle: TextStyle(
                                 fontFamily: 'Inter',
-                                fontSize: isVerySmallScreen ? 12.0 : isSmallScreen ? 13.0 : 14.0,
+                                fontSize: isVerySmallScreen
+                                    ? 12.0
+                                    : isSmallScreen
+                                        ? 13.0
+                                        : 14.0,
                                 letterSpacing: 0.0,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -745,28 +1013,48 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                               borderWidth: 1,
                               borderRadius: 12.0,
                               elevation: 0,
-                              buttonMargin: EdgeInsets.all(isVerySmallScreen ? 2 : isSmallScreen ? 3 : 4),
-                              padding: EdgeInsets.all(isVerySmallScreen ? 4 : isSmallScreen ? 6 : 8),
+                              buttonMargin: EdgeInsets.all(isVerySmallScreen
+                                  ? 2
+                                  : isSmallScreen
+                                      ? 3
+                                      : 4),
+                              padding: EdgeInsets.all(isVerySmallScreen
+                                  ? 4
+                                  : isSmallScreen
+                                      ? 6
+                                      : 8),
                               tabs: [
                                 Tab(
                                   text: 'Hoje',
                                   icon: Icon(
                                     Icons.today_rounded,
-                                    size: isVerySmallScreen ? 14 : isSmallScreen ? 16 : 18,
+                                    size: isVerySmallScreen
+                                        ? 14
+                                        : isSmallScreen
+                                            ? 16
+                                            : 18,
                                   ),
                                 ),
                                 Tab(
                                   text: 'Semana',
                                   icon: Icon(
                                     Icons.date_range_rounded,
-                                    size: isVerySmallScreen ? 14 : isSmallScreen ? 16 : 18,
+                                    size: isVerySmallScreen
+                                        ? 14
+                                        : isSmallScreen
+                                            ? 16
+                                            : 18,
                                   ),
                                 ),
                                 Tab(
                                   text: 'Mês',
                                   icon: Icon(
                                     Icons.calendar_month_rounded,
-                                    size: isVerySmallScreen ? 14 : isSmallScreen ? 16 : 18,
+                                    size: isVerySmallScreen
+                                        ? 14
+                                        : isSmallScreen
+                                            ? 16
+                                            : 18,
                                   ),
                                 ),
                               ],
@@ -782,9 +1070,18 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                         Expanded(
                           flex: 2,
                           child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: isVerySmallScreen ? 12 : isSmallScreen ? 16 : 20),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: isVerySmallScreen
+                                    ? 12
+                                    : isSmallScreen
+                                        ? 16
+                                        : 20),
                             child: Container(
-                              height: isVerySmallScreen ? 220 : isSmallScreen ? 240 : 280,
+                              height: isVerySmallScreen
+                                  ? 220
+                                  : isSmallScreen
+                                      ? 240
+                                      : 280,
                               decoration: BoxDecoration(
                                 color: _surfaceColor,
                                 borderRadius: BorderRadius.circular(20),
@@ -814,29 +1111,50 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                                       ),
                                     ),
                                   ),
-                                  
+
                                   // Conteúdo do pódio
-                                  if (firstPlaceName.isEmpty &&
-                                      secondPlaceName.isEmpty &&
-                                      thirdPlaceName.isEmpty)
+                                  if (_currentFirstPlaceName.isEmpty &&
+                                      _currentSecondPlaceName.isEmpty &&
+                                      _currentThirdPlaceName.isEmpty)
                                     Center(
                                       child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           Icon(
                                             Icons.emoji_events_outlined,
-                                            size: isVerySmallScreen ? 36 : isSmallScreen ? 40 : 48,
-                                            color: _primaryColor.withOpacity(0.3),
+                                            size: isVerySmallScreen
+                                                ? 36
+                                                : isSmallScreen
+                                                    ? 40
+                                                    : 48,
+                                            color:
+                                                _primaryColor.withOpacity(0.3),
                                           ),
-                                          SizedBox(height: isVerySmallScreen ? 8 : isSmallScreen ? 12 : 16),
+                                          SizedBox(
+                                              height: isVerySmallScreen
+                                                  ? 8
+                                                  : isSmallScreen
+                                                      ? 12
+                                                      : 16),
                                           Padding(
-                                            padding: EdgeInsets.symmetric(horizontal: isVerySmallScreen ? 12 : isSmallScreen ? 16 : 24),
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: isVerySmallScreen
+                                                    ? 12
+                                                    : isSmallScreen
+                                                        ? 16
+                                                        : 24),
                                             child: Text(
                                               'Nenhum classificado',
                                               style: TextStyle(
-                                                fontSize: isVerySmallScreen ? 13 : isSmallScreen ? 14 : 16,
+                                                fontSize: isVerySmallScreen
+                                                    ? 13
+                                                    : isSmallScreen
+                                                        ? 14
+                                                        : 16,
                                                 fontWeight: FontWeight.w600,
-                                                color: _onSurfaceColor.withOpacity(0.5),
+                                                color: _onSurfaceColor
+                                                    .withOpacity(0.5),
                                               ),
                                               textAlign: TextAlign.center,
                                             ),
@@ -845,60 +1163,104 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                                       ),
                                     ),
 
-                                  if (firstPlaceName.isNotEmpty || 
-                                      secondPlaceName.isNotEmpty || 
-                                      thirdPlaceName.isNotEmpty)
+                                  if (_currentFirstPlaceName.isNotEmpty ||
+                                      _currentSecondPlaceName.isNotEmpty ||
+                                      _currentThirdPlaceName.isNotEmpty)
                                     SingleChildScrollView(
                                       scrollDirection: Axis.horizontal,
-                                      physics: isVerySmallScreen ? AlwaysScrollableScrollPhysics() : NeverScrollableScrollPhysics(),
+                                      physics: isVerySmallScreen
+                                          ? AlwaysScrollableScrollPhysics()
+                                          : NeverScrollableScrollPhysics(),
                                       child: Container(
                                         padding: EdgeInsets.symmetric(
-                                          horizontal: isVerySmallScreen ? 10 : isSmallScreen ? 15 : 20,
+                                          horizontal: isVerySmallScreen
+                                              ? 10
+                                              : isSmallScreen
+                                                  ? 15
+                                                  : 20,
                                         ),
                                         child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
                                           children: [
                                             // Segundo lugar
-                                            if (secondPlaceName.isNotEmpty)
+                                            if (_currentSecondPlaceName
+                                                    .isNotEmpty &&
+                                                _currentSecondPlacePosition > 0)
                                               _buildPodiumUser(
-                                                position: secondPlacePosition,
-                                                name: secondPlaceName,
-                                                points: (double.tryParse(secondPlacePoints) ?? 0).toStringAsFixed(2),
-                                                avatarUrl: 'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
-                                                height: isVerySmallScreen ? 120 : isSmallScreen ? 140 : 160,
+                                                position:
+                                                    _currentSecondPlacePosition,
+                                                name: _currentSecondPlaceName,
+                                                points: (double.tryParse(
+                                                            _currentSecondPlacePoints) ??
+                                                        0)
+                                                    .toStringAsFixed(2),
+                                                avatarUrl:
+                                                    'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
+                                                height: isVerySmallScreen
+                                                    ? 120
+                                                    : isSmallScreen
+                                                        ? 140
+                                                        : 160,
                                                 isFirst: false,
                                                 context: context,
                                                 isSmallScreen: isSmallScreen,
-                                                isVerySmallScreen: isVerySmallScreen,
+                                                isVerySmallScreen:
+                                                    isVerySmallScreen,
                                               ),
 
                                             // Primeiro lugar
-                                            if (firstPlaceName.isNotEmpty)
+                                            if (_currentFirstPlaceName
+                                                    .isNotEmpty &&
+                                                _currentFirstPlacePosition > 0)
                                               _buildPodiumUser(
-                                                position: firstPlacePosition,
-                                                name: firstPlaceName,
-                                                points: (double.tryParse(firstPlacePoints) ?? 0).toStringAsFixed(2),
-                                                avatarUrl: 'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
-                                                height: isVerySmallScreen ? 150 : isSmallScreen ? 170 : 190,
+                                                position:
+                                                    _currentFirstPlacePosition,
+                                                name: _currentFirstPlaceName,
+                                                points: (double.tryParse(
+                                                            _currentFirstPlacePoints) ??
+                                                        0)
+                                                    .toStringAsFixed(2),
+                                                avatarUrl:
+                                                    'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
+                                                height: isVerySmallScreen
+                                                    ? 150
+                                                    : isSmallScreen
+                                                        ? 170
+                                                        : 190,
                                                 isFirst: true,
                                                 context: context,
                                                 isSmallScreen: isSmallScreen,
-                                                isVerySmallScreen: isVerySmallScreen,
+                                                isVerySmallScreen:
+                                                    isVerySmallScreen,
                                               ),
 
                                             // Terceiro lugar
-                                            if (thirdPlaceName.isNotEmpty)
+                                            if (_currentThirdPlaceName
+                                                    .isNotEmpty &&
+                                                _currentThirdPlacePosition > 0)
                                               _buildPodiumUser(
-                                                position: thirdPlacePosition,
-                                                name: thirdPlaceName,
-                                                points: (double.tryParse(thirdPlacePoints) ?? 0).toStringAsFixed(2),
-                                                avatarUrl: 'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
-                                                height: isVerySmallScreen ? 110 : isSmallScreen ? 130 : 150,
+                                                position:
+                                                    _currentThirdPlacePosition,
+                                                name: _currentThirdPlaceName,
+                                                points: (double.tryParse(
+                                                            _currentThirdPlacePoints) ??
+                                                        0)
+                                                    .toStringAsFixed(2),
+                                                avatarUrl:
+                                                    'https://images.unsplash.com/photo-1507502707541-f369a3b18502',
+                                                height: isVerySmallScreen
+                                                    ? 110
+                                                    : isSmallScreen
+                                                        ? 130
+                                                        : 150,
                                                 isFirst: false,
                                                 context: context,
                                                 isSmallScreen: isSmallScreen,
-                                                isVerySmallScreen: isVerySmallScreen,
+                                                isVerySmallScreen:
+                                                    isVerySmallScreen,
                                               ),
                                           ],
                                         ),
@@ -906,33 +1268,50 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                                     ),
 
                                   // Loading overlay
-                                  if (isLoading)
+                                  if (_isCurrentLoading)
                                     Positioned.fill(
                                       child: Container(
                                         decoration: BoxDecoration(
                                           color: Colors.white.withOpacity(0.8),
-                                          borderRadius: BorderRadius.circular(20),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
                                         ),
                                         child: Center(
                                           child: Container(
-                                            padding: EdgeInsets.all(isVerySmallScreen ? 12 : isSmallScreen ? 16 : 20),
+                                            padding:
+                                                EdgeInsets.all(isVerySmallScreen
+                                                    ? 12
+                                                    : isSmallScreen
+                                                        ? 16
+                                                        : 20),
                                             decoration: BoxDecoration(
                                               color: _surfaceColor,
                                               shape: BoxShape.circle,
                                               boxShadow: [
                                                 BoxShadow(
-                                                  color: Colors.black.withOpacity(0.1),
+                                                  color: Colors.black
+                                                      .withOpacity(0.1),
                                                   blurRadius: 8,
                                                   offset: const Offset(0, 4),
                                                 ),
                                               ],
                                             ),
                                             child: SizedBox(
-                                              width: isVerySmallScreen ? 24 : isSmallScreen ? 28 : 32,
-                                              height: isVerySmallScreen ? 24 : isSmallScreen ? 28 : 32,
+                                              width: isVerySmallScreen
+                                                  ? 24
+                                                  : isSmallScreen
+                                                      ? 28
+                                                      : 32,
+                                              height: isVerySmallScreen
+                                                  ? 24
+                                                  : isSmallScreen
+                                                      ? 28
+                                                      : 32,
                                               child: CircularProgressIndicator(
                                                 strokeWidth: 3,
-                                                valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                        Color>(_primaryColor),
                                               ),
                                             ),
                                           ),
@@ -949,7 +1328,11 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                         Expanded(
                           flex: 3,
                           child: Container(
-                            margin: EdgeInsets.all(isVerySmallScreen ? 12 : isSmallScreen ? 16 : 20),
+                            margin: EdgeInsets.all(isVerySmallScreen
+                                ? 12
+                                : isSmallScreen
+                                    ? 16
+                                    : 20),
                             decoration: BoxDecoration(
                               color: _surfaceColor,
                               borderRadius: BorderRadius.circular(20),
@@ -966,11 +1349,20 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                                 // Header da lista
                                 Container(
                                   padding: EdgeInsets.symmetric(
-                                    horizontal: isVerySmallScreen ? 12 : isSmallScreen ? 16 : 24,
-                                    vertical: isVerySmallScreen ? 10 : isSmallScreen ? 12 : 16,
+                                    horizontal: isVerySmallScreen
+                                        ? 12
+                                        : isSmallScreen
+                                            ? 16
+                                            : 24,
+                                    vertical: isVerySmallScreen
+                                        ? 10
+                                        : isSmallScreen
+                                            ? 12
+                                            : 16,
                                   ),
                                   decoration: BoxDecoration(
-                                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                                    borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(20)),
                                     gradient: LinearGradient(
                                       begin: Alignment.centerLeft,
                                       end: Alignment.centerRight,
@@ -984,15 +1376,28 @@ class _Tela12VitoriaViewWidgetState extends State<Tela12VitoriaViewWidget>
                                     children: [
                                       Icon(
                                         Icons.leaderboard_rounded,
-                                        size: isVerySmallScreen ? 18 : isSmallScreen ? 20 : 22,
+                                        size: isVerySmallScreen
+                                            ? 18
+                                            : isSmallScreen
+                                                ? 20
+                                                : 22,
                                         color: _primaryColor,
                                       ),
-                                      SizedBox(width: isVerySmallScreen ? 6 : isSmallScreen ? 8 : 12),
+                                      SizedBox(
+                                          width: isVerySmallScreen
+                                              ? 6
+                                              : isSmallScreen
+                                                  ? 8
+                                                  : 12),
                                       Flexible(
                                         child: Text(
                                           'CLASSIFICAÇÃO COMPLETA',
                                           style: TextStyle(
-                                            fontSize: isVerySmallScreen ? 12 : isSmallScreen ? 13 : 14,
+                                            fontSize: isVerySmallScreen
+                                                ? 12
+                                                : isSmallScreen
+                                                    ? 13
+                                                    : 14,
                                             fontWeight: FontWeight.w700,
                                             letterSpacing: 0.5,
                                             color: _primaryColor,

@@ -228,89 +228,220 @@ class _Tela11EditarPerfilWidgetState extends State<Tela11EditarPerfilWidget>
   }
 
   Future<void> _verifyPhoneNumber(String newPhone) async {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => Dialog(
         backgroundColor: _surfaceColor,
         surfaceTintColor: _surfaceColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Verificar Número',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  color: _primaryColor,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18,
-                ),
-              ),
-              SizedBox(height: 12),
-              Text(
-                'Enviaremos um código OTP para $newPhone',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  color: _onSurfaceColor.withOpacity(0.8),
-                  fontSize: 14,
-                ),
-              ),
-              SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    style: TextButton.styleFrom(
-                      foregroundColor: _onSurfaceColor,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    ),
-                    child: Text(
-                      'Cancelar',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(isMobile ? 20 : 24),
+        ),
+        insetPadding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 16 : max((screenWidth - 500) / 2, 16),
+          vertical: 16,
+        ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: 500,
+            minWidth: isMobile ? 280 : 400,
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(isMobile ? 20 : 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: isMobile ? 36 : 40,
+                      height: isMobile ? 36 : 40,
+                      decoration: BoxDecoration(
+                        color: _primaryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(isMobile ? 12 : 14),
                       ),
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _primaryColor.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: FFButtonWidget(
-                      onPressed: () => Navigator.pop(context, true),
-                      text: 'Enviar Código',
-                      options: FFButtonOptions(
-                        height: 44,
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(20, 0, 20, 0),
+                      child: Icon(
+                        Icons.phone_iphone_rounded,
                         color: _primaryColor,
-                        textStyle: TextStyle(
-                          fontFamily: 'Inter',
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
+                        size: isMobile ? 20 : 22,
                       ),
                     ),
+                    SizedBox(width: isMobile ? 12 : 16),
+                    Expanded(
+                      child: Text(
+                        'Verificar Número',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          color: _primaryColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: isMobile ? 18 : 20,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: isMobile ? 16 : 20),
+                Text(
+                  'Enviaremos um código OTP para:',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    color: _onSurfaceColor.withOpacity(0.8),
+                    fontSize: isMobile ? 14 : 15,
                   ),
-                ],
-              ),
-            ],
+                ),
+                SizedBox(height: isMobile ? 6 : 8),
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(isMobile ? 12 : 16),
+                  decoration: BoxDecoration(
+                    color: _backgroundColor,
+                    borderRadius: BorderRadius.circular(isMobile ? 12 : 14),
+                    border: Border.all(
+                      color: _outlineColor,
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    newPhone,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      color: _onSurfaceColor,
+                      fontSize: isMobile ? 16 : 17,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                SizedBox(height: isMobile ? 24 : 28),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (isMobile) ...[
+                      // Mobile: botões empilhados
+                      Expanded(
+                        child: Column(
+                          children: [
+                            OutlinedButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: _onSurfaceColor,
+                                side: BorderSide(color: _outlineColor),
+                                minimumSize:
+                                    Size(double.infinity, isMobile ? 44 : 48),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(isMobile ? 12 : 14),
+                                ),
+                              ),
+                              child: Text(
+                                'Cancelar',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: isMobile ? 14 : 15,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: isMobile ? 12 : 16),
+                            Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.circular(isMobile ? 12 : 14),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: _primaryColor.withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: FFButtonWidget(
+                                onPressed: () => Navigator.pop(context, true),
+                                text: 'Enviar Código',
+                                options: FFButtonOptions(
+                                  height: isMobile ? 44 : 48,
+                                  padding: EdgeInsets.zero,
+                                  color: _primaryColor,
+                                  textStyle: TextStyle(
+                                    fontFamily: 'Inter',
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: isMobile ? 14 : 15,
+                                  ),
+                                  borderRadius:
+                                      BorderRadius.circular(isMobile ? 12 : 14),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    ] else ...[
+                      // Desktop: botões lado a lado
+                      OutlinedButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: _onSurfaceColor,
+                          side: BorderSide(color: _outlineColor),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isMobile ? 16 : 24,
+                            vertical: isMobile ? 10 : 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(isMobile ? 12 : 14),
+                          ),
+                        ),
+                        child: Text(
+                          'Cancelar',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.w600,
+                            fontSize: isMobile ? 14 : 15,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: isMobile ? 12 : 16),
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius:
+                              BorderRadius.circular(isMobile ? 12 : 14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: _primaryColor.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: FFButtonWidget(
+                          onPressed: () => Navigator.pop(context, true),
+                          text: 'Enviar Código',
+                          options: FFButtonOptions(
+                            height: isMobile ? 44 : 48,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isMobile ? 20 : 28,
+                            ),
+                            color: _primaryColor,
+                            textStyle: TextStyle(
+                              fontFamily: 'Inter',
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: isMobile ? 14 : 15,
+                            ),
+                            borderRadius:
+                                BorderRadius.circular(isMobile ? 12 : 14),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -327,124 +458,167 @@ class _Tela11EditarPerfilWidgetState extends State<Tela11EditarPerfilWidget>
           return Dialog(
             backgroundColor: _surfaceColor,
             surfaceTintColor: _surfaceColor,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            child: FutureBuilder(
-              future: UserService().sendOtp(phoneNumber),
-              builder: (context, snapshot) {
-                return Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: _primaryColor.withOpacity(0.1),
-                          shape: BoxShape.circle,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(isMobile ? 20 : 24),
+            ),
+            insetPadding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 16 : max((screenWidth - 500) / 2, 16),
+              vertical: 16,
+            ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: 500,
+                minWidth: isMobile ? 280 : 400,
+              ),
+              child: FutureBuilder(
+                future: UserService().sendOtp(phoneNumber),
+                builder: (context, snapshot) {
+                  return Padding(
+                    padding: EdgeInsets.all(isMobile ? 20 : 24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(isMobile ? 20 : 24),
+                          decoration: BoxDecoration(
+                            color: _primaryColor.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: SizedBox(
+                            width: isMobile ? 32 : 40,
+                            height: isMobile ? 32 : 40,
+                            child: snapshot.connectionState ==
+                                    ConnectionState.waiting
+                                ? CircularProgressIndicator(
+                                    strokeWidth: 3,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        _primaryColor),
+                                  )
+                                : snapshot.hasError
+                                    ? Icon(
+                                        Icons.error_outline_rounded,
+                                        color: _errorColor,
+                                        size: isMobile ? 24 : 28,
+                                      )
+                                    : Icon(
+                                        Icons.check_circle_rounded,
+                                        color: _successColor,
+                                        size: isMobile ? 24 : 28,
+                                      ),
+                          ),
                         ),
-                        child: SizedBox(
-                          width: 32,
-                          height: 32,
-                          child: snapshot.connectionState ==
-                                  ConnectionState.waiting
-                              ? CircularProgressIndicator(
-                                  strokeWidth: 3,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      _primaryColor),
-                                )
-                              : snapshot.hasError
-                                  ? Icon(
-                                      Icons.error_outline_rounded,
-                                      color: _errorColor,
-                                      size: 24,
-                                    )
-                                  : Icon(
-                                      Icons.check_circle_rounded,
-                                      color: _successColor,
-                                      size: 24,
-                                    ),
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      Text(
-                        snapshot.connectionState == ConnectionState.waiting
-                            ? 'Enviando código para $phoneNumber...'
-                            : snapshot.hasError
-                                ? 'Falha ao enviar código'
-                                : 'Código enviado com sucesso!',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          color: _onSurfaceColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      if (snapshot.hasError) ...[
-                        SizedBox(height: 8),
+                        SizedBox(height: isMobile ? 20 : 24),
                         Text(
-                          'Tente novamente mais tarde',
+                          snapshot.connectionState == ConnectionState.waiting
+                              ? 'Enviando código para:'
+                              : snapshot.hasError
+                                  ? 'Falha ao enviar código'
+                                  : 'Código enviado com sucesso!',
                           style: TextStyle(
                             fontFamily: 'Inter',
-                            color: _onSurfaceColor.withOpacity(0.6),
-                            fontSize: 14,
+                            color: _onSurfaceColor,
+                            fontSize: isMobile ? 16 : 18,
+                            fontWeight: FontWeight.w600,
                           ),
                           textAlign: TextAlign.center,
                         ),
-                      ],
-                      SizedBox(height: 24),
-                      if (snapshot.connectionState == ConnectionState.done)
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: (snapshot.hasError
-                                        ? _errorColor
-                                        : _successColor)
-                                    .withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: Offset(0, 4),
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) ...[
+                          SizedBox(height: isMobile ? 8 : 12),
+                          Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(isMobile ? 12 : 16),
+                            decoration: BoxDecoration(
+                              color: _backgroundColor,
+                              borderRadius:
+                                  BorderRadius.circular(isMobile ? 12 : 14),
+                              border: Border.all(
+                                color: _outlineColor,
+                                width: 1,
                               ),
-                            ],
-                          ),
-                          child: FFButtonWidget(
-                            onPressed: () {
-                              if (snapshot.hasError) {
-                                Navigator.pop(context);
-                                _showSnackBar(
-                                    'Falha ao enviar OTP: ${snapshot.error}',
-                                    _errorColor);
-                              } else {
-                                sendSuccess = true;
-                                Navigator.pop(context);
-                              }
-                            },
-                            text: snapshot.hasError
-                                ? 'Tentar Novamente'
-                                : 'Continuar',
-                            options: FFButtonOptions(
-                              height: 44,
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  24, 0, 24, 0),
-                              color: snapshot.hasError
-                                  ? _errorColor
-                                  : _successColor,
-                              textStyle: TextStyle(
+                            ),
+                            child: Text(
+                              phoneNumber,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
                                 fontFamily: 'Inter',
-                                color: Colors.white,
+                                color: _primaryColor,
+                                fontSize: isMobile ? 14 : 16,
                                 fontWeight: FontWeight.w700,
-                                fontSize: 14,
                               ),
-                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                        ),
-                    ],
-                  ),
-                );
-              },
+                        ],
+                        if (snapshot.hasError) ...[
+                          SizedBox(height: isMobile ? 8 : 12),
+                          Text(
+                            'Tente novamente mais tarde',
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              color: _onSurfaceColor.withOpacity(0.6),
+                              fontSize: isMobile ? 14 : 15,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                        SizedBox(height: isMobile ? 24 : 28),
+                        if (snapshot.connectionState == ConnectionState.done)
+                          Container(
+                            width: isMobile ? double.infinity : null,
+                            decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.circular(isMobile ? 12 : 14),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: (snapshot.hasError
+                                          ? _errorColor
+                                          : _successColor)
+                                      .withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: FFButtonWidget(
+                              onPressed: () {
+                                if (snapshot.hasError) {
+                                  Navigator.pop(context);
+                                  _showSnackBar(
+                                      'Falha ao enviar OTP: ${snapshot.error}',
+                                      _errorColor);
+                                } else {
+                                  sendSuccess = true;
+                                  Navigator.pop(context);
+                                }
+                              },
+                              text: snapshot.hasError
+                                  ? 'Tentar Novamente'
+                                  : 'Continuar',
+                              options: FFButtonOptions(
+                                height: isMobile ? 44 : 48,
+                                width: isMobile ? double.infinity : null,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: isMobile ? 16 : 24,
+                                ),
+                                color: snapshot.hasError
+                                    ? _errorColor
+                                    : _successColor,
+                                textStyle: TextStyle(
+                                  fontFamily: 'Inter',
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: isMobile ? 14 : 15,
+                                ),
+                                borderRadius:
+                                    BorderRadius.circular(isMobile ? 12 : 14),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
           );
         },
