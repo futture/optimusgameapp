@@ -143,582 +143,604 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
 
     return StatefulBuilder(
       builder: (context, setModalState) {
-        return Container(
-          margin: EdgeInsets.all(isMobile ? 16 : 24),
-          decoration: BoxDecoration(
-            color: _surfaceColor,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 30,
-                offset: Offset(0, 10),
+        return Center(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(isMobile ? 16 : 24),
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: isMobile
+                    ? double.infinity // Em mobile ocupa toda largura disponível
+                    : 500, // Largura máxima fixa para web
               ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Cabeçalho do modal
-              Container(
-                padding: EdgeInsets.all(isMobile ? 24 : 32),
-                decoration: BoxDecoration(
-                  gradient: _primaryGradient,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
+              decoration: BoxDecoration(
+                color: _surfaceColor,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 30,
+                    offset: Offset(0, 10),
                   ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: isMobile ? 48 : 56,
-                      height: isMobile ? 48 : 56,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.lock_reset_rounded,
-                          color: Colors.white,
-                          size: isMobile ? 24 : 28,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Recuperar Senha',
-                            style: TextStyle(
-                              fontSize: isMobile ? 20 : 24,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            _model.isRecoveryEmailSelected
-                                ? 'Enviaremos um link de recuperação para seu email'
-                                : 'Enviaremos um código de verificação para seu telefone',
-                            style: TextStyle(
-                              fontSize: isMobile ? 13 : 14,
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                ],
               ),
-
-              // Conteúdo do modal
-              Padding(
-                padding: EdgeInsets.all(isMobile ? 24 : 32),
-                child: Column(
-                  children: [
-                    Text(
-                      _model.isRecoveryEmailSelected
-                          ? 'Digite o email associado à sua conta e enviaremos instruções para redefinir sua senha.'
-                          : 'Digite o número de telefone associado à sua conta e enviaremos um código de verificação.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: isMobile ? 14 : 15,
-                        color: _textSecondary,
-                        height: 1.5,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Cabeçalho do modal
+                  Container(
+                    padding: EdgeInsets.all(isMobile ? 24 : 32),
+                    decoration: BoxDecoration(
+                      gradient: _primaryGradient,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(24),
+                        topRight: Radius.circular(24),
                       ),
                     ),
-                    SizedBox(height: 24),
-
-                    // Opções de método de recuperação
-                    Container(
-                      decoration: BoxDecoration(
-                        color: _primaryLight.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: _borderColor,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(13),
-                                  bottomLeft: Radius.circular(13),
-                                ),
-                                onTap: () {
-                                  setModalState(() {
-                                    _model.setRecoveryMethod(
-                                        setModalState, true);
-                                  });
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: isMobile ? 14 : 16,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: _model.isRecoveryEmailSelected
-                                        ? _primaryColor
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(13),
-                                      bottomLeft: Radius.circular(13),
-                                    ),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Icon(
-                                        Icons.email_outlined,
-                                        color: _model.isRecoveryEmailSelected
-                                            ? Colors.white
-                                            : _textSecondary,
-                                        size: isMobile ? 20 : 22,
-                                      ),
-                                      SizedBox(height: 6),
-                                      Text(
-                                        'Email',
-                                        style: TextStyle(
-                                          fontSize: isMobile ? 12 : 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: _model.isRecoveryEmailSelected
-                                              ? Colors.white
-                                              : _textSecondary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            width: 1.5,
-                            height: 40,
-                            color: _borderColor,
-                          ),
-                          Expanded(
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(13),
-                                  bottomRight: Radius.circular(13),
-                                ),
-                                onTap: () {
-                                  setModalState(() {
-                                    _model.setRecoveryMethod(
-                                        setModalState, false);
-                                  });
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: isMobile ? 14 : 16,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: !_model.isRecoveryEmailSelected
-                                        ? _primaryColor
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(13),
-                                      bottomRight: Radius.circular(13),
-                                    ),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Icon(
-                                        Icons.phone_android_outlined,
-                                        color: !_model.isRecoveryEmailSelected
-                                            ? Colors.white
-                                            : _textSecondary,
-                                        size: isMobile ? 20 : 22,
-                                      ),
-                                      SizedBox(height: 6),
-                                      Text(
-                                        'Telefone',
-                                        style: TextStyle(
-                                          fontSize: isMobile ? 12 : 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: !_model.isRecoveryEmailSelected
-                                              ? Colors.white
-                                              : _textSecondary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 20),
-
-                    // Campo dinâmico baseado na escolha
-                    if (_model.isRecoveryEmailSelected)
-                      // Campo de email
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: _model.emailRecoveryFocusNode.hasFocus
-                                ? _primaryColor
-                                : _borderColor,
-                            width: _model.emailRecoveryFocusNode.hasFocus
-                                ? 2
-                                : 1.5,
-                          ),
-                          boxShadow: _model.emailRecoveryFocusNode.hasFocus
-                              ? [
-                                  BoxShadow(
-                                    color: _primaryColor.withOpacity(0.1),
-                                    blurRadius: 10,
-                                    offset: Offset(0, 3),
-                                  ),
-                                ]
-                              : [],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: isMobile ? 48 : 56,
-                              child: Center(
-                                child: Icon(
-                                  Icons.email_outlined,
-                                  color: _model.emailRecoveryFocusNode.hasFocus
-                                      ? _primaryColor
-                                      : _textSecondary,
-                                  size: isMobile ? 20 : 22,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: TextFormField(
-                                controller: _model.emailRecoveryController,
-                                focusNode: _model.emailRecoveryFocusNode,
-                                keyboardType: TextInputType.emailAddress,
-                                style: TextStyle(
-                                  fontSize: isMobile ? 15 : 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: _textPrimary,
-                                ),
-                                decoration: InputDecoration(
-                                  hintText: 'seu@email.com',
-                                  hintStyle: TextStyle(
-                                    color: _textTertiary,
-                                    fontSize: isMobile ? 14 : 15,
-                                  ),
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.symmetric(
-                                    vertical: isMobile ? 16 : 18,
-                                  ),
-                                ),
-                                onChanged: (value) {
-                                  // Atualiza em tempo real se quiser validação
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      // Campo de telefone
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: _model.phoneRecoveryFocusNode.hasFocus
-                                ? _primaryColor
-                                : _borderColor,
-                            width: _model.phoneRecoveryFocusNode.hasFocus
-                                ? 2
-                                : 1.5,
-                          ),
-                          boxShadow: _model.phoneRecoveryFocusNode.hasFocus
-                              ? [
-                                  BoxShadow(
-                                    color: _primaryColor.withOpacity(0.1),
-                                    blurRadius: 10,
-                                    offset: Offset(0, 3),
-                                  ),
-                                ]
-                              : [],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: isMobile ? 48 : 56,
-                              child: Center(
-                                child: Icon(
-                                  Icons.phone_android_outlined,
-                                  color: _model.phoneRecoveryFocusNode.hasFocus
-                                      ? _primaryColor
-                                      : _textSecondary,
-                                  size: isMobile ? 20 : 22,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: TextFormField(
-                                controller: _model.phoneRecoveryController,
-                                focusNode: _model.phoneRecoveryFocusNode,
-                                keyboardType: TextInputType.phone,
-                                style: TextStyle(
-                                  fontSize: isMobile ? 15 : 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: _textPrimary,
-                                ),
-                                decoration: InputDecoration(
-                                  hintText: '(11) 99999-9999',
-                                  hintStyle: TextStyle(
-                                    color: _textTertiary,
-                                    fontSize: isMobile ? 14 : 15,
-                                  ),
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.symmetric(
-                                    vertical: isMobile ? 16 : 18,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    SizedBox(height: 32),
-
-                    // Botões de ação
-                    Row(
+                    child: Row(
                       children: [
-                        Expanded(
-                          child: Container(
-                            height: isMobile ? 50 : 56,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: _borderColor,
-                                width: 1.5,
-                              ),
-                            ),
-                            child: Material(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(14),
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(14),
-                                onTap: () {
-                                  Navigator.of(context).pop();
-                                  // Limpa os campos
-                                  _model.emailRecoveryController?.clear();
-                                  _model.phoneRecoveryController?.clear();
-                                },
-                                child: Center(
-                                  child: Text(
-                                    'CANCELAR',
-                                    style: TextStyle(
-                                      color: _textSecondary,
-                                      fontSize: isMobile ? 14 : 15,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                              ),
+                        Container(
+                          width: isMobile ? 48 : 56,
+                          height: isMobile ? 48 : 56,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.lock_reset_rounded,
+                              color: Colors.white,
+                              size: isMobile ? 24 : 28,
                             ),
                           ),
                         ),
-                        SizedBox(width: 12),
+                        SizedBox(width: 16),
                         Expanded(
-                          child: Container(
-                            height: isMobile ? 50 : 56,
-                            decoration: BoxDecoration(
-                              gradient: _primaryGradient,
-                              borderRadius: BorderRadius.circular(14),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: _primaryColor.withOpacity(0.3),
-                                  blurRadius: 15,
-                                  offset: Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: Material(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(14),
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(14),
-                                onTap: _model.isSendingRecoveryCode
-                                    ? null
-                                    : () async {
-                                        // VALIDAÇÃO DIRETA
-                                        if (_model.isRecoveryEmailSelected) {
-                                          final email = _model
-                                                  .emailRecoveryController?.text
-                                                  .trim() ??
-                                              '';
-
-                                          if (email.isEmpty) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                content:
-                                                    Text('Informe seu email'),
-                                                backgroundColor: _errorColor,
-                                              ),
-                                            );
-                                            return;
-                                          }
-
-                                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                                              .hasMatch(email)) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                content: Text('Email inválido'),
-                                                backgroundColor: _errorColor,
-                                              ),
-                                            );
-                                            return;
-                                          }
-
-                                          // INICIA LOADING
-                                          _model.setSendingRecoveryCode(
-                                              setModalState, true);
-
-                                          try {
-                                            // CHAMA O USER SERVICE DIRETO
-                                            final result = await _model
-                                                .userService
-                                                .requestPasswordReset(email);
-
-                                            // FECHA O MODAL
-                                            Navigator.of(context).pop();
-
-                                            // VERIFICA RESPOSTA
-                                            if (result['isSuccess'] == true ||
-                                                result['success'] == true) {
-                                              _showSuccessMessage(
-                                                context,
-                                                '✅ Email enviado!',
-                                                'Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.',
-                                              );
-                                              print(
-                                                  '✅ Recuperação enviada para: $email');
-                                            } else {
-                                              _showErrorMessage(
-                                                context,
-                                                result['message'] ??
-                                                    'Falha ao enviar email',
-                                              );
-                                              print(
-                                                  '❌ Erro: ${result['message']}');
-                                            }
-                                          } catch (e) {
-                                            Navigator.of(context).pop();
-                                            _showErrorMessage(
-                                              context,
-                                              'Erro: ${e.toString()}',
-                                            );
-                                            print('❌ Exception: $e');
-                                          } finally {
-                                            _model.setSendingRecoveryCode(
-                                                setModalState, false);
-                                          }
-                                        } else {
-                                          // PARA TELEFONE (EM DESENVOLVIMENTO)
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                  'Recuperação por SMS em desenvolvimento'),
-                                              backgroundColor: _primaryColor,
-                                            ),
-                                          );
-                                        }
-                                      },
-                                child: Center(
-                                  child: _model.isSendingRecoveryCode
-                                      ? SizedBox(
-                                          width: 24,
-                                          height: 24,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: Colors.white,
-                                          ),
-                                        )
-                                      : Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              _model.isRecoveryEmailSelected
-                                                  ? Icons.send_rounded
-                                                  : Icons.sms_rounded,
-                                              color: Colors.white,
-                                              size: isMobile ? 18 : 20,
-                                            ),
-                                            SizedBox(width: 8),
-                                            Text(
-                                              _model.isRecoveryEmailSelected
-                                                  ? 'ENVIAR LINK'
-                                                  : 'ENVIAR CÓDIGO',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: isMobile ? 14 : 15,
-                                                fontWeight: FontWeight.w800,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Recuperar Senha',
+                                style: TextStyle(
+                                  fontSize: isMobile ? 20 : 24,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
                                 ),
                               ),
-                            ),
+                              SizedBox(height: 4),
+                              Text(
+                                _model.isRecoveryEmailSelected
+                                    ? 'Enviaremos um link de recuperação para seu email'
+                                    : 'Enviaremos um código de verificação para seu telefone',
+                                style: TextStyle(
+                                  fontSize: isMobile ? 13 : 14,
+                                  color: Colors.white.withOpacity(0.9),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 16),
-                    
-                    Container(
-                      padding: EdgeInsets.all(isMobile ? 12 : 16),
-                      decoration: BoxDecoration(
-                        color: _primaryLight.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: _primaryColor.withOpacity(0.1),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.info_outline_rounded,
-                            color: _primaryColor,
-                            size: isMobile ? 16 : 18,
+                  ),
+
+                  // Conteúdo do modal
+                  Padding(
+                    padding: EdgeInsets.all(isMobile ? 24 : 32),
+                    child: Column(
+                      children: [
+                        Text(
+                          _model.isRecoveryEmailSelected
+                              ? 'Digite o email associado à sua conta e enviaremos instruções para redefinir sua senha.'
+                              : 'Digite o número de telefone associado à sua conta e enviaremos um código de verificação.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: isMobile ? 14 : 15,
+                            color: _textSecondary,
+                            height: 1.5,
                           ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              _model.isRecoveryEmailSelected
-                                  ? 'Verifique sua caixa de spam se não receber o email em alguns minutos. O link expira em 1 hora.'
-                                  : 'O código SMS pode levar alguns minutos para chegar. Certifique-se de que o número está correto.',
-                              style: TextStyle(
-                                fontSize: isMobile ? 12 : 13,
-                                color: _textSecondary,
-                              ),
+                        ),
+                        SizedBox(height: 24),
+
+                        // Opções de método de recuperação
+                        Container(
+                          decoration: BoxDecoration(
+                            color: _primaryLight.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: _borderColor,
+                              width: 1.5,
                             ),
                           ),
-                        ],
-                      ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(13),
+                                      bottomLeft: Radius.circular(13),
+                                    ),
+                                    onTap: () {
+                                      setModalState(() {
+                                        _model.setRecoveryMethod(
+                                            setModalState, true);
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: isMobile ? 14 : 16,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: _model.isRecoveryEmailSelected
+                                            ? _primaryColor
+                                            : Colors.transparent,
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(13),
+                                          bottomLeft: Radius.circular(13),
+                                        ),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Icon(
+                                            Icons.email_outlined,
+                                            color:
+                                                _model.isRecoveryEmailSelected
+                                                    ? Colors.white
+                                                    : _textSecondary,
+                                            size: isMobile ? 20 : 22,
+                                          ),
+                                          SizedBox(height: 6),
+                                          Text(
+                                            'Email',
+                                            style: TextStyle(
+                                              fontSize: isMobile ? 12 : 13,
+                                              fontWeight: FontWeight.w600,
+                                              color:
+                                                  _model.isRecoveryEmailSelected
+                                                      ? Colors.white
+                                                      : _textSecondary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                width: 1.5,
+                                height: 40,
+                                color: _borderColor,
+                              ),
+                              Expanded(
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(13),
+                                      bottomRight: Radius.circular(13),
+                                    ),
+                                    onTap: () {
+                                      setModalState(() {
+                                        _model.setRecoveryMethod(
+                                            setModalState, false);
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: isMobile ? 14 : 16,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: !_model.isRecoveryEmailSelected
+                                            ? _primaryColor
+                                            : Colors.transparent,
+                                        borderRadius: BorderRadius.only(
+                                          topRight: Radius.circular(13),
+                                          bottomRight: Radius.circular(13),
+                                        ),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Icon(
+                                            Icons.phone_android_outlined,
+                                            color:
+                                                !_model.isRecoveryEmailSelected
+                                                    ? Colors.white
+                                                    : _textSecondary,
+                                            size: isMobile ? 20 : 22,
+                                          ),
+                                          SizedBox(height: 6),
+                                          Text(
+                                            'Telefone',
+                                            style: TextStyle(
+                                              fontSize: isMobile ? 12 : 13,
+                                              fontWeight: FontWeight.w600,
+                                              color: !_model
+                                                      .isRecoveryEmailSelected
+                                                  ? Colors.white
+                                                  : _textSecondary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 20),
+
+                        // Campo dinâmico baseado na escolha
+                        if (_model.isRecoveryEmailSelected)
+                          // Campo de email
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: _model.emailRecoveryFocusNode.hasFocus
+                                    ? _primaryColor
+                                    : _borderColor,
+                                width: _model.emailRecoveryFocusNode.hasFocus
+                                    ? 2
+                                    : 1.5,
+                              ),
+                              boxShadow: _model.emailRecoveryFocusNode.hasFocus
+                                  ? [
+                                      BoxShadow(
+                                        color: _primaryColor.withOpacity(0.1),
+                                        blurRadius: 10,
+                                        offset: Offset(0, 3),
+                                      ),
+                                    ]
+                                  : [],
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: isMobile ? 48 : 56,
+                                  child: Center(
+                                    child: Icon(
+                                      Icons.email_outlined,
+                                      color:
+                                          _model.emailRecoveryFocusNode.hasFocus
+                                              ? _primaryColor
+                                              : _textSecondary,
+                                      size: isMobile ? 20 : 22,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _model.emailRecoveryController,
+                                    focusNode: _model.emailRecoveryFocusNode,
+                                    keyboardType: TextInputType.emailAddress,
+                                    style: TextStyle(
+                                      fontSize: isMobile ? 15 : 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: _textPrimary,
+                                    ),
+                                    decoration: InputDecoration(
+                                      hintText: 'seu@email.com',
+                                      hintStyle: TextStyle(
+                                        color: _textTertiary,
+                                        fontSize: isMobile ? 14 : 15,
+                                      ),
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.symmetric(
+                                        vertical: isMobile ? 16 : 18,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        else
+                          // Campo de telefone
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: _model.phoneRecoveryFocusNode.hasFocus
+                                    ? _primaryColor
+                                    : _borderColor,
+                                width: _model.phoneRecoveryFocusNode.hasFocus
+                                    ? 2
+                                    : 1.5,
+                              ),
+                              boxShadow: _model.phoneRecoveryFocusNode.hasFocus
+                                  ? [
+                                      BoxShadow(
+                                        color: _primaryColor.withOpacity(0.1),
+                                        blurRadius: 10,
+                                        offset: Offset(0, 3),
+                                      ),
+                                    ]
+                                  : [],
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: isMobile ? 48 : 56,
+                                  child: Center(
+                                    child: Icon(
+                                      Icons.phone_android_outlined,
+                                      color:
+                                          _model.phoneRecoveryFocusNode.hasFocus
+                                              ? _primaryColor
+                                              : _textSecondary,
+                                      size: isMobile ? 20 : 22,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _model.phoneRecoveryController,
+                                    focusNode: _model.phoneRecoveryFocusNode,
+                                    keyboardType: TextInputType.phone,
+                                    style: TextStyle(
+                                      fontSize: isMobile ? 15 : 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: _textPrimary,
+                                    ),
+                                    decoration: InputDecoration(
+                                      hintText: '(11) 99999-9999',
+                                      hintStyle: TextStyle(
+                                        color: _textTertiary,
+                                        fontSize: isMobile ? 14 : 15,
+                                      ),
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.symmetric(
+                                        vertical: isMobile ? 16 : 18,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        SizedBox(height: 32),
+
+                        // Botões de ação
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: isMobile ? 50 : 56,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: _borderColor,
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(14),
+                                    onTap: () {
+                                      Navigator.of(context).pop();
+                                      // Limpa os campos
+                                      _model.emailRecoveryController?.clear();
+                                      _model.phoneRecoveryController?.clear();
+                                    },
+                                    child: Center(
+                                      child: Text(
+                                        'CANCELAR',
+                                        style: TextStyle(
+                                          color: _textSecondary,
+                                          fontSize: isMobile ? 14 : 15,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Container(
+                                height: isMobile ? 50 : 56,
+                                decoration: BoxDecoration(
+                                  gradient: _primaryGradient,
+                                  borderRadius: BorderRadius.circular(14),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: _primaryColor.withOpacity(0.3),
+                                      blurRadius: 15,
+                                      offset: Offset(0, 5),
+                                    ),
+                                  ],
+                                ),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(14),
+                                    onTap: _model.isSendingRecoveryCode
+                                        ? null
+                                        : () async {
+                                            // VALIDAÇÃO DIRETA
+                                            if (_model
+                                                .isRecoveryEmailSelected) {
+                                              final email = _model
+                                                      .emailRecoveryController
+                                                      ?.text
+                                                      .trim() ??
+                                                  '';
+
+                                              if (email.isEmpty) {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                        'Informe seu email'),
+                                                    backgroundColor:
+                                                        _errorColor,
+                                                  ),
+                                                );
+                                                return;
+                                              }
+
+                                              if (!RegExp(
+                                                      r'^[^@]+@[^@]+\.[^@]+')
+                                                  .hasMatch(email)) {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  SnackBar(
+                                                    content:
+                                                        Text('Email inválido'),
+                                                    backgroundColor:
+                                                        _errorColor,
+                                                  ),
+                                                );
+                                                return;
+                                              }
+
+                                              // INICIA LOADING
+                                              _model.setSendingRecoveryCode(
+                                                  setModalState, true);
+
+                                              try {
+                                                // CHAMA O USER SERVICE DIRETO
+                                                final result = await _model
+                                                    .userService
+                                                    .requestPasswordReset(
+                                                        email);
+
+                                                // FECHA O MODAL
+                                                Navigator.of(context).pop();
+
+                                                // VERIFICA RESPOSTA
+                                                if (result['isSuccess'] ==
+                                                        true ||
+                                                    result['success'] == true) {
+                                                  _showSuccessMessage(
+                                                    context,
+                                                    '✅ Email enviado!',
+                                                    'Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.',
+                                                  );
+                                                  print(
+                                                      '✅ Recuperação enviada para: $email');
+                                                } else {
+                                                  _showErrorMessage(
+                                                    context,
+                                                    result['message'] ??
+                                                        'Falha ao enviar email',
+                                                  );
+                                                  print(
+                                                      '❌ Erro: ${result['message']}');
+                                                }
+                                              } catch (e) {
+                                                Navigator.of(context).pop();
+                                                _showErrorMessage(
+                                                  context,
+                                                  'Erro: ${e.toString()}',
+                                                );
+                                                print('❌ Exception: $e');
+                                              } finally {
+                                                _model.setSendingRecoveryCode(
+                                                    setModalState, false);
+                                              }
+                                            } else {
+                                              // PARA TELEFONE (EM DESENVOLVIMENTO)
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                      'Recuperação por SMS em desenvolvimento'),
+                                                  backgroundColor:
+                                                      _primaryColor,
+                                                ),
+                                              );
+                                            }
+                                          },
+                                    child: Center(
+                                      child: _model.isSendingRecoveryCode
+                                          ? SizedBox(
+                                              width: 24,
+                                              height: 24,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: Colors.white,
+                                              ),
+                                            )
+                                          : Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  _model.isRecoveryEmailSelected
+                                                      ? Icons.send_rounded
+                                                      : Icons.sms_rounded,
+                                                  color: Colors.white,
+                                                  size: isMobile ? 18 : 20,
+                                                ),
+                                                SizedBox(width: 8),
+                                                Text(
+                                                  _model.isRecoveryEmailSelected
+                                                      ? 'ENVIAR LINK'
+                                                      : 'ENVIAR CÓDIGO',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize:
+                                                        isMobile ? 14 : 15,
+                                                    fontWeight: FontWeight.w800,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 16),
+
+                        Container(
+                          padding: EdgeInsets.all(isMobile ? 12 : 16),
+                          decoration: BoxDecoration(
+                            color: _primaryLight.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _primaryColor.withOpacity(0.1),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline_rounded,
+                                color: _primaryColor,
+                                size: isMobile ? 16 : 18,
+                              ),
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  _model.isRecoveryEmailSelected
+                                      ? 'Verifique sua caixa de spam se não receber o email em alguns minutos. O link expira em 1 hora.'
+                                      : 'O código SMS pode levar alguns minutos para chegar. Certifique-se de que o número está correto.',
+                                  style: TextStyle(
+                                    fontSize: isMobile ? 12 : 13,
+                                    color: _textSecondary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },

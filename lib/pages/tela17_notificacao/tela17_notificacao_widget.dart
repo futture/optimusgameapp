@@ -212,8 +212,7 @@ class _Tela17NotificacaoViewWidgetState
             ),
           ),
         ],
-      ),
-    );
+      ));
   }
 
   Future<void> _loadInitialData() async {
@@ -437,7 +436,7 @@ class _Tela17NotificacaoViewWidgetState
         return Text(
           'Partida cancelada pelos participantes',
           style: TextStyle(
-            color: _onSurfaceColor.withOpacity(0.7),
+            color: Colors.orange.withOpacity(0.7),
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -571,6 +570,10 @@ class _Tela17NotificacaoViewWidgetState
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+    final safePadding = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: _backgroundColor,
@@ -587,10 +590,17 @@ class _Tela17NotificacaoViewWidgetState
         },
         child: Column(
           children: [
-            // Header Personalizado
-            _buildCustomHeader(),
+            // Header Personalizado (ocupa toda largura)
+            _buildCustomHeader(context, isMobile),
             Expanded(
-              child: _buildNotificationContent(),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: isMobile ? double.infinity : 800, // Limitado a 800px na web
+                  ),
+                  child: _buildNotificationContent(context, isMobile),
+                ),
+              ),
             ),
           ],
         ),
@@ -598,7 +608,7 @@ class _Tela17NotificacaoViewWidgetState
     );
   }
 
-  Widget _buildCustomHeader() {
+  Widget _buildCustomHeader(BuildContext context, bool isMobile) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -613,98 +623,106 @@ class _Tela17NotificacaoViewWidgetState
       ),
       child: SafeArea(
         bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  // Botão Voltar
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: IconButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      icon: Icon(
-                        Icons.arrow_back_ios_rounded,
-                        color: Colors.white,
-                        size: 20,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: isMobile ? double.infinity : 1200, // Header ocupa toda largura
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 20 : 32,
+              vertical: isMobile ? 16 : 20,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    // Botão Voltar
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(isMobile ? 12 : 14),
                       ),
-                      splashRadius: 20,
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Notificações',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.5,
-                          ),
+                      child: IconButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        icon: Icon(
+                          Icons.arrow_back_ios_rounded,
+                          color: Colors.white,
+                          size: isMobile ? 20 : 22,
                         ),
-                        SizedBox(height: 4),
-                        if (_model.pushNotifications.isNotEmpty)
+                        splashRadius: isMobile ? 20 : 24,
+                      ),
+                    ),
+                    SizedBox(width: isMobile ? 16 : 20),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Text(
-                            '${_model.pushNotifications.length} notificaç${_model.pushNotifications.length == 1 ? 'ão' : 'ões'}',
+                            'Notificações',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.8),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                              fontSize: isMobile ? 24 : 28,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.5,
                             ),
                           ),
-                      ],
+                          SizedBox(height: 4),
+                          if (_model.pushNotifications.isNotEmpty)
+                            Text(
+                              '${_model.pushNotifications.length} notificaç${_model.pushNotifications.length == 1 ? 'ão' : 'ões'}',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.8),
+                                fontSize: isMobile ? 14 : 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                  // Ícone de notificação
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      shape: BoxShape.circle,
+                    // Ícone de notificação
+                    Container(
+                      width: isMobile ? 44 : 52,
+                      height: isMobile ? 44 : 52,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.notifications_active_rounded,
+                        color: Colors.white,
+                        size: isMobile ? 22 : 24,
+                      ),
                     ),
-                    child: Icon(
-                      Icons.notifications_active_rounded,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 8),
-              // Barra de progresso sutil
-              Container(
-                height: 2,
-                width: 60,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.6), // Branco translúcido
-                  borderRadius: BorderRadius.circular(2),
+                  ],
                 ),
-              ),
-            ],
+                SizedBox(height: isMobile ? 8 : 12),
+                // Barra de progresso sutil
+                Container(
+                  height: 2,
+                  width: isMobile ? 60 : 80,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.6), // Branco translúcido
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildNotificationContent() {
+  Widget _buildNotificationContent(BuildContext context, bool isMobile) {
     if (_model.isLoading) {
-      return _buildLoadingState();
+      return _buildLoadingState(context, isMobile);
     }
 
     if (_model.pushNotifications.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(context, isMobile);
     }
 
     return NotificationListener<ScrollNotification>(
@@ -729,7 +747,10 @@ class _Tela17NotificacaoViewWidgetState
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             SliverPadding(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 20 : 24,
+                vertical: 20,
+              ),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
@@ -739,9 +760,9 @@ class _Tela17NotificacaoViewWidgetState
                       final isLoading = _loadingNotificationIndex == index;
 
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
+                        padding: EdgeInsets.only(bottom: isMobile ? 16 : 20),
                         child: _buildAnimatedNotificationItem(
-                            item, isNew, isLoading, index),
+                            item, isNew, isLoading, index, context, isMobile),
                       );
                     }
                     return null;
@@ -753,13 +774,13 @@ class _Tela17NotificacaoViewWidgetState
             if (_isLoadingMore)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(24.0),
+                  padding: EdgeInsets.all(isMobile ? 24.0 : 32.0),
                   child: Center(
                     child: Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(isMobile ? 16 : 20),
                       decoration: BoxDecoration(
                         color: _surfaceColor,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.05),
@@ -769,8 +790,8 @@ class _Tela17NotificacaoViewWidgetState
                         ],
                       ),
                       child: SizedBox(
-                        width: 20,
-                        height: 20,
+                        width: isMobile ? 20 : 24,
+                        height: isMobile ? 20 : 24,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
@@ -783,11 +804,14 @@ class _Tela17NotificacaoViewWidgetState
             if (_hasMoreNotifications && !_isLoadingMore)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(20.0),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 20.0 : 24.0,
+                    vertical: 20.0,
+                  ),
                   child: Center(
                     child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                         boxShadow: [
                           BoxShadow(
                             color: _primaryColor.withOpacity(0.1),
@@ -803,10 +827,12 @@ class _Tela17NotificacaoViewWidgetState
                           foregroundColor: _primaryColor, // Texto laranja
                           elevation: 0,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                           ),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 32, vertical: 16),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isMobile ? 32 : 40,
+                            vertical: isMobile ? 16 : 20,
+                          ),
                           shadowColor: Colors.transparent,
                         ),
                         child: Row(
@@ -815,12 +841,15 @@ class _Tela17NotificacaoViewWidgetState
                             Text(
                               'Carregar Mais',
                               style: TextStyle(
-                                fontSize: 15,
+                                fontSize: isMobile ? 15 : 16,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            Icon(Icons.expand_more_rounded, size: 20),
+                            SizedBox(width: isMobile ? 12 : 16),
+                            Icon(
+                              Icons.expand_more_rounded,
+                              size: isMobile ? 20 : 22,
+                            ),
                           ],
                         ),
                       ),
@@ -838,21 +867,21 @@ class _Tela17NotificacaoViewWidgetState
   }
 
   Widget _buildAnimatedNotificationItem(
-      dynamic item, bool isNew, bool isLoading, int index) {
+      dynamic item, bool isNew, bool isLoading, int index, BuildContext context, bool isMobile) {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 400),
       child: Dismissible(
         key: ValueKey(item.id ?? index),
         background: _buildDismissibleBackground(
-            Icons.check_circle_rounded, _successColor, Alignment.centerLeft),
+            Icons.check_circle_rounded, _successColor, Alignment.centerLeft, isMobile),
         secondaryBackground: _buildDismissibleBackground(
-            Icons.delete_forever_rounded, _errorColor, Alignment.centerRight),
+            Icons.delete_forever_rounded, _errorColor, Alignment.centerRight, isMobile),
         confirmDismiss: (direction) async {
           if (direction == DismissDirection.startToEnd) {
             //await _model.markAsRead(item.id);
             return true;
           } else {
-            return await _showDeleteConfirmationDialog();
+            return await _showDeleteConfirmationDialog(context, isMobile);
           }
         },
         onDismissed: (direction) {
@@ -871,97 +900,108 @@ class _Tela17NotificacaoViewWidgetState
           }
           //_model.removeNotification(item.id);
         },
-        child: _buildNotificationItem(item, isNew, isLoading, index),
+        child: _buildNotificationItem(item, isNew, isLoading, index, context, isMobile),
       ),
     );
   }
 
-  Future<bool> _showDeleteConfirmationDialog() async {
+  Future<bool> _showDeleteConfirmationDialog(BuildContext context, bool isMobile) async {
     return await showDialog(
       context: context,
       builder: (context) => Dialog(
         backgroundColor: _surfaceColor,
         surfaceTintColor: _surfaceColor,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(isMobile ? 20 : 24),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: _errorColor.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.delete_forever_rounded,
-                  color: _errorColor,
-                  size: 30,
-                ),
-              ),
-              SizedBox(height: 16),
-              Text(
-                'Excluir Notificação?',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: _onSurfaceColor,
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Esta ação não pode ser desfeita.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: _onSurfaceColor.withOpacity(0.6),
-                  fontSize: 14,
-                ),
-              ),
-              SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: _onSurfaceColor,
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        side: BorderSide(color: _outlineColor),
-                      ),
-                      child: Text(
-                        'Cancelar',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: isMobile ? double.infinity : 500, // Limitado na web
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(isMobile ? 24 : 32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: isMobile ? 60 : 72,
+                  height: isMobile ? 60 : 72,
+                  decoration: BoxDecoration(
+                    color: _errorColor.withOpacity(0.1),
+                    shape: BoxShape.circle,
                   ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _errorColor,
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  child: Icon(
+                    Icons.delete_forever_rounded,
+                    color: _errorColor,
+                    size: isMobile ? 30 : 36,
+                  ),
+                ),
+                SizedBox(height: isMobile ? 16 : 20),
+                Text(
+                  'Excluir Notificação?',
+                  style: TextStyle(
+                    fontSize: isMobile ? 20 : 24,
+                    fontWeight: FontWeight.w800,
+                    color: _onSurfaceColor,
+                  ),
+                ),
+                SizedBox(height: isMobile ? 8 : 12),
+                Text(
+                  'Esta ação não pode ser desfeita.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: _onSurfaceColor.withOpacity(0.6),
+                    fontSize: isMobile ? 14 : 16,
+                  ),
+                ),
+                SizedBox(height: isMobile ? 24 : 32),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: _onSurfaceColor,
+                          padding: EdgeInsets.symmetric(vertical: isMobile ? 12 : 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
+                          ),
+                          side: BorderSide(color: _outlineColor),
+                        ),
+                        child: Text(
+                          'Cancelar',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: isMobile ? 14 : 15,
+                          ),
                         ),
                       ),
-                      child: Text(
-                        'Excluir',
-                        style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    SizedBox(width: isMobile ? 12 : 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _errorColor,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: isMobile ? 12 : 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
+                          ),
+                        ),
+                        child: Text(
+                          'Excluir',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: isMobile ? 14 : 15,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -969,33 +1009,33 @@ class _Tela17NotificacaoViewWidgetState
   }
 
   Widget _buildDismissibleBackground(
-      IconData icon, Color color, Alignment alignment) {
+      IconData icon, Color color, Alignment alignment, bool isMobile) {
     return Container(
       decoration: BoxDecoration(
         color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
         border: Border.all(
           color: color.withOpacity(0.2),
           width: 1.5,
         ),
       ),
       alignment: alignment,
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Icon(icon, color: color, size: 28),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 32),
+      child: Icon(icon, color: color, size: isMobile ? 28 : 32),
     );
   }
 
   Widget _buildNotificationItem(
-      dynamic item, bool isNew, bool isLoading, int index) {
+      dynamic item, bool isNew, bool isLoading, int index, BuildContext context, bool isMobile) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
         onTap: () => _handleNotificationTap(index),
         child: Container(
           decoration: BoxDecoration(
             color: _getNotificationColor(item.code, isNew),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
             border: Border.all(
               color: isNew ? _primaryColor.withOpacity(0.1) : _outlineColor,
               width: isNew ? 1.5 : 1,
@@ -1008,17 +1048,17 @@ class _Tela17NotificacaoViewWidgetState
               ),
             ],
           ),
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(isMobile ? 20 : 24),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
                 child: isLoading
-                    ? _buildLoadingIndicator()
-                    : _buildNotificationIcon(item.code, isNew),
+                    ? _buildLoadingIndicator(isMobile)
+                    : _buildNotificationIcon(item.code, isNew, isMobile),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: isMobile ? 16 : 20),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1038,7 +1078,7 @@ class _Tela17NotificacaoViewWidgetState
                                       style: TextStyle(
                                         fontWeight: FontWeight.w700,
                                         color: _onSurfaceColor,
-                                        fontSize: 16,
+                                        fontSize: isMobile ? 16 : 18,
                                         height: 1.3,
                                       ),
                                       maxLines: 2,
@@ -1046,14 +1086,14 @@ class _Tela17NotificacaoViewWidgetState
                                     ),
                                   ),
                                   if (isNew && !isLoading) 
-                                    _buildNewNotificationBadge(),
+                                    _buildNewNotificationBadge(isMobile),
                                 ],
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: isMobile ? 8 : 12),
                               Text(
                                 item.message ?? '',
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: isMobile ? 14 : 16,
                                   color: _onSurfaceColor.withOpacity(0.8),
                                   height: 1.4,
                                   fontWeight: FontWeight.w500,
@@ -1066,19 +1106,19 @@ class _Tela17NotificacaoViewWidgetState
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: isMobile ? 12 : 16),
                     Row(
                       children: [
                         Icon(
                           Icons.access_time_rounded,
-                          size: 14,
+                          size: isMobile ? 14 : 16,
                           color: _onSurfaceColor.withOpacity(0.5),
                         ),
-                        const SizedBox(width: 6),
+                        SizedBox(width: isMobile ? 6 : 8),
                         Text(
                           _formatDate(item.createdAt ?? DateTime.now()),
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: isMobile ? 12 : 14,
                             color: _onSurfaceColor.withOpacity(0.5),
                             fontWeight: FontWeight.w600,
                             letterSpacing: -0.2,
@@ -1097,10 +1137,10 @@ class _Tela17NotificacaoViewWidgetState
     );
   }
 
-  Widget _buildLoadingIndicator() {
+  Widget _buildLoadingIndicator(bool isMobile) {
     return Container(
-      width: 52,
-      height: 52,
+      width: isMobile ? 52 : 64,
+      height: isMobile ? 52 : 64,
       decoration: BoxDecoration(
         color: _surfaceColor,
         shape: BoxShape.circle,
@@ -1114,8 +1154,8 @@ class _Tela17NotificacaoViewWidgetState
       ),
       child: Center(
         child: SizedBox(
-          width: 22,
-          height: 22,
+          width: isMobile ? 22 : 26,
+          height: isMobile ? 22 : 26,
           child: CircularProgressIndicator(
             strokeWidth: 2.5,
             valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
@@ -1125,10 +1165,10 @@ class _Tela17NotificacaoViewWidgetState
     );
   }
 
-  Widget _buildNotificationIcon(String? code, bool isNew) {
+  Widget _buildNotificationIcon(String? code, bool isNew, bool isMobile) {
     return Container(
-      width: 52,
-      height: 52,
+      width: isMobile ? 52 : 64,
+      height: isMobile ? 52 : 64,
       decoration: BoxDecoration(
         gradient: _getIconGradient(code, isNew),
         shape: BoxShape.circle,
@@ -1143,16 +1183,16 @@ class _Tela17NotificacaoViewWidgetState
       child: Icon(
         _getNotificationIcon(code),
         color: Colors.white,
-        size: 22,
+        size: isMobile ? 22 : 26,
       ),
     );
   }
 
-  Widget _buildNewNotificationBadge() {
+  Widget _buildNewNotificationBadge(bool isMobile) {
     return Container(
-      width: 10,
-      height: 10,
-      margin: const EdgeInsets.only(left: 8, top: 6),
+      width: isMobile ? 10 : 12,
+      height: isMobile ? 10 : 12,
+      margin: EdgeInsets.only(left: isMobile ? 8 : 12, top: isMobile ? 6 : 8),
       decoration: BoxDecoration(
         gradient: _accentGradient, // Gradiente laranja
         shape: BoxShape.circle,
@@ -1167,149 +1207,164 @@ class _Tela17NotificacaoViewWidgetState
     );
   }
 
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(BuildContext context, bool isMobile) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              gradient: _premiumGradient, // Gradiente laranja
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: _primaryColor.withOpacity(0.2),
-                  blurRadius: 15,
-                  offset: Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Center(
-              child: SizedBox(
-                width: 40,
-                height: 40,
-                child: CircularProgressIndicator(
-                  strokeWidth: 3,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: isMobile ? double.infinity : 800),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: isMobile ? 100 : 120,
+              height: isMobile ? 100 : 120,
+              decoration: BoxDecoration(
+                gradient: _premiumGradient, // Gradiente laranja
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: _primaryColor.withOpacity(0.2),
+                    blurRadius: 15,
+                    offset: Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: SizedBox(
+                  width: isMobile ? 40 : 48,
+                  height: isMobile ? 40 : 48,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 32),
-          Text(
-            'Carregando Notificações',
-            style: TextStyle(
-              fontSize: 18,
-              color: _onSurfaceColor,
-              fontWeight: FontWeight.w700,
+            SizedBox(height: isMobile ? 32 : 40),
+            Text(
+              'Carregando Notificações',
+              style: TextStyle(
+                fontSize: isMobile ? 18 : 22,
+                color: _onSurfaceColor,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Preparando sua central de notificações...',
-            style: TextStyle(
-              fontSize: 14,
-              color: _onSurfaceColor.withOpacity(0.6),
+            SizedBox(height: isMobile ? 8 : 12),
+            Text(
+              'Preparando sua central de notificações...',
+              style: TextStyle(
+                fontSize: isMobile ? 14 : 16,
+                color: _onSurfaceColor.withOpacity(0.6),
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context, bool isMobile) {
     return Center(
       child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(40.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 180,
-                height: 180,
-                decoration: BoxDecoration(
-                  color: _surfaceColor,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 20,
-                      offset: Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.notifications_off_rounded,
-                  size: 80,
-                  color: _onSurfaceColor.withOpacity(0.3),
-                ),
-              ),
-              const SizedBox(height: 40),
-              Text(
-                'Nenhuma Notificação',
-                style: TextStyle(
-                  fontSize: 24,
-                  color: _onSurfaceColor,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Você está atualizado! Novas notificações\naparecerão aqui automaticamente.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: _onSurfaceColor.withOpacity(0.6),
-                  height: 1.5,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 40),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _primaryColor.withOpacity(0.2),
-                      blurRadius: 15,
-                      offset: Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: ElevatedButton(
-                  onPressed: _loadInitialData,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _primaryColor, // Laranja
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 18),
-                    shadowColor: Colors.transparent,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.refresh_rounded, size: 20),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Atualizar',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: isMobile ? double.infinity : 800),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 40.0 : 48.0,
+              vertical: isMobile ? 40.0 : 48.0,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: isMobile ? 180 : 200,
+                  height: isMobile ? 180 : 200,
+                  decoration: BoxDecoration(
+                    color: _surfaceColor,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 20,
+                        offset: Offset(0, 10),
                       ),
                     ],
                   ),
+                  child: Icon(
+                    Icons.notifications_off_rounded,
+                    size: isMobile ? 80 : 96,
+                    color: _onSurfaceColor.withOpacity(0.3),
+                  ),
                 ),
-              ),
-            ],
+                SizedBox(height: isMobile ? 40 : 48),
+                Text(
+                  'Nenhuma Notificação',
+                  style: TextStyle(
+                    fontSize: isMobile ? 24 : 28,
+                    color: _onSurfaceColor,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                SizedBox(height: isMobile ? 16 : 20),
+                Text(
+                  'Você está atualizado! Novas notificações\naparecerão aqui automaticamente.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: isMobile ? 16 : 18,
+                    color: _onSurfaceColor.withOpacity(0.6),
+                    height: 1.5,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: isMobile ? 40 : 48),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _primaryColor.withOpacity(0.2),
+                        blurRadius: 15,
+                        offset: Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: ElevatedButton(
+                    onPressed: _loadInitialData,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _primaryColor, // Laranja
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isMobile ? 32 : 40,
+                        vertical: isMobile ? 18 : 20,
+                      ),
+                      shadowColor: Colors.transparent,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.refresh_rounded,
+                          size: isMobile ? 20 : 22,
+                        ),
+                        SizedBox(width: isMobile ? 12 : 16),
+                        Text(
+                          'Atualizar',
+                          style: TextStyle(
+                            fontSize: isMobile ? 16 : 18,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
