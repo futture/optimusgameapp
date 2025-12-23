@@ -310,7 +310,7 @@ class _Tela00LoginWidgetState extends State<Tela00LoginWidget>
                                         SizedBox(width: 12),
                                         Expanded(
                                           child: Text(
-                                            'O link expira em 1 hora',
+                                            'O link expira em 30 minutos',
                                             style: TextStyle(
                                               fontSize: 14,
                                               color: Color(0xFF2E7D32),
