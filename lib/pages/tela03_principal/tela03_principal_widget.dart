@@ -508,7 +508,10 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
                         ),
                       ),
                     );
-                    safeSetState(() {});
+                    if (mounted) {
+                      await _refreshData();
+                      safeSetState(() {});
+                    }
                   },
                 ),
               ],
