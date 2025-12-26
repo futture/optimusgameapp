@@ -1309,7 +1309,9 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
               onTap: () => FocusScope.of(context).unfocus(),
               child: Padding(
                 padding: MediaQuery.viewInsetsOf(context),
-                child: const ModalValidaContaWidget(),
+                child: ModalValidaContaWidget(
+                  phoneNumber: _model.inputTelefoneTextController?.text ?? '',
+                ),
               ),
             );
           },

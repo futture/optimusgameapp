@@ -8,20 +8,30 @@ enum Status {
   const Status(this.label);
 }
 
+enum RoomType {
+  FREE('Gratis'),
+  EVENT('Event'),
+  NORMAL('Normal'),
+  CUSTOMIZED('Customizada');
+
+  final String label;
+  const RoomType(this.label);
+}
+
 class CreateRoomRequest {
   final String nameRoom;
-  final bool isCustomized;
+  final String roomType;
   final CreateRoomConfigurationRequest roomConfiguration;
 
   CreateRoomRequest(
       {required this.nameRoom,
-      required this.isCustomized,
+      required this.roomType,
       required this.roomConfiguration});
 
   Map<String, dynamic> toJson() => {
         "code": "AAA",
         "name": this.nameRoom,
-        "isCustomized": this.isCustomized,
+        "roomType": this.roomType,
         "roomConfiguration": this.roomConfiguration.toJson()
       };
 }
@@ -82,7 +92,6 @@ class UpdateRoomConfigurationRequest {
 }
 
 class CreateRoomConfigurationRequest {
-  final bool isEvent;
   final bool isSingleWinner;
   final bool isSimpleQuestions;
   final int timeToRespond;
@@ -94,7 +103,7 @@ class CreateRoomConfigurationRequest {
   final double premiumRate;
 
   CreateRoomConfigurationRequest(
-      {required this.isEvent,
+      {
       required this.isSingleWinner,
       required this.timeToRespond,
       required this.numberOfPlayers,
@@ -106,7 +115,6 @@ class CreateRoomConfigurationRequest {
       required this.premiumRate});
 
   Map<String, dynamic> toJson() => {
-        "isEvent": isEvent,
         "isSingleWinner": isSingleWinner,
         "timeToRespond": timeToRespond,
         "isSimpleQuestions": isSimpleQuestions,

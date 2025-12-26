@@ -181,10 +181,10 @@ class UserService {
     }
   }
 
-  Future<Map<String, dynamic>> validateOtp(String code) async {
+  Future<Map<String, dynamic>> validateOtp(String code, String phoneNumber) async {
     try {
       final result = await httpService.request<OtpCodeResponse>(
-        '/otp/$code',
+        '/otp/$code/phone-number/$phoneNumber',
         method: 'GET',
         successParser: (json) => OtpCodeResponse.fromJson(json),
       );

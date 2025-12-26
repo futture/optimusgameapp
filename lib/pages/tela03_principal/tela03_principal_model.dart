@@ -114,7 +114,7 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
     try {
       var _dateTime = DateTime.now();
       final response = await matchService.getAllMatchAsync(
-          isEvent: true,
+          roomTypes: [RoomType.EVENT.label],
           status: [Status.Pendente.label, Status.AguardandoInicio.label],
           startDate: _dateTime);
 

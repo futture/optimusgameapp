@@ -1,23 +1,24 @@
 import 'package:projeto_game_quiz/core/models/common/error_response.dart';
+import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_prize_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 
 class RoomResponse {
   final String id;
-  final bool isFree;
+  final String roomType;
   final String nameRoom;
   final RoomConfigurationResponse? roomConfiguration;
 
   RoomResponse(
       {required this.id,
-      required this.isFree,
+      required this.roomType,
       required this.nameRoom,
       required this.roomConfiguration});
 
   factory RoomResponse.fromJson(Map<String, dynamic> json) => RoomResponse(
         id: json["id"],
-        isFree: json["isFree"] == null ? false : json["isFree"],
+        roomType: json["roomType"] == null ? false : json["roomType"],
         nameRoom: json["name"],
         roomConfiguration: json["roomConfiguration"] != null
             ? RoomConfigurationResponse.fromJson(json["roomConfiguration"])
@@ -81,7 +82,6 @@ class MatchPlayerResponse {
 
 class RoomConfigurationResponse {
   final String id;
-  final bool? isEvent;
   final bool isSingleWinner;
   final int timeToRespond;
   final int numberOfPlayers;
@@ -93,7 +93,6 @@ class RoomConfigurationResponse {
 
   RoomConfigurationResponse(
       {required this.id,
-      required this.isEvent,
       required this.isSingleWinner,
       required this.timeToRespond,
       required this.numberOfPlayers,
@@ -106,7 +105,6 @@ class RoomConfigurationResponse {
   factory RoomConfigurationResponse.fromJson(Map<String, dynamic> json) =>
       RoomConfigurationResponse(
           id: json["id"],
-          isEvent: json["isEvent"],
           premiumRate: json["premiumRate"],
           isSingleWinner: json["isSingleWinner"],
           timeToRespond: json["timeToRespond"],

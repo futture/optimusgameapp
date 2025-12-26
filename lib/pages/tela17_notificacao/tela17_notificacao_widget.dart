@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:projeto_game_quiz/components/moda_menu_pagian_inicial_widget.dart';
 import 'package:projeto_game_quiz/core/models/common/error_response.dart';
+import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_model.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_theme.dart';
@@ -328,7 +329,7 @@ class _Tela17NotificacaoViewWidgetState
 
     DadosDaPartidaUtils.showMatchParticipantsDialog(
       ctx: context,
-      title: _model.match!.room!.roomConfiguration!.isEvent!
+      title: _model.match!.room!.roomType == RoomType.EVENT.label
           ? "Super partida"
           : "Desafio",
       currentUser: _model.currentUser,

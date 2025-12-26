@@ -34,23 +34,23 @@ class MatchService {
   }
 
   Future<dynamic> getAllMatchAsync(
-      {bool? isEvent,
+      {List<String>? roomTypes,
       List<String>? status,
       DateTime? startDate,
       DateTime? endDate}) async {
     try {
-      final queryParams = <String, dynamic>{};
-
-      if (isEvent != null) {
-        queryParams['isEvent'] = isEvent.toString();
-      }
-
       String queryString = '';
 
       if (status != null && status.isNotEmpty) {
-        // Montar status separadamente
         queryString +=
             status.map((s) => 'status=${Uri.encodeComponent(s)}').join('&');
+      }
+
+      if (roomTypes != null && roomTypes.isNotEmpty) {
+        if (queryString.isNotEmpty) queryString += '&';
+        queryString += roomTypes
+            .map((s) => 'roomType=${Uri.encodeComponent(s)}')
+            .join('&');
       }
 
       if (startDate != null) {
@@ -63,11 +63,6 @@ class MatchService {
         if (queryString.isNotEmpty) queryString += '&';
         queryString +=
             'endDate=${Uri.encodeComponent(endDate.toIso8601String())}';
-      }
-
-      if (isEvent != null) {
-        if (queryString.isNotEmpty) queryString += '&';
-        queryString += 'isEvent=$isEvent';
       }
 
       final route = queryString.isNotEmpty ? '/match?$queryString' : '/match';
@@ -86,30 +81,42 @@ class MatchService {
   }
 
   Future<dynamic> getMatchByUserIdAsync(String userId,
-      {bool? isEvent,
-      String? status,
+      {List<String>? roomTypes,
+      List<String>? status,
       DateTime? startDate,
       DateTime? endDate}) async {
     try {
-      final queryParams = <String, String>{};
+      String queryString = '';
 
-      if (isEvent != null) {
-        queryParams['isEvent'] = isEvent.toString();
+      if (status != null && status.isNotEmpty) {
+        queryString +=
+            status.map((s) => 'status=${Uri.encodeComponent(s)}').join('&');
       }
-      if (status != null) {
-        queryParams['status'] = status;
+
+      if (roomTypes != null && roomTypes.isNotEmpty) {
+        if (queryString.isNotEmpty) queryString += '&';
+        queryString += roomTypes
+            .map((s) => 'roomType=${Uri.encodeComponent(s)}')
+            .join('&');
       }
+
       if (startDate != null) {
-        queryParams['startDate'] = startDate.toIso8601String();
+        if (queryString.isNotEmpty) queryString += '&';
+        queryString +=
+            'startDate=${Uri.encodeComponent(startDate.toIso8601String())}';
       }
+
       if (endDate != null) {
-        queryParams['endDate'] = endDate.toString();
+        if (queryString.isNotEmpty) queryString += '&';
+        queryString +=
+            'endDate=${Uri.encodeComponent(endDate.toIso8601String())}';
       }
-      String queryString = Uri(queryParameters: queryParams).query;
 
       var route = queryString.isNotEmpty
           ? "/user/${userId}/match?$queryString"
           : "/user/${userId}/match";
+
+      print("[INFOdd] - url: $route");
 
       final successResult = await httpService.request<List<MatchResponse>>(
         route,

@@ -16,9 +16,11 @@ export 'modal_valida_conta_model.dart';
 class ModalValidaContaWidget extends StatefulWidget {
   const ModalValidaContaWidget({
     super.key,
+    this.phoneNumber,
     this.onOtpValidated,
   });
 
+  final String? phoneNumber;
   final VoidCallback? onOtpValidated;
 
   @override
@@ -102,7 +104,7 @@ class _ModalValidaContaWidgetState extends State<ModalValidaContaWidget> {
 
   Future<void> _validateOtp() async {
     final otp = _getOtpCode();
-    
+
     // Verifica se todos os 6 dígitos foram preenchidos
     if (otp.length != 6) {
       // CORREÇÃO: Usar um simples SnackBar em vez de showGeneralDialog
@@ -121,7 +123,7 @@ class _ModalValidaContaWidgetState extends State<ModalValidaContaWidget> {
           ),
         ),
       );
-      
+
       // Foca no primeiro campo vazio
       for (int i = 0; i < _otpControllers.length; i++) {
         if (_otpControllers[i].text.isEmpty) {
@@ -137,11 +139,12 @@ class _ModalValidaContaWidgetState extends State<ModalValidaContaWidget> {
     });
 
     try {
-      final response = await UserService().validateOtp(otp);
-      
+      final response =
+          await UserService().validateOtp(otp, widget.phoneNumber!);
+
       if (response["isSuccess"]) {
         OtpCodeResponse data = response["data"] as OtpCodeResponse;
-        if (otp == data.code) {
+        if (data.isValid) {
           // Sucesso - mostra mensagem e fecha automaticamente
           await showDialog(
             context: context,
@@ -169,7 +172,7 @@ class _ModalValidaContaWidgetState extends State<ModalValidaContaWidget> {
           return;
         }
       }
-      
+
       // Se chegou aqui, é porque falhou na validação da API
       // CORREÇÃO: Usar showDialog em vez de showGeneralDialog para não fechar o modal
       await showDialog(
@@ -189,7 +192,6 @@ class _ModalValidaContaWidgetState extends State<ModalValidaContaWidget> {
           );
         },
       );
-      
     } catch (e) {
       // CORREÇÃO: Usar showDialog para erros também
       await showDialog(
@@ -201,7 +203,8 @@ class _ModalValidaContaWidgetState extends State<ModalValidaContaWidget> {
             insetPadding: const EdgeInsets.symmetric(horizontal: 40.0),
             child: ErrorDialogWidget(
               message: 'Erro ao validar código. Verifique sua conexão.',
-              onOk: () => Navigator.pop(dialogContext), // Fecha apenas o diálogo de erro
+              onOk: () => Navigator.pop(
+                  dialogContext), // Fecha apenas o diálogo de erro
             ),
           );
         },
@@ -229,7 +232,7 @@ class _ModalValidaContaWidgetState extends State<ModalValidaContaWidget> {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final isMobile = mediaQuery.size.width < 768;
-    
+
     return Align(
       alignment: AlignmentDirectional.center,
       child: Container(
@@ -354,7 +357,7 @@ class _ModalValidaContaWidgetState extends State<ModalValidaContaWidget> {
                   ],
                 ),
               ),
-              
+
               // Conteúdo do modal
               Padding(
                 padding: EdgeInsets.all(24),
@@ -434,17 +437,20 @@ class _ModalValidaContaWidgetState extends State<ModalValidaContaWidget> {
                         builder: (context, constraints) {
                           // Calcula o tamanho dinâmico baseado na largura disponível
                           final availableWidth = constraints.maxWidth;
-                          final spacing = 8.0; // Espaçamento mínimo entre os campos
+                          final spacing =
+                              8.0; // Espaçamento mínimo entre os campos
                           final maxFieldWidth = 52.0;
-                          
+
                           // Calcula o tamanho ideal para os campos
-                          double fieldWidth = (availableWidth - (5 * spacing)) / 6;
+                          double fieldWidth =
+                              (availableWidth - (5 * spacing)) / 6;
                           fieldWidth = fieldWidth.clamp(40.0, maxFieldWidth);
-                          
+
                           // Se for muito pequeno, reduzimos o espaçamento
-                          double actualSpacing = (availableWidth - (6 * fieldWidth)) / 5;
+                          double actualSpacing =
+                              (availableWidth - (6 * fieldWidth)) / 5;
                           actualSpacing = actualSpacing.clamp(4.0, 12.0);
-                          
+
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: List.generate(6, (index) {
@@ -493,10 +499,12 @@ class _ModalValidaContaWidgetState extends State<ModalValidaContaWidget> {
                                   ),
                                   onChanged: (value) {
                                     if (value.isNotEmpty && index < 5) {
-                                      FocusScope.of(context).requestFocus(_otpFocusNodes[index + 1]);
+                                      FocusScope.of(context).requestFocus(
+                                          _otpFocusNodes[index + 1]);
                                     }
                                     if (value.isEmpty && index > 0) {
-                                      FocusScope.of(context).requestFocus(_otpFocusNodes[index - 1]);
+                                      FocusScope.of(context).requestFocus(
+                                          _otpFocusNodes[index - 1]);
                                     }
                                   },
                                   inputFormatters: [
@@ -583,7 +591,8 @@ class _ModalValidaContaWidgetState extends State<ModalValidaContaWidget> {
                                         height: 20,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
                                             Colors.white,
                                           ),
                                         ),
