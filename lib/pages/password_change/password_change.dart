@@ -3,13 +3,16 @@ import 'package:flutter/services.dart';
 import 'package:projeto_game_quiz/core/api/services/user_service.dart';
 import 'package:projeto_game_quiz/core/api/utils/token_util.dart';
 import 'package:projeto_game_quiz/core/api/utils/user_util.dart';
+import 'package:projeto_game_quiz/core/enum/password_mode.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';
 import 'package:projeto_game_quiz/dialogs/success-dialog-widget.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_util.dart';
 import 'package:projeto_game_quiz/pages/tela00_login/tela00_login_widget.dart';
 
 class PasswordChangeScreen extends StatefulWidget {
-  const PasswordChangeScreen({super.key});
+  final PasswordMode mode;
+  final String? resetToken;
+  const PasswordChangeScreen({super.key, required this.mode, this.resetToken});
   static String routeName = 'passwordChange';
   static String routePath = '/passwordChange';
 
@@ -29,7 +32,6 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
 
   // Cores do tema premium com laranja como primária
   final Color _primaryColor = Color(0xFFEC8D0D);
-  final Color _primaryDark = Color(0xFFD17A0A);
   final Color _backgroundColor = Color(0xFFF8FAFC);
   final Color _surfaceColor = Colors.white;
   final Color _onSurfaceColor = Color(0xFF1E293B);
@@ -51,7 +53,9 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
   bool _obscureConfirmPassword = true;
   int _passwordStrength = 0;
   bool _isLoading = false;
-
+  bool isLoading = true;
+  bool isValidToken = false;
+  bool _showSuccessWidget = false;
   // Animações
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -60,20 +64,19 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
   @override
   void initState() {
     super.initState();
-    
-    // Configuração das animações
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: Curves.easeInOut,
       ),
     );
-    
+
     _slideAnimation = Tween<double>(begin: 30.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _animationController,
@@ -81,7 +84,11 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
       ),
     );
 
-    getUserInfo();
+    if (widget.mode == PasswordMode.change) {
+      getUserInfo();
+    } else {
+      _validateToken();
+    }
     _animationController.forward();
   }
 
@@ -116,41 +123,58 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
     setState(() => _isLoading = true);
 
     try {
-      if (user == null) {
-        throw Exception("Usuário não encontrado");
+      Map<String, dynamic> result;
+
+      if (widget.mode == PasswordMode.change) {
+        if (user == null) throw Exception("Usuário não encontrado");
+
+        result = await UserService().changePassword(
+          user_id: user!.id,
+          oldPassword: _currentPasswordController.text,
+          newPassword: _newPasswordController.text,
+        );
+      } else { 
+        if (widget.resetToken == null) {
+          throw Exception("Token inválido ou ausente");
+        }
+
+        result = await UserService().resetPassword(
+          token: widget.resetToken!,
+          newPassword: _newPasswordController.text,
+        );
       }
 
-      final result = await UserService().changePassword(
-        user_id: user!.id,
-        oldPassword: _currentPasswordController.text,
-        newPassword: _newPasswordController.text,
-      ); 
-      
       setState(() => _isLoading = false);
-      
-      if (result['isSuccess'] == true) {
-        final shouldNavigate = await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => SuccessDialogWidget(
-            message: 'Senha alterada com sucesso!',
-            onOk: () async {
-              Navigator.of(context).pop(true); 
-            },
-          ),
-        );
-        
-        if (shouldNavigate == true) {
+ 
+      if (result['isSuccess'] == true || result['msg'] != null) {
+        if (widget.mode == PasswordMode.change) { 
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) => SuccessDialogWidget(
+              message: 'Senha alterada com sucesso!',
+              onOk: () => Navigator.of(context).pop(),
+            ),
+          );
+
           TokenUtil.removeToken();
-          context.pushNamed(Tela00LoginWidget.routeName);
+          context.goNamed(Tela00LoginWidget.routeName);
+        } else { 
+          _showSuccessMessage(); 
+          await Future.delayed(Duration(seconds: 7)); 
+          if (mounted) {
+            context.goNamed(Tela00LoginWidget.routeName);
+          }
         }
-      } else {
-        final error = result['error'] as Map<String, dynamic>;
-        _showSnackBar(error['detail']['message'] ?? 'Erro ao alterar senha', _errorColor);
+      } else { 
+        _showSnackBar(
+          result['error']?['detail']?['message'] ?? 'Erro ao alterar senha',
+          _errorColor,
+        );
       }
     } catch (e) {
       setState(() => _isLoading = false);
-      _showSnackBar('Erro ao conectar com o servidor: ${e.toString()}', _errorColor);
+      _showSnackBar('Erro: ${e.toString()}', _errorColor);
     }
   }
 
@@ -172,6 +196,28 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
     );
   }
 
+  void _showSuccessMessage() {
+    setState(() {
+      _showSuccessWidget = true;
+    }); 
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.white, size: 20),
+            SizedBox(width: 8),
+            Expanded(child: Text('Senha redefinida com sucesso! Agora você pode fazer login com a nova senha no aplicativo ou na web.')),
+          ],
+        ),
+        backgroundColor: _successColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 8,
+        duration: Duration(seconds: 7),
+      ),
+    );
+  }
+
   Future<void> getUserInfo() async {
     try {
       var _user = await UserUtil.getUserInfo();
@@ -188,6 +234,398 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
 
   @override
   Widget build(BuildContext context) {
+    if (widget.mode == PasswordMode.reset) {
+      if (isLoading) {
+        return const Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+
+      if (!isValidToken) {
+        return Scaffold(
+          backgroundColor: _backgroundColor,
+          body: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: 500, // Limita a largura máxima para web
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width > 600 ? 40 : 24,
+                  vertical: 24,
+                ),
+                child: SingleChildScrollView(
+                    child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                      // Minimalist error illustration
+                      Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 20,
+                              offset: Offset(0, 8),
+                            ),
+                          ],
+                          border: Border.all(
+                            color: _outlineColor.withOpacity(0.2),
+                            width: 1,
+                          ),
+                        ),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            // Background pulse effect
+                            Positioned.fill(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(24),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: RadialGradient(
+                                      center: Alignment.center,
+                                      radius: 0.8,
+                                      colors: [
+                                        _errorColor.withOpacity(0.03),
+                                        Colors.transparent,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            // Broken link icon with modern design
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 48,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    color: _errorColor.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    Icons.link_off_outlined,
+                                    color: _errorColor,
+                                    size: 28,
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    color: _warningColor.withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.access_time_outlined,
+                                    color: _warningColor,
+                                    size: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      SizedBox(height: 32),
+
+                      // Title with clean typography
+                      Text(
+                        'Link Expirado',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: _onSurfaceColor,
+                          letterSpacing: -0.5,
+                          height: 1.2,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+
+                      SizedBox(height: 12),
+
+                      // Subtitle
+                      Text(
+                        'Este link de recuperação não está mais ativo',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: _onSurfaceColor.withOpacity(0.6),
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+
+                      SizedBox(height: 32),
+
+                      // Clean info cards
+                      Column(
+                        children: [
+                          // Reason card
+                          Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: _outlineColor.withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: _errorColor.withOpacity(0.08),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Icon(
+                                    Icons.info_outline_rounded,
+                                    size: 20,
+                                    color: _errorColor,
+                                  ),
+                                ),
+                                SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Motivo',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color:
+                                              _onSurfaceColor.withOpacity(0.8),
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        'O link foi utilizado anteriormente ou expirou após 30 minutos.',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color:
+                                              _onSurfaceColor.withOpacity(0.6),
+                                          height: 1.4,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          SizedBox(height: 12),
+
+                          // Solution card
+                          Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: _outlineColor.withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: _primaryColor.withOpacity(0.08),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Icon(
+                                    Icons.refresh_rounded,
+                                    size: 20,
+                                    color: _primaryColor,
+                                  ),
+                                ),
+                                SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Solução',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color:
+                                              _onSurfaceColor.withOpacity(0.8),
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        'Solicite um novo link de recuperação na página de login.',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color:
+                                              _onSurfaceColor.withOpacity(0.6),
+                                          height: 1.4,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: 40),
+
+                      // Action buttons - clean and modern
+                      if (widget.mode == PasswordMode.change) ...[
+                        Column(
+                          children: [
+                            // Primary action
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  context.goNamed(Tela00LoginWidget.routeName);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: _primaryColor,
+                                  foregroundColor: Colors.white,
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 18, horizontal: 24),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  elevation: 0,
+                                  shadowColor: Colors.transparent,
+                                  visualDensity: VisualDensity.comfortable,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.arrow_back_rounded,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 12),
+                                    Text(
+                                      'Voltar ao Login',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            SizedBox(height: 16),
+
+                            // Secondary action
+                            SizedBox(
+                              width: double.infinity,
+                              child: TextButton(
+                                onPressed: () {
+                                  // Navega para login com foco no campo de recuperação
+                                  context.goNamed(
+                                    Tela00LoginWidget.routeName,
+                                    extra: {'showReset': true},
+                                  );
+                                },
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 16, horizontal: 24),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  foregroundColor: _primaryColor,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.email_outlined,
+                                      size: 18,
+                                    ),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      'Nova solicitação',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: 24),
+
+                        // Help link - subtle
+                        MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: GestureDetector(
+                            onTap: () {
+                              // Mostrar informações de suporte
+                              showDialog(
+                                context: context,
+                                builder: (context) =>
+                                    _buildModernHelpDialog(context),
+                              );
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(12),
+                              child: Text(
+                                'Precisa de ajuda?',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: _onSurfaceColor.withOpacity(0.5),
+                                  fontWeight: FontWeight.w500,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor:
+                                      _onSurfaceColor.withOpacity(0.3),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ])),
+              ),
+            ),
+          ),
+        );
+      }
+    }
+
+    // ✅ SE CHEGOU AQUI, TUDO OK → MOSTRA A TELA NORMAL
     return Scaffold(
       backgroundColor: _backgroundColor,
       body: AnimatedBuilder(
@@ -219,7 +657,8 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
               child: SafeArea(
                 bottom: false,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -255,7 +694,6 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
                               ),
                             ),
                           ),
-                          // Ícone de segurança
                           Container(
                             width: 44,
                             height: 44,
@@ -272,7 +710,6 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
                         ],
                       ),
                       SizedBox(height: 8),
-                      // Barra de progresso sutil
                       Container(
                         height: 2,
                         width: 60,
@@ -300,7 +737,6 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
                     key: _formKey,
                     child: Column(
                       children: [
-                        // Card Principal
                         Container(
                           decoration: BoxDecoration(
                             color: _surfaceColor,
@@ -318,54 +754,51 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Informação de segurança
                                 _buildSecurityInfo(),
                                 SizedBox(height: 32),
-
-                                // Campo Senha Atual
-                                _buildPasswordField(
-                                  controller: _currentPasswordController,
-                                  label: 'Senha Atual',
-                                  icon: Icons.lock_rounded,
-                                  obscureText: _obscureCurrentPassword,
-                                  onToggle: () => setState(() =>
-                                      _obscureCurrentPassword = !_obscureCurrentPassword),
-                                  validator: (value) => value?.isEmpty ?? true
-                                      ? 'Digite sua senha atual'
-                                      : null,
-                                ),
-                                SizedBox(height: 24),
-
-                                // Campo Nova Senha
+                                if (widget.mode == PasswordMode.change) ...[
+                                  _buildPasswordField(
+                                    controller: _currentPasswordController,
+                                    label: 'Senha Atual',
+                                    icon: Icons.lock_rounded,
+                                    obscureText: _obscureCurrentPassword,
+                                    onToggle: () => setState(() =>
+                                        _obscureCurrentPassword =
+                                            !_obscureCurrentPassword),
+                                    validator: (value) => value?.isEmpty ?? true
+                                        ? 'Digite sua senha atual'
+                                        : null,
+                                  ),
+                                  const SizedBox(height: 24),
+                                ],
                                 _buildPasswordField(
                                   controller: _newPasswordController,
                                   label: 'Nova Senha',
                                   icon: Icons.lock_reset_rounded,
                                   obscureText: _obscureNewPassword,
                                   onChanged: _analyzePassword,
-                                  onToggle: () => setState(
-                                      () => _obscureNewPassword = !_obscureNewPassword),
+                                  onToggle: () => setState(() =>
+                                      _obscureNewPassword =
+                                          !_obscureNewPassword),
                                   validator: (value) {
                                     if (value?.isEmpty ?? true)
                                       return 'Digite uma nova senha';
-                                    if (value!.length < 8) return 'Mínimo 8 caracteres';
+                                    if (value!.length < 8)
+                                      return 'Mínimo 8 caracteres';
                                     return null;
                                   },
                                 ),
                                 SizedBox(height: 16),
-
-                                // Indicador de força da senha
                                 _buildPasswordStrength(),
                                 SizedBox(height: 24),
-
-                                // Campo Confirmar Senha
                                 _buildPasswordField(
                                   controller: _confirmPasswordController,
                                   label: 'Confirmar Senha',
                                   icon: Icons.lock_clock_rounded,
                                   obscureText: _obscureConfirmPassword,
                                   onToggle: () => setState(() =>
-                                      _obscureConfirmPassword = !_obscureConfirmPassword),
+                                      _obscureConfirmPassword =
+                                          !_obscureConfirmPassword),
                                   validator: (value) {
                                     if (value?.isEmpty ?? true)
                                       return 'Confirme sua senha';
@@ -375,17 +808,12 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
                                   },
                                 ),
                                 SizedBox(height: 32),
-
-                                // Botão de Atualização
                                 _buildSubmitButton(),
                               ],
                             ),
                           ),
                         ),
-
                         SizedBox(height: 24),
-
-                        // Dicas de Segurança
                         _buildSecurityTips(),
                       ],
                     ),
@@ -551,7 +979,7 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
       'Forte',
       'Excelente'
     ][_passwordStrength];
-    
+
     final strengthColor = [
       _errorColor,
       _warningColor,
@@ -630,7 +1058,9 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isMet ? _successColor.withOpacity(0.1) : _outlineColor.withOpacity(0.3),
+        color: isMet
+            ? _successColor.withOpacity(0.1)
+            : _outlineColor.withOpacity(0.3),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isMet ? _successColor : _outlineColor,
@@ -799,6 +1229,182 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _validateToken() async {
+    final token = widget.resetToken ?? Uri.base.queryParameters['token'];
+
+    if (token == null || token.isEmpty) {
+      setState(() {
+        isValidToken = false;
+        isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      final isValid = await UserService().validateResetToken(token);
+
+      setState(() {
+        isValidToken = isValid;
+        isLoading = false;
+      });
+    } catch (_) {
+      setState(() {
+        isValidToken = false;
+        isLoading = false;
+      });
+    }
+  }
+
+  Widget _buildModernHelpDialog(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 400),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: _primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.help_outline_rounded,
+                      color: _primaryColor,
+                      size: 24,
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      'Suporte Técnico',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: _onSurfaceColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Se você está com problemas para acessar sua conta:',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: _onSurfaceColor.withOpacity(0.7),
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 16),
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: _backgroundColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: _outlineColor.withOpacity(0.3),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Entre em contato',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: _onSurfaceColor.withOpacity(0.8),
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.email_rounded,
+                          size: 16,
+                          color: _primaryColor,
+                        ),
+                        SizedBox(width: 8),
+                        SelectableText(
+                          'suporte@optimusgame.com',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: _onSurfaceColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        side: BorderSide(color: _outlineColor),
+                      ),
+                      child: Text(
+                        'Fechar',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Ação para copiar email
+                        // Clipboard.setData(ClipboardData(text: 'suporte@optimusgame.com'));
+                        // ScaffoldMessenger.of(context).showSnackBar(...);
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: Text(
+                        'Copiar email',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

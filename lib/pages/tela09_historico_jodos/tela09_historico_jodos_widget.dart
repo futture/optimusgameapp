@@ -115,6 +115,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
 
   Future<void> _selectDateRange(BuildContext context,
       {bool isRanking = false}) async {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+    
     final DateTimeRange? picked;
     if (!isRanking) {
       picked = await showDateRangePicker(
@@ -122,6 +125,17 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
         firstDate: DateTime(2020),
         lastDate: DateTime.now().add(const Duration(days: 365)),
         initialDateRange: _dateRange,
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              size: Size(
+                isMobile ? screenWidth - 32 : 600,
+                500,
+              ),
+            ),
+            child: child ?? SizedBox(),
+          );
+        },
       );
     } else {
       picked = await showDateRangePicker(
@@ -129,6 +143,17 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
         firstDate: DateTime(2020),
         lastDate: DateTime.now().add(const Duration(days: 365)),
         initialDateRange: _dateRangeRanking,
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              size: Size(
+                isMobile ? screenWidth - 32 : 600,
+                500,
+              ),
+            ),
+            child: child ?? SizedBox(),
+          );
+        },
       );
     }
 
@@ -153,7 +178,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 600;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+    final safePadding = MediaQuery.of(context).padding.top;
 
     return GestureDetector(
       onTap: () {
@@ -182,7 +209,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                 bottom: false,
                 child: Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: isMobile ? 16 : 20,
+                    horizontal: isMobile ? 16 : 32,
                     vertical: isMobile ? 12 : 16,
                   ),
                   child: Column(
@@ -194,7 +221,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                           Container(
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(isMobile ? 12 : 14),
                             ),
                             child: IconButton(
                               onPressed: () async {
@@ -203,18 +230,18 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                               icon: Icon(
                                 Icons.arrow_back_ios_rounded,
                                 color: Colors.white,
-                                size: isMobile ? 18 : 20,
+                                size: isMobile ? 18 : 22,
                               ),
-                              splashRadius: 20,
+                              splashRadius: isMobile ? 20 : 24,
                             ),
                           ),
-                          SizedBox(width: isMobile ? 12 : 16),
+                          SizedBox(width: isMobile ? 12 : 20),
                           Expanded(
                             child: Text(
                               'HISTÓRICO DE JOGOS',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: isMobile ? 18 : 20,
+                                fontSize: isMobile ? 18 : 22,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.5,
                               ),
@@ -222,8 +249,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                           ),
                           // Ícone de histórico
                           Container(
-                            width: isMobile ? 40 : 44,
-                            height: isMobile ? 40 : 44,
+                            width: isMobile ? 40 : 48,
+                            height: isMobile ? 40 : 48,
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.15),
                               shape: BoxShape.circle,
@@ -231,16 +258,16 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                             child: Icon(
                               Icons.history_rounded,
                               color: Colors.white,
-                              size: isMobile ? 20 : 22,
+                              size: isMobile ? 20 : 24,
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 8),
+                      SizedBox(height: isMobile ? 8 : 12),
                       // Barra de progresso sutil
                       Container(
                         height: 2,
-                        width: 60,
+                        width: isMobile ? 60 : 80,
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.5),
                           borderRadius: BorderRadius.circular(2),
@@ -264,74 +291,84 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                   ),
                 ],
               ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 20),
-                child: TabBar(
-                  controller: _tabController,
-                  labelColor: _primaryColor,
-                  unselectedLabelColor: _onSurfaceColor.withOpacity(0.6),
-                  indicatorColor: _primaryColor,
-                  indicatorWeight: 3,
-                  indicatorPadding: EdgeInsets.symmetric(horizontal: 8),
-                  labelStyle: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: isMobile ? 14 : 16,
-                    fontWeight: FontWeight.w600,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: isMobile ? double.infinity : 1200),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24),
+                    child: TabBar(
+                      controller: _tabController,
+                      labelColor: _primaryColor,
+                      unselectedLabelColor: _onSurfaceColor.withOpacity(0.6),
+                      indicatorColor: _primaryColor,
+                      indicatorWeight: 3,
+                      indicatorPadding: EdgeInsets.symmetric(horizontal: isMobile ? 4 : 8),
+                      labelStyle: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: isMobile ? 13 : 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      unselectedLabelStyle: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: isMobile ? 13 : 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      tabs: [
+                        Tab(text: 'Partidas Concluídas'),
+                        Tab(text: 'Partidas Pendentes'),
+                      ],
+                    ),
                   ),
-                  unselectedLabelStyle: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: isMobile ? 14 : 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  tabs: [
-                    Tab(text: 'Partidas Concluídas'),
-                    Tab(text: 'Partidas Pendentes'),
-                  ],
                 ),
               ),
             ),
 
             Expanded(
-              child: _model.isLoadingRanking || _model.isLoadingAllMach
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(Color(0xFFEC8D0D)),
-                      ),
-                    )
-                  : _model.rankings.isEmpty && _model.matches.isEmpty
-                      ? Column(
-                          children: [
-                            if (_currentIndex == 0)
-                              _buildCompletedFilters(isMobile)
-                            else
-                              _buildPendingFilters(isMobile),
-                            SizedBox(height: isMobile ? 12 : 16),
-                            _buildEmptyState(isMobile: isMobile)
-                          ],
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: isMobile ? double.infinity : 1200),
+                  child: _model.isLoadingRanking || _model.isLoadingAllMach
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Color(0xFFEC8D0D)),
+                          ),
                         )
-                      : Column(
-                          children: [
-                            // Filtros
-                            if (_currentIndex == 0)
-                              _buildCompletedFilters(isMobile)
-                            else
-                              _buildPendingFilters(isMobile),
+                      : _model.rankings.isEmpty && _model.matches.isEmpty
+                          ? Column(
+                              children: [
+                                if (_currentIndex == 0)
+                                  _buildCompletedFilters(isMobile)
+                                else
+                                  _buildPendingFilters(isMobile),
+                                SizedBox(height: isMobile ? 12 : 16),
+                                Expanded(child: _buildEmptyState(isMobile: isMobile))
+                              ],
+                            )
+                          : Column(
+                              children: [
+                                // Filtros
+                                if (_currentIndex == 0)
+                                  _buildCompletedFilters(isMobile)
+                                else
+                                  _buildPendingFilters(isMobile),
 
-                            SizedBox(height: isMobile ? 12 : 16),
+                                SizedBox(height: isMobile ? 12 : 16),
 
-                            // Conteúdo das Tabs
-                            Expanded(
-                              child: TabBarView(
-                                controller: _tabController,
-                                children: [
-                                  _buildGamesList(true, isMobile),
-                                  _buildMatchesList(isMobile),
-                                ],
-                              ),
+                                // Conteúdo das Tabs
+                                Expanded(
+                                  child: TabBarView(
+                                    controller: _tabController,
+                                    children: [
+                                      _buildGamesList(true, isMobile),
+                                      _buildMatchesList(isMobile),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                ),
+              ),
             ),
           ],
         ),
@@ -342,13 +379,13 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
   Widget _buildEmptyState({bool isMobile = false}) {
     return Center(
         child: Container(
-      padding: EdgeInsets.all(32),
+      padding: EdgeInsets.all(isMobile ? 24 : 32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 80,
-            height: 80,
+            width: isMobile ? 80 : 100,
+            height: isMobile ? 80 : 100,
             decoration: BoxDecoration(
               color: _outlineColor.withOpacity(0.3),
               shape: BoxShape.circle,
@@ -356,24 +393,24 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
             child: Icon(
               Icons.videogame_asset_outlined,
               color: _onSurfaceColor.withOpacity(0.4),
-              size: 32,
+              size: isMobile ? 32 : 40,
             ),
           ),
-          SizedBox(height: 16),
+          SizedBox(height: isMobile ? 16 : 24),
           Text(
             'Nenhum histórico de jogos encontrado',
             style: TextStyle(
               fontFamily: 'Inter',
-              fontSize: 16,
+              fontSize: isMobile ? 16 : 18,
               fontWeight: FontWeight.w600,
               color: _onSurfaceColor.withOpacity(0.6),
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 16),
+          SizedBox(height: isMobile ? 16 : 24),
           Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
               boxShadow: [
                 BoxShadow(
                   color: _primaryColor.withOpacity(0.3),
@@ -384,15 +421,18 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
             ),
             child: Material(
               color: Colors.transparent,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
               child: InkWell(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
                 onTap: () => _model.load(setState),
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 24 : 32, 
+                    vertical: isMobile ? 12 : 16,
+                  ),
                   decoration: BoxDecoration(
                     gradient: _primaryGradient,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -400,15 +440,15 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                       Icon(
                         Icons.refresh_rounded,
                         color: Colors.white,
-                        size: 20,
+                        size: isMobile ? 20 : 22,
                       ),
-                      SizedBox(width: 8),
+                      SizedBox(width: isMobile ? 8 : 12),
                       Text(
                         'RECARREGAR',
                         style: TextStyle(
                           fontFamily: 'Inter',
                           color: Colors.white,
-                          fontSize: 14,
+                          fontSize: isMobile ? 14 : 16,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -450,8 +490,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         _filterResult = selected ? 'all' : _filterResult;
                       });
                     },
+                    isMobile: isMobile,
                   ),
-                  SizedBox(width: 8),
+                  SizedBox(width: isMobile ? 8 : 12),
                   _buildFilterChip(
                     label: 'Vitórias',
                     selected: _filterResult == 'winner',
@@ -460,8 +501,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         _filterResult = selected ? 'winner' : _filterResult;
                       });
                     },
+                    isMobile: isMobile,
                   ),
-                  SizedBox(width: 8),
+                  SizedBox(width: isMobile ? 8 : 12),
                   _buildFilterChip(
                     label: 'Derrotas',
                     selected: _filterResult == 'loser',
@@ -470,17 +512,18 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         _filterResult = selected ? 'loser' : _filterResult;
                       });
                     },
+                    isMobile: isMobile,
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 12),
+            SizedBox(height: isMobile ? 12 : 16),
             Row(
               children: [
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                       boxShadow: [
                         BoxShadow(
                           color: _primaryColor.withOpacity(0.1),
@@ -491,16 +534,18 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                     ),
                     child: Material(
                       color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                       child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                         onTap: () => _selectDateRange(context, isRanking: true),
                         child: Container(
                           padding: EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 16),
+                              vertical: isMobile ? 12 : 16, 
+                              horizontal: isMobile ? 16 : 20,
+                          ),
                           decoration: BoxDecoration(
                             color: _surfaceColor,
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                             border: Border.all(
                               color: _outlineColor,
                               width: 1.5,
@@ -511,21 +556,24 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                             children: [
                               Icon(
                                 Icons.calendar_today_rounded,
-                                size: 16,
+                                size: isMobile ? 16 : 18,
                                 color: _primaryColor,
                               ),
-                              SizedBox(width: 8),
-                              Text(
-                                _dateRangeRanking == null
-                                    ? 'Filtrar por data'
-                                    : '${DateFormat('dd/MM/yyyy').format(_dateRangeRanking!.start)} - ${DateFormat('dd/MM/yyyy').format(_dateRangeRanking!.end)}',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: _onSurfaceColor,
+                              SizedBox(width: isMobile ? 8 : 12),
+                              Expanded(
+                                child: Text(
+                                  _dateRangeRanking == null
+                                      ? 'Filtrar por data'
+                                      : '${DateFormat('dd/MM/yyyy').format(_dateRangeRanking!.start)} - ${DateFormat('dd/MM/yyyy').format(_dateRangeRanking!.end)}',
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontSize: isMobile ? 14 : 15,
+                                    fontWeight: FontWeight.w500,
+                                    color: _onSurfaceColor,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                maxLines: 1,
                               ),
                             ],
                           ),
@@ -535,10 +583,10 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                   ),
                 ),
                 if (_dateRangeRanking != null) ...[
-                  SizedBox(width: 8),
+                  SizedBox(width: isMobile ? 8 : 12),
                   Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                       boxShadow: [
                         BoxShadow(
                           color: _errorColor.withOpacity(0.1),
@@ -549,19 +597,19 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                     ),
                     child: Material(
                       color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                       child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                         onTap: () {
                           setState(() {
                             _dateRange = null;
                           });
                         },
                         child: Container(
-                          padding: EdgeInsets.all(12),
+                          padding: EdgeInsets.all(isMobile ? 12 : 16),
                           decoration: BoxDecoration(
                             color: _surfaceColor,
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                             border: Border.all(
                               color: _errorColor,
                               width: 1.5,
@@ -570,7 +618,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                           child: Icon(
                             Icons.clear_rounded,
                             color: _errorColor,
-                            size: 20,
+                            size: isMobile ? 20 : 22,
                           ),
                         ),
                       ),
@@ -610,11 +658,12 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                       _filterStatus = selected ? 'all' : _filterStatus;
                     });
                   },
+                  isMobile: isMobile,
                 ),
-                SizedBox(width: 8),
+                SizedBox(width: isMobile ? 8 : 12),
                 ..._statusOptions.map((status) {
                   return Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
+                    padding: EdgeInsets.only(right: isMobile ? 8.0 : 12.0),
                     child: _buildFilterChip(
                       label: _getStatusLabel(status),
                       selected: _filterStatus == status,
@@ -623,19 +672,20 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                           _filterStatus = selected ? status : _filterStatus;
                         });
                       },
+                      isMobile: isMobile,
                     ),
                   );
                 }).toList(),
               ],
             ),
           ),
-          SizedBox(height: 12),
+          SizedBox(height: isMobile ? 12 : 16),
           Row(
             children: [
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                     boxShadow: [
                       BoxShadow(
                         color: _primaryColor.withOpacity(0.1),
@@ -646,16 +696,18 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                   ),
                   child: Material(
                     color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                       onTap: () => _selectDateRange(context),
                       child: Container(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                        padding: EdgeInsets.symmetric(
+                          vertical: isMobile ? 12 : 16, 
+                          horizontal: isMobile ? 16 : 20,
+                        ),
                         decoration: BoxDecoration(
                           color: _surfaceColor,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                           border: Border.all(
                             color: _outlineColor,
                             width: 1.5,
@@ -666,21 +718,24 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                           children: [
                             Icon(
                               Icons.calendar_today_rounded,
-                              size: 16,
+                              size: isMobile ? 16 : 18,
                               color: _primaryColor,
                             ),
-                            SizedBox(width: 8),
-                            Text(
-                              _dateRange == null
-                                  ? 'Filtrar por data'
-                                  : '${DateFormat('dd/MM/yyyy').format(_dateRange!.start)} - ${DateFormat('dd/MM/yyyy').format(_dateRange!.end)}',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: _onSurfaceColor,
+                            SizedBox(width: isMobile ? 8 : 12),
+                            Expanded(
+                              child: Text(
+                                _dateRange == null
+                                    ? 'Filtrar por data'
+                                    : '${DateFormat('dd/MM/yyyy').format(_dateRange!.start)} - ${DateFormat('dd/MM/yyyy').format(_dateRange!.end)}',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: isMobile ? 14 : 15,
+                                  fontWeight: FontWeight.w500,
+                                  color: _onSurfaceColor,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              maxLines: 1,
                             ),
                           ],
                         ),
@@ -690,10 +745,10 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                 ),
               ),
               if (_dateRange != null) ...[
-                SizedBox(width: 8),
+                SizedBox(width: isMobile ? 8 : 12),
                 Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                     boxShadow: [
                       BoxShadow(
                         color: _errorColor.withOpacity(0.1),
@@ -704,19 +759,19 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                   ),
                   child: Material(
                     color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                       onTap: () {
                         setState(() {
                           _dateRange = null;
                         });
                       },
                       child: Container(
-                        padding: EdgeInsets.all(12),
+                        padding: EdgeInsets.all(isMobile ? 12 : 16),
                         decoration: BoxDecoration(
                           color: _surfaceColor,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                           border: Border.all(
                             color: _errorColor,
                             width: 1.5,
@@ -725,7 +780,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         child: Icon(
                           Icons.clear_rounded,
                           color: _errorColor,
-                          size: 20,
+                          size: isMobile ? 20 : 22,
                         ),
                       ),
                     ),
@@ -743,10 +798,11 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
     required String label,
     required bool selected,
     required Function(bool) onSelected,
+    required bool isMobile,
   }) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(isMobile ? 20 : 24),
         boxShadow: selected
             ? [
                 BoxShadow(
@@ -762,7 +818,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
           label,
           style: TextStyle(
             fontFamily: 'Inter',
-            fontSize: 14,
+            fontSize: isMobile ? 13 : 14,
             fontWeight: FontWeight.w500,
             color: selected ? Colors.white : _onSurfaceColor,
           ),
@@ -773,7 +829,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
         selectedColor: _primaryColor,
         checkmarkColor: Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(isMobile ? 20 : 24),
           side: BorderSide(
             color: selected ? _primaryColor : _outlineColor,
             width: 1.5,
@@ -802,22 +858,22 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
     final filteredRankings = _getFilteredRankings(isCompleted);
 
     if (filteredRankings.isEmpty) {
-      return _buildEmptyGamesList(isCompleted);
+      return _buildEmptyGamesList(isCompleted, isMobile);
     }
 
     return SingleChildScrollView(
       physics: BouncingScrollPhysics(),
       child: Padding(
-        padding: EdgeInsets.all(isMobile ? 16 : 20),
+        padding: EdgeInsets.all(isMobile ? 16 : 24),
         child: Column(
           children: [
             // Cabeçalho da Tabela - APENAS PARA DESKTOP
             if (!isMobile)
               Container(
-                padding: EdgeInsets.all(20),
+                padding: EdgeInsets.all(isMobile ? 16 : 20),
                 decoration: BoxDecoration(
                   color: _surfaceColor,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.08),
@@ -836,7 +892,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontWeight: FontWeight.w600,
-                          fontSize: 12,
+                          fontSize: isMobile ? 12 : 13,
                           color: _onSurfaceColor.withOpacity(0.6),
                         ),
                         textAlign: TextAlign.center,
@@ -849,7 +905,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontWeight: FontWeight.w600,
-                          fontSize: 12,
+                          fontSize: isMobile ? 12 : 13,
                           color: _onSurfaceColor.withOpacity(0.6),
                         ),
                         textAlign: TextAlign.center,
@@ -862,7 +918,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontWeight: FontWeight.w600,
-                          fontSize: 12,
+                          fontSize: isMobile ? 12 : 13,
                           color: _onSurfaceColor.withOpacity(0.6),
                         ),
                         textAlign: TextAlign.center,
@@ -875,7 +931,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontWeight: FontWeight.w600,
-                          fontSize: 12,
+                          fontSize: isMobile ? 12 : 13,
                           color: _onSurfaceColor.withOpacity(0.6),
                         ),
                         textAlign: TextAlign.center,
@@ -884,7 +940,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                   ],
                 ),
               ),
-            if (!isMobile) SizedBox(height: 12),
+            if (!isMobile) SizedBox(height: isMobile ? 12 : 16),
             // Lista de Jogos
             ListView.builder(
               shrinkWrap: true,
@@ -905,13 +961,13 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
     final filteredMatches = _getFilteredMatches();
 
     if (filteredMatches.isEmpty) {
-      return _buildEmptyMatchesList();
+      return _buildEmptyMatchesList(isMobile);
     }
 
     return SingleChildScrollView(
       physics: BouncingScrollPhysics(),
       child: Padding(
-        padding: EdgeInsets.all(isMobile ? 16 : 20),
+        padding: EdgeInsets.all(isMobile ? 16 : 24),
         child: _model.isLoadingAllMach
             ? const Center(
                 child: CircularProgressIndicator(
@@ -939,10 +995,10 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
     final matchStartDate = match.matchStartDate ?? DateTime.now();
 
     return Container(
-      margin: EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(bottom: isMobile ? 16 : 20),
       decoration: BoxDecoration(
         color: _surfaceColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -953,7 +1009,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
         child: Column(
           children: [
             // Header do Card com Ícone - SETA NO TOPO
@@ -964,8 +1020,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                 children: [
                   // Ícone de expandir no lado ESQUERDO (no topo)
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: isMobile ? 40 : 48,
+                    height: isMobile ? 40 : 48,
                     decoration: BoxDecoration(
                       color: _backgroundColor,
                       shape: BoxShape.circle,
@@ -981,14 +1037,14 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                             ? Icons.expand_less_rounded
                             : Icons.expand_more_rounded,
                         color: _primaryColor,
-                        size: 24,
+                        size: isMobile ? 20 : 24,
                       ),
                       padding: EdgeInsets.zero,
-                      splashRadius: 20,
+                      splashRadius: isMobile ? 20 : 24,
                     ),
                   ),
 
-                  SizedBox(width: 12),
+                  SizedBox(width: isMobile ? 12 : 16),
 
                   Expanded(
                     child: Column(
@@ -998,8 +1054,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
-                              width: 32,
-                              height: 32,
+                              width: isMobile ? 32 : 40,
+                              height: isMobile ? 32 : 40,
                               decoration: BoxDecoration(
                                 color: _primaryColor.withOpacity(0.1),
                                 shape: BoxShape.circle,
@@ -1007,10 +1063,10 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                               child: Icon(
                                 Icons.sports_esports_rounded,
                                 color: _primaryColor,
-                                size: 16,
+                                size: isMobile ? 16 : 20,
                               ),
                             ),
-                            SizedBox(width: 12),
+                            SizedBox(width: isMobile ? 12 : 16),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1025,13 +1081,13 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                       color: _onSurfaceColor,
                                     ),
                                   ),
-                                  SizedBox(height: 2),
+                                  SizedBox(height: isMobile ? 2 : 4),
                                   Text(
                                     DateFormat('HH:mm').format(matchStartDate),
                                     style: TextStyle(
                                       fontFamily: 'Inter',
                                       color: _onSurfaceColor.withOpacity(0.6),
-                                      fontSize: 14,
+                                      fontSize: isMobile ? 14 : 15,
                                     ),
                                   ),
                                 ],
@@ -1039,14 +1095,16 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                             ),
                           ],
                         ),
-                        SizedBox(height: 12),
+                        SizedBox(height: isMobile ? 12 : 16),
                         Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isMobile ? 12 : 16, 
+                            vertical: isMobile ? 6 : 8,
+                          ),
                           decoration: BoxDecoration(
                             color: _getStatusColor(match.statusMatch)
                                 .withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(isMobile ? 20 : 24),
                             border: Border.all(
                               color: _getStatusColor(match.statusMatch)
                                   .withOpacity(0.3),
@@ -1059,7 +1117,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                               fontFamily: 'Inter',
                               color: _getStatusColor(match.statusMatch),
                               fontWeight: FontWeight.w600,
-                              fontSize: 12,
+                              fontSize: isMobile ? 12 : 13,
                             ),
                             maxLines: 1,
                           ),
@@ -1083,40 +1141,42 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                       label: 'Jogadores',
                       value:
                           '${match.matchPlayers?.length ?? 0}/${match.room?.roomConfiguration?.numberOfPlayers ?? 0}',
+                      isMobile: isMobile,
                     ),
-                    SizedBox(height: 12),
+                    SizedBox(height: isMobile ? 12 : 16),
                     _buildMatchInfoRow(
                       icon: Icons.emoji_events_rounded,
                       label: 'Prêmio Total',
                       value:
                           '${match.matchPrize?.totalGain?.toStringAsFixed(2) ?? '0.00'} AOA',
+                      isMobile: isMobile,
                     ),
                     if (match.matchPlayers != null &&
                         match.matchPlayers!.isNotEmpty) ...[
-                      SizedBox(height: 20),
+                      SizedBox(height: isMobile ? 20 : 24),
                       Text(
                         'Jogadores Participantes',
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontWeight: FontWeight.w600,
-                          fontSize: 16,
+                          fontSize: isMobile ? 16 : 18,
                           color: _onSurfaceColor,
                         ),
                       ),
-                      SizedBox(height: 12),
+                      SizedBox(height: isMobile ? 12 : 16),
                       ...match.matchPlayers!.map((player) {
                         return Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
+                          padding: EdgeInsets.only(bottom: isMobile ? 8.0 : 12.0),
                           child: _buildPlayerTile(player.userResponse,
-                              currentUser: _model.currentUser),
+                              currentUser: _model.currentUser, isMobile: isMobile),
                         );
                       }).toList(),
                     ],
                     if (match.statusMatch == 'PENDING') ...[
-                      SizedBox(height: 20),
+                      SizedBox(height: isMobile ? 20 : 24),
                       Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
                           boxShadow: [
                             BoxShadow(
                               color: _errorColor.withOpacity(0.3),
@@ -1127,9 +1187,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         ),
                         child: Material(
                           color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
                           child: InkWell(
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
                             onTap: () async {
                               await _model.leaveTheMatchAsync(
                                   setState, match.id);
@@ -1137,16 +1197,18 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                             child: Container(
                               width: double.infinity,
                               padding: EdgeInsets.symmetric(
-                                  vertical: 16, horizontal: 24),
+                                vertical: isMobile ? 16 : 20, 
+                                horizontal: isMobile ? 24 : 32,
+                              ),
                               decoration: BoxDecoration(
                                 color: _errorColor,
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
                               ),
                               child: _model.isLoadingLeave
                                   ? Center(
                                       child: SizedBox(
-                                        width: 20,
-                                        height: 20,
+                                        width: isMobile ? 20 : 24,
+                                        height: isMobile ? 20 : 24,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
                                           valueColor:
@@ -1159,15 +1221,18 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.exit_to_app_rounded,
-                                            color: Colors.white, size: 20),
-                                        SizedBox(width: 8),
+                                        Icon(
+                                          Icons.exit_to_app_rounded,
+                                          color: Colors.white, 
+                                          size: isMobile ? 20 : 22,
+                                        ),
+                                        SizedBox(width: isMobile ? 8 : 12),
                                         Text(
                                           'SAIR DA PARTIDA',
                                           style: TextStyle(
                                             fontFamily: 'Inter',
                                             color: Colors.white,
-                                            fontSize: 16,
+                                            fontSize: isMobile ? 16 : 18,
                                             fontWeight: FontWeight.w700,
                                           ),
                                           maxLines: 1,
@@ -1193,12 +1258,13 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
     required IconData icon,
     required String label,
     required String value,
+    required bool isMobile,
   }) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(isMobile ? 16 : 20),
       decoration: BoxDecoration(
         color: _backgroundColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
         border: Border.all(
           color: _outlineColor,
           width: 1,
@@ -1207,19 +1273,19 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: isMobile ? 40 : 48,
+            height: isMobile ? 40 : 48,
             decoration: BoxDecoration(
               color: _primaryColor.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               icon,
-              size: 20,
+              size: isMobile ? 20 : 24,
               color: _primaryColor,
             ),
           ),
-          SizedBox(width: 12),
+          SizedBox(width: isMobile ? 12 : 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1229,19 +1295,19 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                   style: TextStyle(
                     fontFamily: 'Inter',
                     color: _onSurfaceColor.withOpacity(0.6),
-                    fontSize: 14,
+                    fontSize: isMobile ? 14 : 16,
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,
                 ),
-                SizedBox(height: 2),
+                SizedBox(height: isMobile ? 2 : 4),
                 Text(
                   value,
                   style: TextStyle(
                     fontFamily: 'Inter',
                     fontWeight: FontWeight.w700,
                     color: _onSurfaceColor,
-                    fontSize: 16,
+                    fontSize: isMobile ? 16 : 18,
                   ),
                   maxLines: 1,
                 ),
@@ -1262,10 +1328,10 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
     if (isMobile) {
       // Layout mobile otimizado
       return Container(
-        margin: EdgeInsets.only(bottom: 12),
+        margin: EdgeInsets.only(bottom: isMobile ? 12 : 16),
         decoration: BoxDecoration(
           color: _surfaceColor,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.08),
@@ -1276,12 +1342,12 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
         ),
         child: Material(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
           child: Column(
             children: [
               // Header do Card - Layout vertical para mobile
               Padding(
-                padding: EdgeInsets.all(16),
+                padding: EdgeInsets.all(isMobile ? 16 : 20),
                 child: Column(
                   children: [
                     // Linha 1: Data e Resultado - COM SETA NO TOPO
@@ -1289,8 +1355,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                       children: [
                         // Ícone de expandir NO LADO ESQUERDO
                         Container(
-                          width: 40,
-                          height: 40,
+                          width: isMobile ? 40 : 48,
+                          height: isMobile ? 40 : 48,
                           decoration: BoxDecoration(
                             color: _backgroundColor,
                             shape: BoxShape.circle,
@@ -1311,13 +1377,13 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                   ? Icons.expand_less_rounded
                                   : Icons.expand_more_rounded,
                               color: _primaryColor,
-                              size: 20,
+                              size: isMobile ? 20 : 24,
                             ),
                             padding: EdgeInsets.zero,
                           ),
                         ),
 
-                        SizedBox(width: 12),
+                        SizedBox(width: isMobile ? 12 : 16),
 
                         Expanded(
                           child: Column(
@@ -1326,8 +1392,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                               Row(
                                 children: [
                                   Container(
-                                    width: 32,
-                                    height: 32,
+                                    width: isMobile ? 32 : 40,
+                                    height: isMobile ? 32 : 40,
                                     decoration: BoxDecoration(
                                       color: _primaryColor.withOpacity(0.1),
                                       shape: BoxShape.circle,
@@ -1335,10 +1401,10 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                     child: Icon(
                                       Icons.calendar_today_rounded,
                                       color: _primaryColor,
-                                      size: 16,
+                                      size: isMobile ? 16 : 20,
                                     ),
                                   ),
-                                  SizedBox(width: 8),
+                                  SizedBox(width: isMobile ? 8 : 12),
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
@@ -1349,18 +1415,18 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                               .format(createdAt),
                                           style: TextStyle(
                                             fontFamily: 'Inter',
-                                            fontSize: 14,
+                                            fontSize: isMobile ? 14 : 16,
                                             color: _onSurfaceColor,
                                             fontWeight: FontWeight.w600,
                                           ),
                                           maxLines: 1,
                                         ),
-                                        SizedBox(height: 2),
+                                        SizedBox(height: isMobile ? 2 : 4),
                                         Text(
                                           DateFormat('HH:mm').format(createdAt),
                                           style: TextStyle(
                                             fontFamily: 'Inter',
-                                            fontSize: 12,
+                                            fontSize: isMobile ? 12 : 14,
                                             color: _onSurfaceColor
                                                 .withOpacity(0.6),
                                           ),
@@ -1370,15 +1436,17 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 12),
+                              SizedBox(height: isMobile ? 12 : 16),
                               Container(
                                 padding: EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 6),
+                                  horizontal: isMobile ? 12 : 16, 
+                                  vertical: isMobile ? 6 : 8,
+                                ),
                                 decoration: BoxDecoration(
                                   color: isWinner
                                       ? _successColor.withOpacity(0.1)
                                       : _errorColor.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                                   border: Border.all(
                                     color: isWinner
                                         ? _successColor.withOpacity(0.3)
@@ -1397,9 +1465,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                       color: isWinner
                                           ? _successColor
                                           : _errorColor,
-                                      size: 16,
+                                      size: isMobile ? 16 : 18,
                                     ),
-                                    SizedBox(width: 6),
+                                    SizedBox(width: isMobile ? 6 : 8),
                                     Text(
                                       isWinner ? 'Vitória' : 'Derrota',
                                       style: TextStyle(
@@ -1408,7 +1476,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                             ? _successColor
                                             : _errorColor,
                                         fontWeight: FontWeight.w600,
-                                        fontSize: 12,
+                                        fontSize: isMobile ? 12 : 14,
                                       ),
                                     ),
                                   ],
@@ -1420,15 +1488,17 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                       ],
                     ),
 
-                    SizedBox(height: 16),
+                    SizedBox(height: isMobile ? 16 : 20),
 
                     // Linha 2: Tempo e Pontos
                     Container(
-                      padding:
-                          EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      padding: EdgeInsets.symmetric(
+                        vertical: isMobile ? 12 : 16, 
+                        horizontal: isMobile ? 16 : 20,
+                      ),
                       decoration: BoxDecoration(
                         color: _backgroundColor,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -1440,25 +1510,25 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                   Icon(
                                     Icons.timer_rounded,
                                     color: _primaryColor,
-                                    size: 14,
+                                    size: isMobile ? 14 : 16,
                                   ),
-                                  SizedBox(width: 6),
+                                  SizedBox(width: isMobile ? 6 : 8),
                                   Text(
                                     'Tempo',
                                     style: TextStyle(
                                       fontFamily: 'Inter',
-                                      fontSize: 12,
+                                      fontSize: isMobile ? 12 : 14,
                                       color: _onSurfaceColor.withOpacity(0.6),
                                     ),
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 4),
+                              SizedBox(height: isMobile ? 4 : 6),
                               Text(
                                 '$totalResponseTime s',
                                 style: TextStyle(
                                   fontFamily: 'Inter',
-                                  fontSize: 14,
+                                  fontSize: isMobile ? 14 : 16,
                                   color: _onSurfaceColor,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -1467,7 +1537,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                           ),
                           Container(
                             width: 1,
-                            height: 30,
+                            height: isMobile ? 30 : 36,
                             color: _outlineColor,
                           ),
                           Column(
@@ -1477,25 +1547,25 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                   Icon(
                                     Icons.star_rounded,
                                     color: _primaryColor,
-                                    size: 14,
+                                    size: isMobile ? 14 : 16,
                                   ),
-                                  SizedBox(width: 6),
+                                  SizedBox(width: isMobile ? 6 : 8),
                                   Text(
                                     'Pontos',
                                     style: TextStyle(
                                       fontFamily: 'Inter',
-                                      fontSize: 12,
+                                      fontSize: isMobile ? 12 : 14,
                                       color: _onSurfaceColor.withOpacity(0.6),
                                     ),
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 4),
+                              SizedBox(height: isMobile ? 4 : 6),
                               Text(
                                 '$totalScore',
                                 style: TextStyle(
                                   fontFamily: 'Inter',
-                                  fontSize: 16,
+                                  fontSize: isMobile ? 16 : 18,
                                   fontWeight: FontWeight.w700,
                                   color: _primaryColor,
                                 ),
@@ -1513,22 +1583,22 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
               if (ranking.isExpanded ?? false) ...[
                 Divider(height: 1, color: _outlineColor),
                 Padding(
-                  padding: EdgeInsets.all(16),
+                  padding: EdgeInsets.all(isMobile ? 16 : 20),
                   child: Column(
                     children: [
-                      _buildPrizeInfoSection(ranking),
-                      SizedBox(height: 20),
+                      _buildPrizeInfoSection(ranking, isMobile),
+                      SizedBox(height: isMobile ? 20 : 24),
                       Text(
                         'Detalhes das Perguntas',
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontWeight: FontWeight.w600,
-                          fontSize: 16,
+                          fontSize: isMobile ? 16 : 18,
                           color: _onSurfaceColor,
                         ),
                       ),
-                      SizedBox(height: 16),
-                      _buildQuestionsList(),
+                      SizedBox(height: isMobile ? 16 : 20),
+                      _buildQuestionsList(isMobile),
                     ],
                   ),
                 ),
@@ -1540,10 +1610,10 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
     } else {
       // Layout desktop com table-like
       return Container(
-        margin: EdgeInsets.only(bottom: 12),
+        margin: EdgeInsets.only(bottom: isMobile ? 12 : 16),
         decoration: BoxDecoration(
           color: _surfaceColor,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.08),
@@ -1554,18 +1624,18 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
         ),
         child: Material(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
           child: Column(
             children: [
               // Header do Card - Layout horizontal para desktop
               Padding(
-                padding: EdgeInsets.all(20),
+                padding: EdgeInsets.all(isMobile ? 20 : 24),
                 child: Row(
                   children: [
                     // Ícone de expandir NO LADO ESQUERDO
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: isMobile ? 40 : 48,
+                      height: isMobile ? 40 : 48,
                       decoration: BoxDecoration(
                         color: _backgroundColor,
                         shape: BoxShape.circle,
@@ -1585,17 +1655,17 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                               ? Icons.expand_less_rounded
                               : Icons.expand_more_rounded,
                           color: _primaryColor,
-                          size: 20,
+                          size: isMobile ? 20 : 24,
                         ),
                         padding: EdgeInsets.zero,
                       ),
                     ),
 
-                    SizedBox(width: 20),
+                    SizedBox(width: isMobile ? 20 : 24),
 
                     // DATA
                     Container(
-                      width: 150,
+                      width: isMobile ? 150 : 180,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1603,18 +1673,18 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                             DateFormat('dd/MM/yyyy').format(createdAt),
                             style: TextStyle(
                               fontFamily: 'Inter',
-                              fontSize: 14,
+                              fontSize: isMobile ? 14 : 16,
                               color: _onSurfaceColor,
                               fontWeight: FontWeight.w600,
                             ),
                             maxLines: 1,
                           ),
-                          SizedBox(height: 2),
+                          SizedBox(height: isMobile ? 2 : 4),
                           Text(
                             DateFormat('HH:mm').format(createdAt),
                             style: TextStyle(
                               fontFamily: 'Inter',
-                              fontSize: 13,
+                              fontSize: isMobile ? 13 : 14,
                               color: _onSurfaceColor.withOpacity(0.6),
                             ),
                           ),
@@ -1622,19 +1692,21 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                       ),
                     ),
 
-                    SizedBox(width: 20),
+                    SizedBox(width: isMobile ? 20 : 24),
 
                     // RESULTADO
                     Container(
-                      width: 150,
+                      width: isMobile ? 150 : 180,
                       child: Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isMobile ? 12 : 16, 
+                          vertical: isMobile ? 8 : 12,
+                        ),
                         decoration: BoxDecoration(
                           color: isWinner
                               ? _successColor.withOpacity(0.1)
                               : _errorColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                           border: Border.all(
                             color: isWinner
                                 ? _successColor.withOpacity(0.3)
@@ -1649,16 +1721,16 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                   ? Icons.emoji_events_rounded
                                   : Icons.sentiment_dissatisfied_rounded,
                               color: isWinner ? _successColor : _errorColor,
-                              size: 16,
+                              size: isMobile ? 16 : 20,
                             ),
-                            SizedBox(height: 2),
+                            SizedBox(height: isMobile ? 2 : 4),
                             Text(
                               isWinner ? 'Vitória' : 'Derrota',
                               style: TextStyle(
                                 fontFamily: 'Inter',
                                 color: isWinner ? _successColor : _errorColor,
                                 fontWeight: FontWeight.w600,
-                                fontSize: 12,
+                                fontSize: isMobile ? 12 : 14,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -1667,24 +1739,24 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                       ),
                     ),
 
-                    SizedBox(width: 20),
+                    SizedBox(width: isMobile ? 20 : 24),
 
                     // TEMPO
                     Container(
-                      width: 80,
+                      width: isMobile ? 80 : 100,
                       child: Column(
                         children: [
                           Icon(
                             Icons.timer_rounded,
                             color: _primaryColor,
-                            size: 16,
+                            size: isMobile ? 16 : 20,
                           ),
-                          SizedBox(height: 4),
+                          SizedBox(height: isMobile ? 4 : 6),
                           Text(
                             '$totalResponseTime s',
                             style: TextStyle(
                               fontFamily: 'Inter',
-                              fontSize: 14,
+                              fontSize: isMobile ? 14 : 16,
                               color: _onSurfaceColor,
                               fontWeight: FontWeight.w600,
                             ),
@@ -1694,24 +1766,24 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                       ),
                     ),
 
-                    SizedBox(width: 20),
+                    SizedBox(width: isMobile ? 20 : 24),
 
                     // PONTOS
                     Container(
-                      width: 80,
+                      width: isMobile ? 80 : 100,
                       child: Column(
                         children: [
                           Icon(
                             Icons.star_rounded,
                             color: _primaryColor,
-                            size: 16,
+                            size: isMobile ? 16 : 20,
                           ),
-                          SizedBox(height: 4),
+                          SizedBox(height: isMobile ? 4 : 6),
                           Text(
                             '$totalScore',
                             style: TextStyle(
                               fontFamily: 'Inter',
-                              fontSize: 16,
+                              fontSize: isMobile ? 16 : 18,
                               fontWeight: FontWeight.w700,
                               color: _primaryColor,
                             ),
@@ -1728,22 +1800,22 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
               if (ranking.isExpanded ?? false) ...[
                 Divider(height: 1, color: _outlineColor),
                 Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.all(isMobile ? 20 : 24),
                   child: Column(
                     children: [
-                      _buildPrizeInfoSection(ranking),
-                      SizedBox(height: 20),
+                      _buildPrizeInfoSection(ranking, isMobile),
+                      SizedBox(height: isMobile ? 20 : 24),
                       Text(
                         'Detalhes das Perguntas',
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontWeight: FontWeight.w600,
-                          fontSize: 18,
+                          fontSize: isMobile ? 18 : 20,
                           color: _onSurfaceColor,
                         ),
                       ),
-                      SizedBox(height: 16),
-                      _buildQuestionsList(),
+                      SizedBox(height: isMobile ? 16 : 20),
+                      _buildQuestionsList(isMobile),
                     ],
                   ),
                 ),
@@ -1755,14 +1827,14 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
     }
   }
 
-  Widget _buildPrizeInfoSection(RankingResponse ranking) {
+  Widget _buildPrizeInfoSection(RankingResponse ranking, bool isMobile) {
     final isWinner = ranking.isWinner ?? false;
 
     return Column(
       children: [
         Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
             boxShadow: [
               BoxShadow(
                 color: _infoColor.withOpacity(0.1),
@@ -1773,19 +1845,19 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
           ),
           child: Material(
             color: Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
             child: InkWell(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
               onTap: () {
                 setState(() {
                   _expandPremioInfo = !_expandPremioInfo;
                 });
               },
               child: Container(
-                padding: EdgeInsets.all(16),
+                padding: EdgeInsets.all(isMobile ? 16 : 20),
                 decoration: BoxDecoration(
                   color: _infoColor.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                   border: Border.all(
                     color: _infoColor.withOpacity(0.3),
                     width: 1.5,
@@ -1797,8 +1869,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                     Row(
                       children: [
                         Container(
-                          width: 40,
-                          height: 40,
+                          width: isMobile ? 40 : 48,
+                          height: isMobile ? 40 : 48,
                           decoration: BoxDecoration(
                             color: _infoColor.withOpacity(0.1),
                             shape: BoxShape.circle,
@@ -1806,10 +1878,10 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                           child: Icon(
                             Icons.attach_money_rounded,
                             color: _infoColor,
-                            size: 20,
+                            size: isMobile ? 20 : 24,
                           ),
                         ),
-                        SizedBox(width: 12),
+                        SizedBox(width: isMobile ? 12 : 16),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -1819,11 +1891,11 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                 fontFamily: 'Inter',
                                 fontWeight: FontWeight.w600,
                                 color: _infoColor,
-                                fontSize: 16,
+                                fontSize: isMobile ? 16 : 18,
                               ),
                               maxLines: 1,
                             ),
-                            SizedBox(height: 2),
+                            SizedBox(height: isMobile ? 2 : 4),
                             Text(
                               isWinner
                                   ? 'Você venceu esta partida!'
@@ -1831,7 +1903,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                               style: TextStyle(
                                 fontFamily: 'Inter',
                                 color: _onSurfaceColor.withOpacity(0.6),
-                                fontSize: 12,
+                                fontSize: isMobile ? 12 : 14,
                               ),
                             ),
                           ],
@@ -1843,7 +1915,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                           ? Icons.expand_less_rounded
                           : Icons.expand_more_rounded,
                       color: _infoColor,
-                      size: 24,
+                      size: isMobile ? 24 : 28,
                     ),
                   ],
                 ),
@@ -1852,12 +1924,12 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
           ),
         ),
         if (_expandPremioInfo && _model.matchInfo != null) ...[
-          SizedBox(height: 16),
+          SizedBox(height: isMobile ? 16 : 20),
           Container(
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.all(isMobile ? 20 : 24),
             decoration: BoxDecoration(
               color: _backgroundColor,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
               border: Border.all(
                 color: _outlineColor,
                 width: 1,
@@ -1869,19 +1941,22 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                   'Valor do Prêmio',
                   '${_model.matchInfo!.matchPrize?.totalGain ?? 0} AOA',
                   Icons.celebration_rounded,
+                  isMobile: isMobile,
                 ),
-                SizedBox(height: 12),
+                SizedBox(height: isMobile ? 12 : 16),
                 _buildPrizeDetailRow(
                   'Taxa de Jogo',
                   '${(_model.matchInfo!.room?.roomConfiguration?.premiumRate ?? 0) * 100}%',
                   Icons.percent_rounded,
+                  isMobile: isMobile,
                 ),
-                SizedBox(height: 12),
+                SizedBox(height: isMobile ? 12 : 16),
                 _buildPrizeDetailRow(
                   'Ganho Líquido',
                   '${!isWinner ? 0 : _model.matchInfo!.matchPrize?.netPremium ?? 0} AOA',
                   Icons.account_balance_wallet_rounded,
                   isHighlighted: isWinner,
+                  isMobile: isMobile,
                 ),
               ],
             ),
@@ -1892,12 +1967,12 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
   }
 
   Widget _buildPrizeDetailRow(String label, String value, IconData icon,
-      {bool isHighlighted = false}) {
+      {bool isHighlighted = false, required bool isMobile}) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(isMobile ? 16 : 20),
       decoration: BoxDecoration(
         color: isHighlighted ? _successColor.withOpacity(0.05) : _surfaceColor,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(isMobile ? 8 : 12),
         border: Border.all(
           color: isHighlighted ? _successColor.withOpacity(0.2) : _outlineColor,
           width: 1,
@@ -1906,8 +1981,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
       child: Row(
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: isMobile ? 36 : 44,
+            height: isMobile ? 36 : 44,
             decoration: BoxDecoration(
               color: isHighlighted
                   ? _successColor.withOpacity(0.1)
@@ -1916,18 +1991,18 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
             ),
             child: Icon(
               icon,
-              size: 18,
+              size: isMobile ? 18 : 22,
               color: isHighlighted ? _successColor : _primaryColor,
             ),
           ),
-          SizedBox(width: 12),
+          SizedBox(width: isMobile ? 12 : 16),
           Expanded(
             child: Text(
               label,
               style: TextStyle(
                 fontFamily: 'Inter',
                 color: _onSurfaceColor.withOpacity(0.7),
-                fontSize: 14,
+                fontSize: isMobile ? 14 : 16,
                 fontWeight: FontWeight.w500,
               ),
               maxLines: 1,
@@ -1939,7 +2014,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
               fontFamily: 'Inter',
               fontWeight: FontWeight.w700,
               color: isHighlighted ? _successColor : _onSurfaceColor,
-              fontSize: 16,
+              fontSize: isMobile ? 16 : 18,
             ),
             maxLines: 1,
           ),
@@ -1948,22 +2023,23 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
     );
   }
 
-  Widget _buildQuestionsList() {
+  Widget _buildQuestionsList(bool isMobile) {
     if (_model.isLoadingHistory) {
       return Container(
-        padding: EdgeInsets.all(40),
+        padding: EdgeInsets.all(isMobile ? 40 : 48),
         child: Center(
           child: Column(
             children: [
               CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
               ),
-              SizedBox(height: 16),
+              SizedBox(height: isMobile ? 16 : 20),
               Text(
                 'Carregando perguntas...',
                 style: TextStyle(
                   fontFamily: 'Inter',
                   color: _onSurfaceColor.withOpacity(0.6),
+                  fontSize: isMobile ? 14 : 16,
                 ),
               ),
             ],
@@ -1974,10 +2050,10 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
 
     if (_model.historys.isEmpty) {
       return Container(
-        padding: EdgeInsets.all(32),
+        padding: EdgeInsets.all(isMobile ? 32 : 40),
         decoration: BoxDecoration(
           color: _backgroundColor,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
           border: Border.all(
             color: _outlineColor,
             width: 1,
@@ -1987,27 +2063,27 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
           children: [
             Icon(
               Icons.help_outline_rounded,
-              size: 48,
+              size: isMobile ? 48 : 56,
               color: _onSurfaceColor.withOpacity(0.4),
             ),
-            SizedBox(height: 12),
+            SizedBox(height: isMobile ? 12 : 16),
             Text(
               'Nenhuma pergunta encontrada',
               style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 16,
+                fontSize: isMobile ? 16 : 18,
                 fontWeight: FontWeight.w600,
                 color: _onSurfaceColor.withOpacity(0.6),
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 8),
+            SizedBox(height: isMobile ? 8 : 12),
             Text(
               'As perguntas desta partida não estão disponíveis',
               style: TextStyle(
                 fontFamily: 'Inter',
                 color: _onSurfaceColor.withOpacity(0.4),
-                fontSize: 14,
+                fontSize: isMobile ? 14 : 15,
               ),
               textAlign: TextAlign.center,
             ),
@@ -2023,20 +2099,22 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
           history.optionAnswer?.textOption ?? 'Resposta não disponível',
           history.optionAnswer?.isCorrect ?? false,
           history.responseTimeInSecond ?? 0,
+          isMobile: isMobile,
         );
       }).toList(),
     );
   }
 
   Widget _buildQuestionItem(
-      String question, String answer, bool isCorrect, int time) {
+      String question, String answer, bool isCorrect, int time,
+      {required bool isMobile}) {
     return Container(
-        margin: EdgeInsets.only(bottom: 12),
+        margin: EdgeInsets.only(bottom: isMobile ? 12 : 16),
         decoration: BoxDecoration(
           color: isCorrect
               ? _successColor.withOpacity(0.05)
               : _errorColor.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
           border: Border.all(
             color: isCorrect
                 ? _successColor.withOpacity(0.2)
@@ -2046,11 +2124,11 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
         ),
         child: Material(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
           child: ExpansionTile(
             leading: Container(
-              width: 32,
-              height: 32,
+              width: isMobile ? 32 : 40,
+              height: isMobile ? 32 : 40,
               decoration: BoxDecoration(
                 color: isCorrect ? _successColor : _errorColor,
                 shape: BoxShape.circle,
@@ -2058,7 +2136,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
               child: Icon(
                 isCorrect ? Icons.check_rounded : Icons.close_rounded,
                 color: Colors.white,
-                size: 18,
+                size: isMobile ? 18 : 22,
               ),
             ),
             title: Text(
@@ -2067,19 +2145,22 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                   : question,
               style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 14,
+                fontSize: isMobile ? 14 : 16,
                 color: _onSurfaceColor,
                 fontWeight: FontWeight.w500,
               ),
               maxLines: 2,
             ),
             trailing: Container(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 8 : 12, 
+                vertical: isMobile ? 4 : 6,
+              ),
               decoration: BoxDecoration(
                 color: isCorrect
                     ? _successColor.withOpacity(0.1)
                     : _errorColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(isMobile ? 8 : 12),
                 border: Border.all(
                   color: isCorrect ? _successColor : _errorColor,
                   width: 1,
@@ -2090,17 +2171,17 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                 children: [
                   Icon(
                     Icons.timer_rounded,
-                    size: 12,
+                    size: isMobile ? 12 : 14,
                     color: isCorrect ? _successColor : _errorColor,
                   ),
-                  SizedBox(width: 4),
+                  SizedBox(width: isMobile ? 4 : 6),
                   Text(
                     '$time s',
                     style: TextStyle(
                       fontFamily: 'Inter',
                       color: isCorrect ? _successColor : _errorColor,
                       fontWeight: FontWeight.w600,
-                      fontSize: 12,
+                      fontSize: isMobile ? 12 : 14,
                     ),
                   ),
                 ],
@@ -2108,17 +2189,22 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
             ),
             children: [
               Padding(
-                padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+                padding: EdgeInsets.fromLTRB(
+                  isMobile ? 16 : 20, 
+                  0, 
+                  isMobile ? 16 : 20, 
+                  isMobile ? 16 : 20,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: EdgeInsets.all(12),
+                      padding: EdgeInsets.all(isMobile ? 12 : 16),
                       decoration: BoxDecoration(
                         color: isCorrect
                             ? _successColor.withOpacity(0.05)
                             : _errorColor.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(isMobile ? 8 : 12),
                         border: Border.all(
                           color: isCorrect
                               ? _successColor.withOpacity(0.2)
@@ -2133,9 +2219,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                 ? Icons.check_circle_rounded
                                 : Icons.cancel_rounded,
                             color: isCorrect ? _successColor : _errorColor,
-                            size: 16,
+                            size: isMobile ? 16 : 18,
                           ),
-                          SizedBox(width: 8),
+                          SizedBox(width: isMobile ? 8 : 12),
                           Expanded(
                             child: Text(
                               'Sua resposta: $answer',
@@ -2143,6 +2229,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                 fontFamily: 'Inter',
                                 color: isCorrect ? _successColor : _errorColor,
                                 fontWeight: FontWeight.w500,
+                                fontSize: isMobile ? 14 : 16,
                               ),
                               maxLines: 2,
                             ),
@@ -2150,7 +2237,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         ],
                       ),
                     ),
-                    SizedBox(height: 8),
+                    SizedBox(height: isMobile ? 8 : 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -2159,16 +2246,18 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                           style: TextStyle(
                             fontFamily: 'Inter',
                             color: _onSurfaceColor.withOpacity(0.6),
-                            fontSize: 13,
+                            fontSize: isMobile ? 13 : 14,
                           ),
                           maxLines: 1,
                         ),
                         Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isMobile ? 8 : 12, 
+                            vertical: isMobile ? 4 : 6,
+                          ),
                           decoration: BoxDecoration(
                             color: _primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(isMobile ? 6 : 8),
                           ),
                           child: Text(
                             'Pontos: ${isCorrect ? (_model.matchInfo?.room?.roomConfiguration?.timeToRespond ?? 30) - time : 0}',
@@ -2176,7 +2265,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                               fontFamily: 'Inter',
                               fontWeight: FontWeight.w600,
                               color: _primaryColor,
-                              fontSize: 12,
+                              fontSize: isMobile ? 12 : 14,
                             ),
                           ),
                         ),
@@ -2190,7 +2279,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
         ));
   }
 
-  Widget _buildHeaderItem(String text, {int flex = 1}) {
+  Widget _buildHeaderItem(String text, {int flex = 1, required bool isMobile}) {
     return Expanded(
       flex: flex,
       child: Text(
@@ -2198,7 +2287,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
         style: TextStyle(
           fontFamily: 'Inter',
           fontWeight: FontWeight.w600,
-          fontSize: 12,
+          fontSize: isMobile ? 12 : 13,
           color: _onSurfaceColor.withOpacity(0.6),
         ),
         textAlign: TextAlign.center,
@@ -2207,28 +2296,31 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
   }
 
   Widget _buildPlayerTile(UserResponse? player,
-      {required UserResponse? currentUser}) {
+      {required UserResponse? currentUser, required bool isMobile}) {
     final isCurrentUser = player?.id == currentUser?.id;
     final playerName = player?.name ?? 'Jogador sem nome';
     final playerEmail = player?.email ?? '';
 
     return Container(
-      margin: EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: isMobile ? 8 : 12),
       decoration: BoxDecoration(
         color: isCurrentUser ? _primaryColor.withOpacity(0.05) : _surfaceColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
         border: Border.all(
           color: isCurrentUser ? _primaryColor.withOpacity(0.2) : _outlineColor,
           width: 1.5,
         ),
       ),
       child: ListTile(
-        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 16 : 20, 
+          vertical: isMobile ? 8 : 12,
+        ),
         leading: Stack(
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: isMobile ? 40 : 48,
+              height: isMobile ? 40 : 48,
               decoration: BoxDecoration(
                 color: isCurrentUser ? _primaryColor : _outlineColor,
                 shape: BoxShape.circle,
@@ -2239,7 +2331,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                   style: TextStyle(
                     color: isCurrentUser ? Colors.white : _onSurfaceColor,
                     fontWeight: FontWeight.w600,
-                    fontSize: 16,
+                    fontSize: isMobile ? 16 : 18,
                   ),
                 ),
               ),
@@ -2249,14 +2341,14 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                 right: 0,
                 bottom: 0,
                 child: Container(
-                  width: 12,
-                  height: 12,
+                  width: isMobile ? 12 : 14,
+                  height: isMobile ? 12 : 14,
                   decoration: BoxDecoration(
                     color: _successColor,
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: _surfaceColor,
-                      width: 2,
+                      width: isMobile ? 2 : 3,
                     ),
                   ),
                 ),
@@ -2271,19 +2363,19 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                 fontFamily: 'Inter',
                 fontWeight: isCurrentUser ? FontWeight.w700 : FontWeight.w500,
                 color: _onSurfaceColor,
-                fontSize: 14,
+                fontSize: isMobile ? 14 : 16,
               ),
               maxLines: 1,
             ),
             if (isCurrentUser)
               Padding(
-                padding: EdgeInsets.only(left: 6.0),
+                padding: EdgeInsets.only(left: isMobile ? 6.0 : 8.0),
                 child: Text(
                   '(você)',
                   style: TextStyle(
                     fontFamily: 'Inter',
                     color: _onSurfaceColor.withOpacity(0.6),
-                    fontSize: 12,
+                    fontSize: isMobile ? 12 : 13,
                   ),
                 ),
               ),
@@ -2294,7 +2386,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
           style: TextStyle(
             fontFamily: 'Inter',
             color: _onSurfaceColor.withOpacity(0.6),
-            fontSize: 12,
+            fontSize: isMobile ? 12 : 13,
           ),
           maxLines: 1,
         ),
@@ -2302,16 +2394,16 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
     );
   }
 
-  Widget _buildEmptyGamesList(bool isCompleted) {
+  Widget _buildEmptyGamesList(bool isCompleted, bool isMobile) {
     return Center(
       child: Container(
-        padding: EdgeInsets.all(32),
+        padding: EdgeInsets.all(isMobile ? 24 : 32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 80,
-              height: 80,
+              width: isMobile ? 80 : 100,
+              height: isMobile ? 80 : 100,
               decoration: BoxDecoration(
                 color: _outlineColor.withOpacity(0.3),
                 shape: BoxShape.circle,
@@ -2321,17 +2413,17 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                     ? Icons.emoji_events_rounded
                     : Icons.hourglass_empty_rounded,
                 color: _onSurfaceColor.withOpacity(0.4),
-                size: 32,
+                size: isMobile ? 32 : 40,
               ),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: isMobile ? 16 : 24),
             Text(
               isCompleted
                   ? 'Nenhuma partida concluída encontrada'
                   : 'Nenhuma partida pendente encontrada',
               style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 16,
+                fontSize: isMobile ? 16 : 18,
                 fontWeight: FontWeight.w600,
                 color: _onSurfaceColor.withOpacity(0.6),
               ),
@@ -2343,16 +2435,16 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
     );
   }
 
-  Widget _buildEmptyMatchesList() {
+  Widget _buildEmptyMatchesList(bool isMobile) {
     return Center(
       child: Container(
-        padding: EdgeInsets.all(32),
+        padding: EdgeInsets.all(isMobile ? 24 : 32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 80,
-              height: 80,
+              width: isMobile ? 80 : 100,
+              height: isMobile ? 80 : 100,
               decoration: BoxDecoration(
                 color: _outlineColor.withOpacity(0.3),
                 shape: BoxShape.circle,
@@ -2360,24 +2452,24 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
               child: Icon(
                 Icons.hourglass_empty_rounded,
                 color: _onSurfaceColor.withOpacity(0.4),
-                size: 32,
+                size: isMobile ? 32 : 40,
               ),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: isMobile ? 16 : 24),
             Text(
               'Nenhuma partida encontrada com os filtros atuais',
               style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 16,
+                fontSize: isMobile ? 16 : 18,
                 fontWeight: FontWeight.w600,
                 color: _onSurfaceColor.withOpacity(0.6),
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 16),
+            SizedBox(height: isMobile ? 16 : 24),
             Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
                 boxShadow: [
                   BoxShadow(
                     color: _primaryColor.withOpacity(0.3),
@@ -2388,9 +2480,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
               ),
               child: Material(
                 color: Colors.transparent,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
                   onTap: () {
                     setState(() {
                       _filterStatus = 'all';
@@ -2398,17 +2490,20 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                     });
                   },
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isMobile ? 24 : 32, 
+                      vertical: isMobile ? 12 : 16,
+                    ),
                     decoration: BoxDecoration(
                       gradient: _primaryGradient,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
                     ),
                     child: Text(
                       'LIMPAR FILTROS',
                       style: TextStyle(
                         fontFamily: 'Inter',
                         color: Colors.white,
-                        fontSize: 14,
+                        fontSize: isMobile ? 14 : 16,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

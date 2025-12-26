@@ -825,7 +825,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                           ),
                           SizedBox(height: 4),
                           Text(
-                            isWinner ? 'Vencedor' : 'Eliminado',
+                            isWinner ? 'Vencedor' : 'Perdedor',
                             style: TextStyle(
                               color: isWinner ? _winnerGreen : _loserRed,
                               fontSize: 10,

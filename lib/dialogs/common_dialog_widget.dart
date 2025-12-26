@@ -86,9 +86,16 @@ class CommonDialogWidget {
               builder: (context, child) {
                 return Dialog(
                   backgroundColor: Colors.transparent,
-                  insetPadding: const EdgeInsets.all(16),
+                  insetPadding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width > 768 ? 
+                      MediaQuery.of(context).size.width * 0.15 : 16,
+                    vertical: 16,
+                  ),
                   child: Container(
-                    width: double.infinity,
+                    constraints: BoxConstraints(
+                      maxWidth: 600,
+                      maxHeight: MediaQuery.of(context).size.height * 0.9,
+                    ),
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).secondaryBackground,
                       borderRadius: BorderRadius.circular(16),
@@ -105,7 +112,9 @@ class CommonDialogWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(16),
+                          padding: EdgeInsets.all(
+                            MediaQuery.of(context).size.width > 768 ? 20 : 16,
+                          ),
                           decoration: BoxDecoration(
                             color: isError == true
                                 ? Colors.red
@@ -129,15 +138,17 @@ class CommonDialogWidget {
                                           .override(
                                             fontFamily: 'Inter Tight',
                                             color: Colors.white,
-                                            fontSize: 20,
+                                            fontSize: 
+                                              MediaQuery.of(context).size.width > 768 ? 22 : 20,
                                             letterSpacing: 0,
                                           ),
                                     ),
                                     Text(
                                       '${formatHour(match.matchStartDate)} • ${match.matchPlayers?.length ?? 0} participantes',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: Colors.white70,
-                                        fontSize: 14,
+                                        fontSize: 
+                                          MediaQuery.of(context).size.width > 768 ? 15 : 14,
                                       ),
                                     ),
                                   ],
@@ -154,40 +165,94 @@ class CommonDialogWidget {
                             ],
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: infos.map((info) {
-                                  return _buildInfoItem(
-                                    icon: info['icon'] as IconData,
-                                    title: info['title'] as String,
-                                    value: info['value'] as String,
-                                  );
-                                }).toList(),
+                        Flexible(
+                          child: SingleChildScrollView(
+                            child: Padding(
+                              padding: EdgeInsets.all(
+                                MediaQuery.of(context).size.width > 768 ? 20 : 16,
                               ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Participantes:',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      fontFamily: 'Inter',
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 0,
-                                    ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Layout responsivo mantendo Horário e Vagas na mesma linha
+                                  LayoutBuilder(
+                                    builder: (context, constraints) {
+                                      final isLargeScreen = constraints.maxWidth > 500;
+                                      
+                                      if (isLargeScreen) {
+                                        // Em telas grandes: 4 itens em uma linha
+                                        return Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: infos.map((info) {
+                                            return Expanded(
+                                              child: _buildInfoItem(
+                                                icon: info['icon'] as IconData,
+                                                title: info['title'] as String,
+                                                value: info['value'] as String,
+                                                isLargeScreen: true,
+                                              ),
+                                            );
+                                          }).toList(),
+                                        );
+                                      } else {
+                                        // Em telas pequenas: 2 linhas
+                                        return Column(
+                                          children: [
+                                            // Primeira linha: Inscrição e Prêmio
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: infos.sublist(0, 2).map((info) {
+                                                return Expanded(
+                                                  child: _buildInfoItem(
+                                                    icon: info['icon'] as IconData,
+                                                    title: info['title'] as String,
+                                                    value: info['value'] as String,
+                                                    isLargeScreen: false,
+                                                  ),
+                                                );
+                                              }).toList(),
+                                            ),
+                                            SizedBox(height: 16),
+                                            // Segunda linha: Horário e Vagas
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: infos.sublist(2, 4).map((info) {
+                                                return Expanded(
+                                                  child: _buildInfoItem(
+                                                    icon: info['icon'] as IconData,
+                                                    title: info['title'] as String,
+                                                    value: info['value'] as String,
+                                                    isLargeScreen: false,
+                                                  ),
+                                                );
+                                              }).toList(),
+                                            ),
+                                          ],
+                                        );
+                                      }
+                                    },
+                                  ),
+                                  SizedBox(height: MediaQuery.of(context).size.width > 768 ? 20 : 16),
+                                  Text(
+                                    'Participantes:',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          fontFamily: 'Inter',
+                                          fontSize: 
+                                            MediaQuery.of(context).size.width > 768 ? 17 : 16,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 0,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  _buildParticipantsList(
+                                      context, match, participants, currentUser),
+                                  SizedBox(height: MediaQuery.of(context).size.width > 768 ? 20 : 16),
+                                  widget
+                                ],
                               ),
-                              const SizedBox(height: 8),
-                              _buildParticipantsList(
-                                  context, match, participants, currentUser),
-                              const SizedBox(height: 16),
-                              widget
-                            ],
+                            ),
                           ),
                         ),
                         if (isProgressBar)
@@ -215,19 +280,32 @@ class CommonDialogWidget {
     );
   }
 
-  static Widget _buildInfoItem(
-      {required IconData icon, required String title, required String value}) {
+  static Widget _buildInfoItem({
+    required IconData icon, 
+    required String title, 
+    required String value,
+    bool isLargeScreen = false
+  }) {
     return Column(
       children: [
-        Icon(icon, size: 24, color: const Color(0xFFEC8D0D)),
+        Icon(icon, 
+          size: isLargeScreen ? 26 : 24, 
+          color: const Color(0xFFEC8D0D)
+        ),
         const SizedBox(height: 4),
         Text(
           title,
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
+          style: TextStyle(
+            fontSize: isLargeScreen ? 13 : 12, 
+            color: Colors.grey
+          ),
         ),
         Text(
           value,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: isLargeScreen ? 15 : 14, 
+            fontWeight: FontWeight.bold
+          ),
         ),
       ],
     );
@@ -240,7 +318,9 @@ class CommonDialogWidget {
       UserResponse? currentUser) {
     if (participants.isEmpty) {
       return Container(
-        padding: const EdgeInsets.symmetric(vertical: 24),
+        padding: EdgeInsets.symmetric(
+          vertical: MediaQuery.of(context).size.width > 768 ? 28 : 24,
+        ),
         decoration: BoxDecoration(
           color: FlutterFlowTheme.of(context).primaryBackground,
           borderRadius: BorderRadius.circular(8),
@@ -248,14 +328,19 @@ class CommonDialogWidget {
         child: Center(
           child: Text(
             'Nenhum participante ainda',
-            style: TextStyle(color: Colors.grey.shade600),
+            style: TextStyle(
+              color: Colors.grey.shade600,
+              fontSize: MediaQuery.of(context).size.width > 768 ? 15 : 14,
+            ),
           ),
         ),
       );
     }
 
     return Container(
-      constraints: const BoxConstraints(maxHeight: 200),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.3,
+      ),
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).primaryBackground,
         borderRadius: BorderRadius.circular(8),
@@ -268,8 +353,10 @@ class CommonDialogWidget {
           final isCurrentUser = player.id == currentUser!.id;
 
           return ListTile(
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: MediaQuery.of(context).size.width > 768 ? 18 : 16,
+              vertical: MediaQuery.of(context).size.width > 768 ? 10 : 8,
+            ),
             leading: CircleAvatar(
               backgroundColor: const Color(0xFFEC8D0D).withOpacity(0.2),
               child: Text(
@@ -281,6 +368,7 @@ class CommonDialogWidget {
               player.name,
               style: FlutterFlowTheme.of(context).bodyMedium.override(
                     fontFamily: 'Inter',
+                    fontSize: MediaQuery.of(context).size.width > 768 ? 15 : 14,
                     fontWeight:
                         isCurrentUser ? FontWeight.bold : FontWeight.normal,
                     letterSpacing: 0,

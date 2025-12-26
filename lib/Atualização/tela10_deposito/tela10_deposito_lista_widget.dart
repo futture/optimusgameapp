@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -6,17 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:projeto_game_quiz/Atualiza%C3%A7%C3%A3o/tela10_deposito/tela10_deposito_lista_model.dart';
 import 'package:projeto_game_quiz/flutter_flow/flutter_flow_model.dart';
 import 'package:projeto_game_quiz/pages/payment/payment_forms/payment_form.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-
-// Primeiro, adicione estas imagens na sua pasta assets:
-// assets/images/payment_methods/
-// - multicaixa.png
-// - express.png
-// - afrimoney.png
-// - unitel_money.png
-// - africel.png
-// - mpesa.png
 
 class Tela10DepositoListaWidget extends StatefulWidget {
   const Tela10DepositoListaWidget({super.key});
@@ -31,33 +20,16 @@ class Tela10DepositoListaWidget extends StatefulWidget {
 
 class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
     with TickerProviderStateMixin {
-  // Cores premium alinhadas com o tema
-  final Color _primaryColor = Color(0xFFEC8D0D);
-  final Color _primaryDark = Color(0xFFD17E0C);
+  final Color _primaryColor = Color(0xFFEC8D0D); 
   final Color _backgroundColor = Color(0xFFF8FAFC);
   final Color _cardColor = Colors.white;
-  final Color _textPrimary = Color(0xFF1E293B);
-  final Color _textSecondary = Color(0xFF64748B);
-  final Color _borderColor = Color(0xFFE2E8F0);
+  final Color _textPrimary = Color(0xFF111827);
+  final Color _textSecondary = Color(0xFF6B7280);
+  final Color _borderColor = Color(0xFFE5E7EB);
   final Color _successColor = Color(0xFF10B981);
-  final Color _warningColor = Color(0xFFF59E0B);
-  final Color _errorColor = Color(0xFFEF4444);
+  final Color _warningColor = Color(0xFFF59E0B); 
   final Color _infoColor = Color(0xFF3B82F6);
 
-  // Gradientes premium
-  final LinearGradient _primaryGradient = LinearGradient(
-    colors: [Color(0xFFEC8D0D), Color(0xFFF59E0B)],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
-
-  final LinearGradient _cardGradient = LinearGradient(
-    colors: [Color(0xFFFFFFFF), Color(0xFFF8FAFC)],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-  );
-
-  // Métodos de pagamento com IMAGENS REAIS
   final List<Map<String, dynamic>> _paymentMethods = [
     {
       'id': 1,
@@ -66,11 +38,11 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
       'available': true,
       'popular': true,
       'color': Color(0xFFEC8D0D),
-      'image': 'multicaixa', // Nome do arquivo da imagem
-      'imageType': 'asset', // Tipo: asset ou icon
+      'image': 'multicaixa',
+      'imageType': 'asset',
       'entidade': '11454',
       'type': 'atm',
-      'iconData': Icons.atm_rounded, // Fallback icon
+      'iconData': Icons.atm_rounded,
       'brandColor': Color(0xFFEC8D0D),
       'minAmount': 500.0,
       'maxAmount': 1000000.0,
@@ -152,16 +124,6 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
     },
   ];
 
-  // Fallback para ícones quando as imagens não estiverem disponíveis
-  final Map<String, IconData> _paymentIcons = {
-    'multicaixa': Icons.atm_rounded,
-    'express': Icons.bolt_rounded,
-    'afrimoney': Icons.account_balance_wallet_rounded,
-    'unitel_money': Icons.phone_iphone_rounded,
-    'africel': Icons.phone_rounded,
-    'mpesa': Icons.money_rounded,
-  };
-
   late Tela10DepositoListaModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -217,9 +179,10 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 600;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isMobile = screenWidth < 600;
     final safePadding = MediaQuery.of(context).padding.top;
-    final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
       backgroundColor: _backgroundColor,
@@ -230,9 +193,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
             scale: _scaleAnimation.value,
             child: Stack(
               children: [
-                // Background decorative elements
                 _buildBackgroundElements(),
-
                 Positioned.fill(
                   child: SingleChildScrollView(
                     physics: BouncingScrollPhysics(),
@@ -244,18 +205,26 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                           child: Opacity(
                             opacity: _fadeAnimation.value,
                             child: Padding(
-                              padding: EdgeInsets.all(isMobile ? 18 : 24),
-                              child: Column(
-                                children: [
-                                  _buildWelcomeSection(isMobile),
-                                  SizedBox(height: isMobile ? 30 : 40),
-                                  _buildMethodsSection(isMobile, width),
-                                  SizedBox(height: isMobile ? 30 : 40),
-                                  _buildSecuritySection(isMobile),
-                                  SizedBox(height: isMobile ? 30 : 40),
-                                  _buildFAQSection(isMobile),
-                                  SizedBox(height: isMobile ? 24 : 32),
-                                ],
+                              padding: EdgeInsets.symmetric(
+                                horizontal: isMobile ? 16 : 24,
+                                vertical: 16,
+                              ),
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: 1200,
+                                ),
+                                child: Column(
+                                  children: [
+                                    _buildWelcomeSection(isMobile),
+                                    SizedBox(height: isMobile ? 24 : 32),
+                                    _buildMethodsSection(context),
+                                    SizedBox(height: isMobile ? 24 : 32),
+                                    _buildSecuritySection(isMobile),
+                                    SizedBox(height: isMobile ? 24 : 32),
+                                    _buildFAQSection(isMobile),
+                                    SizedBox(height: isMobile ? 16 : 24),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -264,7 +233,6 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                     ),
                   ),
                 ),
-
                 Positioned(
                   top: 0,
                   left: 0,
@@ -330,9 +298,10 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
       child: SafeArea(
         bottom: false,
         child: Container(
+          constraints: BoxConstraints(maxWidth: 1200),
           padding: EdgeInsets.symmetric(
-            horizontal: isMobile ? 20 : 24,
-            vertical: isMobile ? 18 : 22,
+            horizontal: isMobile ? 20 : 32,
+            vertical: isMobile ? 16 : 20,
           ),
           child: Row(
             children: [
@@ -341,7 +310,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                 onPressed: () => Navigator.pop(context),
                 isMobile: isMobile,
               ),
-              SizedBox(width: isMobile ? 18 : 22),
+              SizedBox(width: isMobile ? 16 : 24),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -350,24 +319,17 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                       'DEPOSITAR',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: isMobile ? 24 : 26,
+                        fontSize: isMobile ? 22 : 26,
                         fontWeight: FontWeight.w900,
-                        letterSpacing: 1.5,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withOpacity(0.15),
-                            blurRadius: 6,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
+                        letterSpacing: 1.2,
                       ),
                     ),
-                    SizedBox(height: 6),
+                    SizedBox(height: 4),
                     Text(
                       'Escolha o método de pagamento',
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.95),
-                        fontSize: isMobile ? 14 : 15,
+                        fontSize: isMobile ? 13 : 15,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -396,41 +358,27 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
     return Stack(
       children: [
         Container(
-          width: isMobile ? 52 : 58,
-          height: isMobile ? 52 : 58,
+          width: isMobile ? 48 : 56,
+          height: isMobile ? 48 : 56,
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: Colors.white.withOpacity(0.3),
-              width: 2,
+              width: 1.5,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 15,
-                offset: Offset(0, 5),
-              ),
-              BoxShadow(
-                color: Colors.white.withOpacity(0.1),
-                blurRadius: 15,
-                offset: Offset(0, -5),
-              ),
-            ],
           ),
           child: Material(
             color: Colors.transparent,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             child: InkWell(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(14),
               onTap: onPressed,
-              splashColor: Colors.white.withOpacity(0.3),
-              highlightColor: Colors.white.withOpacity(0.2),
               child: Center(
                 child: Icon(
                   icon,
                   color: Colors.white,
-                  size: isMobile ? 24 : 26,
+                  size: isMobile ? 22 : 24,
                 ),
               ),
             ),
@@ -438,22 +386,15 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
         ),
         if (badge)
           Positioned(
-            top: 8,
-            right: 8,
+            top: 6,
+            right: 6,
             child: Container(
-              width: 12,
-              height: 12,
+              width: 10,
+              height: 10,
               decoration: BoxDecoration(
                 color: Colors.red,
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
-                  ),
-                ],
+                border: Border.all(color: Colors.white, width: 1.5),
               ),
             ),
           ),
@@ -464,56 +405,49 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
   Widget _buildWelcomeSection(bool isMobile) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(isMobile ? 24 : 32),
+      padding: EdgeInsets.all(isMobile ? 16 : 20),
       decoration: BoxDecoration(
         color: _cardColor,
-        borderRadius: BorderRadius.circular(isMobile ? 22 : 28),
+        borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
         border: Border.all(
           color: _borderColor.withOpacity(0.7),
-          width: 2,
+          width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 40,
-            offset: Offset(0, 10),
-          ),
-          BoxShadow(
-            color: Colors.white.withOpacity(0.8),
-            blurRadius: 40,
-            offset: Offset(0, -10),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 12,
+            offset: Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Cabeçalho compacto
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: isMobile ? 72 : 84,
-                height: isMobile ? 72 : 84,
+                width: isMobile ? 52 : 60,
+                height: isMobile ? 52 : 60,
                 decoration: BoxDecoration(
-                  gradient: _primaryGradient,
-                  borderRadius: BorderRadius.circular(isMobile ? 20 : 24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _primaryColor.withOpacity(0.4),
-                      blurRadius: 20,
-                      offset: Offset(0, 8),
-                    ),
-                  ],
+                  gradient: LinearGradient(
+                    colors: [_primaryColor, Color(0xFFF59E0B)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                 ),
                 child: Center(
                   child: Icon(
                     Icons.add_circle_outline_rounded,
                     color: Colors.white,
-                    size: isMobile ? 36 : 42,
+                    size: isMobile ? 24 : 28,
                   ),
                 ),
               ),
-              SizedBox(width: isMobile ? 22 : 28),
+              SizedBox(width: isMobile ? 12 : 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -524,29 +458,27 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                           TextSpan(
                             text: 'Adicionar ',
                             style: TextStyle(
-                              fontSize: isMobile ? 26 : 30,
-                              fontWeight: FontWeight.w900,
+                              fontSize: isMobile ? 18 : 22,
+                              fontWeight: FontWeight.w800,
                               color: _textPrimary,
-                              letterSpacing: -0.8,
                             ),
                           ),
                           TextSpan(
                             text: 'Fundos',
                             style: TextStyle(
-                              fontSize: isMobile ? 26 : 30,
-                              fontWeight: FontWeight.w900,
+                              fontSize: isMobile ? 18 : 22,
+                              fontWeight: FontWeight.w800,
                               color: _primaryColor,
-                              letterSpacing: -0.8,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 8),
+                    SizedBox(height: 4),
                     Text(
                       'Depósito rápido, seguro e instantâneo',
                       style: TextStyle(
-                        fontSize: isMobile ? 15 : 17,
+                        fontSize: isMobile ? 12 : 14,
                         color: _textSecondary,
                         fontWeight: FontWeight.w500,
                       ),
@@ -556,14 +488,16 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
               ),
             ],
           ),
-          SizedBox(height: isMobile ? 28 : 36),
-          _buildFeaturesRow(isMobile),
+          SizedBox(height: isMobile ? 16 : 20),
+
+          // Grid de features compacto
+          _buildFeaturesResponsive(isMobile),
         ],
       ),
     );
   }
 
-  Widget _buildFeaturesRow(bool isMobile) {
+  Widget _buildFeaturesResponsive(bool isMobile) {
     final features = [
       {
         'icon': Icons.shield_rounded,
@@ -593,133 +527,141 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
         'icon': Icons.support_agent_rounded,
         'label': 'Suporte 24/7',
         'color': _primaryColor,
-        'gradient': _primaryGradient,
+        'gradient': LinearGradient(
+          colors: [_primaryColor, Color(0xFFF59E0B)],
+        ),
       },
     ];
 
-    return Wrap(
-      spacing: isMobile ? 20 : 30,
-      runSpacing: isMobile ? 20 : 30,
-      alignment: WrapAlignment.spaceEvenly,
-      children: features.map((feature) {
-        return Column(
-          children: [
-            Container(
-              width: isMobile ? 76 : 88,
-              height: isMobile ? 76 : 88,
-              decoration: BoxDecoration(
-                gradient: feature['gradient'] as LinearGradient,
-                borderRadius: BorderRadius.circular(isMobile ? 20 : 24),
-                boxShadow: [
-                  BoxShadow(
-                    color: (feature['color'] as Color).withOpacity(0.3),
-                    blurRadius: 20,
-                    offset: Offset(0, 8),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final containerWidth = constraints.maxWidth;
+        final isVerySmall = containerWidth < 400;
+        final crossAxisCount = isVerySmall ? 2 : 4;
+
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: isMobile ? 8 : 16,
+            mainAxisSpacing: isMobile ? 10 : 20,
+            childAspectRatio:
+                isVerySmall ? 0.85 : 0.95,
+          ),
+          itemCount: features.length,
+          itemBuilder: (context, index) {
+            final feature = features[index];
+            final iconSize = isVerySmall ? 20.00 : 24.00; 
+            final boxSize = isVerySmall ? 48.00 : 56.00; 
+
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: boxSize,
+                  height: boxSize,
+                  decoration: BoxDecoration(
+                    gradient: feature['gradient'] as LinearGradient,
+                    borderRadius: BorderRadius.circular(isVerySmall ? 12 : 14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (feature['color'] as Color).withOpacity(0.2),
+                        blurRadius: 6,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
                   ),
-                  BoxShadow(
-                    color: Colors.white.withOpacity(0.5),
-                    blurRadius: 20,
-                    offset: Offset(0, -8),
+                  child: Center(
+                    child: Icon(
+                      feature['icon'] as IconData,
+                      color: Colors.white,
+                      size: iconSize,
+                    ),
                   ),
-                ],
-              ),
-              child: Center(
-                child: Icon(
-                  feature['icon'] as IconData,
-                  color: Colors.white,
-                  size: isMobile ? 32 : 36,
                 ),
-              ),
-            ),
-            SizedBox(height: isMobile ? 12 : 16),
-            Text(
-              feature['label'] as String,
-              style: TextStyle(
-                fontSize: isMobile ? 13 : 15,
-                fontWeight: FontWeight.w700,
-                color: _textPrimary,
-              ),
-            ),
-          ],
+                SizedBox(height: isMobile ? 6 : 8), // Reduzido espaçamento
+                Text(
+                  feature['label'] as String,
+                  style: TextStyle(
+                    fontSize: isMobile ? 11 : 13, // Texto menor
+                    fontWeight: FontWeight.w600, // Peso mais leve
+                    color: _textPrimary,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                ),
+              ],
+            );
+          },
         );
-      }).toList(),
+      },
     );
   }
 
-  Widget _buildMethodsSection(bool isMobile, double width) {
+  Widget _buildMethodsSection(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: isMobile ? 4 : 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      gradient: _primaryGradient,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      'Métodos Disponíveis',
-                      style: TextStyle(
-                        fontSize: isMobile ? 26 : 30,
-                        fontWeight: FontWeight.w900,
-                        color: _textPrimary,
-                        letterSpacing: -0.8,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 12),
-              Padding(
-                padding: EdgeInsets.only(left: 24),
-                child: Text(
-                  'Escolha a forma mais conveniente para você',
-                  style: TextStyle(
-                    fontSize: isMobile ? 15 : 17,
-                    color: _textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
+        Text(
+          'Métodos Disponíveis',
+          style: TextStyle(
+            fontSize: screenWidth < 600 ? 20 : 24,
+            fontWeight: FontWeight.w700,
+            color: _textPrimary,
           ),
         ),
-        SizedBox(height: isMobile ? 32 : 40),
+        SizedBox(height: 8),
+        Text(
+          'Escolha a forma mais conveniente para você',
+          style: TextStyle(
+            fontSize: screenWidth < 600 ? 14 : 16,
+            color: _textSecondary,
+          ),
+        ),
+        SizedBox(height: screenWidth < 600 ? 20 : 28),
 
-        // Lista responsiva de métodos
-        if (isMobile)
-          _buildMobileMethodsList()
-        else if (width < 1100)
-          _buildDesktopMethodsGrid(2)
-        else if (width < 1500)
-          _buildDesktopMethodsGrid(3)
-        else
-          _buildDesktopMethodsGrid(4),
+        // Grid responsivo - ESTILO DA ÚLTIMA VERSÃO
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            int crossAxisCount;
+
+            if (width < 600) {
+              crossAxisCount = 1;
+            } else if (width < 900) {
+              crossAxisCount = 2;
+            } else if (width < 1200) {
+              crossAxisCount = 3;
+            } else {
+              crossAxisCount = 4;
+            }
+
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: crossAxisCount == 1 ? 2.8 : 1.1,
+              ),
+              itemCount: _paymentMethods.length,
+              itemBuilder: (context, index) {
+                return crossAxisCount == 1
+                    ? _buildMethodRow(index)
+                    : _buildMethodCard(index);
+              },
+            );
+          },
+        ),
       ],
     );
   }
 
-  Widget _buildMobileMethodsList() {
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      itemCount: _paymentMethods.length,
-      separatorBuilder: (context, index) => SizedBox(height: 20),
-      itemBuilder: (context, index) => _buildMethodListItem(index),
-    );
-  }
-
-  Widget _buildMethodListItem(int index) {
+  Widget _buildMethodRow(int index) {
     final method = _paymentMethods[index];
     final isAvailable = method['available'] as bool;
     final isPopular = method['popular'] as bool;
@@ -727,44 +669,48 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
+        color: _cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 20,
-            offset: Offset(0, 8),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: Offset(0, 2),
           ),
         ],
       ),
       child: Material(
-        color: _cardColor,
-        borderRadius: BorderRadius.circular(24),
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
         child: InkWell(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(12),
           onTap: isAvailable ? () => _showPaymentDialog(context, method) : null,
-          splashColor: color.withOpacity(0.15),
-          highlightColor: color.withOpacity(0.1),
-          child: Container(
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: isAvailable
-                    ? _borderColor.withOpacity(0.7)
-                    : _borderColor.withOpacity(0.4),
-                width: 2,
-              ),
-            ),
+          child: Padding(
+            padding: EdgeInsets.all(16),
             child: Row(
               children: [
-                // Imagem do método de pagamento
-                _buildPaymentMethodImage(method, 68, true),
-                SizedBox(width: 20),
-
-                // Informações do método
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color:
+                        isAvailable ? color.withOpacity(0.1) : _backgroundColor,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color:
+                          isAvailable ? color.withOpacity(0.2) : _borderColor,
+                    ),
+                  ),
+                  child: Center(
+                    child: _buildPaymentMethodIcon(method, 28),
+                  ),
+                ),
+                SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Row(
                         children: [
@@ -772,108 +718,64 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                             child: Text(
                               method['name'],
                               style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w900,
-                                color: isAvailable
-                                    ? _textPrimary
-                                    : _textSecondary.withOpacity(0.6),
-                                letterSpacing: -0.5,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color:
+                                    isAvailable ? _textPrimary : _textSecondary,
                               ),
                             ),
                           ),
                           if (isPopular && isAvailable)
                             Container(
                               padding: EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
+                                horizontal: 8,
+                                vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                gradient: _primaryGradient,
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: _primaryColor.withOpacity(0.3),
-                                    blurRadius: 10,
-                                    offset: Offset(0, 4),
-                                  ),
-                                ],
+                                color: _primaryColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.trending_up_rounded,
-                                    color: Colors.white,
-                                    size: 14,
-                                  ),
-                                  SizedBox(width: 6),
-                                  Text(
-                                    'POPULAR',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: 0.8,
-                                    ),
-                                  ),
-                                ],
+                              child: Text(
+                                'Popular',
+                                style: TextStyle(
+                                  color: _primaryColor,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                         ],
                       ),
-                      SizedBox(height: 8),
+                      SizedBox(height: 4),
                       Text(
                         method['description'],
                         style: TextStyle(
-                          fontSize: 15,
-                          color: isAvailable
-                              ? _textSecondary
-                              : _textSecondary.withOpacity(0.5),
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      Container(
-                        height: 42,
-                        decoration: BoxDecoration(
-                          color: isAvailable
-                              ? color.withOpacity(0.1)
-                              : _backgroundColor,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isAvailable
-                                ? color.withOpacity(0.3)
-                                : _borderColor,
-                            width: 2,
-                          ),
-                        ),
-                        child: Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              if (isAvailable)
-                                Icon(
-                                  Icons.arrow_forward_rounded,
-                                  color: color,
-                                  size: 18,
-                                ),
-                              SizedBox(width: isAvailable ? 8 : 0),
-                              Text(
-                                isAvailable ? 'SELECIONAR' : 'EM BREVE',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w800,
-                                  color: isAvailable
-                                      ? color
-                                      : _textSecondary.withOpacity(0.6),
-                                  letterSpacing: 0.8,
-                                ),
-                              ),
-                            ],
-                          ),
+                          fontSize: 13,
+                          color: _textSecondary,
                         ),
                       ),
                     ],
+                  ),
+                ),
+                SizedBox(width: 12),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color:
+                        isAvailable ? color.withOpacity(0.1) : _backgroundColor,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color:
+                          isAvailable ? color.withOpacity(0.3) : _borderColor,
+                    ),
+                  ),
+                  child: Text(
+                    isAvailable ? 'Selecionar' : 'Em breve',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: isAvailable ? color : _textSecondary,
+                    ),
                   ),
                 ),
               ],
@@ -881,22 +783,6 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildDesktopMethodsGrid(int crossAxisCount) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        crossAxisSpacing: 24,
-        mainAxisSpacing: 24,
-        childAspectRatio:
-            crossAxisCount == 2 ? 1.15 : (crossAxisCount == 3 ? 1.05 : 0.95),
-      ),
-      itemCount: _paymentMethods.length,
-      itemBuilder: (context, index) => _buildMethodCard(index),
     );
   }
 
@@ -908,180 +794,114 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
+        color: _cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 25,
-            offset: Offset(0, 10),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: Offset(0, 2),
           ),
         ],
       ),
       child: Material(
-        color: _cardColor,
-        borderRadius: BorderRadius.circular(28),
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
         child: InkWell(
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(12),
           onTap: isAvailable ? () => _showPaymentDialog(context, method) : null,
-          splashColor: color.withOpacity(0.15),
-          highlightColor: color.withOpacity(0.1),
-          child: Container(
-            padding: EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(
-                color: isAvailable
-                    ? _borderColor.withOpacity(0.7)
-                    : _borderColor.withOpacity(0.4),
-                width: 2,
-              ),
-            ),
+          child: Padding(
+            padding: EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Cabeçalho com imagem e badge
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildPaymentMethodImage(method, 72, false),
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: isAvailable
+                            ? color.withOpacity(0.1)
+                            : _backgroundColor,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: isAvailable
+                              ? color.withOpacity(0.2)
+                              : _borderColor,
+                        ),
+                      ),
+                      child: Center(
+                        child: _buildPaymentMethodIcon(method, 24),
+                      ),
+                    ),
                     if (isPopular && isAvailable)
                       Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
+                          horizontal: 8,
+                          vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          gradient: _primaryGradient,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: _primaryColor.withOpacity(0.4),
-                              blurRadius: 15,
-                              offset: Offset(0, 5),
-                            ),
-                          ],
+                          color: _primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.star_rounded,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              'POPULAR',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          'Popular',
+                          style: TextStyle(
+                            color: _primaryColor,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                   ],
                 ),
-                SizedBox(height: 24),
-
-                // Nome do método
+                SizedBox(height: 16),
                 Text(
                   method['name'],
                   style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
-                    color: isAvailable
-                        ? _textPrimary
-                        : _textSecondary.withOpacity(0.6),
-                    letterSpacing: -0.5,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: isAvailable ? _textPrimary : _textSecondary,
                   ),
                 ),
-                SizedBox(height: 12),
-
-                // Descrição
+                SizedBox(height: 8),
                 Expanded(
                   child: Text(
                     method['description'],
                     style: TextStyle(
-                      fontSize: 16,
-                      color: isAvailable
-                          ? _textSecondary
-                          : _textSecondary.withOpacity(0.5),
-                      height: 1.6,
-                      fontWeight: FontWeight.w400,
+                      fontSize: 13,
+                      color: _textSecondary,
+                      height: 1.4,
                     ),
                   ),
                 ),
-                SizedBox(height: 24),
-
-                // Botão de ação
+                SizedBox(height: 16),
                 Container(
                   width: double.infinity,
-                  height: 52,
+                  padding: EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
                     color:
                         isAvailable ? color.withOpacity(0.1) : _backgroundColor,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color:
                           isAvailable ? color.withOpacity(0.3) : _borderColor,
-                      width: 2,
                     ),
                   ),
                   child: Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (isAvailable)
-                          Icon(
-                            Icons.arrow_forward_rounded,
-                            color: color,
-                            size: 20,
-                          ),
-                        SizedBox(width: isAvailable ? 10 : 0),
-                        Text(
-                          isAvailable ? 'SELECIONAR' : 'EM BREVE',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                            color: isAvailable
-                                ? color
-                                : _textSecondary.withOpacity(0.6),
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      isAvailable ? 'Selecionar' : 'Em breve',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: isAvailable ? color : _textSecondary,
+                      ),
                     ),
                   ),
                 ),
-
-                // Limites (se disponível)
-                if (isAvailable && method.containsKey('minAmount'))
-                  Padding(
-                    padding: EdgeInsets.only(top: 16),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline_rounded,
-                          color: color.withOpacity(0.7),
-                          size: 16,
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Limite: ${method['minAmount']} - ${method['maxAmount']} Kz',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: color.withOpacity(0.7),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
               ],
             ),
           ),
@@ -1090,112 +910,17 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
     );
   }
 
-  Widget _buildPaymentMethodImage(
-      Map<String, dynamic> method, double size, bool isList) {
-    final color = method['color'] as Color;
-    final isAvailable = method['available'] as bool;
-    final imageName = method['image'] as String;
-    final imageType = method['imageType'] as String;
-
-    // Se for do tipo asset, carrega a imagem
-    if (imageType == 'asset') {
-      return Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          gradient: isAvailable
-              ? LinearGradient(
-                  colors: [
-                    color.withOpacity(0.15),
-                    color.withOpacity(0.05),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : null,
-          color: !isAvailable ? _backgroundColor : null,
-          borderRadius: BorderRadius.circular(isList ? 16 : 18),
-          border: Border.all(
-            color: isAvailable
-                ? color.withOpacity(0.25)
-                : _borderColor.withOpacity(0.4),
-            width: isAvailable ? 2 : 1.5,
-          ),
-          boxShadow: isAvailable
-              ? [
-                  BoxShadow(
-                    color: color.withOpacity(0.15),
-                    blurRadius: 12,
-                    offset: Offset(0, 5),
-                  ),
-                ]
-              : null,
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(isList ? 16 : 18),
-          child: Container(
-            color: Colors.white,
-            child: Center(
-              child: _buildPaymentMethodIcon(method, size * 0.6),
-            ),
-          ),
-        ),
-      );
-    } else {
-      // Fallback para ícone
-      return Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          gradient: isAvailable
-              ? LinearGradient(
-                  colors: [
-                    color.withOpacity(0.15),
-                    color.withOpacity(0.05),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : null,
-          color: !isAvailable ? _backgroundColor : null,
-          borderRadius: BorderRadius.circular(isList ? 16 : 18),
-          border: Border.all(
-            color: isAvailable
-                ? color.withOpacity(0.25)
-                : _borderColor.withOpacity(0.4),
-            width: isAvailable ? 2 : 1.5,
-          ),
-          boxShadow: isAvailable
-              ? [
-                  BoxShadow(
-                    color: color.withOpacity(0.15),
-                    blurRadius: 12,
-                    offset: Offset(0, 5),
-                  ),
-                ]
-              : null,
-        ),
-        child: Center(
-          child: _buildPaymentMethodIcon(method, size * 0.5),
-        ),
-      );
-    }
-  }
-
   Widget _buildPaymentMethodIcon(Map<String, dynamic> method, double iconSize) {
     final isAvailable = method['available'] as bool;
     final color = method['color'] as Color;
 
-    // Tenta carregar a imagem do asset
     try {
       return Image.asset(
         'assets/images/${method['image']}.png',
         width: iconSize,
         height: iconSize,
         color: isAvailable ? null : _textSecondary.withOpacity(0.4),
-        colorBlendMode: isAvailable ? BlendMode.srcIn : BlendMode.modulate,
         errorBuilder: (context, error, stackTrace) {
-          // Fallback para ícone se a imagem não existir
           return Icon(
             method['iconData'] as IconData? ?? Icons.credit_card_rounded,
             color: isAvailable ? color : _textSecondary.withOpacity(0.4),
@@ -1204,7 +929,6 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
         },
       );
     } catch (e) {
-      // Fallback para ícone se ocorrer erro
       return Icon(
         method['iconData'] as IconData? ?? Icons.credit_card_rounded,
         color: isAvailable ? color : _textSecondary.withOpacity(0.4),
@@ -1216,56 +940,28 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
   Widget _buildSecuritySection(bool isMobile) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(isMobile ? 24 : 32),
+      padding: EdgeInsets.all(isMobile ? 20 : 28),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            _successColor.withOpacity(0.1),
-            _successColor.withOpacity(0.03),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(isMobile ? 22 : 28),
-        border: Border.all(
-          color: _successColor.withOpacity(0.2),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 30,
-            offset: Offset(0, 10),
-          ),
-        ],
+        color: _successColor.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _successColor.withOpacity(0.2)),
       ),
       child: Row(
         children: [
           Container(
-            width: isMobile ? 76 : 88,
-            height: isMobile ? 76 : 88,
+            width: isMobile ? 60 : 72,
+            height: isMobile ? 60 : 72,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [_successColor, Color(0xFF10B981)],
-              ),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: _successColor.withOpacity(0.4),
-                  blurRadius: 25,
-                  offset: Offset(0, 10),
-                ),
-              ],
+              color: _successColor,
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Center(
-              child: Icon(
-                Icons.verified_user_rounded,
-                color: Colors.white,
-                size: isMobile ? 36 : 42,
-              ),
+            child: Icon(
+              Icons.verified_user_rounded,
+              color: Colors.white,
+              size: isMobile ? 28 : 32,
             ),
           ),
-          SizedBox(width: isMobile ? 24 : 32),
+          SizedBox(width: isMobile ? 16 : 24),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1273,21 +969,18 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                 Text(
                   'Segurança Total Garantida',
                   style: TextStyle(
-                    fontSize: isMobile ? 24 : 28,
-                    fontWeight: FontWeight.w900,
+                    fontSize: isMobile ? 18 : 22,
+                    fontWeight: FontWeight.w700,
                     color: _textPrimary,
-                    letterSpacing: -0.8,
                   ),
                 ),
-                SizedBox(height: isMobile ? 14 : 18),
+                SizedBox(height: isMobile ? 8 : 12),
                 Text(
-                  'Seus dados financeiros permanecem seguros'
-                  'mantendo total confidencialidade e integridade em cada operação',
+                  'Seus dados financeiros permanecem seguros mantendo total confidencialidade e integridade em cada operação',
                   style: TextStyle(
-                    fontSize: isMobile ? 15 : 17,
+                    fontSize: isMobile ? 13 : 15,
                     color: _textSecondary,
-                    height: 1.7,
-                    fontWeight: FontWeight.w400,
+                    height: 1.5,
                   ),
                 ),
               ],
@@ -1320,91 +1013,58 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
       },
     ];
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isMobile ? 24 : 32),
-      decoration: BoxDecoration(
-        color: _cardColor,
-        borderRadius: BorderRadius.circular(isMobile ? 22 : 28),
-        border: Border.all(
-          color: _borderColor.withOpacity(0.7),
-          width: 2,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Perguntas Frequentes',
+          style: TextStyle(
+            fontSize: isMobile ? 20 : 24,
+            fontWeight: FontWeight.w700,
+            color: _textPrimary,
+          ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 30,
-            offset: Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 8,
-                height: 28,
-                decoration: BoxDecoration(
-                  gradient: _primaryGradient,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-              SizedBox(width: 16),
-              Text(
-                'Perguntas Frequentes',
-                style: TextStyle(
-                  fontSize: isMobile ? 24 : 28,
-                  fontWeight: FontWeight.w900,
-                  color: _textPrimary,
-                  letterSpacing: -0.8,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: isMobile ? 24 : 32),
-          ...faqs.asMap().entries.map((entry) {
-            final index = entry.key;
-            final faq = entry.value;
+        SizedBox(height: isMobile ? 16 : 24),
+        ...faqs.asMap().entries.map((entry) {
+          final faq = entry.value;
+          final isLast = entry.key == faqs.length - 1;
 
-            return Container(
-              margin: EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: _backgroundColor,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: _borderColor.withOpacity(0.5)),
-              ),
-              child: ExpansionTile(
-                tilePadding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                collapsedIconColor: _textSecondary,
-                iconColor: _primaryColor,
-                title: Text(
-                  faq['question']!,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: _textPrimary,
-                  ),
+          return Container(
+            margin: EdgeInsets.only(bottom: isLast ? 0 : 12),
+            decoration: BoxDecoration(
+              color: _cardColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: _borderColor),
+            ),
+            child: ExpansionTile(
+              tilePadding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              collapsedIconColor: _textSecondary,
+              iconColor: _primaryColor,
+              title: Text(
+                faq['question']!,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: _textPrimary,
                 ),
-                children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
-                    child: Text(
-                      faq['answer']!,
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: _textSecondary,
-                        height: 1.6,
-                      ),
+              ),
+              children: [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(20, 0, 20, 16),
+                  child: Text(
+                    faq['answer']!,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: _textSecondary,
+                      height: 1.5,
                     ),
                   ),
-                ],
-              ),
-            );
-          }).toList(),
-        ],
-      ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ],
     );
   }
 
@@ -1415,34 +1075,25 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
       isScrollControlled: true,
       builder: (context) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.88,
+          height: MediaQuery.of(context).size.height * 0.85,
           decoration: BoxDecoration(
             color: _cardColor,
             borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(36),
-              topRight: Radius.circular(36),
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.25),
-                blurRadius: 50,
-                offset: Offset(0, -15),
-              ),
-            ],
           ),
           child: Column(
             children: [
-              // Handle do modal
               Container(
                 margin: EdgeInsets.only(top: 12, bottom: 8),
-                width: 60,
-                height: 6,
+                width: 40,
+                height: 4,
                 decoration: BoxDecoration(
                   color: _borderColor,
-                  borderRadius: BorderRadius.circular(3),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-
               Expanded(
                 child: SingleChildScrollView(
                   physics: BouncingScrollPhysics(),
@@ -1450,136 +1101,86 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                     padding: EdgeInsets.all(24),
                     child: Column(
                       children: [
-                        // Ícone do help
                         Container(
-                          width: 120,
-                          height: 120,
+                          width: 80,
+                          height: 80,
                           decoration: BoxDecoration(
-                            gradient: _primaryGradient,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: _primaryColor.withOpacity(0.4),
-                                blurRadius: 30,
-                                offset: Offset(0, 15),
-                              ),
-                            ],
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.live_help_rounded,
-                              color: Colors.white,
-                              size: 56,
+                            gradient: LinearGradient(
+                              colors: [_primaryColor, Color(0xFFF59E0B)],
                             ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Icon(
+                            Icons.help_outline_rounded,
+                            color: Colors.white,
+                            size: 36,
                           ),
                         ),
                         SizedBox(height: 24),
-
-                        // Título
                         Text(
                           'Central de Ajuda',
                           style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w900,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
                             color: _textPrimary,
-                            letterSpacing: -1.0,
                           ),
                         ),
                         SizedBox(height: 12),
-
-                        // Descrição
                         Text(
                           'Tire suas dúvidas sobre depósitos e formas de pagamento. '
                           'Nossa equipe está disponível 24/7 para ajudar.',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 17,
+                            fontSize: 15,
                             color: _textSecondary,
-                            height: 1.6,
-                            fontWeight: FontWeight.w400,
+                            height: 1.5,
                           ),
                         ),
-                        SizedBox(height: 36),
-
-                        // Opções de contato
+                        SizedBox(height: 32),
                         _buildContactOption(
                           icon: Icons.phone_in_talk_rounded,
                           title: 'Suporte Telefônico',
                           subtitle: '+244 923 456 789',
                           color: _successColor,
-                          gradient: LinearGradient(
-                            colors: [_successColor, Color(0xFF10B981)],
-                          ),
                         ),
-                        SizedBox(height: 16),
-
+                        SizedBox(height: 12),
                         _buildContactOption(
                           icon: Icons.email_rounded,
                           title: 'Email',
                           subtitle: 'suporte@gamequiz.ao',
                           color: _infoColor,
-                          gradient: LinearGradient(
-                            colors: [_infoColor, Color(0xFF3B82F6)],
-                          ),
                         ),
-                        SizedBox(height: 16),
-
+                        SizedBox(height: 12),
                         _buildContactOption(
                           icon: Icons.chat_bubble_rounded,
                           title: 'Chat Online',
                           subtitle: 'Resposta em até 5 minutos',
                           color: _primaryColor,
-                          gradient: _primaryGradient,
                         ),
-                        SizedBox(height: 40),
-
-                        // Botão de fechar
-                        Container(
-                          width: double.infinity,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            gradient: _primaryGradient,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: _primaryColor.withOpacity(0.5),
-                                blurRadius: 25,
-                                offset: Offset(0, 10),
-                              ),
-                            ],
+                        SizedBox(height: 32),
+                        ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _primaryColor,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 16,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
                           ),
-                          child: Material(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(20),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(20),
-                              onTap: () => Navigator.pop(context),
-                              child: Center(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.check_circle_rounded,
-                                      color: Colors.white,
-                                      size: 24,
-                                    ),
-                                    SizedBox(width: 12),
-                                    Text(
-                                      'ENTENDI, OBRIGADO!',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w900,
-                                        letterSpacing: 0.8,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                          child: Text(
+                            'Entendi, obrigado!',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
-                        SizedBox(height: 20),
+                        SizedBox(height: 16),
                       ],
                     ),
                   ),
@@ -1597,53 +1198,36 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
     required String title,
     required String subtitle,
     required Color color,
-    required LinearGradient gradient,
   }) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: color.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: Offset(0, 8),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _borderColor),
       ),
       child: Material(
-        color: _cardColor,
-        borderRadius: BorderRadius.circular(22),
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
         child: InkWell(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(12),
           onTap: () {},
           child: Padding(
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.all(16),
             child: Row(
               children: [
                 Container(
-                  width: 64,
-                  height: 64,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
-                    gradient: gradient,
-                    borderRadius: BorderRadius.circular(18),
-                    boxShadow: [
-                      BoxShadow(
-                        color: color.withOpacity(0.4),
-                        blurRadius: 20,
-                        offset: Offset(0, 8),
-                      ),
-                    ],
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Center(
-                    child: Icon(
-                      icon,
-                      color: Colors.white,
-                      size: 30,
-                    ),
+                  child: Icon(
+                    icon,
+                    color: color,
+                    size: 24,
                   ),
                 ),
-                SizedBox(width: 20),
+                SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1651,18 +1235,17 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                       Text(
                         title,
                         style: TextStyle(
-                          fontSize: 19,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
                           color: _textPrimary,
                         ),
                       ),
-                      SizedBox(height: 6),
+                      SizedBox(height: 2),
                       Text(
                         subtitle,
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: 14,
                           color: _textSecondary,
-                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
@@ -1671,7 +1254,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                 Icon(
                   Icons.chevron_right_rounded,
                   color: _borderColor,
-                  size: 30,
+                  size: 24,
                 ),
               ],
             ),
@@ -1692,82 +1275,44 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
   void _showPaymentForm(BuildContext context, Map<String, dynamic> method) {
     showDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.7),
+      barrierColor: Colors.black.withOpacity(0.5),
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         insetPadding: EdgeInsets.symmetric(
-          horizontal: MediaQuery.of(context).size.width > 600 ? 140 : 20,
-          vertical: 24, // Reduzido de 60 para 24
+          horizontal: MediaQuery.of(context).size.width > 600 ? 100 : 16,
+          vertical: 16,
         ),
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height *
-                0.85, // Limitar altura máxima
-            minWidth: MediaQuery.of(context).size.width * 0.9,
+            maxHeight: MediaQuery.of(context).size.height * 0.85,
+            maxWidth: 600,
           ),
           child: Container(
             decoration: BoxDecoration(
               color: _cardColor,
-              borderRadius: BorderRadius.circular(32),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.25),
-                  blurRadius: 50,
-                  offset: Offset(0, 25),
-                ),
-              ],
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
-              mainAxisSize: MainAxisSize.min, // Usar MainAxisSize.min
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Header compacto
                 Container(
-                  padding: EdgeInsets.all(20), // Reduzido de 28
+                  padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        method['color'] as Color,
-                        (method['color'] as Color).withOpacity(0.8),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: method['color'] as Color,
                     borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(32),
-                      topRight: Radius.circular(32),
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
                     ),
                   ),
                   child: Row(
                     children: [
-                      // Botão de fechar mais compacto
-                      Container(
-                        width: 48, // Reduzido de 56
-                        height: 48, // Reduzido de 56
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.3),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(14),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(14),
-                            onTap: () => Navigator.pop(context),
-                            child: Center(
-                              child: Icon(
-                                Icons.close_rounded,
-                                color: Colors.white,
-                                size: 22, // Reduzido de 26
-                              ),
-                            ),
-                          ),
-                        ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: Icon(Icons.close_rounded),
+                        color: Colors.white,
+                        iconSize: 20,
                       ),
-                      SizedBox(width: 16), // Reduzido de 20
+                      SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1775,159 +1320,41 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
                             Text(
                               method['name'],
                               style: TextStyle(
-                                fontSize: 22, // Reduzido de 26
-                                fontWeight: FontWeight.w900,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
                                 color: Colors.white,
-                                letterSpacing: -0.6, // Reduzido
                               ),
                             ),
-                            SizedBox(height: 4), // Reduzido de 6
+                            SizedBox(height: 4),
                             Text(
                               method['description'],
                               style: TextStyle(
-                                fontSize: 14, // Reduzido de 15
+                                fontSize: 14,
                                 color: Colors.white.withOpacity(0.9),
-                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      _buildPaymentMethodImage(
-                          method, 48, false), // Reduzido de 56
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(
+                          child: _buildPaymentMethodIcon(method, 24),
+                        ),
+                      ),
                     ],
                   ),
                 ),
-
-                // Formulário com tamanho fixo
                 Flexible(
-                  fit: FlexFit.loose, // Usar Flexible em vez de Expanded
-                  child: Container(
-                    constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(context).size.height *
-                          0.5, // Limitar altura
-                    ),
-                    child: SingleChildScrollView(
-                      physics: BouncingScrollPhysics(),
-                      padding: EdgeInsets.all(20), // Reduzido de 28
-                      child: PaymentForm(method: method['name']),
-                    ),
-                  ),
-                ),
-
-                // Footer compacto
-                Container(
-                  padding: EdgeInsets.all(20), // Reduzido de 24
-                  decoration: BoxDecoration(
-                    color: _backgroundColor,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(32),
-                      bottomRight: Radius.circular(32),
-                    ),
-                    border: Border(
-                      top: BorderSide(
-                          color: _borderColor, width: 1.5), // Reduzido de 2
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 52, // Reduzido de 60
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius:
-                                BorderRadius.circular(16), // Reduzido de 18
-                            border: Border.all(
-                                color: _borderColor, width: 1.5), // Reduzido
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 8, // Reduzido de 10
-                                offset: Offset(0, 4), // Reduzido de 5
-                              ),
-                            ],
-                          ),
-                          child: Material(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(16),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(16),
-                              onTap: () => Navigator.pop(context),
-                              child: Center(
-                                child: Text(
-                                  'CANCELAR',
-                                  style: TextStyle(
-                                    color: _textSecondary,
-                                    fontSize: 15, // Reduzido de 17
-                                    fontWeight:
-                                        FontWeight.w700, // Reduzido de 800
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 16), // Reduzido de 20
-                      Expanded(
-                        flex: 2,
-                        child: Container(
-                          height: 52, // Reduzido de 60
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                method['color'] as Color,
-                                (method['color'] as Color).withOpacity(0.8),
-                              ],
-                            ),
-                            borderRadius:
-                                BorderRadius.circular(16), // Reduzido de 18
-                            boxShadow: [
-                              BoxShadow(
-                                color:
-                                    (method['color'] as Color).withOpacity(0.5),
-                                blurRadius: 20, // Reduzido de 25
-                                offset: Offset(0, 8), // Reduzido de 10
-                              ),
-                            ],
-                          ),
-                          child: Material(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(16),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(16),
-                              onTap: () {
-                                // Lógica de pagamento
-                                Navigator.pop(context);
-                              },
-                              child: Center(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.lock_rounded,
-                                      color: Colors.white,
-                                      size: 20, // Reduzido de 24
-                                    ),
-                                    SizedBox(width: 8), // Reduzido de 12
-                                    Text(
-                                      'CONFIRMAR',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15, // Reduzido de 17
-                                        fontWeight:
-                                            FontWeight.w800, // Reduzido de 900
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                  child: SingleChildScrollView(
+                    physics: BouncingScrollPhysics(),
+                    padding: EdgeInsets.all(24),
+                    child: PaymentForm(method: method['name']),
                   ),
                 ),
               ],
@@ -1941,7 +1368,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
   void _showMulticaixaInfo(BuildContext context) {
     showDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.8),
+      barrierColor: Colors.black.withOpacity(0.5),
       barrierDismissible: false,
       builder: (context) => MulticaixaDialog(model: _model),
     );
@@ -1949,7 +1376,7 @@ class _Tela10DepositoListaWidgetState extends State<Tela10DepositoListaWidget>
 }
 
 // ======================================================================
-// CLASSE SEPARADA PARA O DIÁLOGO MULTICAIXA
+// CLASSE MULTICAIXA DIALOG (MANTIDA COM MELHORIAS DE DESIGN)
 // ======================================================================
 
 class MulticaixaDialog extends StatefulWidget {
@@ -1971,13 +1398,12 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
   Color _corMensagem = Colors.transparent;
   Timer? _timerMensagem;
 
-  // Cores simplificadas
   final Color _primaryColor = Color(0xFFEC8D0D);
   final Color _backgroundColor = Color(0xFFF8FAFC);
   final Color _cardColor = Colors.white;
-  final Color _textPrimary = Color(0xFF1E293B);
-  final Color _textSecondary = Color(0xFF64748B);
-  final Color _borderColor = Color(0xFFE2E8F0);
+  final Color _textPrimary = Color(0xFF111827);
+  final Color _textSecondary = Color(0xFF6B7280);
+  final Color _borderColor = Color(0xFFE5E7EB);
   final Color _successColor = Color(0xFF10B981);
   final Color _errorColor = Color(0xFFEF4444);
 
@@ -2006,7 +1432,8 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
 
   bool _isMontanteValido() {
     if (_montanteController.text.isEmpty) return false;
-    final valor = double.tryParse(_montanteController.text.replaceAll(',', '.'));
+    final valor =
+        double.tryParse(_montanteController.text.replaceAll(',', '.'));
     return valor != null && valor >= 500;
   }
 
@@ -2055,8 +1482,7 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
         },
         context,
       );
-      
-      print(result["isSuccess"]);
+
       if (result != null && result["isSuccess"] == true) {
         setState(() {
           _referenciaGerada = true;
@@ -2071,7 +1497,8 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
         setState(() => _isLoading = false);
 
         final error = result["error"];
-        final message = error?['detail']?['message'] ?? "Falha ao gerar referência";
+        final message =
+            error?['detail']?['message'] ?? "Falha ao gerar referência";
         final details = error?['detail']?['details'] ?? "";
 
         _mostrarMensagemTemporaria(
@@ -2099,8 +1526,10 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
   }
 
   void _copiarTudo() {
-    if (widget.model.reference.isNotEmpty && _montanteController.text.isNotEmpty) {
-      String tudo = 'Entidade: 11454\nReferência: ${widget.model.reference}\nValor: Kz ${_montanteController.text}';
+    if (widget.model.reference.isNotEmpty &&
+        _montanteController.text.isNotEmpty) {
+      String tudo =
+          'Entidade: 11454\nReferência: ${widget.model.reference}\nValor: Kz ${_montanteController.text}';
       Clipboard.setData(ClipboardData(text: tudo));
       _mostrarMensagemTemporaria('Todos dados copiados', _primaryColor);
     }
@@ -2122,7 +1551,7 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
     final isSmallScreen = screenWidth < 400;
 
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       insetPadding: EdgeInsets.symmetric(
         horizontal: isSmallScreen ? 16 : 24,
         vertical: 16,
@@ -2135,19 +1564,18 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
         child: Container(
           decoration: BoxDecoration(
             color: _cardColor,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header simples
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: _primaryColor,
                   borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
                   ),
                 ),
                 child: Row(
@@ -2159,10 +1587,11 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
                         height: 40,
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         child: Center(
-                          child: Icon(Icons.close, color: Colors.white, size: 20),
+                          child:
+                              Icon(Icons.close, color: Colors.white, size: 20),
                         ),
                       ),
                     ),
@@ -2174,7 +1603,7 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
                           Text(
                             'Multicaixa',
                             style: TextStyle(
-                              fontSize: isSmallScreen ? 18 : 20,
+                              fontSize: 20,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
                             ),
@@ -2183,39 +1612,43 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
                           Text(
                             'Pagamento por referência',
                             style: TextStyle(
-                              fontSize: 13,
+                              fontSize: 14,
                               color: Colors.white.withOpacity(0.9),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    Image.asset(
-                      'assets/images/payment_methods/multicaixa.png',
+                    Container(
                       width: 40,
                       height: 40,
-                      color: Colors.white,
-                      errorBuilder: (context, error, stackTrace) => Icon(
-                        Icons.atm,
-                        color: Colors.white,
-                        size: 32,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.atm,
+                          color: Colors.white,
+                          size: 24,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-
-              // Mensagem de status
               if (_mostrarMensagem)
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   color: _corMensagem.withOpacity(0.1),
                   child: Row(
                     children: [
                       Icon(
-                        _corMensagem == _successColor ? Icons.check_circle : Icons.error,
+                        _corMensagem == _successColor
+                            ? Icons.check_circle
+                            : Icons.error,
                         color: _corMensagem,
-                        size: 18,
+                        size: 20,
                       ),
                       SizedBox(width: 10),
                       Expanded(
@@ -2232,48 +1665,35 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
                           setState(() => _mostrarMensagem = false);
                           _timerMensagem?.cancel();
                         },
-                        child: Icon(Icons.close, size: 18, color: _textSecondary),
+                        child:
+                            Icon(Icons.close, size: 20, color: _textSecondary),
                       ),
                     ],
                   ),
                 ),
-
-              // Conteúdo principal
               Expanded(
                 child: SingleChildScrollView(
                   physics: BouncingScrollPhysics(),
-                  padding: EdgeInsets.all(16),
+                  padding: EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      // Entidade
                       _buildInfoCard(
                         title: 'Entidade',
                         value: '11454',
                         description: 'Código da empresa',
                         onCopy: _copiarEntidade,
-                        icon: Icons.account_balance,
                       ),
                       SizedBox(height: 16),
-
-                      // Montante
                       _buildAmountCard(),
                       SizedBox(height: 16),
-
-                      // Referência
                       _buildReferenceCard(),
                       SizedBox(height: 20),
-
-                      // Botões principais
                       _buildMainActionButtons(),
-
                       if (_referenciaGerada) ...[
                         SizedBox(height: 16),
                         _buildCopyAllButton(),
                       ],
-
                       SizedBox(height: 20),
-
-                      // Instruções (somente quando referência gerada)
                       if (_referenciaGerada) _buildInstructionsCard(),
                     ],
                   ),
@@ -2291,7 +1711,6 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
     required String value,
     required String description,
     required VoidCallback onCopy,
-    required IconData icon,
   }) {
     return Container(
       padding: EdgeInsets.all(16),
@@ -2303,19 +1722,13 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(icon, color: _primaryColor, size: 20),
-              SizedBox(width: 10),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: _textPrimary,
-                ),
-              ),
-            ],
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: _textPrimary,
+            ),
           ),
           SizedBox(height: 12),
           Row(
@@ -2327,7 +1740,7 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
                     Text(
                       value,
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 20,
                         fontWeight: FontWeight.w700,
                         color: _primaryColor,
                       ),
@@ -2343,7 +1756,6 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
                   ],
                 ),
               ),
-              SizedBox(width: 12),
               IconButton(
                 onPressed: onCopy,
                 icon: Icon(Icons.copy, color: _primaryColor, size: 20),
@@ -2368,19 +1780,13 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(Icons.attach_money, color: _primaryColor, size: 20),
-              SizedBox(width: 10),
-              Text(
-                'Montante',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: _textPrimary,
-                ),
-              ),
-            ],
+          Text(
+            'Montante',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: _textPrimary,
+            ),
           ),
           SizedBox(height: 12),
           TextFormField(
@@ -2403,21 +1809,16 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
               ),
               filled: true,
               fillColor: Colors.white,
-              contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               prefixText: 'Kz ',
               prefixStyle: TextStyle(
                 color: _textPrimary,
                 fontWeight: FontWeight.w600,
+                fontSize: 16,
               ),
               errorText: _validarMontante(_montanteController.text),
               errorStyle: TextStyle(fontSize: 12, color: _errorColor),
-              suffixIcon: _montanteController.text.isNotEmpty
-                  ? IconButton(
-                      icon: Icon(Icons.clear, size: 18, color: _textSecondary),
-                      onPressed: () => _montanteController.clear(),
-                      padding: EdgeInsets.zero,
-                    )
-                  : null,
             ),
             style: TextStyle(
               fontSize: 16,
@@ -2426,11 +1827,12 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
             ),
             keyboardType: TextInputType.numberWithOptions(decimal: true),
             textInputAction: TextInputAction.done,
-            onFieldSubmitted: (_) => _isMontanteValido() ? _gerarReferencia() : null,
+            onFieldSubmitted: (_) =>
+                _isMontanteValido() ? _gerarReferencia() : null,
           ),
           SizedBox(height: 8),
           Text(
-            'Mínimo: 500,00 Kz • Máximo: 1.000.000 Kz',
+            'Mínimo: 500,00 Kz',
             style: TextStyle(fontSize: 12, color: _textSecondary),
           ),
         ],
@@ -2445,34 +1847,33 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
         color: _backgroundColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _referenciaGerada ? _successColor.withOpacity(0.3) : _borderColor,
+          color:
+              _referenciaGerada ? _successColor.withOpacity(0.3) : _borderColor,
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(Icons.receipt_long, color: _successColor, size: 20),
-              SizedBox(width: 10),
-              Text(
-                'Referência',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: _textPrimary,
-                ),
-              ),
-            ],
+          Text(
+            'Referência',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: _textPrimary,
+            ),
           ),
           SizedBox(height: 12),
           Container(
-            padding: EdgeInsets.all(12),
+            padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: _referenciaGerada ? _successColor.withOpacity(0.1) : Colors.white,
+              color: _referenciaGerada
+                  ? _successColor.withOpacity(0.1)
+                  : Colors.white,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: _referenciaGerada ? _successColor.withOpacity(0.2) : _borderColor,
+                color: _referenciaGerada
+                    ? _successColor.withOpacity(0.2)
+                    : _borderColor,
               ),
             ),
             child: Row(
@@ -2481,16 +1882,16 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (_referenciaGerada && widget.model.reference.isNotEmpty)
+                      if (_referenciaGerada &&
+                          widget.model.reference.isNotEmpty)
                         Text(
                           widget.model.reference,
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 18,
                             fontWeight: FontWeight.w700,
                             color: _successColor,
                             fontFamily: 'Monospace',
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
                       if (!_referenciaGerada || widget.model.reference.isEmpty)
                         Text(
@@ -2501,17 +1902,20 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
                             fontStyle: FontStyle.italic,
                           ),
                         ),
-                      if (_referenciaGerada && widget.model.reference.isNotEmpty)
+                      if (_referenciaGerada &&
+                          widget.model.reference.isNotEmpty)
                         SizedBox(height: 4),
-                      if (_referenciaGerada && widget.model.reference.isNotEmpty)
+                      if (_referenciaGerada &&
+                          widget.model.reference.isNotEmpty)
                         Row(
                           children: [
-                            Icon(Icons.access_time, size: 14, color: _successColor),
+                            Icon(Icons.access_time,
+                                size: 14, color: _successColor),
                             SizedBox(width: 4),
                             Text(
                               'Válida por 24 horas',
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 12,
                                 color: _successColor,
                               ),
                             ),
@@ -2567,14 +1971,18 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
           child: ElevatedButton(
             onPressed: _referenciaGerada
                 ? () {
-                    _mostrarMensagemTemporaria('Configuração concluída', _successColor);
+                    _mostrarMensagemTemporaria(
+                        'Configuração concluída', _successColor);
                     Future.delayed(Duration(seconds: 1), () {
                       if (mounted) Navigator.pop(context);
                     });
                   }
-                : (_isMontanteValido() && !_isLoading) ? _gerarReferencia : null,
+                : (_isMontanteValido() && !_isLoading)
+                    ? _gerarReferencia
+                    : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _referenciaGerada ? _successColor : _primaryColor,
+              backgroundColor:
+                  _referenciaGerada ? _successColor : _primaryColor,
               padding: EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -2613,7 +2021,7 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
     return OutlinedButton.icon(
       onPressed: _copiarTudo,
       style: OutlinedButton.styleFrom(
-        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
         side: BorderSide(color: _primaryColor),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
@@ -2638,19 +2046,13 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(Icons.info, color: _primaryColor, size: 18),
-              SizedBox(width: 8),
-              Text(
-                'Como pagar',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: _textPrimary,
-                ),
-              ),
-            ],
+          Text(
+            'Como pagar',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: _textPrimary,
+            ),
           ),
           SizedBox(height: 12),
           ..._buildInstructionSteps(),
@@ -2700,7 +2102,7 @@ class _MulticaixaDialogState extends State<MulticaixaDialog> {
               child: Text(
                 step,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 14,
                   color: _textPrimary,
                   height: 1.4,
                 ),

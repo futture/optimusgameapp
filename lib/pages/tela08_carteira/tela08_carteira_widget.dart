@@ -54,22 +54,27 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
   final Color _errorColor = Color(0xFFEF4444);
   final Color _warningColor = Color(0xFFF59E0B);
   final Color _infoColor = Color(0xFF3B82F6);
- 
+
   final LinearGradient _primaryGradient = LinearGradient(
     colors: [Color(0xFFEC8D0D), Color(0xFFF59E0B)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
+  // Constantes responsivas
+  static const double _webMaxWidth = 1200.0;
+  static const double _webCardMaxWidth = 800.0;
+  static const double _mobileBreakpoint = 768.0;
+
   @override
   void initState() {
     super.initState();
-    _model = createModel(context, () => Tela08CarteiraModel()); 
+    _model = createModel(context, () => Tela08CarteiraModel());
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted &&
           (_model.textController1?.text.isEmpty == true ||
               _model.textController2?.text.isEmpty == true)) {
-          //await _showEmptyFieldWarning();
+        //await _showEmptyFieldWarning();
       }
     });
 
@@ -275,37 +280,79 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
         .fold(0.0, (sum, item) => sum + item.amount);
   }
 
+  // Método auxiliar para determinar se é web
+  bool get _isWeb => MediaQuery.of(context).size.width > _mobileBreakpoint;
+
+  // Método auxiliar para obter o tamanho máximo do conteúdo
+  double get _maxContentWidth {
+    final screenWidth = MediaQuery.of(context).size.width;
+    return _isWeb ? _webMaxWidth : screenWidth;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 600;
-
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: _backgroundColor,
         body: SafeArea(
+          top: true,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Header
-              _buildHeader(isMobile),
+              // Header fixo - SEMPRE OCUPA LARGURA TOTAL
+              _buildHeader(),
 
-              // Card de Saldo
-              _buildBalanceCard(isMobile),
-
-              // TabBar
-              _buildTabBar(isMobile),
-
-              // Conteúdo das Tabs
+              // TUDO ABAIXO DO HEADER TEM SCROLL E É CENTRALIZADO NA WEB
               Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24),
-                  child: TabBarView(
-                    controller: _model.tabBarController,
-                    children: [
-                      _buildHistoricoTab(isMobile),
-                      _buildSolicitacoesTab(isMobile),
-                    ],
+                child: Container(
+                  width: double.infinity,
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: _maxContentWidth,
+                      ),
+                      child: SingleChildScrollView(
+                        physics: AlwaysScrollableScrollPhysics(),
+                        child: Container(
+                          width: double.infinity,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Card de Saldo - CENTRALIZADO
+                              _buildBalanceCard(),
+
+                              // TabBar - CENTRALIZADO
+                              _buildTabBar(),
+
+                              // Conteúdo das Tabs - ALTURA FLEXÍVEL
+                              Container(
+                                width: double.infinity,
+                                padding: _isWeb
+                                    ? EdgeInsets.symmetric(horizontal: 40, vertical: 16)
+                                    : EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                constraints: BoxConstraints(
+                                  minHeight: MediaQuery.of(context).size.height * 0.5,
+                                ),
+                                child: SizedBox(
+                                  height: MediaQuery.of(context).size.height * 0.6,
+                                  child: TabBarView(
+                                    controller: _model.tabBarController,
+                                    children: [
+                                      // Tab de Histórico
+                                      _buildHistoricoTab(),
+                                      // Tab de Solicitações
+                                      _buildSolicitacoesTab(),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -316,7 +363,7 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
     );
   }
 
-  Widget _buildHeader(bool isMobile) {
+  Widget _buildHeader() {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -329,32 +376,38 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
           ),
         ],
       ),
-      padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 20 : 32,
-        vertical: isMobile ? 16 : 20,
-      ),
-      child: Row(
-        children: [
-          _buildBackButton(isMobile),
-          SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              'CARTEIRA DIGITAL',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: isMobile ? 20 : 24,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1,
-              ),
-            ),
+      padding: _isWeb
+          ? EdgeInsets.symmetric(horizontal: 40, vertical: 24)
+          : EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: _maxContentWidth,
           ),
-          _buildWalletIcon(isMobile),
-        ],
+          child: Row(
+            children: [
+              _buildBackButton(),
+              SizedBox(width: 20),
+              Expanded(
+                child: Text(
+                  'CARTEIRA DIGITAL',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: _isWeb ? 24 : 20,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+              _buildWalletIcon(),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildBackButton(bool isMobile) {
+  Widget _buildBackButton() {
     return Material(
       color: Colors.transparent,
       borderRadius: BorderRadius.circular(12),
@@ -362,8 +415,8 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
         onTap: () => context.safePop(),
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          width: 44,
-          height: 44,
+          width: _isWeb ? 48 : 44,
+          height: _isWeb ? 48 : 44,
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.15),
             borderRadius: BorderRadius.circular(12),
@@ -371,17 +424,17 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
           child: Icon(
             Icons.arrow_back_ios_rounded,
             color: Colors.white,
-            size: 20,
+            size: _isWeb ? 20 : 18,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildWalletIcon(bool isMobile) {
+  Widget _buildWalletIcon() {
     return Container(
-      width: 44,
-      height: 44,
+      width: _isWeb ? 48 : 44,
+      height: _isWeb ? 48 : 44,
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.15),
         shape: BoxShape.circle,
@@ -389,204 +442,200 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
       child: Icon(
         Icons.account_balance_wallet_rounded,
         color: Colors.white,
-        size: 22,
+        size: _isWeb ? 24 : 20,
       ),
     );
   }
 
-  Widget _buildBalanceCard(bool isMobile) {
+  Widget _buildBalanceCard() {
     return Padding(
-      padding: EdgeInsets.all(isMobile ? 20 : 24),
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(isMobile ? 24 : 32),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFF1E293B),
-              Color(0xFF0F172A),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      padding: _isWeb
+          ? EdgeInsets.all(24)
+          : EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: _webCardMaxWidth,
           ),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 30,
-              offset: Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.account_balance_wallet_rounded,
-                  color: Colors.white,
-                  size: 24,
-                ),
-                SizedBox(width: 12),
-                Text(
-                  'Saldo Disponível',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+          child: Container(
+            width: double.infinity,
+            padding: _isWeb ? EdgeInsets.all(32) : EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF1E293B),
+                  Color(0xFF0F172A),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 30,
+                  offset: Offset(0, 10),
                 ),
               ],
             ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
                   children: [
-                    Text(
-                      'Total',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
-                        fontSize: 14,
-                      ),
+                    Icon(
+                      Icons.account_balance_wallet_rounded,
+                      color: Colors.white,
+                      size: _isWeb ? 24 : 22,
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(width: 12),
                     Text(
-                      '${(userAccountInfo?.availableBalance ?? 0.00).toStringAsFixed(2)} Kz',
+                      'Saldo Disponível',
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: isMobile ? 32 : 40,
-                        fontWeight: FontWeight.w800,
-                        height: 1,
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: _isWeb ? 16 : 15,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
-                Column(
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      'Conta',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
-                        fontSize: 14,
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Total',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.6),
+                              fontSize: _isWeb ? 14 : 13,
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              '${(userAccountInfo?.availableBalance ?? 0.00).toStringAsFixed(2)} Kz',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: _isWeb ? 40 : 32,
+                                fontWeight: FontWeight.w800,
+                                height: 1,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    SizedBox(height: 4),
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: _primaryColor,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        userAccountInfo?.accountNumber?.toString() ?? '---',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        ),
+                    SizedBox(width: 20),
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            'Conta',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.6),
+                              fontSize: _isWeb ? 14 : 13,
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: _primaryColor,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                userAccountInfo?.accountNumber.toString() ??
+                                    'N/A',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: _isWeb ? 14 : 13,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-            SizedBox(height: 8),
-            Divider(color: Colors.white.withOpacity(0.1), height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildInfoItem('Limite Diário', '100.000,00 Kz'),
-                _buildInfoItem('Última Atualização',
-                    DateFormat('dd/MM/yyyy').format(DateTime.now())),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabBar() {
+    return Padding(
+      padding: _isWeb
+          ? EdgeInsets.symmetric(horizontal: 40)
+          : EdgeInsets.symmetric(horizontal: 16),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: _webCardMaxWidth,
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: _surfaceColor,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 20,
+                  offset: Offset(0, 8),
+                ),
               ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoItem(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.6),
-            fontSize: 12,
-          ),
-        ),
-        SizedBox(height: 2),
-        Text(
-          value,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTabBar(bool isMobile) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 20 : 24),
-      child: Container(
-        decoration: BoxDecoration(
-          color: _surfaceColor,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 20,
-              offset: Offset(0, 8),
+            child: FlutterFlowButtonTabBar(
+              useToggleButtonStyle: true,
+              labelStyle: TextStyle(
+                fontSize: _isWeb ? 16 : 14,
+                fontWeight: FontWeight.w600,
+              ),
+              unselectedLabelStyle: TextStyle(
+                fontSize: _isWeb ? 16 : 14,
+                fontWeight: FontWeight.w500,
+              ),
+              labelColor: Colors.white,
+              unselectedLabelColor: _onSurfaceColor.withOpacity(0.6),
+              backgroundColor: _primaryColor,
+              unselectedBackgroundColor: _surfaceColor,
+              borderColor: _primaryColor,
+              unselectedBorderColor: _outlineColor,
+              borderWidth: 2,
+              borderRadius: 12,
+              elevation: 0,
+              labelPadding: EdgeInsets.symmetric(
+                horizontal: _isWeb ? 32 : 24,
+                vertical: _isWeb ? 16 : 14,
+              ),
+              buttonMargin: EdgeInsets.all(6),
+              tabs: [
+                Tab(text: 'Histórico'),
+                Tab(text: 'Solicitações'),
+              ],
+              controller: _model.tabBarController,
             ),
-          ],
-        ),
-        child: FlutterFlowButtonTabBar(
-          useToggleButtonStyle: true,
-          labelStyle: TextStyle(
-            fontSize: isMobile ? 14 : 16,
-            fontWeight: FontWeight.w600,
           ),
-          unselectedLabelStyle: TextStyle(
-            fontSize: isMobile ? 14 : 16,
-            fontWeight: FontWeight.w500,
-          ),
-          labelColor: Colors.white,
-          unselectedLabelColor: _onSurfaceColor.withOpacity(0.6),
-          backgroundColor: _primaryColor,
-          unselectedBackgroundColor: _surfaceColor,
-          borderColor: _primaryColor,
-          unselectedBorderColor: _outlineColor,
-          borderWidth: 2,
-          borderRadius: 12,
-          elevation: 0,
-          labelPadding: EdgeInsets.symmetric(
-            horizontal: isMobile ? 24 : 32,
-            vertical: isMobile ? 14 : 16,
-          ),
-          buttonMargin: EdgeInsets.all(6),
-          tabs: [
-            Tab(text: 'Histórico'),
-            Tab(text: 'Solicitações'),
-          ],
-          controller: _model.tabBarController,
         ),
       ),
     );
   }
 
-  Widget _buildHistoricoTab(bool isMobile) {
+  Widget _buildHistoricoTab() {
     if (isLoading) {
       return _buildLoadingState();
     }
@@ -599,187 +648,436 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 20),
-      child: ListView.separated(
-        itemCount: depositHistory.length,
-        separatorBuilder: (_, __) =>
-            Divider(height: 1, color: _outlineColor.withOpacity(0.3)),
-        itemBuilder: (context, index) {
-          final item = depositHistory[index];
-          final isDeposit = item['operacao'] == 'Depósito';
-          final statusColor = _getStatusColor(item['status']);
+    return Container(
+      width: double.infinity,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: _webCardMaxWidth,
+          ),
+          child: ListView.separated(
+            physics: AlwaysScrollableScrollPhysics(),
+            itemCount: depositHistory.length,
+            separatorBuilder: (_, __) => Divider(
+              height: 1,
+              color: _outlineColor.withOpacity(0.3),
+              indent: 16,
+              endIndent: 16,
+            ),
+            padding: EdgeInsets.only(top: 8, bottom: 20),
+            itemBuilder: (context, index) {
+              final item = depositHistory[index];
+              final isDeposit = item['operacao'] == 'Depósito';
+              final statusColor = _getStatusColor(item['status']);
 
-          return Material(
-            color: Colors.transparent,
-            child: InkWell(
-              //onTap: () => _showTransactionDetails(item['raw']),
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: _surfaceColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    // Ícone
-                    Container(
-                      width: 48,
-                      height: 48,
+              return Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => _showTransactionDetails(
+                        item['raw'] as TransactionResponse),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: _isWeb ? EdgeInsets.all(16) : EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: (isDeposit ? _successColor : _primaryColor)
-                            .withOpacity(0.1),
+                        color: _surfaceColor,
                         borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        isDeposit
-                            ? Icons.arrow_downward_rounded
-                            : Icons.arrow_upward_rounded,
-                        color: isDeposit ? _successColor : _primaryColor,
-                        size: 24,
-                      ),
-                    ),
-                    SizedBox(width: 16),
-
-                    // Detalhes
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item['operacao'],
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                              color: _onSurfaceColor,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            item['dataHora'],
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: _onSurfaceColor.withOpacity(0.6),
-                            ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.03),
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
                           ),
                         ],
                       ),
-                    ),
+                      child: Row(
+                        children: [
+                          // Ícone
+                          Container(
+                            width: _isWeb ? 52 : 44,
+                            height: _isWeb ? 52 : 44,
+                            decoration: BoxDecoration(
+                              color: (isDeposit ? _successColor : _primaryColor)
+                                  .withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              isDeposit
+                                  ? Icons.arrow_downward_rounded
+                                  : Icons.arrow_upward_rounded,
+                              color: isDeposit ? _successColor : _primaryColor,
+                              size: _isWeb ? 24 : 22,
+                            ),
+                          ),
+                          SizedBox(width: _isWeb ? 16 : 12),
 
-                    // Montante e Status
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          item['montante'],
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
-                            color: _onSurfaceColor,
+                          // Detalhes
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item['operacao'],
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: _isWeb ? 16 : 15,
+                                    color: _onSurfaceColor,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                SizedBox(height: 6),
+                                Text(
+                                  item['dataHora'],
+                                  style: TextStyle(
+                                    fontSize: _isWeb ? 13 : 12,
+                                    color: _onSurfaceColor.withOpacity(0.6),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 4),
-                        Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: statusColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
+
+                          SizedBox(width: _isWeb ? 16 : 8),
+
+                          // Montante e Status
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: statusColor,
-                                  shape: BoxShape.circle,
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  item['montante'],
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: _isWeb ? 16 : 15,
+                                    color: _onSurfaceColor,
+                                  ),
                                 ),
                               ),
-                              SizedBox(width: 6),
-                              Text(
-                                _getStatusLabel(item['status']),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: statusColor,
+                              SizedBox(height: 8),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: statusColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: statusColor,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        _getStatusLabel(item['status']),
+                                        style: TextStyle(
+                                          fontSize: _isWeb ? 12 : 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: statusColor,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          );
-        },
+              );
+            },
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildSolicitacoesTab(bool isMobile) {
+  Widget _buildSolicitacoesTab() {
     final filteredWithdrawals = _getFilteredWithdrawals();
 
-    return Column(
-      children: [
-        // Filtros
-        _buildFiltersSection(isMobile),
-        SizedBox(height: 20),
+    return Container(
+      width: double.infinity,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: _webCardMaxWidth,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Filtros - AGORA VISÍVEIS NO TOPO
+              _buildFiltersSection(),
+              SizedBox(height: _isWeb ? 16 : 12),
 
-        // Estatísticas
-        if (filteredWithdrawals.isNotEmpty)
-          _buildStatsCard(filteredWithdrawals, isMobile),
+              // Estatísticas - VISÍVEIS APÓS OS FILTROS
+              if (filteredWithdrawals.isNotEmpty)
+                Column(
+                  children: [
+                    _buildStatsCard(filteredWithdrawals),
+                    SizedBox(height: _isWeb ? 16 : 12),
+                  ],
+                ),
 
-        SizedBox(height: 20),
+              // Lista de solicitações - COM SCROLL PRÓPRIO
+              Expanded(
+                child: isLoadingWithdrawals
+                    ? _buildLoadingState()
+                    : filteredWithdrawals.isEmpty
+                        ? _buildEmptyState(
+                            icon: Icons.request_quote_rounded,
+                            title: 'Nenhuma solicitação encontrada',
+                            subtitle: _selectedFilter == 'TODOS'
+                                ? 'Você ainda não fez nenhuma solicitação de saque'
+                                : 'Nenhuma solicitação com o estado "${_getStatusLabel(_selectedFilter)}"',
+                          )
+                        : RefreshIndicator(
+                            color: _primaryColor,
+                            backgroundColor: _surfaceColor,
+                            onRefresh: loadWithdrawalHistory,
+                            child: ListView.separated(
+                              physics: AlwaysScrollableScrollPhysics(),
+                              padding: EdgeInsets.only(top: 8, bottom: 20),
+                              itemCount: filteredWithdrawals.length,
+                              separatorBuilder: (_, __) => SizedBox(height: _isWeb ? 12 : 8),
+                              itemBuilder: (context, index) {
+                                final withdrawal = filteredWithdrawals[index];
+                                final statusColor = _getStatusColor(withdrawal.status);
+                                final dateTime = _parseDateTime(withdrawal.createdAt);
+                                final formattedDate = DateFormat('dd/MM/yyyy').format(dateTime);
+                                final formattedTime = DateFormat('HH:mm').format(dateTime);
+                                final amount = '${withdrawal.amount.toStringAsFixed(2).replaceAll('.', ',')} Kz';
+                                final shortId = withdrawal.id?.substring(0, 6).toUpperCase() ?? 'N/A';
 
-        // Lista
-        Expanded(
-          child: isLoadingWithdrawals
-              ? _buildLoadingState()
-              : filteredWithdrawals.isEmpty
-                  ? _buildEmptyState(
-                      icon: Icons.request_quote_rounded,
-                      title: 'Nenhuma solicitação',
-                      subtitle: _selectedFilter == 'TODOS'
-                          ? 'Você ainda não fez nenhum saque'
-                          : 'Nenhuma solicitação com este filtro',
-                    )
-                  : _buildWithdrawalsList(filteredWithdrawals, isMobile),
+                                return Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 4),
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: InkWell(
+                                      onTap: () => _showWithdrawalDetails(withdrawal),
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Container(
+                                        padding: _isWeb ? EdgeInsets.all(16) : EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: _surfaceColor,
+                                          borderRadius: BorderRadius.circular(12),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withOpacity(0.03),
+                                              blurRadius: 4,
+                                              offset: Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            // Status indicator
+                                            Container(
+                                              width: 8,
+                                              height: 40,
+                                              decoration: BoxDecoration(
+                                                color: statusColor,
+                                                borderRadius: BorderRadius.circular(4),
+                                              ),
+                                            ),
+                                            SizedBox(width: _isWeb ? 16 : 12),
+
+                                            // Detalhes
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Text(
+                                                        'Saque',
+                                                        style: TextStyle(
+                                                          fontSize: _isWeb ? 16 : 14,
+                                                          fontWeight: FontWeight.w700,
+                                                          color: _onSurfaceColor,
+                                                        ),
+                                                      ),
+                                                      Spacer(),
+                                                      Text(
+                                                        '#$shortId',
+                                                        style: TextStyle(
+                                                          fontSize: _isWeb ? 12 : 10,
+                                                          color: _onSurfaceColor.withOpacity(0.5),
+                                                          fontWeight: FontWeight.w600,
+                                                          fontFamily: 'monospace',
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: _isWeb ? 8 : 6),
+                                                  Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.calendar_today_rounded,
+                                                        size: _isWeb ? 14 : 12,
+                                                        color: _onSurfaceColor.withOpacity(0.5),
+                                                      ),
+                                                      SizedBox(width: _isWeb ? 6 : 4),
+                                                      Text(
+                                                        formattedDate,
+                                                        style: TextStyle(
+                                                          fontSize: _isWeb ? 13 : 11,
+                                                          color: _onSurfaceColor.withOpacity(0.6),
+                                                        ),
+                                                      ),
+                                                      SizedBox(width: _isWeb ? 12 : 8),
+                                                      Icon(
+                                                        Icons.access_time_rounded,
+                                                        size: _isWeb ? 14 : 12,
+                                                        color: _onSurfaceColor.withOpacity(0.5),
+                                                      ),
+                                                      SizedBox(width: _isWeb ? 6 : 4),
+                                                      Text(
+                                                        formattedTime,
+                                                        style: TextStyle(
+                                                          fontSize: _isWeb ? 13 : 11,
+                                                          color: _onSurfaceColor.withOpacity(0.6),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+
+                                            SizedBox(width: _isWeb ? 16 : 12),
+
+                                            // Valor e Status
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.end,
+                                              children: [
+                                                Text(
+                                                  amount,
+                                                  style: TextStyle(
+                                                    fontSize: _isWeb ? 16 : 14,
+                                                    fontWeight: FontWeight.w800,
+                                                    color: _primaryColor,
+                                                  ),
+                                                ),
+                                                SizedBox(height: _isWeb ? 8 : 6),
+                                                Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: _isWeb ? 10 : 8,
+                                                      vertical: _isWeb ? 4 : 3),
+                                                  decoration: BoxDecoration(
+                                                    color: statusColor.withOpacity(0.1),
+                                                    borderRadius: BorderRadius.circular(6),
+                                                  ),
+                                                  child: Text(
+                                                    _getStatusLabel(withdrawal.status),
+                                                    style: TextStyle(
+                                                      fontSize: _isWeb ? 12 : 10,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: statusColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+              ),
+            ],
+          ),
         ),
-      ],
+      ),
     );
   }
 
-  Widget _buildFiltersSection(bool isMobile) {
+  Widget _buildFiltersSection() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(_isWeb ? 16 : 12),
       decoration: BoxDecoration(
         color: _surfaceColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 15,
-            offset: Offset(0, 5),
+            blurRadius: 10,
+            offset: Offset(0, 3),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Filtrar por estado',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-              color: _onSurfaceColor,
-            ),
+          Row(
+            children: [
+              Icon(
+                Icons.filter_list_rounded,
+                color: _primaryColor,
+                size: _isWeb ? 20 : 18,
+              ),
+              SizedBox(width: _isWeb ? 8 : 6),
+              Text(
+                'Filtrar por status',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: _isWeb ? 15 : 14,
+                  color: _onSurfaceColor,
+                ),
+              ),
+              Spacer(),
+              if (_selectedFilter != 'TODOS')
+                GestureDetector(
+                  onTap: () {
+                    setState(() => _selectedFilter = 'TODOS');
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: _isWeb ? 12 : 10,
+                        vertical: _isWeb ? 6 : 4),
+                    decoration: BoxDecoration(
+                      color: _outlineColor.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.clear_all_rounded,
+                            size: _isWeb ? 14 : 12),
+                        SizedBox(width: 4),
+                        Text(
+                          'Limpar',
+                          style: TextStyle(
+                            fontSize: _isWeb ? 13 : 11,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
           ),
-          SizedBox(height: 12),
+          SizedBox(height: _isWeb ? 12 : 8),
+          // Filtros em linha simples
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -787,37 +1085,12 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
               final isActive = _selectedFilter == filter;
               final statusColor = _getStatusColor(filter);
 
-              return ChoiceChip(
-                label: Text(
-                  filter == 'TODOS' ? 'Todos' : _getStatusLabel(filter),
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: isActive ? Colors.white : statusColor,
-                  ),
-                ),
-                selected: isActive,
-                selectedColor: statusColor,
-                backgroundColor: statusColor.withOpacity(0.1),
-                side: BorderSide(
-                  color: statusColor.withOpacity(0.3),
-                  width: 1,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                onSelected: (selected) {
-                  if (selected) {
-                    setState(() => _selectedFilter = filter);
-                  }
-                },
-                avatar: isActive
-                    ? null
-                    : Icon(
-                        _getStatusIcon(filter),
-                        size: 16,
-                        color: statusColor,
-                      ),
+              return _buildFilterButton(
+                label: filter == 'TODOS' ? 'Todos' : _getStatusLabel(filter),
+                isActive: isActive,
+                color: statusColor,
+                onTap: () => setState(() => _selectedFilter = filter),
+                icon: _getStatusIcon(filter),
               );
             }).toList(),
           ),
@@ -826,78 +1099,138 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
     );
   }
 
-  Widget _buildStatsCard(List<TransactionResponse> withdrawals, bool isMobile) {
+  Widget _buildFilterButton({
+    required String label,
+    required bool isActive,
+    required Color color,
+    required VoidCallback onTap,
+    required IconData icon,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: _isWeb ? 12 : 10,
+            vertical: _isWeb ? 8 : 6,
+          ),
+          decoration: BoxDecoration(
+            color: isActive ? color : color.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isActive ? color : color.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                color: isActive ? Colors.white : color,
+                size: _isWeb ? 16 : 14,
+              ),
+              SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: _isWeb ? 13 : 11,
+                  fontWeight: FontWeight.w600,
+                  color: isActive ? Colors.white : color,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatsCard(List<TransactionResponse> withdrawals) {
     final total = _getFilteredTotal();
+    final count = withdrawals.length;
 
     return Container(
-      padding: EdgeInsets.all(16),
+      width: double.infinity,
+      padding: EdgeInsets.all(_isWeb ? 16 : 12),
       decoration: BoxDecoration(
-        gradient: _primaryGradient,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: _primaryColor.withOpacity(0.2),
-            blurRadius: 20,
-            offset: Offset(0, 5),
-          ),
-        ],
+        color: _primaryColor.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _primaryColor.withOpacity(0.1),
+          width: 1,
+        ),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              Icons.analytics_rounded,
-              color: Colors.white,
-              size: 24,
-            ),
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Resumo do Filtro',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 14,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  '${withdrawals.length} solicitações',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          // Solicitações
           Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
+              Row(
+                children: [
+                  Icon(Icons.list_alt_rounded, 
+                    color: _primaryColor, 
+                    size: _isWeb ? 18 : 16
+                  ),
+                  SizedBox(width: _isWeb ? 6 : 4),
+                  Text(
+                    '$count',
+                    style: TextStyle(
+                      fontSize: _isWeb ? 20 : 18,
+                      fontWeight: FontWeight.w800,
+                      color: _onSurfaceColor,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: _isWeb ? 4 : 2),
+              Text(
+                'Solicitações',
+                style: TextStyle(
+                  fontSize: _isWeb ? 12 : 10,
+                  color: _onSurfaceColor.withOpacity(0.6),
+                ),
+              ),
+            ],
+          ),
+          
+          // Divisor
+          Container(
+            width: 1,
+            height: 40,
+            color: _outlineColor,
+          ),
+          
+          // Valor Total
+          Column(
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.monetization_on_rounded, 
+                    color: _successColor, 
+                    size: _isWeb ? 18 : 16
+                  ),
+                  SizedBox(width: _isWeb ? 6 : 4),
+                  Text(
+                    '${total.toStringAsFixed(2).replaceAll('.', ',')}',
+                    style: TextStyle(
+                      fontSize: _isWeb ? 20 : 18,
+                      fontWeight: FontWeight.w800,
+                      color: _onSurfaceColor,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: _isWeb ? 4 : 2),
               Text(
                 'Valor Total',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.9),
-                  fontSize: 14,
-                ),
-              ),
-              SizedBox(height: 4),
-              Text(
-                '${total.toStringAsFixed(2).replaceAll('.', ',')} Kz',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
+                  fontSize: _isWeb ? 12 : 10,
+                  color: _onSurfaceColor.withOpacity(0.6),
                 ),
               ),
             ],
@@ -907,155 +1240,24 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
     );
   }
 
-  Widget _buildWithdrawalsList(
-      List<TransactionResponse> withdrawals, bool isMobile) {
-    return ListView.separated(
-      itemCount: withdrawals.length,
-      separatorBuilder: (_, __) => SizedBox(height: 12),
-      itemBuilder: (context, index) {
-        final withdrawal = withdrawals[index];
-        final statusColor = _getStatusColor(withdrawal.status);
-        final dateTime = _parseDateTime(withdrawal.createdAt);
-        final formattedDate = DateFormat('dd/MM/yyyy').format(dateTime);
-        final formattedTime = DateFormat('HH:mm').format(dateTime);
-        final amount =
-            '${withdrawal.amount.toStringAsFixed(2).replaceAll('.', ',')} Kz';
-
-        return Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-          child: InkWell(
-            onTap: () => _showWithdrawalDetails(withdrawal),
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: _surfaceColor,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      // Ícone de status
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: statusColor.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          _getStatusIcon(withdrawal.status),
-                          color: statusColor,
-                          size: 20,
-                        ),
-                      ),
-                      SizedBox(width: 12),
-
-                      // Informações principais
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Saque #${withdrawal.id?.substring(0, 8) ?? '---'}',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16,
-                                color: _onSurfaceColor,
-                              ),
-                            ),
-                            SizedBox(height: 2),
-                            Text(
-                              '$formattedDate às $formattedTime',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: _onSurfaceColor.withOpacity(0.6),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Valor
-                      Text(
-                        amount,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 18,
-                          color: _primaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 12),
-
-                  // Status badge
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: statusColor,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          _getStatusLabel(withdrawal.status),
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                            color: statusColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildLoadingState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SizedBox(
-            width: 50,
-            height: 50,
+            width: _isWeb ? 40 : 32,
+            height: _isWeb ? 40 : 32,
             child: CircularProgressIndicator(
               strokeWidth: 3,
               color: _primaryColor,
             ),
           ),
-          SizedBox(height: 16),
+          SizedBox(height: _isWeb ? 12 : 8),
           Text(
             'Carregando...',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: _isWeb ? 14 : 12,
               color: _onSurfaceColor.withOpacity(0.6),
               fontWeight: FontWeight.w500,
             ),
@@ -1065,44 +1267,46 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
     );
   }
 
-  Widget _buildEmptyState(
-      {required IconData icon,
-      required String title,
-      required String subtitle}) {
+  Widget _buildEmptyState({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(_isWeb ? 32 : 24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 80,
-              height: 80,
+              width: _isWeb ? 80 : 60,
+              height: _isWeb ? 80 : 60,
               decoration: BoxDecoration(
-                color: _outlineColor.withOpacity(0.3),
+                color: _outlineColor.withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
                 color: _onSurfaceColor.withOpacity(0.4),
-                size: 40,
+                size: _isWeb ? 36 : 28,
               ),
             ),
-            SizedBox(height: 24),
+            SizedBox(height: _isWeb ? 20 : 16),
             Text(
               title,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: _isWeb ? 16 : 14,
                 fontWeight: FontWeight.w700,
                 color: _onSurfaceColor.withOpacity(0.8),
               ),
+              textAlign: TextAlign.center,
             ),
-            SizedBox(height: 8),
+            SizedBox(height: _isWeb ? 8 : 6),
             Text(
               subtitle,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: _isWeb ? 14 : 12,
                 color: _onSurfaceColor.withOpacity(0.5),
               ),
             ),
@@ -1139,255 +1343,379 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
                 ? Icons.arrow_downward_rounded
                 : Icons.arrow_upward_rounded,
             color: isDeposit ? _successColor : _primaryColor,
+            size: _isWeb ? 28 : 24,
           ),
           SizedBox(width: 12),
-          Text(isDeposit ? 'Depósito' : 'Saque'),
+          Text(
+            isDeposit ? 'Depósito' : 'Saque',
+            style: TextStyle(
+              fontSize: _isWeb ? 20 : 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ],
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildDetailItem(
-              'Valor:', '${transaction.amount.toStringAsFixed(2)} Kz'),
-          _buildDetailItem('Data:', formattedDate),
-          _buildDetailItem('Estado:', _getStatusLabel(transaction.status)),
-          if (transaction.reference != null)
-            _buildDetailItem('Referência:', transaction.reference! as String),
-        ],
+      content: Container(
+        width: _isWeb ? 400 : 300,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildDetailItem(
+                'Valor:', '${transaction.amount.toStringAsFixed(2)} Kz'),
+            SizedBox(height: 8),
+            _buildDetailItem('Data:', formattedDate),
+            SizedBox(height: 8),
+            _buildDetailItem('Estado:', _getStatusLabel(transaction.status)),
+            if (transaction.reference != null) ...[
+              SizedBox(height: 8),
+              _buildDetailItem('Referência:', transaction.reference! as String),
+            ],
+          ],
+        ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('FECHAR'),
+          child: Text(
+            'FECHAR',
+            style: TextStyle(fontWeight: FontWeight.w700),
+          ),
         ),
       ],
     );
   }
 
-  AlertDialog _buildWithdrawalDialog(TransactionResponse withdrawal) {
+  Widget _buildWithdrawalDialog(TransactionResponse withdrawal) {
     final dateTime = _parseDateTime(withdrawal.createdAt);
     final formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(dateTime);
     final statusColor = _getStatusColor(withdrawal.status);
+    final amount =
+        '${withdrawal.amount.toStringAsFixed(2).replaceAll('.', ',')} Kz';
+    final shortId = withdrawal.id?.substring(0, 8).toUpperCase() ?? 'N/A';
 
-    // Cores do tema premium
-    final Color _primaryColor = Color(0xFFEC8D0D);
-    final Color _backgroundColor = Colors.white;
-    final Color _surfaceColor = Colors.white;
-    final Color _onSurfaceColor = Color(0xFF1E293B);
-    final Color _onSurfaceLight = Color(0xFF64748B);
-    final Color _borderColor = Color(0xFFE2E8F0);
-
-    // Gradiente premium
-    final LinearGradient _primaryGradient = LinearGradient(
-      colors: [Color(0xFFEC8D0D), Color(0xFFF59E0B)],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    );
-
-    return AlertDialog(
-      backgroundColor: _backgroundColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: _borderColor,
-          width: 1.5,
-        ),
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: _isWeb ? 100 : 20,
+        vertical: _isWeb ? 40 : 32,
       ),
-      elevation: 0,
-      titlePadding: EdgeInsets.all(24),
-      title: Container(
-        padding: EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: _borderColor,
-              width: 1.5,
-            ),
+      child: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: _isWeb ? 500 : 400,
           ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                gradient: _primaryGradient,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                Icons.currency_exchange_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                'DETALHES DO SAQUE',
-                style: TextStyle(
-                  color: _onSurfaceColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Status card premium
-          Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: statusColor.withOpacity(0.2),
-                width: 1.5,
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: statusColor.withOpacity(0.25),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Icon(
-                    _getStatusIcon(withdrawal.status),
-                    color: statusColor,
-                    size: 20,
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    _getStatusLabel(withdrawal.status),
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: statusColor,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 24),
-
-          // Valor destacado
-          Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: _primaryColor.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: _primaryColor.withOpacity(0.1),
-                width: 1.5,
-              ),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  'Valor Solicitado',
-                  style: TextStyle(
-                    color: _onSurfaceLight,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  '${withdrawal.amount.toStringAsFixed(2)} Kz',
-                  style: TextStyle(
-                    color: _onSurfaceColor,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 16),
-
-          // Detalhes
-          Container(
-            padding: EdgeInsets.all(16),
+          child: Container(
             decoration: BoxDecoration(
               color: _surfaceColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: _borderColor,
-                width: 1.5,
-              ),
-            ),
-            child: Column(
-              children: [
-                _buildDetailItem('Data:', formattedDate),
-                SizedBox(height: 12),
-                _buildDetailItem('ID:', withdrawal.id ?? '---'),
-                if (withdrawal.reference != null) ...[
-                  SizedBox(height: 12),
-                  _buildDetailItem(
-                      'Referência:', withdrawal.reference! as String),
-                ],
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 30,
+                  offset: Offset(0, 10),
+                ),
               ],
             ),
-          ),
-        ],
-      ),
-      actionsPadding: EdgeInsets.only(bottom: 24, left: 24, right: 24),
-      actions: [
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: _primaryColor.withOpacity(0.2),
-                blurRadius: 10,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(vertical: 16),
-                decoration: BoxDecoration(
-                  gradient: _primaryGradient,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
-                    width: 1.5,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Cabeçalho
+                Container(
+                  padding: EdgeInsets.all(_isWeb ? 24 : 20),
+                  decoration: BoxDecoration(
+                    gradient: _primaryGradient,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: _isWeb ? 56 : 44,
+                        height: _isWeb ? 56 : 44,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Icon(
+                          Icons.money_off_csred_rounded,
+                          color: Colors.white,
+                          size: _isWeb ? 28 : 24,
+                        ),
+                      ),
+                      SizedBox(width: _isWeb ? 16 : 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'DETALHES',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: _isWeb ? 18 : 16,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              '#$shortId',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: _isWeb ? 13 : 11,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: Center(
-                  child: Text(
-                    'FECHAR',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.5,
+
+                // Status badge
+                Padding(
+                  padding: EdgeInsets.only(
+                      top: _isWeb ? 20 : 16,
+                      left: _isWeb ? 24 : 20,
+                      right: _isWeb ? 24 : 20),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: _isWeb ? 20 : 16,
+                        vertical: _isWeb ? 10 : 8),
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: statusColor.withOpacity(0.3),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: _isWeb ? 28 : 24,
+                          height: _isWeb ? 28 : 24,
+                          decoration: BoxDecoration(
+                            color: statusColor,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            _getStatusIcon(withdrawal.status),
+                            color: Colors.white,
+                            size: _isWeb ? 14 : 12,
+                          ),
+                        ),
+                        SizedBox(width: _isWeb ? 12 : 8),
+                        Text(
+                          _getStatusLabel(withdrawal.status),
+                          style: TextStyle(
+                            fontSize: _isWeb ? 16 : 14,
+                            fontWeight: FontWeight.w800,
+                            color: statusColor,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
+
+                // Conteúdo
+                Padding(
+                  padding: EdgeInsets.all(_isWeb ? 24 : 20),
+                  child: Column(
+                    children: [
+                      // Valor
+                      Container(
+                        padding: EdgeInsets.all(_isWeb ? 20 : 16),
+                        decoration: BoxDecoration(
+                          color: _primaryColor.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: _primaryColor.withOpacity(0.1),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              'VALOR SOLICITADO',
+                              style: TextStyle(
+                                fontSize: _isWeb ? 13 : 11,
+                                color: _onSurfaceColor.withOpacity(0.6),
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            SizedBox(height: _isWeb ? 12 : 8),
+                            Text(
+                              amount,
+                              style: TextStyle(
+                                fontSize: _isWeb ? 32 : 28,
+                                fontWeight: FontWeight.w800,
+                                color: _primaryColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: _isWeb ? 24 : 20),
+
+                      // Informações
+                      Column(
+                        children: [
+                          _buildDetailRow(
+                            icon: Icons.calendar_today_rounded,
+                            label: 'Data',
+                            value: DateFormat('dd/MM/yyyy').format(dateTime),
+                          ),
+                          SizedBox(height: _isWeb ? 16 : 12),
+                          _buildDetailRow(
+                            icon: Icons.access_time_rounded,
+                            label: 'Hora',
+                            value: DateFormat('HH:mm').format(dateTime),
+                          ),
+                          SizedBox(height: _isWeb ? 16 : 12),
+                          _buildDetailRow(
+                            icon: Icons.receipt_long_rounded,
+                            label: 'Tipo',
+                            value: 'Saque',
+                          ),
+                        ],
+                      ),
+
+                      // Referência
+                      if (withdrawal.reference != null) ...[
+                        SizedBox(height: _isWeb ? 24 : 20),
+                        Container(
+                          padding: EdgeInsets.all(_isWeb ? 16 : 12),
+                          decoration: BoxDecoration(
+                            color: _outlineColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.receipt_rounded,
+                                    size: _isWeb ? 18 : 16,
+                                    color: _onSurfaceColor.withOpacity(0.6),
+                                  ),
+                                  SizedBox(width: _isWeb ? 8 : 6),
+                                  Text(
+                                    'Referência',
+                                    style: TextStyle(
+                                      fontSize: _isWeb ? 15 : 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: _onSurfaceColor.withOpacity(0.8),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: _isWeb ? 8 : 6),
+                              Container(
+                                padding: EdgeInsets.all(_isWeb ? 12 : 10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: _outlineColor,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: SelectableText(
+                                  withdrawal.reference! as String,
+                                  style: TextStyle(
+                                    fontFamily: 'monospace',
+                                    fontSize: _isWeb ? 14 : 12,
+                                    color: _onSurfaceColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+
+                // Botão de fechar
+                Container(
+                  padding: EdgeInsets.all(_isWeb ? 24 : 20),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      top: BorderSide(
+                        color: _outlineColor.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _primaryColor,
+                      foregroundColor: Colors.white,
+                      minimumSize: Size(double.infinity, _isWeb ? 56 : 48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'FECHAR',
+                      style: TextStyle(
+                        fontSize: _isWeb ? 16 : 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: _isWeb ? 20 : 16,
+          color: _onSurfaceColor.withOpacity(0.6),
+        ),
+        SizedBox(width: _isWeb ? 12 : 8),
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: _isWeb ? 15 : 13,
+              color: _onSurfaceColor.withOpacity(0.6),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 2,
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: _isWeb ? 16 : 14,
+                fontWeight: FontWeight.w700,
+                color: _onSurfaceColor,
               ),
             ),
           ),
@@ -1398,16 +1726,17 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
 
   Widget _buildDetailItem(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 100,
+            width: _isWeb ? 120 : 100,
             child: Text(
               label,
               style: TextStyle(
                 fontWeight: FontWeight.w600,
+                fontSize: _isWeb ? 15 : 14,
                 color: _onSurfaceColor.withOpacity(0.7),
               ),
             ),
@@ -1416,6 +1745,7 @@ class _Tela08CarteiraWidgetState extends State<Tela08CarteiraWidget>
             child: Text(
               value,
               style: TextStyle(
+                fontSize: _isWeb ? 15 : 14,
                 color: _onSurfaceColor,
               ),
             ),
