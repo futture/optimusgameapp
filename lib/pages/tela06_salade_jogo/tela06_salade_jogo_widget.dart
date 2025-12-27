@@ -53,7 +53,7 @@ class _Tela06SaladeJogoWidgetState extends State<Tela06SaladeJogoWidget>
         //_model.getMatchStartNoticeAsync(setState);
       }
 
-      _model.setupGame(safeSetState, widget.nextQuestion);
+      _model.setupGame(setState, widget.nextQuestion);
     }
   }
 
