@@ -15,7 +15,7 @@ class CommonDialogWidget {
     }
   }
 
-  static void showMatchParticipantsDialog(
+  static Future<void> showMatchParticipantsDialog(
       BuildContext context,
       List<dynamic> infos,
       String? title,
@@ -87,8 +87,9 @@ class CommonDialogWidget {
                 return Dialog(
                   backgroundColor: Colors.transparent,
                   insetPadding: EdgeInsets.symmetric(
-                    horizontal: MediaQuery.of(context).size.width > 768 ? 
-                      MediaQuery.of(context).size.width * 0.15 : 16,
+                    horizontal: MediaQuery.of(context).size.width > 768
+                        ? MediaQuery.of(context).size.width * 0.15
+                        : 16,
                     vertical: 16,
                   ),
                   child: Container(
@@ -138,8 +139,12 @@ class CommonDialogWidget {
                                           .override(
                                             fontFamily: 'Inter Tight',
                                             color: Colors.white,
-                                            fontSize: 
-                                              MediaQuery.of(context).size.width > 768 ? 22 : 20,
+                                            fontSize: MediaQuery.of(context)
+                                                        .size
+                                                        .width >
+                                                    768
+                                                ? 22
+                                                : 20,
                                             letterSpacing: 0,
                                           ),
                                     ),
@@ -147,8 +152,11 @@ class CommonDialogWidget {
                                       '${formatHour(match.matchStartDate)} • ${match.matchPlayers?.length ?? 0} participantes',
                                       style: TextStyle(
                                         color: Colors.white70,
-                                        fontSize: 
-                                          MediaQuery.of(context).size.width > 768 ? 15 : 14,
+                                        fontSize:
+                                            MediaQuery.of(context).size.width >
+                                                    768
+                                                ? 15
+                                                : 14,
                                       ),
                                     ),
                                   ],
@@ -169,7 +177,9 @@ class CommonDialogWidget {
                           child: SingleChildScrollView(
                             child: Padding(
                               padding: EdgeInsets.all(
-                                MediaQuery.of(context).size.width > 768 ? 20 : 16,
+                                MediaQuery.of(context).size.width > 768
+                                    ? 20
+                                    : 16,
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -177,12 +187,14 @@ class CommonDialogWidget {
                                   // Layout responsivo mantendo Horário e Vagas na mesma linha
                                   LayoutBuilder(
                                     builder: (context, constraints) {
-                                      final isLargeScreen = constraints.maxWidth > 500;
-                                      
+                                      final isLargeScreen =
+                                          constraints.maxWidth > 500;
+
                                       if (isLargeScreen) {
                                         // Em telas grandes: 4 itens em uma linha
                                         return Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: infos.map((info) {
                                             return Expanded(
                                               child: _buildInfoItem(
@@ -200,13 +212,20 @@ class CommonDialogWidget {
                                           children: [
                                             // Primeira linha: Inscrição e Prêmio
                                             Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: infos.sublist(0, 2).map((info) {
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: infos
+                                                  .sublist(0, 2)
+                                                  .map((info) {
                                                 return Expanded(
                                                   child: _buildInfoItem(
-                                                    icon: info['icon'] as IconData,
-                                                    title: info['title'] as String,
-                                                    value: info['value'] as String,
+                                                    icon: info['icon']
+                                                        as IconData,
+                                                    title:
+                                                        info['title'] as String,
+                                                    value:
+                                                        info['value'] as String,
                                                     isLargeScreen: false,
                                                   ),
                                                 );
@@ -215,13 +234,20 @@ class CommonDialogWidget {
                                             SizedBox(height: 16),
                                             // Segunda linha: Horário e Vagas
                                             Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: infos.sublist(2, 4).map((info) {
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: infos
+                                                  .sublist(2, 4)
+                                                  .map((info) {
                                                 return Expanded(
                                                   child: _buildInfoItem(
-                                                    icon: info['icon'] as IconData,
-                                                    title: info['title'] as String,
-                                                    value: info['value'] as String,
+                                                    icon: info['icon']
+                                                        as IconData,
+                                                    title:
+                                                        info['title'] as String,
+                                                    value:
+                                                        info['value'] as String,
                                                     isLargeScreen: false,
                                                   ),
                                                 );
@@ -232,23 +258,37 @@ class CommonDialogWidget {
                                       }
                                     },
                                   ),
-                                  SizedBox(height: MediaQuery.of(context).size.width > 768 ? 20 : 16),
+                                  SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.width >
+                                                  768
+                                              ? 20
+                                              : 16),
                                   Text(
                                     'Participantes:',
                                     style: FlutterFlowTheme.of(context)
                                         .bodyMedium
                                         .override(
                                           fontFamily: 'Inter',
-                                          fontSize: 
-                                            MediaQuery.of(context).size.width > 768 ? 17 : 16,
+                                          fontSize: MediaQuery.of(context)
+                                                      .size
+                                                      .width >
+                                                  768
+                                              ? 17
+                                              : 16,
                                           fontWeight: FontWeight.bold,
                                           letterSpacing: 0,
                                         ),
                                   ),
                                   const SizedBox(height: 8),
-                                  _buildParticipantsList(
-                                      context, match, participants, currentUser),
-                                  SizedBox(height: MediaQuery.of(context).size.width > 768 ? 20 : 16),
+                                  _buildParticipantsList(context, match,
+                                      participants, currentUser),
+                                  SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.width >
+                                                  768
+                                              ? 20
+                                              : 16),
                                   widget
                                 ],
                               ),
@@ -280,32 +320,25 @@ class CommonDialogWidget {
     );
   }
 
-  static Widget _buildInfoItem({
-    required IconData icon, 
-    required String title, 
-    required String value,
-    bool isLargeScreen = false
-  }) {
+  static Widget _buildInfoItem(
+      {required IconData icon,
+      required String title,
+      required String value,
+      bool isLargeScreen = false}) {
     return Column(
       children: [
-        Icon(icon, 
-          size: isLargeScreen ? 26 : 24, 
-          color: const Color(0xFFEC8D0D)
-        ),
+        Icon(icon,
+            size: isLargeScreen ? 26 : 24, color: const Color(0xFFEC8D0D)),
         const SizedBox(height: 4),
         Text(
           title,
-          style: TextStyle(
-            fontSize: isLargeScreen ? 13 : 12, 
-            color: Colors.grey
-          ),
+          style:
+              TextStyle(fontSize: isLargeScreen ? 13 : 12, color: Colors.grey),
         ),
         Text(
           value,
           style: TextStyle(
-            fontSize: isLargeScreen ? 15 : 14, 
-            fontWeight: FontWeight.bold
-          ),
+              fontSize: isLargeScreen ? 15 : 14, fontWeight: FontWeight.bold),
         ),
       ],
     );
