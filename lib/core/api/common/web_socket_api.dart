@@ -7,7 +7,19 @@ class WebSocketService {
   final Function(String) onMessageReceived;
   final void Function(Object)? onError;
   final void Function()? onDone;
-  late final String _baseUrl = "ws://$BASE_URL/ws";
+  
+  late final String _baseUrl = (() {
+    final uri = Uri.parse(BASE_URL);
+
+    final scheme = uri.scheme == 'https' ? 'wss' : 'ws';
+
+    return Uri(
+      scheme: scheme,
+      host: uri.host,
+      port: uri.hasPort ? uri.port : null,
+      path: '/ws',
+    ).toString();
+  })();
 
   WebSocketService({
     required this.url,
