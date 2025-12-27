@@ -418,6 +418,8 @@ class Tela03PrincipalModel extends FlutterFlowModel<Tela03PrincipalWidget> {
       setState(() {
         users = result["data"];
       });
+    } else {
+      users = [];
     }
   }
 
