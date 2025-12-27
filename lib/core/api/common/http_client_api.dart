@@ -9,7 +9,12 @@ import 'package:projeto_game_quiz/flutter_flow/nav/nav.dart';
 import 'package:projeto_game_quiz/pages/tela00_login/tela00_login_widget.dart';
 
 class HttpClientService {
-  final String baseUrl = "http://$BASE_URL";
+  
+  final String baseUrl =
+    BASE_URL.startsWith("http://") || BASE_URL.startsWith("https://")
+        ? BASE_URL
+        : "http://$BASE_URL";
+
 
   HttpClientService();
 
