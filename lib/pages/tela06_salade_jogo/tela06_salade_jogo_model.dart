@@ -23,7 +23,7 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   final _matchService = MatchService();
   final _questionService = QuestionService();
 
-  double points = 0;
+  double points = 0.0;
   String? userId = '';
   bool isLoading = true;
   int? playersConnected;

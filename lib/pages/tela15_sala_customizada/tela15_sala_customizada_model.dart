@@ -167,7 +167,8 @@ class Tela15SalaCustomizadaViewModel
     setState(() {
       isLoadingRooms = true;
     });
-    final resultRoom = await roomService.getAllRoomAsync(false, false);
+    final resultRoom = await roomService.getAllRoomAsync(
+        roomTypes: [RoomType.NORMAL.label, RoomType.FREE.label]);
 
     if (resultRoom["isSuccess"] == true) {
       final fetchedRooms = resultRoom["data"];
@@ -187,10 +188,9 @@ class Tela15SalaCustomizadaViewModel
 
   Future<String?> createRoomAsync() async {
     var result = await roomService.createRoomAsync(CreateRoomRequest(
-        isCustomized: true,
+        roomType: RoomType.CUSTOMIZED.label,
         nameRoom: "SALA-CUSTOMIZADA",
         roomConfiguration: CreateRoomConfigurationRequest(
-            isEvent: false,
             isSingleWinner: onlyOneWinner,
             isSimpleQuestions: isSimpleQuestion,
             timeToRespond: TIME_TO_RESPONSE,
@@ -413,8 +413,6 @@ class Tela15SalaCustomizadaViewModel
     setState(() {});
   }
 
-// In the Tela15SalaCustomizadaViewModel class, replace the showWaitingDialog method with:
-
   void showMatchParticipantsDialog() {
     if (isShowWaitingDialogOpen) return;
 
@@ -443,7 +441,8 @@ class Tela15SalaCustomizadaViewModel
       {
         'title': 'Prêmio',
         'icon': Icons.wine_bar_rounded,
-        'value': '${matchInfo!.room!.roomConfiguration!.minimumAmountToPlay * participants.length } KZ',
+        'value':
+            '${matchInfo!.room!.roomConfiguration!.minimumAmountToPlay * participants.length} KZ',
       },
       {
         'title': 'Nº Questões',
@@ -458,16 +457,15 @@ class Tela15SalaCustomizadaViewModel
       },
     ];
     CommonDialogWidget.showMatchParticipantsDialog(
-      context,
-      infos,
-      "Partida entre amigos",
-      matchInfo!,
-      participants,
-      currentUser,
-      _buildDialogActions(),
-      isPlaySound: false,
-       isProgressBar: false
-    );
+        context,
+        infos,
+        "Partida entre amigos",
+        matchInfo!,
+        participants,
+        currentUser,
+        _buildDialogActions(),
+        isPlaySound: false,
+        isProgressBar: false);
   }
 
   Widget _buildDialogActions() {

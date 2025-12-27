@@ -75,7 +75,8 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
     setState(() {
       isLoadingRooms = true;
     });
-    final resultRoom = await roomService.getAllRoomAsync(false, false);
+    final resultRoom = await roomService.getAllRoomAsync(
+        roomTypes: [RoomType.NORMAL.label, RoomType.FREE.label]);
 
     if (resultRoom["isSuccess"] == true) {
       final fetchedRooms = resultRoom["data"];
@@ -130,7 +131,7 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
       }
 
       await getMatchByMatchIdAsync();
-      bool isFree = matchInfo!.room!.isFree;
+      bool isFree = matchInfo!.room!.roomType == RoomType.FREE.label;
       if (isFree) {
         showMatchParticipantsDialog(isFree: isFree);
       }

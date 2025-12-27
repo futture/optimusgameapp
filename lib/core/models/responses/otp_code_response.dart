@@ -1,11 +1,13 @@
 class OtpCodeResponse {
   final String phoneNumber;
   final String code;
-  final DateTime expirationDate;
+  final bool isValid;
+  final DateTime? expirationDate;
 
   OtpCodeResponse({
     required this.phoneNumber,
     required this.code,
+    required this.isValid,
     required this.expirationDate,
   });
 
@@ -13,7 +15,10 @@ class OtpCodeResponse {
     return OtpCodeResponse(
       phoneNumber: json['phone_number'],
       code: json['code'],
-      expirationDate: DateTime.parse(json['expiration_data']),
+      isValid: json['isValid'],
+      expirationDate: json['expiration_data'] != null
+          ? DateTime.parse(json['expiration_data'])
+          : null,
     );
   }
 }

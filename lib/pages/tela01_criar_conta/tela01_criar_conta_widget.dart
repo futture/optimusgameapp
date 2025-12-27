@@ -1,12 +1,10 @@
-import 'package:projeto_game_quiz/core/api/services/user_service.dart';
-import 'package:projeto_game_quiz/core/models/requests/user_request.dart';
+import 'package:flutter/material.dart';
 import 'package:projeto_game_quiz/dialogs/error-dialog-widget.dart';
 import 'package:projeto_game_quiz/dialogs/success-dialog-widget.dart';
 import 'package:projeto_game_quiz/pages/tela00_login/tela00_login_widget.dart';
 import '/components/modal_valida_conta_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import 'package:flutter/material.dart';
 import 'tela01_criar_conta_model.dart';
 export 'tela01_criar_conta_model.dart';
 
@@ -25,7 +23,7 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
   late Tela01CriarContaModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // Cores modernas alinhadas com o tema (mesmas da tela de login)
+  // Cores modernas
   final Color _primaryColor = Color(0xFFEC8D0D);
   final Color _primaryLight = Color(0xFFFDE68A);
   final Color _primaryDark = Color(0xFFD97706);
@@ -49,18 +47,13 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
     end: Alignment.bottomRight,
   );
 
-  // Animações
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
   late Animation<double> _slideAnimation;
 
-  // URL da imagem ORIGINAL (mesma da tela de login)
   final String _heroImageUrl =
       'https://images.unsplash.com/photo-1604594849809-dfedbc827105?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHw3fHxtb25leXxlbnwwfHx8fDE3NDM2MjA1MTR8MA&ixlib=rb-4.0.3&q=80&w=1080';
-
-  // Estado para controle do loading
-  bool _isSendingOtp = false;
 
   @override
   void initState() {
@@ -82,7 +75,7 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
     _model.inputSenhaTextController2 ??= TextEditingController();
     _model.inputSenhaFocusNode2 ??= FocusNode();
 
-    // Configura animações (iguais à tela de login)
+    // Configura animações
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -109,71 +102,10 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
       ),
     );
 
-    // Inicializar validadores
-    _initializeValidators();
+    // Inicializar validadores no model
+    _model.initializeValidators();
 
     _animationController.forward();
-  }
-
-  void _initializeValidators() {
-    // Validador para Nome Completo
-    _model.inputMomeCompletoTextControllerValidator = (context, value) {
-      if (value == null || value.isEmpty) {
-        return 'Por favor, insira seu nome completo';
-      }
-      if (value.trim().split(' ').length < 2) {
-        return 'Por favor, insira seu nome completo (nome e sobrenome)';
-      }
-      return null;
-    };
-
-    // Validador para Telefone
-    _model.inputTelefoneTextControllerValidator = (context, value) {
-      if (value == null || value.isEmpty) {
-        return 'Por favor, insira seu número de telefone';
-      }
-      // Remove espaços e caracteres especiais
-      final phoneDigits = value.replaceAll(RegExp(r'[^0-9]'), '');
-      if (phoneDigits.length < 9) {
-        return 'Por favor, insira um número de telefone válido (mínimo 9 dígitos)';
-      }
-      return null;
-    };
-
-    // Validador para Email
-    _model.inputEmailTextControllerValidator = (context, value) {
-      if (value == null || value.isEmpty) {
-        return 'Por favor, insira seu email';
-      }
-      final emailRegex =
-          RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-      if (!emailRegex.hasMatch(value.trim())) {
-        return 'Por favor, insira um email válido';
-      }
-      return null;
-    };
-
-    // Validador para Senha
-    _model.inputSenhaTextController1Validator = (context, value) {
-      if (value == null || value.isEmpty) {
-        return 'Por favor, insira uma senha';
-      }
-      if (value.length < 6) {
-        return 'A senha deve ter pelo menos 6 caracteres';
-      }
-      return null;
-    };
-
-    // Validador para Confirmar Senha
-    _model.inputSenhaTextController2Validator = (context, value) {
-      if (value == null || value.isEmpty) {
-        return 'Por favor, confirme sua senha';
-      }
-      if (value != _model.inputSenhaTextController1?.text) {
-        return 'As senhas não coincidem';
-      }
-      return null;
-    };
   }
 
   @override
@@ -238,7 +170,6 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
 
   Widget _buildCircularImageHeader(
       bool isMobile, bool isTablet, bool isDesktop, double screenWidth) {
-    // Tamanho responsivo do círculo
     double circleSize;
     double contentPadding;
 
@@ -295,7 +226,7 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
             child: ClipOval(
               child: Stack(
                 children: [
-                  // Imagem Hero - MESMA IMAGEM DA TELA DE LOGIN
+                  // Imagem Hero
                   Hero(
                     tag: 'app_logo',
                     child: Image.network(
@@ -356,7 +287,6 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
           ),
           SizedBox(height: isMobile ? 24 : 32),
 
-          // Conteúdo textual
           Container(
             constraints: BoxConstraints(
               maxWidth: 500,
@@ -829,7 +759,6 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
                   ),
                   SizedBox(height: 16),
 
-                  // Campo Senha
                   Text(
                     'Senha *',
                     style: TextStyle(
@@ -928,7 +857,6 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
                   ),
                   SizedBox(height: 16),
 
-                  // Campo Confirmar Senha
                   Text(
                     'Confirmar Senha *',
                     style: TextStyle(
@@ -1027,7 +955,6 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
                   ),
                   SizedBox(height: 20),
 
-                  // Checkbox Termos e Políticas
                   Row(
                     children: [
                       Container(
@@ -1096,7 +1023,6 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
                   ),
                   SizedBox(height: 28),
 
-                  // Botão de Cadastrar
                   Container(
                     height: isMobile ? 52 : 56,
                     decoration: BoxDecoration(
@@ -1116,7 +1042,7 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
                       child: InkWell(
                         borderRadius: BorderRadius.circular(16),
                         onTap: _registerUser,
-                        child: _isSendingOtp || _model.isRegistering
+                        child: _model.isSendingOtp || _model.isRegistering
                             ? Center(
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -1133,7 +1059,7 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
                                     ),
                                     SizedBox(width: 12),
                                     Text(
-                                      _isSendingOtp
+                                      _model.isSendingOtp
                                           ? 'Enviando OTP...'
                                           : 'Cadastrando...',
                                       style: TextStyle(
@@ -1161,7 +1087,6 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
                   ),
                   SizedBox(height: 24),
 
-                  // Divisor
                   Row(
                     children: [
                       Expanded(child: Divider(color: _borderColor)),
@@ -1181,7 +1106,6 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
                   ),
                   SizedBox(height: 24),
 
-                  // Botão Voltar para Login
                   Container(
                     height: isMobile ? 52 : 56,
                     decoration: BoxDecoration(
@@ -1215,7 +1139,6 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
                   ),
                   SizedBox(height: 8),
 
-                  // Nota sobre campos obrigatórios
                   Padding(
                     padding: EdgeInsets.only(top: 12),
                     child: Text(
@@ -1237,204 +1160,142 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
     );
   }
 
-  // ... restante do código mantido ...
-
   Future<void> _registerUser() async {
-    // Validação básica
     if (_model.formKey.currentState?.validate() ?? false) {
       if (!(_model.checkboxValue ?? false)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Você precisa aceitar os Termos de Serviço e Política de Privacidade',
-              style: TextStyle(color: Colors.white),
-            ),
-            backgroundColor: _warningColor,
-          ),
-        );
+        _showWarningSnackBar(
+            'Você precisa aceitar os Termos de Serviço e Política de Privacidade');
         return;
       }
 
-      String nomeCompleto = _model.inputMomeCompletoTextController?.text ?? '';
-      String telefone = _model.inputTelefoneTextController?.text ?? '';
-      String email = _model.inputEmailTextController?.text ?? '';
-      String senha = _model.inputSenhaTextController1?.text ?? '';
-      String confirmarSenha = _model.inputSenhaTextController2?.text ?? '';
+      final validationResult = _model.validateFormData();
 
-      if (senha != confirmarSenha) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'As senhas não coincidem',
-              style: TextStyle(color: Colors.white),
-            ),
-            backgroundColor: _errorColor,
-          ),
-        );
+      if (!validationResult['isValid']) {
+        final errors = validationResult['errors'] as List<String>;
+        _showErrorSnackBar(
+            errors.isNotEmpty ? errors.first : 'Erro na validação');
         return;
       }
 
-      // Variável para controlar o resultado do OTP
-      bool? otpResult = false;
+      final data = validationResult['data'] as Map<String, dynamic>;
 
       try {
-        // Configuração do estado de carregamento para envio do OTP
-        setState(() {
-          _isSendingOtp = true;
-        });
+        final phoneNumber = _model.formatPhoneNumberForOtp(data['telefone']);
+        await _model.sendOtp(phoneNumber);
 
-        // Envia OTP com loading
-        String phoneNumber = '+244' + telefone;
-        await UserService().sendOtp(phoneNumber);
+        final otpResult = await _showOtpValidationModal(data['telefone']);
 
-        // Finaliza loading do OTP
-        setState(() {
-          _isSendingOtp = false;
-        });
-
-        // Configura estado de carregamento para criação do usuário
-        setState(() {
-          _model.isRegistering = true;
-        });
-
-        // Mostra modal de validação
-        otpResult = await showModalBottomSheet<bool>(
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          enableDrag: false,
-          useSafeArea: true,
-          context: context,
-          builder: (context) {
-            return GestureDetector(
-              onTap: () => FocusScope.of(context).unfocus(),
-              child: Padding(
-                padding: MediaQuery.viewInsetsOf(context),
-                child: const ModalValidaContaWidget(),
-              ),
-            );
-          },
-        );
-
-        // Verifica se o usuário cancelou o modal de OTP
         if (otpResult == null) {
-          setState(() {
-            _model.isRegistering = false;
-          });
           return;
         }
 
         if (otpResult) {
-          // Cria usuário
-          final user = CreateUserRequest(
-            name: nomeCompleto,
-            password: senha,
-            email: email,
-            phone_number: telefone,
-            phone_number_mask: '+244',
-            role: RoleEnum.JOGADOR,
+          final result = await _model.createUser(
+            nomeCompleto: data['nomeCompleto'],
+            telefone: data['telefone'],
+            email: data['email'],
+            senha: data['senha'],
           );
-
-          var result = await UserService().createUser(user);
-
-          // Finaliza loading da criação do usuário
-          print("result do cadastro: $result");
-          setState(() {
-            _model.isRegistering = false;
-          });
 
           if (result['isSuccess'] == true) {
-            await showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => Dialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                backgroundColor: Colors.transparent,
-                child: SuccessDialogWidget(
-                  message: 'Cadastro realizado com sucesso!',
-                  onOk: () {
-                    Navigator.of(context).pop(); // Fecha o diálogo de sucesso
-                    context.pushNamed(
-                        Tela00LoginWidget.routeName); // Vai para login
-                  },
-                ),
-              ),
-            );
+            await _showSuccessDialog();
           } else {
-            // Mostra diálogo de erro SEM fechar a tela de cadastro
-            await showGeneralDialog(
-              context: context,
-              barrierDismissible: false,
-              barrierLabel: "Erro",
-              barrierColor: Colors.black54,
-              transitionDuration: const Duration(milliseconds: 400),
-              pageBuilder: (context, animation, secondaryAnimation) {
-                return Center(
-                  child: ErrorDialogWidget(
-                    message: 'Erro ao cadastrar. Tente novamente.',
-                    onOk: () {
-                      Navigator.of(context)
-                          .pop(); // Apenas fecha o diálogo de erro
-                      // NÃO navega para outra tela
-                    },
-                  ),
-                );
-              },
-              transitionBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                return ScaleTransition(
-                  scale: CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeOutBack,
-                  ),
-                  child: child,
-                );
-              },
-            );
-
-            // Mantém o usuário na tela de cadastro para tentar novamente
-            setState(() {
-              _model.isRegistering = false;
-            });
+            await _showErrorDialog('Erro ao cadastrar. Tente novamente.');
           }
         } else {
-          // Se a validação OTP falhou (usuário inseriu código errado)
-          setState(() {
-            _model.isRegistering = false;
-          });
-
-          // Mostra mensagem informativa
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Validação OTP falhou. Tente novamente.',
-                style: TextStyle(color: Colors.white),
-              ),
-              backgroundColor: _warningColor,
-              duration: Duration(seconds: 3),
-            ),
-          );
+          _showWarningSnackBar('Validação OTP falhou. Tente novamente.');
         }
       } catch (e) {
-        // Em caso de erro, remove todos os loadings
-        setState(() {
-          _isSendingOtp = false;
-          _model.isRegistering = false;
-        });
-
-        // Se houve erro no envio do OTP ou outro erro, mostra mensagem SEM fechar a tela
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Erro ao processar cadastro. Tente novamente.',
-              style: TextStyle(color: Colors.white),
-            ),
-            backgroundColor: _errorColor,
-            duration: Duration(seconds: 3),
-          ),
-        );
+        _model.resetLoadingStates();
+        _showErrorSnackBar('Erro ao processar cadastro. Tente novamente.');
       }
     }
+  }
+
+  Future<bool?> _showOtpValidationModal(String phoneNumber) async {
+    return await showModalBottomSheet<bool>(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      enableDrag: false,
+      useSafeArea: true,
+      context: context,
+      builder: (context) {
+        return GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Padding(
+            padding: MediaQuery.viewInsetsOf(context),
+            child: ModalValidaContaWidget(
+              phoneNumber: phoneNumber,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showSuccessDialog() async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        backgroundColor: Colors.transparent,
+        child: SuccessDialogWidget(
+          message: 'Cadastro realizado com sucesso!',
+          onOk: () {
+            context.pushNamed(Tela00LoginWidget.routeName);
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showErrorDialog(String message) async {
+    await showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierLabel: "Erro",
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 400),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Center(
+          child: ErrorDialogWidget(
+            message: message,
+            onOk: () => Navigator.of(context).pop(),
+          ),
+        );
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return ScaleTransition(
+          scale: CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutBack,
+          ),
+          child: child,
+        );
+      },
+    );
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: TextStyle(color: Colors.white)),
+        backgroundColor: _errorColor,
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
+
+  void _showWarningSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: TextStyle(color: Colors.white)),
+        backgroundColor: _warningColor,
+        duration: Duration(seconds: 3),
+      ),
+    );
   }
 }

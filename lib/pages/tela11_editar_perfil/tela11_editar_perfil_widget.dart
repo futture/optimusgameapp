@@ -1711,7 +1711,8 @@ class _OtpVerificationDialogState extends State<OtpVerificationDialog> {
 
   Future<void> _verifyCode() async {
     final enteredCode = _controllers.map((c) => c.text).join();
-    final verificationResult = await UserService().validateOtp(enteredCode);
+    final verificationResult =
+        await UserService().validateOtp(enteredCode, widget.phoneNumber);
     print(verificationResult["isSuccess"]);
     if ((verificationResult["isSuccess"])) {
       OtpCodeResponse data = verificationResult["data"] as OtpCodeResponse;

@@ -44,7 +44,7 @@ class CommonDialogWidget {
         {
           'title': 'Prêmio',
           'icon': Icons.wine_bar_rounded,
-          'value': '${match.matchPrize?.netPremium} KZ',
+          'value': '${match.matchPrize!.netPremium} KZ',
         },
         {
           'title': 'Horário',

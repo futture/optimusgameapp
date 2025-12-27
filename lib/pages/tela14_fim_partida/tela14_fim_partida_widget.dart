@@ -192,10 +192,12 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                                       return GestureDetector(
                                         onTap: () {
                                           FocusScope.of(context).unfocus();
-                                          FocusManager.instance.primaryFocus?.unfocus();
+                                          FocusManager.instance.primaryFocus
+                                              ?.unfocus();
                                         },
                                         child: Padding(
-                                          padding: MediaQuery.viewInsetsOf(context),
+                                          padding:
+                                              MediaQuery.viewInsetsOf(context),
                                           child: ModaMenuPagianInicialWidget(),
                                         ),
                                       );
@@ -213,7 +215,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                             ),
                           ),
                           SizedBox(width: 16),
-                          
+
                           // Título e subtítulo
                           Expanded(
                             child: Column(
@@ -240,7 +242,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                               ],
                             ),
                           ),
-                          
+
                           // Ícone de troféu
                           Container(
                             width: 44,
@@ -262,7 +264,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                         ],
                       ),
                       SizedBox(height: 8),
-                      
+
                       // Barra de progresso decorativa
                       Container(
                         height: 3,
@@ -353,15 +355,19 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              gradient: semVencedor 
+              gradient: semVencedor
                   ? LinearGradient(
-                      colors: [_onSurfaceLight.withOpacity(0.8), _onSurfaceLight.withOpacity(0.4)],
+                      colors: [
+                        _onSurfaceLight.withOpacity(0.8),
+                        _onSurfaceLight.withOpacity(0.4)
+                      ],
                     )
                   : _primaryGradient,
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: (semVencedor ? _onSurfaceLight : _primaryColor).withOpacity(0.2),
+                  color: (semVencedor ? _onSurfaceLight : _primaryColor)
+                      .withOpacity(0.2),
                   blurRadius: 8,
                   offset: Offset(0, 4),
                 ),
@@ -371,7 +377,9 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  semVencedor ? Icons.groups_rounded : Icons.emoji_events_rounded,
+                  semVencedor
+                      ? Icons.groups_rounded
+                      : Icons.emoji_events_rounded,
                   color: Colors.white,
                   size: 16,
                 ),
@@ -389,21 +397,25 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
             ),
           ),
           SizedBox(height: 20),
-          
+
           // Ícone principal
           Container(
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              gradient: semVencedor 
+              gradient: semVencedor
                   ? LinearGradient(
-                      colors: [_onSurfaceLight.withOpacity(0.3), _onSurfaceLight.withOpacity(0.1)],
+                      colors: [
+                        _onSurfaceLight.withOpacity(0.3),
+                        _onSurfaceLight.withOpacity(0.1)
+                      ],
                     )
                   : _primaryGradient,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: (semVencedor ? _onSurfaceLight : _primaryColor).withOpacity(0.15),
+                  color: (semVencedor ? _onSurfaceLight : _primaryColor)
+                      .withOpacity(0.15),
                   blurRadius: 20,
                   spreadRadius: 3,
                 ),
@@ -416,7 +428,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
             ),
           ),
           SizedBox(height: 16),
-          
+
           // Título principal
           Text(
             semVencedor
@@ -433,7 +445,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
             ),
           ),
           SizedBox(height: 8),
-          
+
           Text(
             semVencedor
                 ? 'Todos os participantes foram eliminados nesta rodada'
@@ -447,7 +459,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
             ),
           ),
           SizedBox(height: 24),
-          
+
           // Informações da partida
           if (matchInfo != null)
             Container(
@@ -465,7 +477,8 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                   _buildInfoItem(
                     icon: Icons.timer_rounded,
                     title: 'Duração Total',
-                    value: '${matchInfo!.room!.roomConfiguration!.timeToRespond * matchInfo!.room!.roomConfiguration!.numberOfQuestions} seg',
+                    value:
+                        '${matchInfo!.room!.roomConfiguration!.timeToRespond * matchInfo!.room!.roomConfiguration!.numberOfQuestions} seg',
                     iconColor: _primaryColor,
                   ),
                   SizedBox(height: 12),
@@ -481,7 +494,8 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                   _buildInfoItem(
                     icon: Icons.question_answer_rounded,
                     title: 'Total de Perguntas',
-                    value: '${matchInfo!.room!.roomConfiguration!.numberOfQuestions}',
+                    value:
+                        '${matchInfo!.room!.roomConfiguration!.numberOfQuestions}',
                     iconColor: _successColor,
                   ),
                 ],
@@ -624,7 +638,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
           ),
         ),
         SizedBox(height: 16),
-        
+
         // Lista de jogadores
         ...List.generate(resultados.length, (index) {
           final jogador = resultados[index];
@@ -684,7 +698,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
               color: isWinner ? _winnerGreenLight : _loserRedLight,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isWinner 
+                color: isWinner
                     ? _winnerGreen.withOpacity(0.3)
                     : _loserRed.withOpacity(0.3),
                 width: 1.5,
@@ -708,7 +722,8 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: _getPositionColor(index).withOpacity(0.2),
+                                  color:
+                                      _getPositionColor(index).withOpacity(0.2),
                                   blurRadius: 8,
                                   offset: Offset(0, 4),
                                 ),
@@ -782,7 +797,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                                 _buildStatBadge(
                                   icon: Icons.star_rounded,
                                   value: '${jogador.pontos}%',
-                                  label: 'Eficácia',
+                                  label: 'Sucesso (%)',
                                   color: _goldColor,
                                 ),
                                 SizedBox(width: 8),
@@ -797,12 +812,14 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
                           ],
                         ),
                       ),
-                      
+
                       // Ícone e status
                       Column(
                         children: [
                           Icon(
-                            isWinner ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                            isWinner
+                                ? Icons.check_circle_rounded
+                                : Icons.cancel_rounded,
                             color: isWinner ? _winnerGreen : _loserRed,
                             size: 24,
                           ),
@@ -929,14 +946,14 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
             _buildStatCircle(
               icon: Icons.percent_rounded,
               value: '${(jogador.accuracyRate * 100).toStringAsFixed(1)}%',
-              label: 'Precisão',
+              label: 'Eficácia',
               color: _infoColor,
               isPrimary: false,
             ),
           ],
         ),
         SizedBox(height: 20),
-        
+
         // Tabela detalhada
         Container(
           padding: EdgeInsets.all(16),
@@ -955,9 +972,12 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
             },
             children: [
               _buildTableRow('Respostas Certas', '${jogador.perguntasCertas}'),
-              _buildTableRow('Respostas Erradas', '${jogador.perguntasErradas}'),
-              _buildTableRow('Taxa de Acerto', '${(jogador.accuracyRate * 100).toStringAsFixed(1)}%'),
-              _buildTableRow('Desempenho Tempo', '${(jogador.timeRate * 100).toStringAsFixed(1)}%'),
+              _buildTableRow(
+                  'Respostas Erradas', '${jogador.perguntasErradas}'),
+              _buildTableRow('Taxa de Eficácia',
+                  '${(jogador.accuracyRate * 100).toStringAsFixed(1)}%'),
+              _buildTableRow('Taxa de Eficiência',
+                  '${(jogador.timeRate * 100).toStringAsFixed(1)}%'),
               _buildTableRow('Presenças Top 3', '${jogador.top3vezes ?? 0}'),
             ],
           ),
@@ -979,7 +999,7 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
           width: 52,
           height: 52,
           decoration: BoxDecoration(
-            gradient: isPrimary 
+            gradient: isPrimary
                 ? LinearGradient(
                     colors: [color, color.withOpacity(0.8)],
                   )
@@ -1085,7 +1105,10 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
             height: 80,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [_warningColor.withOpacity(0.3), _warningColor.withOpacity(0.1)],
+                colors: [
+                  _warningColor.withOpacity(0.3),
+                  _warningColor.withOpacity(0.1)
+                ],
               ),
               shape: BoxShape.circle,
               border: Border.all(
@@ -1239,7 +1262,10 @@ class _Tela14FimPartidaViewWidgetState extends State<Tela14FimPartidaViewWidget>
         return _bronzeGradient;
       default:
         return LinearGradient(
-          colors: [_onSurfaceLight.withOpacity(0.8), _onSurfaceLight.withOpacity(0.4)],
+          colors: [
+            _onSurfaceLight.withOpacity(0.8),
+            _onSurfaceLight.withOpacity(0.4)
+          ],
         );
     }
   }

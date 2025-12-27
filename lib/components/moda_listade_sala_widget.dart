@@ -1,3 +1,4 @@
+import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/pages/tela15_sala_customizada/tela15_sala_customizada_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -206,9 +207,8 @@ class _ModaListadeSalaWidgetState extends State<ModaListadeSalaWidget> {
                                         e.roomConfiguration!.timeToRespond,
                                         e.id,
                                       );
-                                     
                                     },
-                                    text: e.isFree
+                                    text: e.roomType == RoomType.FREE.label
                                         ? 'Entrar na sala [Gratis (2 Jog.)]'
                                             .toUpperCase()
                                         : 'Entrar na sala (${e.roomConfiguration!.numberOfPlayers} jogadores)'

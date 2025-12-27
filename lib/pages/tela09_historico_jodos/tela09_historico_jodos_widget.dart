@@ -117,7 +117,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
       {bool isRanking = false}) async {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 600;
-    
+
     final DateTimeRange? picked;
     if (!isRanking) {
       picked = await showDateRangePicker(
@@ -221,7 +221,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                           Container(
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(isMobile ? 12 : 14),
+                              borderRadius:
+                                  BorderRadius.circular(isMobile ? 12 : 14),
                             ),
                             child: IconButton(
                               onPressed: () async {
@@ -293,16 +294,19 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
               ),
               child: Center(
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: isMobile ? double.infinity : 1200),
+                  constraints: BoxConstraints(
+                      maxWidth: isMobile ? double.infinity : 1200),
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24),
                     child: TabBar(
                       controller: _tabController,
                       labelColor: _primaryColor,
                       unselectedLabelColor: _onSurfaceColor.withOpacity(0.6),
                       indicatorColor: _primaryColor,
                       indicatorWeight: 3,
-                      indicatorPadding: EdgeInsets.symmetric(horizontal: isMobile ? 4 : 8),
+                      indicatorPadding:
+                          EdgeInsets.symmetric(horizontal: isMobile ? 4 : 8),
                       labelStyle: TextStyle(
                         fontFamily: 'Inter',
                         fontSize: isMobile ? 13 : 15,
@@ -326,12 +330,13 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
             Expanded(
               child: Center(
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: isMobile ? double.infinity : 1200),
+                  constraints: BoxConstraints(
+                      maxWidth: isMobile ? double.infinity : 1200),
                   child: _model.isLoadingRanking || _model.isLoadingAllMach
                       ? const Center(
                           child: CircularProgressIndicator(
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Color(0xFFEC8D0D)),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0xFFEC8D0D)),
                           ),
                         )
                       : _model.rankings.isEmpty && _model.matches.isEmpty
@@ -342,7 +347,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                 else
                                   _buildPendingFilters(isMobile),
                                 SizedBox(height: isMobile ? 12 : 16),
-                                Expanded(child: _buildEmptyState(isMobile: isMobile))
+                                Expanded(
+                                    child: _buildEmptyState(isMobile: isMobile))
                               ],
                             )
                           : Column(
@@ -427,7 +433,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                 onTap: () => _model.load(setState),
                 child: Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: isMobile ? 24 : 32, 
+                    horizontal: isMobile ? 24 : 32,
                     vertical: isMobile ? 12 : 16,
                   ),
                   decoration: BoxDecoration(
@@ -540,12 +546,13 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         onTap: () => _selectDateRange(context, isRanking: true),
                         child: Container(
                           padding: EdgeInsets.symmetric(
-                              vertical: isMobile ? 12 : 16, 
-                              horizontal: isMobile ? 16 : 20,
+                            vertical: isMobile ? 12 : 16,
+                            horizontal: isMobile ? 16 : 20,
                           ),
                           decoration: BoxDecoration(
                             color: _surfaceColor,
-                            borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
+                            borderRadius:
+                                BorderRadius.circular(isMobile ? 12 : 16),
                             border: Border.all(
                               color: _outlineColor,
                               width: 1.5,
@@ -609,7 +616,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                           padding: EdgeInsets.all(isMobile ? 12 : 16),
                           decoration: BoxDecoration(
                             color: _surfaceColor,
-                            borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
+                            borderRadius:
+                                BorderRadius.circular(isMobile ? 12 : 16),
                             border: Border.all(
                               color: _errorColor,
                               width: 1.5,
@@ -702,12 +710,13 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                       onTap: () => _selectDateRange(context),
                       child: Container(
                         padding: EdgeInsets.symmetric(
-                          vertical: isMobile ? 12 : 16, 
+                          vertical: isMobile ? 12 : 16,
                           horizontal: isMobile ? 16 : 20,
                         ),
                         decoration: BoxDecoration(
                           color: _surfaceColor,
-                          borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
+                          borderRadius:
+                              BorderRadius.circular(isMobile ? 12 : 16),
                           border: Border.all(
                             color: _outlineColor,
                             width: 1.5,
@@ -771,7 +780,8 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         padding: EdgeInsets.all(isMobile ? 12 : 16),
                         decoration: BoxDecoration(
                           color: _surfaceColor,
-                          borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
+                          borderRadius:
+                              BorderRadius.circular(isMobile ? 12 : 16),
                           border: Border.all(
                             color: _errorColor,
                             width: 1.5,
@@ -1098,13 +1108,14 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         SizedBox(height: isMobile ? 12 : 16),
                         Container(
                           padding: EdgeInsets.symmetric(
-                            horizontal: isMobile ? 12 : 16, 
+                            horizontal: isMobile ? 12 : 16,
                             vertical: isMobile ? 6 : 8,
                           ),
                           decoration: BoxDecoration(
                             color: _getStatusColor(match.statusMatch)
                                 .withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(isMobile ? 20 : 24),
+                            borderRadius:
+                                BorderRadius.circular(isMobile ? 20 : 24),
                             border: Border.all(
                               color: _getStatusColor(match.statusMatch)
                                   .withOpacity(0.3),
@@ -1166,17 +1177,21 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                       SizedBox(height: isMobile ? 12 : 16),
                       ...match.matchPlayers!.map((player) {
                         return Padding(
-                          padding: EdgeInsets.only(bottom: isMobile ? 8.0 : 12.0),
+                          padding:
+                              EdgeInsets.only(bottom: isMobile ? 8.0 : 12.0),
                           child: _buildPlayerTile(player.userResponse,
-                              currentUser: _model.currentUser, isMobile: isMobile),
+                              currentUser: _model.currentUser,
+                              isMobile: isMobile),
                         );
                       }).toList(),
                     ],
-                    if (match.statusMatch == 'PENDING') ...[
+                    if (['PENDING', 'IN_PROGRESS', 'WAITING_FOR_START']
+                        .contains(match.statusMatch)) ...[
                       SizedBox(height: isMobile ? 20 : 24),
                       Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
+                          borderRadius:
+                              BorderRadius.circular(isMobile ? 16 : 20),
                           boxShadow: [
                             BoxShadow(
                               color: _errorColor.withOpacity(0.3),
@@ -1187,9 +1202,11 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         ),
                         child: Material(
                           color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
+                          borderRadius:
+                              BorderRadius.circular(isMobile ? 16 : 20),
                           child: InkWell(
-                            borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
+                            borderRadius:
+                                BorderRadius.circular(isMobile ? 16 : 20),
                             onTap: () async {
                               await _model.leaveTheMatchAsync(
                                   setState, match.id);
@@ -1197,12 +1214,13 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                             child: Container(
                               width: double.infinity,
                               padding: EdgeInsets.symmetric(
-                                vertical: isMobile ? 16 : 20, 
+                                vertical: isMobile ? 16 : 20,
                                 horizontal: isMobile ? 24 : 32,
                               ),
                               decoration: BoxDecoration(
                                 color: _errorColor,
-                                borderRadius: BorderRadius.circular(isMobile ? 16 : 20),
+                                borderRadius:
+                                    BorderRadius.circular(isMobile ? 16 : 20),
                               ),
                               child: _model.isLoadingLeave
                                   ? Center(
@@ -1223,7 +1241,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                                       children: [
                                         Icon(
                                           Icons.exit_to_app_rounded,
-                                          color: Colors.white, 
+                                          color: Colors.white,
                                           size: isMobile ? 20 : 22,
                                         ),
                                         SizedBox(width: isMobile ? 8 : 12),
@@ -1439,14 +1457,15 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                               SizedBox(height: isMobile ? 12 : 16),
                               Container(
                                 padding: EdgeInsets.symmetric(
-                                  horizontal: isMobile ? 12 : 16, 
+                                  horizontal: isMobile ? 12 : 16,
                                   vertical: isMobile ? 6 : 8,
                                 ),
                                 decoration: BoxDecoration(
                                   color: isWinner
                                       ? _successColor.withOpacity(0.1)
                                       : _errorColor.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
+                                  borderRadius:
+                                      BorderRadius.circular(isMobile ? 12 : 16),
                                   border: Border.all(
                                     color: isWinner
                                         ? _successColor.withOpacity(0.3)
@@ -1493,7 +1512,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                     // Linha 2: Tempo e Pontos
                     Container(
                       padding: EdgeInsets.symmetric(
-                        vertical: isMobile ? 12 : 16, 
+                        vertical: isMobile ? 12 : 16,
                         horizontal: isMobile ? 16 : 20,
                       ),
                       decoration: BoxDecoration(
@@ -1699,14 +1718,15 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                       width: isMobile ? 150 : 180,
                       child: Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: isMobile ? 12 : 16, 
+                          horizontal: isMobile ? 12 : 16,
                           vertical: isMobile ? 8 : 12,
                         ),
                         decoration: BoxDecoration(
                           color: isWinner
                               ? _successColor.withOpacity(0.1)
                               : _errorColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
+                          borderRadius:
+                              BorderRadius.circular(isMobile ? 12 : 16),
                           border: Border.all(
                             color: isWinner
                                 ? _successColor.withOpacity(0.3)
@@ -2153,7 +2173,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
             ),
             trailing: Container(
               padding: EdgeInsets.symmetric(
-                horizontal: isMobile ? 8 : 12, 
+                horizontal: isMobile ? 8 : 12,
                 vertical: isMobile ? 4 : 6,
               ),
               decoration: BoxDecoration(
@@ -2190,9 +2210,9 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
             children: [
               Padding(
                 padding: EdgeInsets.fromLTRB(
-                  isMobile ? 16 : 20, 
-                  0, 
-                  isMobile ? 16 : 20, 
+                  isMobile ? 16 : 20,
+                  0,
+                  isMobile ? 16 : 20,
                   isMobile ? 16 : 20,
                 ),
                 child: Column(
@@ -2252,12 +2272,13 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                         ),
                         Container(
                           padding: EdgeInsets.symmetric(
-                            horizontal: isMobile ? 8 : 12, 
+                            horizontal: isMobile ? 8 : 12,
                             vertical: isMobile ? 4 : 6,
                           ),
                           decoration: BoxDecoration(
                             color: _primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(isMobile ? 6 : 8),
+                            borderRadius:
+                                BorderRadius.circular(isMobile ? 6 : 8),
                           ),
                           child: Text(
                             'Pontos: ${isCorrect ? (_model.matchInfo?.room?.roomConfiguration?.timeToRespond ?? 30) - time : 0}',
@@ -2313,7 +2334,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
       ),
       child: ListTile(
         contentPadding: EdgeInsets.symmetric(
-          horizontal: isMobile ? 16 : 20, 
+          horizontal: isMobile ? 16 : 20,
           vertical: isMobile ? 8 : 12,
         ),
         leading: Stack(
@@ -2491,7 +2512,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                   },
                   child: Container(
                     padding: EdgeInsets.symmetric(
-                      horizontal: isMobile ? 24 : 32, 
+                      horizontal: isMobile ? 24 : 32,
                       vertical: isMobile ? 12 : 16,
                     ),
                     decoration: BoxDecoration(

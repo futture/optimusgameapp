@@ -12,11 +12,11 @@ import 'tela09_historico_jodos_widget.dart' show Tela09HistoricoJodosWidget;
 import 'package:flutter/material.dart';
 
 class Param {
-  bool? isEvent;
-  String? status;
+  List<String>? roomType;
+  List<String>? status;
   DateTime? startDate;
   DateTime? endDate;
-  Param({this.isEvent, this.status, this.endDate, this.startDate});
+  Param({this.roomType, this.status, this.endDate, this.startDate});
 }
 
 class Tela09HistoricoJodosModel
@@ -141,7 +141,7 @@ class Tela09HistoricoJodosModel
 
     var result = await _matchService.getMatchByUserIdAsync(userId!,
         endDate: param.endDate,
-        isEvent: param.isEvent,
+        roomTypes: param.roomType,
         startDate: param.startDate,
         status: param.status);
 
