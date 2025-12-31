@@ -94,9 +94,9 @@ class _Tela15SalaCustomizadaViewWidgetState
           builder: (context, constraints) {
             final screenWidth = constraints.maxWidth;
             final isMobile = screenWidth < _mobileBreakpoint;
-            final isTablet = screenWidth >= _mobileBreakpoint && 
-                            screenWidth < _tabletBreakpoint;
-            
+            final isTablet = screenWidth >= _mobileBreakpoint &&
+                screenWidth < _tabletBreakpoint;
+
             return Column(
               children: [
                 // Header
@@ -136,7 +136,8 @@ class _Tela15SalaCustomizadaViewWidgetState
         bottom: false,
         child: Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: isMobile ? double.infinity : _tabletBreakpoint),
+            constraints: BoxConstraints(
+                maxWidth: isMobile ? double.infinity : _tabletBreakpoint),
             child: Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: isMobile ? 16 : 20,
@@ -151,12 +152,14 @@ class _Tela15SalaCustomizadaViewWidgetState
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(isMobile ? 10 : 12),
+                          borderRadius:
+                              BorderRadius.circular(isMobile ? 10 : 12),
                         ),
                         child: IconButton(
                           onPressed: () {
                             Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(builder: (_) => Tela03PrincipalWidget()),
+                              MaterialPageRoute(
+                                  builder: (_) => Tela03PrincipalWidget()),
                             );
                           },
                           icon: Icon(
@@ -204,7 +207,8 @@ class _Tela15SalaCustomizadaViewWidgetState
 
   Widget _buildMainContent(bool isMobile, bool isTablet, double screenWidth) {
     final horizontalPadding = isMobile ? 12.0 : 16.0;
-    final maxContentWidth = isTablet ? 800.0 : (isMobile ? double.infinity : 1200.0);
+    final maxContentWidth =
+        isTablet ? 800.0 : (isMobile ? double.infinity : 1200.0);
 
     return Container(
       width: double.infinity,
@@ -218,9 +222,9 @@ class _Tela15SalaCustomizadaViewWidgetState
               children: [
                 // Cabeçalho melhorado da criação
                 _buildMainHeader(isMobile, isTablet),
-                
+
                 SizedBox(height: isMobile ? 12 : 16),
-                
+
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 12),
                   child: Column(
@@ -233,24 +237,26 @@ class _Tela15SalaCustomizadaViewWidgetState
                         isMobile: isMobile,
                       ),
                       SizedBox(height: isMobile ? 12 : 16),
-                      
+
                       // Campo: Número de Jogadores
                       _buildInputField(
                         label: 'Número de Jogadores',
                         hintText: 'Ex: 10',
                         controller: _model.numberPlayerTextController,
                         focusNode: _model.numberPlayerFocusNode,
-                        validator: (val) => _model.validateNumberPlayer(context, val),
+                        validator: (val) =>
+                            _model.validateNumberPlayer(context, val),
                         maxLength: 2,
                         keyboardType: TextInputType.number,
                         icon: Icons.people_alt_rounded,
                         onChanged: (value) => setState(() {}),
                         isMobile: isMobile,
                       ),
-                      
-                      if (_model.numberPlayerTextController.text.isNotEmpty) ...[
+
+                      if (_model
+                          .numberPlayerTextController.text.isNotEmpty) ...[
                         SizedBox(height: isMobile ? 16 : 24),
-                        
+
                         // Título: Adicionar Jogadores
                         _buildSectionTitle(
                           title: 'Adicionar Jogadores',
@@ -258,17 +264,17 @@ class _Tela15SalaCustomizadaViewWidgetState
                           isMobile: isMobile,
                         ),
                         SizedBox(height: isMobile ? 12 : 16),
-                        
+
                         // Campo de busca de jogadores
                         _buildPlayerAutocomplete(context, isMobile),
-                        
+
                         if (_model.addedUsers.isNotEmpty) ...[
                           SizedBox(height: isMobile ? 16 : 20),
                           _buildAddedPlayersSection(context, isMobile),
                         ],
-                        
+
                         SizedBox(height: isMobile ? 16 : 24),
-                        
+
                         // Título: Configurações do Jogo
                         _buildSectionTitle(
                           title: 'Configurações do Jogo',
@@ -276,19 +282,20 @@ class _Tela15SalaCustomizadaViewWidgetState
                           isMobile: isMobile,
                         ),
                         SizedBox(height: isMobile ? 12 : 16),
-                        
+
                         // Campos de configuração em linha
                         _buildGameSettingsRow(isMobile),
-                        
+
                         SizedBox(height: isMobile ? 12 : 16),
-                        
+
                         // Campo: Valor da Aposta
                         _buildInputField(
                           label: 'Valor da Aposta',
                           hintText: 'Ex: 1500',
                           controller: _model.montanteTextController,
                           focusNode: _model.montanteFocusNode,
-                          validator: (val) => _model.validateMontante(context, val),
+                          validator: (val) =>
+                              _model.validateMontante(context, val),
                           maxLength: 10,
                           keyboardType: TextInputType.number,
                           icon: Icons.account_balance_wallet_rounded,
@@ -296,17 +303,17 @@ class _Tela15SalaCustomizadaViewWidgetState
                           prefixText: 'AOA ',
                           isMobile: isMobile,
                         ),
-                        
+
                         SizedBox(height: isMobile ? 16 : 24),
-                        
+
                         // Configurações Avançadas
                         _buildAdvancedSettingsSection(context, isMobile),
-                        
+
                         SizedBox(height: isMobile ? 20 : 32),
-                        
+
                         // Botão de Iniciar Partida
                         _buildStartGameButton(context, isMobile),
-                        
+
                         SizedBox(height: isMobile ? 16 : 20),
                       ],
                     ],
@@ -326,10 +333,7 @@ class _Tela15SalaCustomizadaViewWidgetState
       padding: EdgeInsets.all(isMobile ? 16 : 24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            _surfaceColor,
-            Color(0xFFFEF7E6)
-          ],
+          colors: [_surfaceColor, Color(0xFFFEF7E6)],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -374,7 +378,7 @@ class _Tela15SalaCustomizadaViewWidgetState
             ),
           ),
           SizedBox(height: isMobile ? 12 : 20),
-          
+
           // Título principal
           Text(
             'CRIAR PARTIDA PERSONALIZADA',
@@ -389,9 +393,9 @@ class _Tela15SalaCustomizadaViewWidgetState
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          
+
           SizedBox(height: isMobile ? 4 : 8),
-          
+
           // Subtítulo
           Text(
             'Configure regras, convide amigos e crie uma experiência única de jogo',
@@ -405,9 +409,9 @@ class _Tela15SalaCustomizadaViewWidgetState
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
-          
+
           SizedBox(height: isMobile ? 12 : 20),
-          
+
           // Badge informativo
           Container(
             padding: EdgeInsets.symmetric(
@@ -448,7 +452,8 @@ class _Tela15SalaCustomizadaViewWidgetState
     );
   }
 
-  Widget _buildSectionTitle({required String title, required IconData icon, required bool isMobile}) {
+  Widget _buildSectionTitle(
+      {required String title, required IconData icon, required bool isMobile}) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -827,8 +832,7 @@ class _Tela15SalaCustomizadaViewWidgetState
                       ),
                     ),
                     child: IconButton(
-                      icon: Icon(Icons.close_rounded, 
-                          size: isMobile ? 16 : 18),
+                      icon: Icon(Icons.close_rounded, size: isMobile ? 16 : 18),
                       color: Colors.red.shade500,
                       onPressed: () {
                         setState(() {
@@ -899,7 +903,7 @@ class _Tela15SalaCustomizadaViewWidgetState
               ],
             ),
             SizedBox(height: isMobile ? 16 : 20),
-            
+
             // Tipo de Pergunta
             Text(
               'Tipo de Pergunta:',
@@ -922,9 +926,9 @@ class _Tela15SalaCustomizadaViewWidgetState
               option2Title: 'Completa',
               option2Value: false,
             ),
-            
+
             SizedBox(height: isMobile ? 16 : 20),
-            
+
             // Vencedores
             Text(
               'Vencedores:',
@@ -995,7 +999,7 @@ class _Tela15SalaCustomizadaViewWidgetState
     required bool isMobile,
   }) {
     final isSelected = groupValue == value;
-    
+
     return InkWell(
       onTap: () => onChanged(value),
       borderRadius: BorderRadius.circular(isMobile ? 10 : 12),
@@ -1120,7 +1124,7 @@ class _Tela15SalaCustomizadaViewWidgetState
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      Icons.play_arrow_rounded, 
+                      Icons.play_arrow_rounded,
                       size: isMobile ? 20 : 22,
                     ),
                   ),
@@ -1155,7 +1159,7 @@ class _Tela15SalaCustomizadaViewWidgetState
                 controller: _model.numberQuestionTextController,
                 focusNode: _model.numberQuestionFocusNode,
                 validator: (val) => _model.validateNumberQuestion(context, val),
-                maxLength: 2,
+                maxLength: 8,
                 keyboardType: TextInputType.number,
                 icon: Icons.quiz_rounded,
                 isMobile: isMobile,
@@ -1166,7 +1170,8 @@ class _Tela15SalaCustomizadaViewWidgetState
                 hintText: 'Ex: 4',
                 controller: _model.numberOptionAnswerTextController,
                 focusNode: _model.numberOptionAnswerFocusNode,
-                validator: (val) => _model.validateNumberOptionAnswer(context, val),
+                validator: (val) =>
+                    _model.validateNumberOptionAnswer(context, val),
                 maxLength: 1,
                 keyboardType: TextInputType.number,
                 icon: Icons.format_list_numbered_rounded,
@@ -1182,7 +1187,8 @@ class _Tela15SalaCustomizadaViewWidgetState
                   hintText: 'Ex: 10',
                   controller: _model.numberQuestionTextController,
                   focusNode: _model.numberQuestionFocusNode,
-                  validator: (val) => _model.validateNumberQuestion(context, val),
+                  validator: (val) =>
+                      _model.validateNumberQuestion(context, val),
                   maxLength: 2,
                   keyboardType: TextInputType.number,
                   icon: Icons.quiz_rounded,
@@ -1196,7 +1202,8 @@ class _Tela15SalaCustomizadaViewWidgetState
                   hintText: 'Ex: 4',
                   controller: _model.numberOptionAnswerTextController,
                   focusNode: _model.numberOptionAnswerFocusNode,
-                  validator: (val) => _model.validateNumberOptionAnswer(context, val),
+                  validator: (val) =>
+                      _model.validateNumberOptionAnswer(context, val),
                   maxLength: 1,
                   keyboardType: TextInputType.number,
                   icon: Icons.format_list_numbered_rounded,
@@ -1258,7 +1265,7 @@ class _Tela15SalaCustomizadaViewWidgetState
                               shape: BoxShape.circle,
                             ),
                             child: IconButton(
-                              icon: Icon(Icons.close_rounded, 
+                              icon: Icon(Icons.close_rounded,
                                   size: isMobile ? 16 : 18),
                               color: Colors.grey.shade600,
                               onPressed: () {
@@ -1317,7 +1324,7 @@ class _Tela15SalaCustomizadaViewWidgetState
                   Padding(
                     padding: EdgeInsets.only(top: isMobile ? 10 : 12),
                     child: ElevatedButton.icon(
-                      icon: Icon(Icons.person_add_rounded, 
+                      icon: Icon(Icons.person_add_rounded,
                           size: isMobile ? 16 : 18),
                       label: Text(
                         'Adicionar Jogador',
@@ -1332,7 +1339,8 @@ class _Tela15SalaCustomizadaViewWidgetState
                         foregroundColor: Colors.white,
                         minimumSize: Size(double.infinity, isMobile ? 44 : 48),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(isMobile ? 10 : 12),
+                          borderRadius:
+                              BorderRadius.circular(isMobile ? 10 : 12),
                         ),
                         elevation: 2,
                         shadowColor: _primaryColor.withOpacity(0.3),

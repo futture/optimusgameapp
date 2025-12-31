@@ -1973,7 +1973,7 @@ class _Tela09HistoricoJodosWidgetState extends State<Tela09HistoricoJodosWidget>
                 SizedBox(height: isMobile ? 12 : 16),
                 _buildPrizeDetailRow(
                   'Ganho Líquido',
-                  '${!isWinner ? 0 : _model.matchInfo!.matchPrize?.netPremium ?? 0} AOA',
+                  '${!isWinner ? 0 : _model.matchInfo!.matchPrize?.playerMatchPrize?.where((e) => e.playerId == _model.userId).first.netPremium ?? 0} AOA',
                   Icons.account_balance_wallet_rounded,
                   isHighlighted: isWinner,
                   isMobile: isMobile,

@@ -465,7 +465,11 @@ class Tela15SalaCustomizadaViewModel
         currentUser,
         _buildDialogActions(),
         isPlaySound: false,
-        isProgressBar: false);
+        isProgressBar: false, onClose: () async {
+      await leaveTheMatchAsync(context);
+      _matchWebSocketService?.disconnect();
+      isShowWaitingDialogOpen = false;
+    });
   }
 
   Widget _buildDialogActions() {

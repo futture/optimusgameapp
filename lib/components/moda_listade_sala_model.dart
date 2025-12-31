@@ -284,7 +284,11 @@ class ModaListadeSalaModel extends FlutterFlowModel<ModaListadeSalaWidget> {
         _buildDialogActions(isFree: isFree),
         timeCloseDialog: 3600,
         isPlaySound: false,
-        isProgressBar: false);
+        isProgressBar: false, onClose: () async {
+      await leaveTheMatchAsync(context);
+      _matchWebSocketService?.disconnect();
+      isShowWaitingDialogOpen = false;
+    });
   }
 
   Widget _buildDialogActions({bool isFree = false}) {

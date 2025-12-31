@@ -1189,7 +1189,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
 
             try {
               await _model.getUsersByMatchId(setState, match.id);
-              await CommonDialogWidget.showMatchParticipantsDialog(
+              CommonDialogWidget.showMatchParticipantsDialog(
                   context,
                   List.empty(),
                   null,

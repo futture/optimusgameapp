@@ -15,18 +15,20 @@ class CommonDialogWidget {
     }
   }
 
-  static Future<void> showMatchParticipantsDialog(
-      BuildContext context,
-      List<dynamic> infos,
-      String? title,
-      MatchResponse match,
-      List<UserResponse> participants,
-      UserResponse? currentUser,
-      Widget widget,
-      {bool? isError,
-      int timeCloseDialog = 10,
-      bool isProgressBar = true,
-      bool isPlaySound = true}) async {
+  static void showMatchParticipantsDialog(
+    BuildContext context,
+    List<dynamic> infos,
+    String? title,
+    MatchResponse match,
+    List<UserResponse> participants,
+    UserResponse? currentUser,
+    Widget widget, {
+    bool? isError,
+    int timeCloseDialog = 10,
+    bool isProgressBar = true,
+    bool isPlaySound = true,
+    VoidCallback? onClose,
+  }) async {
     if (currentUser == null) return;
 
     if (isPlaySound) await _playSound();
@@ -165,9 +167,13 @@ class CommonDialogWidget {
                               IconButton(
                                 icon: const Icon(Icons.close,
                                     color: Colors.white),
-                                onPressed: () {
+                                onPressed: () async {
                                   progressController?.dispose();
+
                                   Navigator.pop(context);
+                                  if (onClose != null) {
+                                    onClose();
+                                  }
                                 },
                               ),
                             ],
