@@ -133,7 +133,7 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
           oldPassword: _currentPasswordController.text,
           newPassword: _newPasswordController.text,
         );
-      } else { 
+      } else {
         if (widget.resetToken == null) {
           throw Exception("Token inválido ou ausente");
         }
@@ -145,9 +145,9 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
       }
 
       setState(() => _isLoading = false);
- 
+
       if (result['isSuccess'] == true || result['msg'] != null) {
-        if (widget.mode == PasswordMode.change) { 
+        if (widget.mode == PasswordMode.change) {
           await showDialog(
             context: context,
             barrierDismissible: false,
@@ -159,14 +159,14 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
 
           TokenUtil.removeToken();
           context.goNamed(Tela00LoginWidget.routeName);
-        } else { 
-          _showSuccessMessage(); 
-          await Future.delayed(Duration(seconds: 7)); 
+        } else {
+          _showSuccessMessage();
+          await Future.delayed(Duration(seconds: 7));
           if (mounted) {
             context.goNamed(Tela00LoginWidget.routeName);
           }
         }
-      } else { 
+      } else {
         _showSnackBar(
           result['error']?['detail']?['message'] ?? 'Erro ao alterar senha',
           _errorColor,
@@ -199,14 +199,16 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
   void _showSuccessMessage() {
     setState(() {
       _showSuccessWidget = true;
-    }); 
+    });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
             Icon(Icons.check_circle, color: Colors.white, size: 20),
             SizedBox(width: 8),
-            Expanded(child: Text('Senha redefinida com sucesso! Agora você pode fazer login com a nova senha no aplicativo ou na web.')),
+            Expanded(
+                child: Text(
+                    'Senha redefinida com sucesso! Agora você pode fazer login com a nova senha no aplicativo ou na web.')),
           ],
         ),
         backgroundColor: _successColor,
@@ -783,8 +785,8 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
                                   validator: (value) {
                                     if (value?.isEmpty ?? true)
                                       return 'Digite uma nova senha';
-                                    if (value!.length < 8)
-                                      return 'Mínimo 8 caracteres';
+                                    if (value!.length < 6)
+                                      return 'Mínimo 6 caracteres';
                                     return null;
                                   },
                                 ),
@@ -1044,7 +1046,7 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen>
           spacing: 8,
           runSpacing: 8,
           children: [
-            _buildRequirementChip('8+ caracteres', _passwordStrength > 0),
+            _buildRequirementChip('6+ caracteres', _passwordStrength > 0),
             _buildRequirementChip('Letra maiúscula', _passwordStrength > 1),
             _buildRequirementChip('Número', _passwordStrength > 1),
             _buildRequirementChip('Símbolo especial', _passwordStrength > 2),
