@@ -1,7 +1,10 @@
+import 'dart:async';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warning00_campo_vazio_widget.dart';
 import 'package:projeto_game_quiz/components/warnings/warning04_reducao_de_saldo/warning04_reducao_de_saldo_widget.dart';
 import 'package:projeto_game_quiz/core/api/services/fcm_token_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
+import 'package:projeto_game_quiz/core/api/services/question_service.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/dialogs/common_dialog_widget.dart';
 import 'package:projeto_game_quiz/utils.dart';
@@ -27,14 +30,16 @@ class Tela03PrincipalWidget extends StatefulWidget {
   State<Tela03PrincipalWidget> createState() => _Tela03PrincipalWidgetState();
 }
 
-class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
+class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late Tela03PrincipalModel _model;
   final matchService = MatchService();
+  final questionService = QuestionService();
 
-  // Mapa para controlar loading individual de cada partida
   final Map<String, bool> _matchLoadingStates = {};
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  final FocusNode _screenFocusNode = FocusNode();
   final FcmTokenService _fcmTokenService = FcmTokenService();
 
   // Cores e gradientes do tema premium
@@ -54,162 +59,374 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
     end: Alignment.bottomRight,
   );
 
+  bool _showMatchNotification = false;
+  Timer? _timerNotificacao;
+  late AnimationController _animacaoPulsar;
+  late AnimationController _animationController;
+  bool _showNoMatchNotification = false;
+  bool _isCheckingMatches = false;
+  Timer? _checkTimer;
+  List<MatchResponse> _activeMatches = [];
+  bool _showActiveMatchNotification = false;
+  bool _hasActiveMatch = false;
+  bool _firstBuild = true;
+  DateTime? _lastManualCheck;
+  bool _isAppInForeground = true;
+
   @override
   void initState() {
     super.initState();
+    _goBackToMatch();
+    WidgetsBinding.instance.addObserver(this);
     _fcmTokenService.initFirebaseMessaging(context);
 
     _model = createModel(context, () => Tela03PrincipalModel());
 
+    _animacaoPulsar = AnimationController(
+      duration: Duration(milliseconds: 1000),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 700),
+      vsync: this,
+    );
+
+    // Configuração inicial
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+
+    // Carrega dados do usuário
     _model.getUserInfoAndAccountInfoAsync(setState, context);
     _model.loadMatches(setState);
+
+    // Verificação IMEDIATA ao abrir o app
+    _checkForActiveMatchInProgress(urgent: true);
+
+    // Configura timer para verificar a cada 1 minuto (mais frequente)
+    _checkTimer = Timer.periodic(Duration(minutes: 1), (timer) {
+      if (mounted && _isAppInForeground) {
+        _checkForActiveMatchInProgress(silent: true);
+      }
+    });
+
+    // Força foco na tela
+    _screenFocusNode.requestFocus();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    if (state == AppLifecycleState.resumed) {
+      // App voltou ao foreground
+      _isAppInForeground = true;
+      print("📱 App retomado - verificando partidas ativas");
+
+      // Verificação URGENTE quando o app é retomado
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _checkForActiveMatchInProgress(urgent: true);
+        }
+      });
+    } else if (state == AppLifecycleState.paused) {
+      // App foi para background
+      _isAppInForeground = false;
+      print("📱 App em background");
+    } else if (state == AppLifecycleState.inactive) {
+      // App está inativo (ex: chamada telefônica)
+      _isAppInForeground = false;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Verificação quando as dependências mudam
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_firstBuild && mounted) {
+        _firstBuild = false;
+        _checkForActiveMatchInProgress(urgent: true);
+      }
+    });
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _model.dispose();
+    _timerNotificacao?.cancel();
+    _checkTimer?.cancel();
+    _screenFocusNode.dispose();
+    _animacaoPulsar.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false,
-      child: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: Scaffold(
-          key: scaffoldKey,
-          backgroundColor: _backgroundColor,
-          body: Column(
+  void _closeNotification() {
+    setState(() {
+      _showMatchNotification = false;
+      _showActiveMatchNotification = false;
+    });
+    // Remove badge quando fecha a notificação
+    FlutterAppBadger.removeBadge();
+  }
+
+  Future<void> _goBackToMatch() async {
+    final userId = _model.user?.id;
+    if (userId == null) {
+      print("⚠️ Usuário não logado para voltar à partida");
+      return;
+    }
+
+    if (_activeMatches.isEmpty) {
+      print("⚠️ Nenhuma partida ativa encontrada para voltar");
+      return;
+    }
+
+    final match = _activeMatches.first;
+    final matchId = match.id;
+
+    final result =
+        await matchService.activatePlayerInMatchAsync(matchId, userId); 
+    print("🎯 Resultado de reativação do jogador: $result");
+    final nextQuestionResult =
+        await questionService.nextQuestionMatchAsync(matchId);
+    print("🎯 Resultado da próxima questão: $nextQuestionResult");
+    final nextQuestion = nextQuestionResult['data'];
+    print("🎯 Próxima questão obtida: ID ${nextQuestion}");
+    print("🎯 Partidartida: $match");
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => Tela06SaladeJogoWidget(
+          matchInfo: match,
+          recebeuNotificaca: true,
+          nextQuestion: nextQuestion,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _checkForActiveMatchInProgress(
+      {bool silent = false, bool urgent = false}) async {
+    if (_isCheckingMatches && !urgent) return;
+
+    // Para verificações não urgentes, verifica se precisa verificar novamente
+    if (!urgent && _lastManualCheck != null) {
+      final timeSinceLastCheck = DateTime.now().difference(_lastManualCheck!);
+      if (timeSinceLastCheck < Duration(seconds: 30)) {
+        return;
+      }
+    }
+
+    if (!silent) {
+      setState(() {
+        _isCheckingMatches = true;
+      });
+    }
+
+    try {
+      final userId = _model.user?.id;
+      if (userId == null) {
+        print("⚠️ Usuário não logado para verificar partida ativa");
+        return;
+      }
+
+      final result =
+          await matchService.checkUserHasMatchInProgressToday(userId);
+
+      if (mounted && result['isSuccess'] == true) {
+        final hasActiveMatch = result['hasMatchToday'] ?? false;
+        final matchCount = result['matchCount'] ?? 0;
+        final List<MatchResponse> matches = result['matches'] ?? [];
+
+        print(
+            "📊 Resultado verificação: hasMatchToday=$hasActiveMatch, matchCount=$matchCount");
+
+        // Verifica se houve mudança de estado
+        final bool stateChanged = _hasActiveMatch != hasActiveMatch ||
+            _showActiveMatchNotification != hasActiveMatch;
+
+        // Atualiza sempre, mas especialmente se houve mudança
+        if (stateChanged || urgent) {
+          setState(() {
+            _hasActiveMatch = hasActiveMatch;
+            _activeMatches = matches;
+            _showActiveMatchNotification = hasActiveMatch;
+            _showMatchNotification = hasActiveMatch;
+
+            if (!silent && !hasActiveMatch) {
+              _showNoMatchNotification = true;
+            } else if (hasActiveMatch) {
+              _showNoMatchNotification = false;
+            }
+          });
+
+          // Atualiza badge do app
+          await _updateAppBadge(hasActiveMatch);
+
+          _lastManualCheck = DateTime.now();
+        }
+
+        if (!silent) {
+          if (hasActiveMatch) {
+            print("🎮 USUÁRIO TEM $matchCount PARTIDA(S) EM ANDAMENTO HOJE");
+            matches.forEach((match) {
+              print(
+                  "  - Partida ID: ${match.id}, Status: ${match.statusMatch}, Início: ${match.matchStartDate}");
+            });
+          } else {
+            print("📭 USUÁRIO NÃO TEM PARTIDAS EM ANDAMENTO HOJE");
+          }
+        }
+      } else {
+        print("⚠️ Falha ao verificar partidas ativas: ${result['error']}");
+        if (mounted && !silent) {
+          setState(() {
+            _showActiveMatchNotification = false;
+            _hasActiveMatch = false;
+            _activeMatches = [];
+          });
+          await _updateAppBadge(false);
+        }
+      }
+    } catch (e) {
+      print("💥 Erro ao verificar partida em andamento: $e");
+      if (mounted && !silent) {
+        setState(() {
+          _showActiveMatchNotification = false;
+          _hasActiveMatch = false;
+          _activeMatches = [];
+        });
+        await _updateAppBadge(false);
+      }
+    } finally {
+      if (!silent && mounted) {
+        setState(() {
+          _isCheckingMatches = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _updateAppBadge(bool hasActiveMatch) async {
+    try {
+      if (hasActiveMatch) {
+        await FlutterAppBadger.updateBadgeCount(1);
+      } else {
+        await FlutterAppBadger.removeBadge();
+      }
+    } catch (e) {
+      print("⚠️ Erro ao atualizar badge: $e");
+    }
+  }
+
+  Widget _buildNoMatchTodayNotification() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color(0xFF9C27B0),
+            Color(0xFF7B1FA2),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0xFF9C27B0).withOpacity(0.4),
+            blurRadius: 20,
+            spreadRadius: 2,
+            offset: Offset(0, 6),
+          ),
+        ],
+        border: Border.all(
+          color: Colors.white.withOpacity(0.3),
+          width: 2,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
             children: [
-              // Header Premium - Mesmo estilo da tela de finanças
               Container(
-                width: double.infinity,
+                width: 50,
+                height: 50,
                 decoration: BoxDecoration(
-                  gradient: _primaryGradient,
-                  boxShadow: [
-                    BoxShadow(
-                      color: _primaryColor.withOpacity(0.3),
-                      blurRadius: 15,
-                      offset: Offset(0, 4),
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.4),
+                    width: 2,
+                  ),
+                ),
+                child: _isCheckingMatches
+                    ? CircularProgressIndicator(
+                        strokeWidth: 3,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      )
+                    : Icon(
+                        Icons.event_busy_rounded,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+              ),
+              SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _isCheckingMatches
+                          ? 'VERIFICANDO...'
+                          : 'NENHUMA PARTIDA EM CURSO',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    SizedBox(height: 5),
+                    Text(
+                      _isCheckingMatches
+                          ? 'Verificando se está inscrito em uma partida em curso...'
+                          : 'Não há alguma partida em curso que você esteja inscrito.',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.95),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 2,
                     ),
                   ],
                 ),
-                child: SafeArea(
-                  bottom: false,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: _getResponsivePadding(context),
-                      vertical: 16,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            // Botão Menu Premium
-                            Container(
-                              width: _getIconSize(context),
-                              height: _getIconSize(context),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: IconButton(
-                                onPressed: _showMenuModal,
-                                icon: Icon(
-                                  FontAwesomeIcons.bars,
-                                  color: Colors.white,
-                                  size: _getIconSize(context) - 28,
-                                ),
-                                splashRadius: 20,
-                              ),
-                            ),
-                            SizedBox(width: 16),
-                            Expanded(
-                              child: Text(
-                                'GAME QUIZ',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: _getFontSize(context, baseSize: 20),
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ),
-                            // Ícone de notificações
-                            Container(
-                              width: _getIconSize(context),
-                              height: _getIconSize(context),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.15),
-                                shape: BoxShape.circle,
-                              ),
-                              child: IconButton(
-                                icon: Icon(
-                                  Icons.notifications_outlined,
-                                  color: Colors.white,
-                                  size: _getIconSize(context) - 24,
-                                ),
-                                onPressed: () {
-                                  // Adicionar funcionalidade de notificações aqui
-                                },
-                                splashRadius: 20,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 8),
-                        // Barra de progresso sutil
-                        Container(
-                          height: 2,
-                          width: 60,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
               ),
-
-              Expanded(
-                child: Center(
+              if (!_isCheckingMatches)
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _showNoMatchNotification = false;
+                    });
+                  },
                   child: Container(
-                    constraints: BoxConstraints(
-                      maxWidth: isWeb ? 1000 : double.infinity,
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      shape: BoxShape.circle,
                     ),
-                    child: RefreshIndicator(
-                      onRefresh: _refreshData,
-                      color: const Color(0xFFEC8D0D),
-                      backgroundColor: _backgroundColor,
-                      child: SingleChildScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: EdgeInsets.all(_getResponsivePadding(context)),
-                        child: Column(
-                          children: [
-                            _buildUserProfileCard(context),
-                            const SizedBox(height: 24),
-                            _buildGameRoomButton(context),
-                            const SizedBox(height: 24),
-                            _buildSuperLeagueHeader(context),
-                            const SizedBox(height: 20),
-                            if (_model.isLoadingMatches)
-                              _buildLoadingState()
-                            else if (_model.matchList.isEmpty)
-                              _buildEmptyMatchesState(context)
-                            else
-                              _buildMatchList(context),
-                          ],
-                        ),
-                      ),
+                    child: Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 22,
                     ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
@@ -217,32 +434,426 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
     );
   }
 
-  // Métodos auxiliares para responsividade
-  double _getResponsivePadding(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    if (width < 350) return 12;
-    if (width < 400) return 14;
-    if (width < 500) return 16;
-    return 20;
+  Widget _buildNotificacaoPartidaAtiva() {
+    return AnimatedBuilder(
+      animation: _animacaoPulsar,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: 0.95 + (_animacaoPulsar.value * 0.1),
+          child: child,
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF2196F3),
+              Color(0xFF1976D2),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0xFF2196F3).withOpacity(0.5),
+              blurRadius: 20,
+              spreadRadius: 2,
+              offset: Offset(0, 6),
+            ),
+          ],
+          border: Border.all(
+            color: Colors.white.withOpacity(0.3),
+            width: 2,
+          ),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: _goBackToMatch,
+            splashColor: Colors.white.withOpacity(0.3),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.4),
+                        width: 2,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.sports_esports_rounded,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                  SizedBox(width: 15),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '🏆 VOLTAR À PARTIDA!',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          'Você não entrou na partida por atraso ou desconexão. A partida ainda decorre!',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.95),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 2,
+                        ),
+                        SizedBox(height: 8),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.4),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.play_arrow_rounded,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                              SizedBox(width: 6),
+                              Text(
+                                'CLIQUE PARA VOLTAR',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: _closeNotification,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.close_rounded,
+                        color: Colors.white,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
-  double _getIconSize(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    if (width < 350) return 38;
-    if (width < 400) return 40;
-    return 44;
+  Widget _buildManualCheckButton() {
+    return IconButton(
+      icon: _isCheckingMatches
+          ? SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            )
+          : Icon(
+              Icons.refresh_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
+      onPressed: _isCheckingMatches
+          ? null
+          : () async {
+              print("🔄 Verificação manual solicitada");
+              await _checkForActiveMatchInProgress(urgent: true);
+            },
+      tooltip: 'Verificar partidas ativas',
+    );
   }
 
-  double _getFontSize(BuildContext context, {required double baseSize}) {
-    final width = MediaQuery.of(context).size.width;
-    if (width < 350) return baseSize * 0.85;
-    if (width < 400) return baseSize * 0.9;
-    return baseSize;
+  @override
+  Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (_firstBuild && mounted) {
+        _firstBuild = false;
+        await _checkForActiveMatchInProgress(silent: true);
+      }
+    });
+
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Focus(
+        focusNode: _screenFocusNode,
+        onFocusChange: (hasFocus) {
+          if (hasFocus && mounted) {
+            print("🎯 Tela principal EM FOCO - verificando partidas");
+
+            Future.delayed(Duration(milliseconds: 300), () async {
+              if (mounted) {
+                await _checkForActiveMatchInProgress(urgent: true);
+              }
+            });
+          }
+        },
+        child: GestureDetector(
+          onTap: () async {
+            FocusScope.of(context).unfocus();
+
+            if (!_isCheckingMatches && mounted) {
+              await _checkForActiveMatchInProgress(silent: true);
+            }
+          },
+          child: Scaffold(
+            key: scaffoldKey,
+            backgroundColor: _backgroundColor,
+            body: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: _primaryGradient,
+                    boxShadow: [
+                      BoxShadow(
+                        color: _primaryColor.withOpacity(0.3),
+                        blurRadius: 15,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: _getResponsivePadding(context),
+                        vertical: 16,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: _getIconSize(context),
+                                height: _getIconSize(context),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: IconButton(
+                                  onPressed: _showMenuModal,
+                                  icon: Icon(
+                                    FontAwesomeIcons.bars,
+                                    color: Colors.white,
+                                    size: _getIconSize(context) - 28,
+                                  ),
+                                  splashRadius: 20,
+                                ),
+                              ),
+                              SizedBox(width: 16),
+                              Expanded(
+                                child: Text(
+                                  'GAME QUIZ',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize:
+                                        _getFontSize(context, baseSize: 20),
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                width: _getIconSize(context),
+                                height: _getIconSize(context),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: _buildManualCheckButton(),
+                              ),
+                              SizedBox(width: 8),
+                              Container(
+                                width: _getIconSize(context),
+                                height: _getIconSize(context),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: IconButton(
+                                  icon: Stack(
+                                    children: [
+                                      Icon(
+                                        Icons.notifications_outlined,
+                                        color: Colors.white,
+                                        size: _getIconSize(context) - 24,
+                                      ),
+                                      if (_hasActiveMatch)
+                                        Positioned(
+                                          right: 0,
+                                          top: 0,
+                                          child: Container(
+                                            width: 10,
+                                            height: 10,
+                                            decoration: BoxDecoration(
+                                              color: Colors.red,
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: Colors.white,
+                                                width: 1.5,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  onPressed: () async {
+                                    await _checkForActiveMatchInProgress();
+                                  },
+                                  splashRadius: 20,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8),
+                          Container(
+                            height: 2,
+                            width: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                if (_showNoMatchNotification) _buildNoMatchTodayNotification(),
+                if (_showActiveMatchNotification)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    child: _buildNotificacaoPartidaAtiva(),
+                  ),
+                if (_isCheckingMatches &&
+                    !_showNoMatchNotification &&
+                    !_showActiveMatchNotification)
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.blue),
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        Text(
+                          'Verificando partidas ativas...',
+                          style: TextStyle(
+                            color: Colors.blue[800],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                Expanded(
+                  child: Center(
+                    child: Container(
+                      constraints: BoxConstraints(
+                        maxWidth: isWeb ? 1000 : double.infinity,
+                      ),
+                      child: RefreshIndicator(
+                        onRefresh: _refreshData,
+                        color: const Color(0xFFEC8D0D),
+                        backgroundColor: _backgroundColor,
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding:
+                              EdgeInsets.all(_getResponsivePadding(context)),
+                          child: Column(
+                            children: [
+                              _buildUserProfileCard(context),
+                              const SizedBox(height: 24),
+                              _buildGameRoomButton(context),
+                              const SizedBox(height: 24),
+                              _buildSuperLeagueHeader(context),
+                              const SizedBox(height: 20),
+                              if (_model.isLoadingMatches)
+                                _buildLoadingState()
+                              else if (_model.matchList.isEmpty)
+                                _buildEmptyMatchesState(context)
+                              else
+                                _buildMatchList(context),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _refreshData() async {
     await _model.getUserInfoAndAccountInfoAsync(setState, context);
     await _model.loadMatches(setState);
+    await _checkForActiveMatchInProgress(urgent: true);
   }
 
   void _showMenuModal() async {
@@ -259,6 +870,11 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
         ),
       ),
     );
+
+    if (mounted) {
+      await _checkForActiveMatchInProgress(silent: true);
+    }
+
     safeSetState(() {});
   }
 
@@ -2030,5 +2646,27 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
         ),
       ),
     );
+  }
+
+  double _getResponsivePadding(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width < 350) return 12;
+    if (width < 400) return 14;
+    if (width < 500) return 16;
+    return 20;
+  }
+
+  double _getIconSize(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width < 350) return 38;
+    if (width < 400) return 40;
+    return 44;
+  }
+
+  double _getFontSize(BuildContext context, {required double baseSize}) {
+    final width = MediaQuery.of(context).size.width;
+    if (width < 350) return baseSize * 0.85;
+    if (width < 400) return baseSize * 0.9;
+    return baseSize;
   }
 }
