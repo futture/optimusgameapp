@@ -14,64 +14,117 @@ class MatchVerificationManager {
   Timer? _verificationTimer;
   bool _isVerifying = false;
   DateTime? _lastVerification;
-   
-  final _activeMatchesController = StreamController<List<MatchResponse>>();
-  final _verificationStatusController = StreamController<bool>();
+  
+  // Usando StreamController.broadcast para múltiplos listeners
+  final _activeMatchesController = StreamController<List<MatchResponse>>.broadcast(
+    onCancel: () {
+      print('📡 activeMatchesStream cancelado');
+    },
+  );
+  
+  final _verificationStatusController = StreamController<bool>.broadcast(
+    onCancel: () {
+      print('📡 verificationStatusStream cancelado');
+    },
+  );
   
   Stream<List<MatchResponse>> get activeMatchesStream => 
-      _activeMatchesController.stream;
+      _activeMatchesController.stream.asBroadcastStream(
+        onCancel: (subscription) {
+          subscription.pause();
+        }
+      );
+  
   Stream<bool> get verificationStatusStream => 
-      _verificationStatusController.stream;
+      _verificationStatusController.stream.asBroadcastStream(
+        onCancel: (subscription) {
+          subscription.pause();
+        }
+      );
+  
+  // Cache do último resultado para novos listeners
+  List<MatchResponse> _lastMatches = [];
+  bool _lastVerificationStatus = false;
   
   Future<void> verifyActiveMatches({
     required String userId,
     bool force = false,
     bool silent = false,
   }) async {
-    if (_isVerifying && !force) return;
+    if (_isVerifying && !force) {
+      print("⏳ Verificação já em andamento, aguardando...");
+      return;
+    }
     
     if (!force && _lastVerification != null) {
       final timeSinceLast = DateTime.now().difference(_lastVerification!);
-      if (timeSinceLast < Duration(seconds: 30)) return;
+      if (timeSinceLast < Duration(seconds: 30)) {
+        print("⏳ Última verificação foi há ${timeSinceLast.inSeconds}s, ignorando...");
+        return;
+      }
     }
     
     _isVerifying = true;
     
-    if (!silent) {
-      _verificationStatusController.add(true); 
+    if (!silent && !_verificationStatusController.isClosed) {
+      try {
+        _verificationStatusController.add(true);
+      } catch (e) {
+        print('⚠️ Erro ao adicionar status de verificação: $e');
+      }
     }
     
     try {
+      print("🔄 Verificando partidas ativas para usuário: $userId");
       final result = await _matchService
           .checkUserHasMatchInProgressToday(userId);
       
       if (result['isSuccess'] == true) {
         final List<MatchResponse> matches = 
             (result['matches'] as List?)?.cast<MatchResponse>() ?? [];
-        _activeMatchesController.add(matches);
-         
+        
+        _lastMatches = List.from(matches); // Armazenar cache
+        
+        if (!_activeMatchesController.isClosed) {
+          _activeMatchesController.add(matches);
+        }
+        
         await _updateBadge(matches.isNotEmpty);
         
         print("✅ Verificação concluída: ${matches.length} partida(s) ativa(s)");
       } else {
         print("⚠️ Falha na verificação: ${result['error']}");
-        _activeMatchesController.add([]);
+        _lastMatches = [];
+        if (!_activeMatchesController.isClosed) {
+          _activeMatchesController.add([]);
+        }
         await _updateBadge(false);
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       print('💥 Erro na verificação: $e');
-      _activeMatchesController.add([]);
+      print('📄 Stack trace: $stackTrace');
+      _lastMatches = [];
+      if (!_activeMatchesController.isClosed) {
+        _activeMatchesController.add([]);
+      }
       await _updateBadge(false);
     } finally {
       _isVerifying = false;
       _lastVerification = DateTime.now();
       
-      if (!silent) {
-        _verificationStatusController.add(false);  
+      if (!silent && !_verificationStatusController.isClosed) {
+        try {
+          _verificationStatusController.add(false);
+        } catch (e) {
+          print('⚠️ Erro ao finalizar status de verificação: $e');
+        }
       }
     }
   }
-   
+  
+  // Método para obter o último estado (útil para novos listeners)
+  List<MatchResponse> getLastMatches() => List.from(_lastMatches);
+  
   Future<void> _updateBadge(bool hasActiveMatch) async {
     try {
       if (hasActiveMatch) {
@@ -89,13 +142,23 @@ class MatchVerificationManager {
   void startPeriodicVerification(String userId) {
     _verificationTimer?.cancel();
     
+    // Fazer uma verificação imediata
+    Future.microtask(() {
+      verifyActiveMatches(
+        userId: userId,
+        silent: true,
+      );
+    });
+    
     _verificationTimer = Timer.periodic(
       Duration(minutes: 5),  
-      (_) async {
+      (timer) async {
+        if (!timer.isActive) return;
+        
         print("⏰ Verificação periódica iniciada");
         await verifyActiveMatches(
           userId: userId,
-          silent: true, 
+          silent: true,
         );
       },
     );
@@ -104,15 +167,35 @@ class MatchVerificationManager {
   }
   
   void stopPeriodicVerification() {
+    print("⏹️ Parando verificações periódicas...");
     _verificationTimer?.cancel();
     _verificationTimer = null;
-    print("⏹️ Verificações periódicas paradas");
+  }
+  
+  void pausePeriodicVerification() {
+    print("⏸️ Pausando verificações periódicas temporariamente");
+    _verificationTimer?.cancel();
+  }
+  
+  void resumePeriodicVerification(String userId) {
+    print("▶️ Retomando verificações periódicas");
+    startPeriodicVerification(userId);
   }
   
   void dispose() {
-    _verificationTimer?.cancel();
-    _activeMatchesController.close();
-    _verificationStatusController.close();
-    print("♻️ MatchVerificationManager disposed");
+    print("♻️ Iniciando dispose do MatchVerificationManager");
+    
+    stopPeriodicVerification();
+    
+    // Fechar controllers apenas se não estiverem fechados
+    if (!_activeMatchesController.isClosed) {
+      _activeMatchesController.close();
+    }
+    
+    if (!_verificationStatusController.isClosed) {
+      _verificationStatusController.close();
+    }
+    
+    print("✅ MatchVerificationManager disposed com sucesso");
   }
 }
