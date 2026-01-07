@@ -42,14 +42,11 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
   final FocusNode _screenFocusNode = FocusNode();
   final FcmTokenService _fcmTokenService = FcmTokenService();
 
-  // Cores e gradientes do tema premium
   final Color _primaryColor = Color(0xFFEC8D0D);
   final Color _backgroundColor = Color(0xFFF8FAFC);
   final Color _surfaceColor = Colors.white;
   final Color _onSurfaceColor = Color(0xFF1E293B);
   final Color _outlineColor = Color(0xFFE2E8F0);
-
-  // Cores mais suaves para os cards
   final Color _cardLightOrange = Color(0xFFFFA726);
   final Color _cardDarkOrange = Color(0xFFFB8C00);
 
@@ -59,7 +56,6 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
     end: Alignment.bottomRight,
   );
 
-  // Variáveis de estado
   bool _showNoMatchNotification = false;
   Timer? _timerNotificacao;
   late AnimationController _animacaoPulsar;
@@ -72,15 +68,18 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
   bool _firstBuild = true;
   DateTime? _lastManualCheck;
   bool _isAppInForeground = true;
-
-  // Controladores de timer
   final List<Timer> _activeTimers = [];
   bool _isDisposed = false;
+  bool _isRedirecting = false;
+  bool _shouldCheckOnFocus = true;
+  DateTime? _lastFocusCheck;
 
   @override
   void initState() {
     super.initState();
     _isDisposed = false;
+    _isRedirecting = false;
+    _shouldCheckOnFocus = true;
 
     WidgetsBinding.instance.addObserver(this);
     _fcmTokenService.initFirebaseMessaging(context);
@@ -124,7 +123,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
   void _setupCheckTimer() {
     _cancelCheckTimer();
 
-    _checkTimer = Timer.periodic(Duration(minutes: 1), (timer) {
+    _checkTimer = Timer.periodic(Duration(minutes: 5), (timer) {
       if (_isDisposed || !mounted) {
         timer.cancel();
         return;
@@ -146,8 +145,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
     }
     _checkTimer = null;
   }
-
-  /// Cancela todos os timers
+ 
   void _cancelAllTimers() {
     for (var timer in _activeTimers) {
       if (timer.isActive) {
@@ -172,20 +170,16 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
 
     if (state == AppLifecycleState.resumed) {
       _isAppInForeground = true;
-      print("📱 App retomado - verificando partidas ativas");
-
-      // Verificação URGENTE quando o app é retomado
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      
+      Future.delayed(Duration(seconds: 2), () {
         if (mounted && !_isDisposed) {
           _checkForActiveMatchInProgress(urgent: true);
         }
       });
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive) {
-      _isAppInForeground = false;
-      print("📱 App em background/inativo");
+      _isAppInForeground = false; 
     } else if (state == AppLifecycleState.detached) {
-      // Widget está sendo removido completamente
       _cleanupResources();
     }
   }
@@ -195,8 +189,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
     super.didChangeDependencies();
 
     if (_isDisposed) return;
-
-    // Verificação quando as dependências mudam
+ 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_firstBuild && mounted && !_isDisposed) {
         _firstBuild = false;
@@ -207,25 +200,14 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
 
   @override
   void dispose() {
-    _isDisposed = true;
-    print("🔄 Iniciando dispose da Tela03PrincipalWidget");
-
-    _cleanupResources();
-
-    super.dispose();
-    print("✅ Dispose da Tela03PrincipalWidget completo");
+    _isDisposed = true;  
+    _cleanupResources(); 
+    super.dispose(); 
   }
-
-  /// Limpa todos os recursos de forma segura
+ 
   void _cleanupResources() {
-    if (_isDisposed) return;
-
-    print("🧹 Limpando recursos da Tela03PrincipalWidget");
-
-    // 1. Cancela TODOS os timers primeiro
-    _cancelAllTimers();
-
-    // 2. Para todas as animações
+    if (_isDisposed) return; 
+    _cancelAllTimers(); 
     try {
       if (_animacaoPulsar.isAnimating) {
         _animacaoPulsar.stop();
@@ -242,37 +224,27 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
       _animationController.dispose();
     } catch (e) {
       print("⚠️ Erro ao dispor _animationController: $e");
-    }
-
-    // 3. Remove observer
+    } 
     try {
       WidgetsBinding.instance.removeObserver(this);
     } catch (e) {
       print("⚠️ Erro ao remover observer: $e");
-    }
-
-    // 4. Dispose de outros recursos
+    } 
     try {
       _screenFocusNode.dispose();
     } catch (e) {
       print("⚠️ Erro ao dispor _screenFocusNode: $e");
-    }
-
-    // 5. Dispose do model
+    } 
     try {
       _model.dispose();
     } catch (e) {
       print("⚠️ Erro ao dispor model: $e");
-    }
-
-    // 6. Limpa estados
+    } 
     _matchLoadingStates.clear();
     _activeMatches.clear();
 
     _isDisposed = true;
-  }
-
-  /// Método seguro para setState
+  } 
   void _safeSetState(VoidCallback callback) {
     if (mounted && !_isDisposed) {
       setState(callback);
@@ -304,14 +276,20 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
   }
 
   Future<void> _goBackToMatch() async {
+    if (_isRedirecting) return;
+    
+    _isRedirecting = true;
+    
     final userId = _model.user?.id;
     if (userId == null) {
       print("⚠️ Usuário não logado para voltar à partida");
+      _isRedirecting = false;
       return;
     }
 
     if (_activeMatches.isEmpty) {
       print("⚠️ Nenhuma partida ativa encontrada para voltar");
+      _isRedirecting = false;
       return;
     }
 
@@ -325,6 +303,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
         _showErrorNotification(
           "Erro ao reativar jogador na partida",
         );
+        _isRedirecting = false;
         return;  
       }
       final nextQuestionResult =
@@ -333,6 +312,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
         _showErrorNotification(
           "Erro ao obter próxima questão da partida",
         );
+        _isRedirecting = false;
         return; 
       }
       final nextQuestion = nextQuestionResult['data']; 
@@ -350,6 +330,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
       }
     } catch (e) {
       print("💥 Erro ao voltar à partida: $e");
+      _isRedirecting = false;
       if (mounted && !_isDisposed) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -365,9 +346,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
       {bool silent = false, bool urgent = false}) async {
     if (_isCheckingMatches && !urgent) return;
 
-    if (_isDisposed || !mounted) return;
-
-    // Para verificações não urgentes, verifica se precisa verificar novamente
+    if (_isDisposed || !mounted) return; 
     if (!urgent && _lastManualCheck != null) {
       final timeSinceLastCheck = DateTime.now().difference(_lastManualCheck!);
       if (timeSinceLastCheck < Duration(seconds: 30)) {
@@ -395,15 +374,9 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
         final hasActiveMatch = result['hasMatchToday'] ?? false;
         final matchCount = result['matchCount'] ?? 0;
         final List<MatchResponse> matches = result['matches'] ?? [];
-
-        print(
-            "📊 Resultado verificação: hasMatchToday=$hasActiveMatch, matchCount=$matchCount");
-
-        // Verifica se houve mudança de estado
+ 
         final bool stateChanged = _hasActiveMatch != hasActiveMatch ||
-            _showActiveMatchNotification != hasActiveMatch;
-
-        // Atualiza sempre, mas especialmente se houve mudança
+            _showActiveMatchNotification != hasActiveMatch; 
         if (stateChanged || urgent) {
           _safeSetState(() {
             _hasActiveMatch = hasActiveMatch;
@@ -415,9 +388,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
             } else if (hasActiveMatch) {
               _showNoMatchNotification = false;
             }
-          });
-
-          // Atualiza badge do app
+          }); 
           await _updateAppBadge(hasActiveMatch);
 
           _lastManualCheck = DateTime.now();
@@ -779,10 +750,17 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
       child: Focus(
         focusNode: _screenFocusNode,
         onFocusChange: (hasFocus) {
-          if (hasFocus && mounted && !_isDisposed) {
-            print("🎯 Tela principal EM FOCO - verificando partidas");
-
-            Future.delayed(Duration(milliseconds: 300), () async {
+          if (hasFocus && mounted && !_isDisposed && _shouldCheckOnFocus) {
+            if (_lastFocusCheck != null) {
+              final timeSinceLastFocusCheck = DateTime.now().difference(_lastFocusCheck!);
+              if (timeSinceLastFocusCheck < Duration(seconds: 10)) {
+                return;
+              }
+            }
+            
+            _lastFocusCheck = DateTime.now();
+            
+            Future.delayed(Duration(milliseconds: 500), () async {
               if (mounted && !_isDisposed) {
                 await _checkForActiveMatchInProgress(urgent: true);
               }
@@ -1045,10 +1023,6 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
     }
   }
 
-  // ... (MANTENHA TODOS OS OUTROS MÉTODOS _build... EXATAMENTE COMO ESTAVAM)
-  // Apenas substitua as chamadas setState() internas por _safeSetState()
-
-  // MÉTODOS RESTANTES (mantenha exatamente como estão, apenas troque setState por _safeSetState onde aplicável)
   Widget _buildUserProfileCard(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 400;
 
