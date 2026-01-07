@@ -233,13 +233,12 @@ class MatchService {
   Future<dynamic> activatePlayerInMatchAsync(
       String matchId, String userId) async {
     try {
-      final result = await httpService.request<MatchResultResponse>(
+      await httpService.request<MatchResultResponse>(
           '/match/${matchId}/user/${userId}/activate-player',
           method: 'PATCH',
-          body: {},
-          successParser: (json) => MatchResultResponse.fromJson(json));
+          body: {});
 
-      return {"isSuccess": true, "data": result};
+      return {"isSuccess": true};
     } catch (e) {
       return _errorUtil.handleError(e);
     }
@@ -247,16 +246,15 @@ class MatchService {
 
   Future<dynamic> checkUserHasMatchInProgressToday(String userId) async {
     try {
-      
       final nowUtc = DateTime.now().toUtc();
 
       var startOfTodayUtc = DateTime.utc(
         nowUtc.year,
         nowUtc.month,
         nowUtc.day,
-      ); 
-      final endOfTodayUtc = startOfTodayUtc.add(const Duration(days: 1)); 
-      final statusValue = MatchStatusUtil.toBackendValue("IN_PROGRESS"); 
+      );
+      final endOfTodayUtc = startOfTodayUtc.add(const Duration(days: 1));
+      final statusValue = MatchStatusUtil.toBackendValue("IN_PROGRESS");
       final queryString = 'status=${Uri.encodeComponent(statusValue)}&'
           'startDate=${Uri.encodeComponent(startOfTodayUtc.toIso8601String())}&'
           'endDate=${Uri.encodeComponent(endOfTodayUtc.toIso8601String())}';

@@ -8,7 +8,6 @@ import 'package:projeto_game_quiz/core/api/services/question_service.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/dialogs/common_dialog_widget.dart';
 import 'package:projeto_game_quiz/utils.dart';
-import 'package:projeto_game_quiz/utils/MatchVerificationManager.dart';
 import '/components/moda_listade_sala_widget.dart';
 import '/components/moda_menu_pagian_inicial_widget.dart';
 import '/components/modals_saque_widget.dart';
@@ -60,21 +59,28 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
     end: Alignment.bottomRight,
   );
 
+  // Variáveis de estado
+  bool _showNoMatchNotification = false;
   Timer? _timerNotificacao;
   late AnimationController _animacaoPulsar;
-  bool _showNoMatchNotification = false;
+  late AnimationController _animationController;
   bool _isCheckingMatches = false;
   Timer? _checkTimer;
   List<MatchResponse> _activeMatches = [];
   bool _showActiveMatchNotification = false;
   bool _hasActiveMatch = false;
   bool _firstBuild = true;
-  MatchVerificationManager? _matchManager;
-  StreamSubscription? _matchesSubscription;
-  StreamSubscription? _statusSubscription;
+  DateTime? _lastManualCheck;
+  bool _isAppInForeground = true;
+
+  // Controladores de timer
+  final List<Timer> _activeTimers = [];
+  bool _isDisposed = false;
+
   @override
   void initState() {
     super.initState();
+    _isDisposed = false;
 
     WidgetsBinding.instance.addObserver(this);
     _fcmTokenService.initFirebaseMessaging(context);
@@ -86,206 +92,388 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
       vsync: this,
     )..repeat(reverse: true);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
-
-    _model.getUserInfoAndAccountInfoAsync(setState, context);
-    _model.loadMatches(setState);
-
-    _matchManager = MatchVerificationManager();
-
-    _matchesSubscription = _matchManager?.activeMatchesStream.listen(
-      (matches) {
-        if (mounted) {
-          setState(() {
-            _activeMatches = matches;
-            _hasActiveMatch = matches.isNotEmpty;
-            _showActiveMatchNotification = matches.isNotEmpty;
-
-            if (matches.isEmpty) {
-              _showNoMatchNotification = true;
-            } else {
-              _showNoMatchNotification = false;
-            }
-          });
-        }
-      },
-      onError: (error) {
-        print("❌ Erro no stream de partidas: $error");
-        if (mounted) {
-          setState(() {
-            _activeMatches = [];
-            _hasActiveMatch = false;
-            _showActiveMatchNotification = false;
-          });
-        }
-      },
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 700),
+      vsync: this,
     );
 
-    _statusSubscription = _matchManager?.verificationStatusStream.listen(
-      (isChecking) {
-        if (mounted) {
-          setState(() {
-            _isCheckingMatches = isChecking;
-          });
-        }
-      },
-    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _performInitialVerification();
+      if (mounted && !_isDisposed) {
+        setState(() {});
+      }
     });
+
+    _model.getUserInfoAndAccountInfoAsync((VoidCallback fn) {
+      if (mounted && !_isDisposed) {
+        setState(fn);
+      }
+    }, context);
+
+    _model.loadMatches((VoidCallback fn) {
+      if (mounted && !_isDisposed) {
+        setState(fn);
+      }
+    });
+
+    _checkForActiveMatchInProgress(urgent: true);
+
+    _setupCheckTimer();
     _screenFocusNode.requestFocus();
+  }
+
+  void _setupCheckTimer() {
+    _cancelCheckTimer();
+
+    _checkTimer = Timer.periodic(Duration(minutes: 1), (timer) {
+      if (_isDisposed || !mounted) {
+        timer.cancel();
+        return;
+      }
+
+      if (_isAppInForeground) {
+        _checkForActiveMatchInProgress(silent: true);
+      }
+    });
+
+    if (_checkTimer != null) {
+      _activeTimers.add(_checkTimer!);
+    }
+  }
+
+  void _cancelCheckTimer() {
+    if (_checkTimer != null && _checkTimer!.isActive) {
+      _checkTimer!.cancel();
+    }
+    _checkTimer = null;
+  }
+
+  /// Cancela todos os timers
+  void _cancelAllTimers() {
+    for (var timer in _activeTimers) {
+      if (timer.isActive) {
+        timer.cancel();
+      }
+    }
+    _activeTimers.clear();
+
+    _cancelCheckTimer();
+
+    if (_timerNotificacao != null && _timerNotificacao!.isActive) {
+      _timerNotificacao!.cancel();
+    }
+    _timerNotificacao = null;
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_isDisposed) return;
+
+    super.didChangeAppLifecycleState(state);
+
+    if (state == AppLifecycleState.resumed) {
+      _isAppInForeground = true;
+      print("📱 App retomado - verificando partidas ativas");
+
+      // Verificação URGENTE quando o app é retomado
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !_isDisposed) {
+          _checkForActiveMatchInProgress(urgent: true);
+        }
+      });
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      _isAppInForeground = false;
+      print("📱 App em background/inativo");
+    } else if (state == AppLifecycleState.detached) {
+      // Widget está sendo removido completamente
+      _cleanupResources();
+    }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
+    if (_isDisposed) return;
+
+    // Verificação quando as dependências mudam
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_firstBuild && mounted) {
+      if (_firstBuild && mounted && !_isDisposed) {
         _firstBuild = false;
-        _performVerification(force: true);
+        _checkForActiveMatchInProgress(urgent: true);
       }
     });
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-
-    if (state == AppLifecycleState.resumed) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _performVerification(force: true);
-        }
-      });
-    } else if (state == AppLifecycleState.paused) {
-      _matchManager?.stopPeriodicVerification();
-    } else if (state == AppLifecycleState.inactive) {
-      _matchManager?.stopPeriodicVerification();
-    }
-  }
-
-  Future<void> _performInitialVerification() async {
-    final userId = _model.user?.id;
-    if (userId == null) {
-      print("⚠️ Usuário não logado - aguardando...");
-      Future.delayed(Duration(seconds: 2), () {
-        if (mounted) {
-          _performInitialVerification();
-        }
-      });
-      return;
-    }
-
-    print("🚀 Verificação inicial de partidas ativas");
-    await _matchManager!.verifyActiveMatches(
-      userId: userId,
-      force: true,
-      silent: false,
-    );
-    _matchManager!.startPeriodicVerification(userId);
-  }
-
-  Future<void> _performVerification({bool force = false}) async {
-    final userId = _model.user?.id;
-    if (userId == null) {
-      print("⚠️ Usuário não logado para verificação");
-      return;
-    }
-
-    if (_matchManager == null) {
-      print("⚠️ MatchVerificationManager não inicializado");
-      return;
-    }
-
-    await _matchManager!.verifyActiveMatches(
-      userId: userId,
-      force: force,
-      silent: !force,
-    );
-  }
-
-  @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _model.dispose();
+    _isDisposed = true;
+    print("🔄 Iniciando dispose da Tela03PrincipalWidget");
 
-    _matchesSubscription?.cancel();
-    _statusSubscription?.cancel();
+    _cleanupResources();
 
-    _matchManager?.dispose();
-
-    _timerNotificacao?.cancel();
-    _checkTimer?.cancel();
-
-    _screenFocusNode.dispose();
-    _animacaoPulsar.dispose();
     super.dispose();
+    print("✅ Dispose da Tela03PrincipalWidget completo");
+  }
+
+  /// Limpa todos os recursos de forma segura
+  void _cleanupResources() {
+    if (_isDisposed) return;
+
+    print("🧹 Limpando recursos da Tela03PrincipalWidget");
+
+    // 1. Cancela TODOS os timers primeiro
+    _cancelAllTimers();
+
+    // 2. Para todas as animações
+    try {
+      if (_animacaoPulsar.isAnimating) {
+        _animacaoPulsar.stop();
+      }
+      _animacaoPulsar.dispose();
+    } catch (e) {
+      print("⚠️ Erro ao dispor _animacaoPulsar: $e");
+    }
+
+    try {
+      if (_animationController.isAnimating) {
+        _animationController.stop();
+      }
+      _animationController.dispose();
+    } catch (e) {
+      print("⚠️ Erro ao dispor _animationController: $e");
+    }
+
+    // 3. Remove observer
+    try {
+      WidgetsBinding.instance.removeObserver(this);
+    } catch (e) {
+      print("⚠️ Erro ao remover observer: $e");
+    }
+
+    // 4. Dispose de outros recursos
+    try {
+      _screenFocusNode.dispose();
+    } catch (e) {
+      print("⚠️ Erro ao dispor _screenFocusNode: $e");
+    }
+
+    // 5. Dispose do model
+    try {
+      _model.dispose();
+    } catch (e) {
+      print("⚠️ Erro ao dispor model: $e");
+    }
+
+    // 6. Limpa estados
+    _matchLoadingStates.clear();
+    _activeMatches.clear();
+
+    _isDisposed = true;
+  }
+
+  /// Método seguro para setState
+  void _safeSetState(VoidCallback callback) {
+    if (mounted && !_isDisposed) {
+      setState(callback);
+    } else {
+      print("⚠️ Tentativa de setState em widget não montado/disposed");
+    }
   }
 
   void _closeNotification() {
-    setState(() {
+    _safeSetState(() {
       _showActiveMatchNotification = false;
+      _showNoMatchNotification = false;
     });
-    FlutterAppBadger.removeBadge();
+
+    try {
+      FlutterAppBadger.removeBadge();
+    } catch (e) {
+      print("⚠️ Erro ao remover badge: $e");
+    }
   }
 
-  Future<void> _goBackToMatch() async {
-    final userId = _model.user?.id;
-    if (userId == null) {
-      print("⚠️ Usuário não logado ao tentar voltar à partida");
-      return;
-    }
-
-    if (_activeMatches.isEmpty) {
-      print("⚠️ Nenhuma partida ativa encontrada ao tentar voltar à partida");
-      return;
-    }
-
-    final match = _activeMatches.first;
-    final matchId = match.id;
-
-    final result =
-        await matchService.activatePlayerInMatchAsync(matchId, userId);
-
-    if (result != null && result['isSuccess'] != true) {
-      _showError(
-        result['error'] ?? 'Não foi possível reativar o jogador na partida.',
-      );
-      return;
-    }
-
-    final nextQuestionResult =
-        await questionService.nextQuestionMatchAsync(matchId);
-
-    if (nextQuestionResult != null && nextQuestionResult['isSuccess'] != true) {
-      _showError(
-        nextQuestionResult['error'] ??
-            'Erro ao obter a próxima questão da partida.',
-      );
-      return;
-    }
-
-    final nextQuestion = nextQuestionResult['data'];
-
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => Tela06SaladeJogoWidget(
-          matchInfo: match,
-          recebeuNotificaca: true,
-          nextQuestion: nextQuestion,
-        ),
-      ),
-    );
-  }
-
-  void _showError(String message) {
+  void _showErrorNotification(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red,
       ),
     );
+  }
+
+  Future<void> _goBackToMatch() async {
+    final userId = _model.user?.id;
+    if (userId == null) {
+      print("⚠️ Usuário não logado para voltar à partida");
+      return;
+    }
+
+    if (_activeMatches.isEmpty) {
+      print("⚠️ Nenhuma partida ativa encontrada para voltar");
+      return;
+    }
+
+    final match = _activeMatches.first;
+    final matchId = match.id;
+
+    try {
+      final result =
+          await matchService.activatePlayerInMatchAsync(matchId, userId);
+      if (result['isSuccess'] != true) {
+        _showErrorNotification(
+          "Erro ao reativar jogador na partida",
+        );
+        return;  
+      }
+      final nextQuestionResult =
+          await questionService.nextQuestionMatchAsync(matchId);
+      if (nextQuestionResult['isSuccess'] != true) {
+        _showErrorNotification(
+          "Erro ao obter próxima questão da partida",
+        );
+        return; 
+      }
+      final nextQuestion = nextQuestionResult['data']; 
+
+      if (mounted && !_isDisposed) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => Tela06SaladeJogoWidget(
+              matchInfo: match,
+              recebeuNotificaca: false, 
+              nextQuestion: nextQuestion,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      print("💥 Erro ao voltar à partida: $e");
+      if (mounted && !_isDisposed) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao voltar à partida. Tente novamente.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _checkForActiveMatchInProgress(
+      {bool silent = false, bool urgent = false}) async {
+    if (_isCheckingMatches && !urgent) return;
+
+    if (_isDisposed || !mounted) return;
+
+    // Para verificações não urgentes, verifica se precisa verificar novamente
+    if (!urgent && _lastManualCheck != null) {
+      final timeSinceLastCheck = DateTime.now().difference(_lastManualCheck!);
+      if (timeSinceLastCheck < Duration(seconds: 30)) {
+        return;
+      }
+    }
+
+    if (!silent) {
+      _safeSetState(() {
+        _isCheckingMatches = true;
+      });
+    }
+
+    try {
+      final userId = _model.user?.id;
+      if (userId == null) {
+        print("⚠️ Usuário não logado para verificar partida ativa");
+        return;
+      }
+
+      final result =
+          await matchService.checkUserHasMatchInProgressToday(userId);
+
+      if (mounted && !_isDisposed && result['isSuccess'] == true) {
+        final hasActiveMatch = result['hasMatchToday'] ?? false;
+        final matchCount = result['matchCount'] ?? 0;
+        final List<MatchResponse> matches = result['matches'] ?? [];
+
+        print(
+            "📊 Resultado verificação: hasMatchToday=$hasActiveMatch, matchCount=$matchCount");
+
+        // Verifica se houve mudança de estado
+        final bool stateChanged = _hasActiveMatch != hasActiveMatch ||
+            _showActiveMatchNotification != hasActiveMatch;
+
+        // Atualiza sempre, mas especialmente se houve mudança
+        if (stateChanged || urgent) {
+          _safeSetState(() {
+            _hasActiveMatch = hasActiveMatch;
+            _activeMatches = matches;
+            _showActiveMatchNotification = hasActiveMatch;
+
+            if (!silent && !hasActiveMatch) {
+              _showNoMatchNotification = true;
+            } else if (hasActiveMatch) {
+              _showNoMatchNotification = false;
+            }
+          });
+
+          // Atualiza badge do app
+          await _updateAppBadge(hasActiveMatch);
+
+          _lastManualCheck = DateTime.now();
+        }
+
+        if (!silent) {
+          if (hasActiveMatch) {
+            print("🎮 USUÁRIO TEM $matchCount PARTIDA(S) EM ANDAMENTO HOJE");
+            matches.forEach((match) {
+              print(
+                  "  - Partida ID: ${match.id}, Status: ${match.statusMatch}, Início: ${match.matchStartDate}");
+            });
+          } else {
+            print("📭 USUÁRIO NÃO TEM PARTIDAS EM ANDAMENTO HOJE");
+          }
+        }
+      } else {
+        print("⚠️ Falha ao verificar partidas ativas: ${result['error']}");
+        if (mounted && !_isDisposed && !silent) {
+          _safeSetState(() {
+            _showActiveMatchNotification = false;
+            _hasActiveMatch = false;
+            _activeMatches = [];
+          });
+          await _updateAppBadge(false);
+        }
+      }
+    } catch (e) {
+      print("💥 Erro ao verificar partida em andamento: $e");
+      if (mounted && !_isDisposed && !silent) {
+        _safeSetState(() {
+          _showActiveMatchNotification = false;
+          _hasActiveMatch = false;
+          _activeMatches = [];
+        });
+        await _updateAppBadge(false);
+      }
+    } finally {
+      if (!silent && mounted && !_isDisposed) {
+        _safeSetState(() {
+          _isCheckingMatches = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _updateAppBadge(bool hasActiveMatch) async {
+    try {
+      if (hasActiveMatch) {
+        await FlutterAppBadger.updateBadgeCount(1);
+      } else {
+        await FlutterAppBadger.removeBadge();
+      }
+    } catch (e) {
+      print("⚠️ Erro ao atualizar badge: $e");
+    }
   }
 
   Widget _buildNoMatchTodayNotification() {
@@ -377,7 +565,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
               if (!_isCheckingMatches)
                 GestureDetector(
                   onTap: () {
-                    setState(() {
+                    _safeSetState(() {
                       _showNoMatchNotification = false;
                     });
                   },
@@ -570,19 +758,19 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
       onPressed: _isCheckingMatches
           ? null
           : () async {
-              print("🔄 Verificação manual solicitada (novo sistema)");
-              await _performVerification(force: true);
+              print("🔄 Verificação manual solicitada");
+              await _checkForActiveMatchInProgress(urgent: true);
             },
-      tooltip: 'Verificar partida em curso',
+      tooltip: 'Verificar partidas ativas',
     );
   }
 
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (_firstBuild && mounted) {
+      if (_firstBuild && mounted && !_isDisposed) {
         _firstBuild = false;
-        await _performVerification();
+        await _checkForActiveMatchInProgress(silent: true);
       }
     });
 
@@ -591,12 +779,12 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
       child: Focus(
         focusNode: _screenFocusNode,
         onFocusChange: (hasFocus) {
-          if (hasFocus && mounted) {
+          if (hasFocus && mounted && !_isDisposed) {
             print("🎯 Tela principal EM FOCO - verificando partidas");
 
             Future.delayed(Duration(milliseconds: 300), () async {
-              if (mounted) {
-                await _performVerification();
+              if (mounted && !_isDisposed) {
+                await _checkForActiveMatchInProgress(urgent: true);
               }
             });
           }
@@ -605,8 +793,8 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
           onTap: () async {
             FocusScope.of(context).unfocus();
 
-            if (!_isCheckingMatches && mounted) {
-              await _performVerification();
+            if (!_isCheckingMatches && mounted && !_isDisposed) {
+              await _checkForActiveMatchInProgress(silent: true);
             }
           },
           child: Scaffold(
@@ -713,8 +901,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
                                     ],
                                   ),
                                   onPressed: () async {
-                                    await _performVerification(
-                                        force: true); // Usa o novo método
+                                    await _checkForActiveMatchInProgress();
                                   },
                                   splashRadius: 20,
                                 ),
@@ -820,9 +1007,21 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
   }
 
   Future<void> _refreshData() async {
-    await _model.getUserInfoAndAccountInfoAsync(setState, context);
-    await _model.loadMatches(setState);
-    await _performVerification(force: true);
+    try {
+      await _model.getUserInfoAndAccountInfoAsync((VoidCallback fn) {
+        if (mounted && !_isDisposed) {
+          setState(fn);
+        }
+      }, context);
+      await _model.loadMatches((VoidCallback fn) {
+        if (mounted && !_isDisposed) {
+          setState(fn);
+        }
+      });
+      await _checkForActiveMatchInProgress(urgent: true);
+    } catch (e) {
+      print("⚠️ Erro no refresh: $e");
+    }
   }
 
   void _showMenuModal() async {
@@ -840,13 +1039,16 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
       ),
     );
 
-    if (mounted) {
-      await _performVerification();
+    if (mounted && !_isDisposed) {
+      await _checkForActiveMatchInProgress(silent: true);
+      _safeSetState(() {});
     }
-
-    safeSetState(() {});
   }
 
+  // ... (MANTENHA TODOS OS OUTROS MÉTODOS _build... EXATAMENTE COMO ESTAVAM)
+  // Apenas substitua as chamadas setState() internas por _safeSetState()
+
+  // MÉTODOS RESTANTES (mantenha exatamente como estão, apenas troque setState por _safeSetState onde aplicável)
   Widget _buildUserProfileCard(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 400;
 
@@ -1093,9 +1295,9 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
                         ),
                       ),
                     );
-                    if (mounted) {
+                    if (mounted && !_isDisposed) {
                       await _refreshData();
-                      safeSetState(() {});
+                      _safeSetState(() {});
                     }
                   },
                 ),
@@ -1278,7 +1480,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
                       ),
                     ),
                   );
-                  safeSetState(() {});
+                  _safeSetState(() {});
                 },
                 borderRadius: BorderRadius.circular(14),
                 child: Container(
@@ -1705,7 +1907,11 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
             ),
             child: FFButtonWidget(
               onPressed: () async {
-                await _model.loadMatches(setState);
+                await _model.loadMatches((VoidCallback fn) {
+                  if (mounted && !_isDisposed) {
+                    setState(fn);
+                  }
+                });
               },
               text: 'ATUALIZAR',
               icon: Icon(
@@ -1768,12 +1974,16 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
           onTap: () async {
             if (isThisCardLoading) return;
 
-            setState(() {
+            _safeSetState(() {
               _matchLoadingStates[match.id] = true;
             });
 
             try {
-              await _model.getUsersByMatchId(setState, match.id);
+              await _model.getUsersByMatchId((VoidCallback fn) {
+                if (mounted && !_isDisposed) {
+                  setState(fn);
+                }
+              }, match.id);
               CommonDialogWidget.showMatchParticipantsDialog(
                   context,
                   List.empty(),
@@ -1797,7 +2007,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
                 "Ocorreu um erro ao carregar os detalhes da partida.",
               );
             } finally {
-              setState(() {
+              _safeSetState(() {
                 _matchLoadingStates[match.id] = false;
               });
             }
@@ -2041,7 +2251,6 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
                           ),
                         ],
                       ),
-                      // CRONÔMETRO APENAS PARA PRÓXIMA PARTIDA
                       if (isNextMatch)
                         Padding(
                           padding: EdgeInsets.only(
@@ -2069,8 +2278,8 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: [
-                                    Color(0xFFD4AF37), // Dourado
-                                    Color(0xFFB8860B), // Dourado escuro
+                                    Color(0xFFD4AF37),
+                                    Color(0xFFB8860B),
                                   ],
                                 ),
                                 borderRadius:
@@ -2148,17 +2357,12 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
                             ),
                           ),
                         ),
-
                       SizedBox(
                           height: isVerySmallScreen
-                              ? (isNextMatch
-                                  ? 8
-                                  : 10) // Espaço menor se tiver cronômetro
+                              ? (isNextMatch ? 8 : 10)
                               : isSmallScreen
                                   ? (isNextMatch ? 10 : 12)
                                   : (isNextMatch ? 12 : 16)),
-
-                      // Informações da partida - Mantendo layout horizontal sempre
                       Container(
                         padding: EdgeInsets.all(isVerySmallScreen
                             ? 8
@@ -2222,15 +2426,12 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
                           ],
                         ),
                       ),
-
                       SizedBox(
                           height: isVerySmallScreen
                               ? 10
                               : isSmallScreen
                                   ? 12
                                   : 16),
-
-                      // Status do usuário na partida
                       if (isRegistered)
                         Container(
                           width: double.infinity,
@@ -2366,8 +2567,6 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
                     ],
                   ),
                 ),
-
-                // Loading overlay apenas para este card
                 if (isThisCardLoading)
                   Positioned.fill(
                     child: Container(
@@ -2472,7 +2671,11 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
   }
 
   Future<void> _handleMatchTap(MatchResponse match) async {
-    await _model.checkPlayerAlreadyRegisteredMatchAsync(setState, match.id);
+    await _model.checkPlayerAlreadyRegisteredMatchAsync((VoidCallback fn) {
+      if (mounted && !_isDisposed) {
+        setState(fn);
+      }
+    }, match.id);
 
     if (!_model.isNotRegisteredMatch) {
       Navigator.pop(context);
@@ -2500,9 +2703,17 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
       if (result == true) {
         Navigator.pop(context);
 
-        setState(() {
-          _model.getUserInfoAndAccountInfoAsync(setState, context);
-          _model.loadMatches(setState);
+        _safeSetState(() {
+          _model.getUserInfoAndAccountInfoAsync((VoidCallback fn) {
+            if (mounted && !_isDisposed) {
+              setState(fn);
+            }
+          }, context);
+          _model.loadMatches((VoidCallback fn) {
+            if (mounted && !_isDisposed) {
+              setState(fn);
+            }
+          });
         });
       }
     }
@@ -2540,9 +2751,17 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
     try {
       Navigator.pop(context);
       await _model.leaveMatchAsync(match.id);
-      setState(() {
-        _model.getUserInfoAndAccountInfoAsync(setState, context);
-        _model.loadMatches(setState);
+      _safeSetState(() {
+        _model.getUserInfoAndAccountInfoAsync((VoidCallback fn) {
+          if (mounted && !_isDisposed) {
+            setState(fn);
+          }
+        }, context);
+        _model.loadMatches((VoidCallback fn) {
+          if (mounted && !_isDisposed) {
+            setState(fn);
+          }
+        });
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
