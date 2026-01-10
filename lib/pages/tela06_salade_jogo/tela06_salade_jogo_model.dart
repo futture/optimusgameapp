@@ -587,6 +587,9 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
                     child: TextButton(
                       onPressed: () {
                         _questionWebSocketService?.disconnect();
+                        if (safetyTimeout?.isActive ?? false) {
+                            safetyTimeout?.cancel();
+                          }
                         Navigator.of(currentContext!).pushReplacement(
                           MaterialPageRoute(
                               builder: (_) => Tela03PrincipalWidget()),
