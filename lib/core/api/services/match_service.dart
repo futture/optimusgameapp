@@ -2,6 +2,8 @@ import 'package:projeto_game_quiz/core/api/common/http_client_api.dart';
 import 'package:projeto_game_quiz/core/api/utils/error_util.dart';
 import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
+import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
+import 'package:projeto_game_quiz/utils/matchStatusUtil.dart';
 
 class MatchService {
   ErrorUtil _errorUtil = ErrorUtil();
@@ -232,13 +234,61 @@ class MatchService {
   Future<dynamic> activatePlayerInMatchAsync(
       String matchId, String userId) async {
     try {
-      final result = await httpService.request<MatchResultResponse>(
+      await httpService.request<MatchResultResponse>(
           '/match/${matchId}/user/${userId}/activate-player',
           method: 'PATCH',
-          body: {},
-          successParser: (json) => MatchResultResponse.fromJson(json));
+          body: {});
+
+      return {"isSuccess": true};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
+  Future<dynamic> returnOngoingMatchAsync(
+      String matchId, String userId) async {
+    try {
+      final result = await httpService.request<QuestionResponse>(
+          '/match/${matchId}/user/${userId}/return-match',
+          method: 'PATCH',
+          body: {});
 
       return {"isSuccess": true, "data": result};
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
+
+  Future<dynamic> checkUserHasMatchInProgressToday(String userId) async {
+    try {
+      final nowUtc = DateTime.now().toUtc();
+
+      var startOfTodayUtc = DateTime.utc(
+        nowUtc.year,
+        nowUtc.month,
+        nowUtc.day,
+      );
+      final endOfTodayUtc = startOfTodayUtc.add(const Duration(days: 1));
+      final statusValue = MatchStatusUtil.toBackendValue("IN_PROGRESS");
+      final queryString = 'status=${Uri.encodeComponent(statusValue)}&'
+          'startDate=${Uri.encodeComponent(startOfTodayUtc.toIso8601String())}&'
+          'endDate=${Uri.encodeComponent(endOfTodayUtc.toIso8601String())}';
+
+      final route = "/user/$userId/match?$queryString";
+
+      final successResult = await httpService.request<List<MatchResponse>>(
+        route,
+        method: 'GET',
+        successParser: (json) =>
+            (json as List).map((item) => MatchResponse.fromJson(item)).toList(),
+      );
+
+      return {
+        "isSuccess": true,
+        "hasMatchToday": successResult.isNotEmpty,
+        "matchCount": successResult.length,
+        "matches": successResult,
+      };
     } catch (e) {
       return _errorUtil.handleError(e);
     }
