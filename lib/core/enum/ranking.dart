@@ -17,3 +17,19 @@ extension RankingPeriodExtension on RankingPeriod {
     }
   }
 }
+
+enum RankingResultTypeEnum {
+  VITORIA,
+  DERROTA,
+}
+
+enum RankingPeriodEnum {
+  TODAY('daily'),
+  WEEKLY('weekly'),
+  MONTHLY('monthly'),
+  DATE('date'),
+  ALL_TIME('all_time');
+
+  final String value;
+  const RankingPeriodEnum(this.value);
+}

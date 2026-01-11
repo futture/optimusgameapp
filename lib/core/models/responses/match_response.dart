@@ -1,5 +1,4 @@
 import 'package:projeto_game_quiz/core/models/common/error_response.dart';
-import 'package:projeto_game_quiz/core/models/requests/match_request.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_prize_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/question_response.dart';
 import 'package:projeto_game_quiz/core/models/responses/user_response.dart';

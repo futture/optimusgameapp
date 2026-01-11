@@ -9,8 +9,8 @@ class RankingService {
 
   final httpService = HttpClientService();
 
-  Future<dynamic> getRankingByUserdAsync(String userId, {DateTime? startDate,
-      DateTime? endDate}) async {
+  Future<dynamic> getRankingByUserdAsync(String userId,
+      {DateTime? startDate, DateTime? endDate}) async {
     try {
       final queryParams = <String, String>{};
       if (startDate != null) {
@@ -55,26 +55,67 @@ class RankingService {
   }
 
   Future<dynamic> getRankingByPeriodAsync(RankingPeriod period) async {
-  try {
-    // Aqui, fazemos a requisição para obter os dados brutos
-    final successResult = await httpService.request<Map<String, dynamic>>(
-      '/ranking/period/${period.value}',
-      method: 'GET',
-    );
-
-    // Verificando se os dados da resposta são válidos
-    if (successResult != null && successResult is Map<String, dynamic>) {
-      // Convertemos os dados brutos para o objeto RankingWithTopWinnersResponse
-      final rankingResponse = RankingWithTopWinnersResponse.fromJson(successResult);
-      return {"isSuccess": true, "data": rankingResponse};
-    } else {
-      // Caso os dados recebidos não sejam válidos
-      return {"isSuccess": false, "message": "Dados inválidos recebidos da API"};
+    try { 
+      final successResult = await httpService.request<Map<String, dynamic>>(
+        '/ranking/period/${period.value}',
+        method: 'GET',
+      );
+      if (successResult != null && successResult is Map<String, dynamic>) {
+        final rankingResponse =
+            RankingWithTopWinnersResponse.fromJson(successResult);
+        return {"isSuccess": true, "data": rankingResponse};
+      } else {
+        return {
+          "isSuccess": false,
+          "message": "Dados inválidos recebidos da API"
+        };
+      }
+    } catch (e) {
+      return _errorUtil.handleError(e);
     }
-  } catch (e) {
-    // Tratamento de erros
-    return _errorUtil.handleError(e);
   }
-}
 
+  Future<dynamic> getEarningsLossesByPeriodAsync({
+    required String userId,
+    required String periodType,
+    DateTime? specificDate,
+  }) async {
+    try {
+      final Map<String, dynamic> body = {
+        'period_type': periodType,
+        'specific_date': specificDate?.toIso8601String(),
+      };
+
+      body.removeWhere((key, value) => value == null);
+
+      final successResult = await httpService.request<Map<String, dynamic>>(
+        '/earning-losses/$userId',
+        method: 'POST',
+        body: body,
+      );
+
+      if (successResult != null && successResult is Map<String, dynamic>) {
+        return {
+          "isSuccess": true,
+          "data": {
+            'total_cash_wins': successResult['total_cash_wins'] ?? 0.0,
+            'total_cash_losses': successResult['total_cash_losses'] ?? 0.0,
+            'total_cash_balance': successResult['total_cash_balance'] ?? 0.0,
+            'rankings': successResult['rankings'] ?? [],
+            'ranking_count': successResult['ranking_count'] ?? 0,
+            'period_type': successResult['period_type'],
+            'start_date': successResult['start_date'],
+            'end_date': successResult['end_date'],
+          }
+        };
+      } else {
+        return {
+          "isSuccess": false,
+          "message": "Dados inválidos recebidos da API"
+        };
+      }
+    } catch (e) {
+      return _errorUtil.handleError(e);
+    }
+  }
 }

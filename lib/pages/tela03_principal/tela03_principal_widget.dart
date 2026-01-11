@@ -1,10 +1,7 @@
-import 'dart:async';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:projeto_game_quiz/components/warnings/warning00_campo_vazio/warning00_campo_vazio_widget.dart';
 import 'package:projeto_game_quiz/components/warnings/warning04_reducao_de_saldo/warning04_reducao_de_saldo_widget.dart';
 import 'package:projeto_game_quiz/core/api/services/fcm_token_service.dart';
 import 'package:projeto_game_quiz/core/api/services/match_service.dart';
-import 'package:projeto_game_quiz/core/api/services/question_service.dart';
 import 'package:projeto_game_quiz/core/models/responses/match_response.dart';
 import 'package:projeto_game_quiz/dialogs/common_dialog_widget.dart';
 import 'package:projeto_game_quiz/utils.dart';
@@ -30,25 +27,26 @@ class Tela03PrincipalWidget extends StatefulWidget {
   State<Tela03PrincipalWidget> createState() => _Tela03PrincipalWidgetState();
 }
 
-class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
-    with TickerProviderStateMixin, WidgetsBindingObserver {
+class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget> {
   late Tela03PrincipalModel _model;
   final matchService = MatchService();
-  final questionService = QuestionService();
 
+  // Mapa para controlar loading individual de cada partida
   final Map<String, bool> _matchLoadingStates = {};
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  final FocusNode _screenFocusNode = FocusNode();
   final FcmTokenService _fcmTokenService = FcmTokenService();
 
+  // Cores e gradientes do tema premium
   final Color _primaryColor = Color(0xFFEC8D0D);
   final Color _backgroundColor = Color(0xFFF8FAFC);
   final Color _surfaceColor = Colors.white;
   final Color _onSurfaceColor = Color(0xFF1E293B);
   final Color _outlineColor = Color(0xFFE2E8F0);
-  final Color _cardLightOrange = Color(0xFFFFA726);
-  final Color _cardDarkOrange = Color(0xFFFB8C00);
+
+  // Cores mais suaves para os cards
+  final Color _cardLightOrange = Color(0xFFFFA726); // Laranja mais suave
+  final Color _cardDarkOrange = Color(0xFFFB8C00); // Laranja escuro mais suave
 
   final LinearGradient _primaryGradient = LinearGradient(
     colors: [Color(0xFFEC8D0D), Color(0xFFF59E0B)],
@@ -56,950 +54,195 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
     end: Alignment.bottomRight,
   );
 
-  bool _showNoMatchNotification = false;
-  Timer? _timerNotificacao;
-  late AnimationController _animacaoPulsar;
-  late AnimationController _animationController;
-  bool _isCheckingMatches = false;
-  Timer? _checkTimer;
-  List<MatchResponse> _activeMatches = [];
-  bool _showActiveMatchNotification = false;
-  bool _hasActiveMatch = false;
-  bool _firstBuild = true;
-  DateTime? _lastManualCheck;
-  bool _isAppInForeground = true;
-  final List<Timer> _activeTimers = [];
-  bool _isDisposed = false;
-  bool _isRedirecting = false;
-  bool _shouldCheckOnFocus = true;
-  DateTime? _lastFocusCheck;
-
   @override
   void initState() {
     super.initState();
-    _isDisposed = false;
-    _isRedirecting = false;
-    _shouldCheckOnFocus = true;
-
-    WidgetsBinding.instance.addObserver(this);
     _fcmTokenService.initFirebaseMessaging(context);
 
     _model = createModel(context, () => Tela03PrincipalModel());
 
-    _animacaoPulsar = AnimationController(
-      duration: Duration(milliseconds: 1000),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 700),
-      vsync: this,
-    );
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && !_isDisposed) {
-        setState(() {});
-      }
-    });
-
-    _model.getUserInfoAndAccountInfoAsync((VoidCallback fn) {
-      if (mounted && !_isDisposed) {
-        setState(fn);
-      }
-    }, context);
-
-    _model.loadMatches((VoidCallback fn) {
-      if (mounted && !_isDisposed) {
-        setState(fn);
-      }
-    });
-
-    _checkForActiveMatchInProgress(urgent: true);
-
-    _setupCheckTimer();
-    _screenFocusNode.requestFocus();
-  }
-
-  void _setupCheckTimer() {
-    _cancelCheckTimer();
-
-    _checkTimer = Timer.periodic(Duration(minutes: 5), (timer) {
-      if (_isDisposed || !mounted) {
-        timer.cancel();
-        return;
-      }
-
-      if (_isAppInForeground) {
-        _checkForActiveMatchInProgress(silent: true);
-      }
-    });
-
-    if (_checkTimer != null) {
-      _activeTimers.add(_checkTimer!);
-    }
-  }
-
-  void _cancelCheckTimer() {
-    if (_checkTimer != null && _checkTimer!.isActive) {
-      _checkTimer!.cancel();
-    }
-    _checkTimer = null;
-  }
- 
-  void _cancelAllTimers() {
-    for (var timer in _activeTimers) {
-      if (timer.isActive) {
-        timer.cancel();
-      }
-    }
-    _activeTimers.clear();
-
-    _cancelCheckTimer();
-
-    if (_timerNotificacao != null && _timerNotificacao!.isActive) {
-      _timerNotificacao!.cancel();
-    }
-    _timerNotificacao = null;
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (_isDisposed) return;
-
-    super.didChangeAppLifecycleState(state);
-
-    if (state == AppLifecycleState.resumed) {
-      _isAppInForeground = true;
-      
-      Future.delayed(Duration(seconds: 2), () {
-        if (mounted && !_isDisposed) {
-          _checkForActiveMatchInProgress(urgent: true);
-        }
-      });
-    } else if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
-      _isAppInForeground = false; 
-    } else if (state == AppLifecycleState.detached) {
-      _cleanupResources();
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    if (_isDisposed) return;
- 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_firstBuild && mounted && !_isDisposed) {
-        _firstBuild = false;
-        _checkForActiveMatchInProgress(urgent: true);
-      }
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    _model.getUserInfoAndAccountInfoAsync(setState, context);
+    _model.loadMatches(setState);
   }
 
   @override
   void dispose() {
-    _isDisposed = true;  
-    _cleanupResources(); 
-    super.dispose(); 
-  }
- 
-  void _cleanupResources() {
-    if (_isDisposed) return; 
-    _cancelAllTimers(); 
-    try {
-      if (_animacaoPulsar.isAnimating) {
-        _animacaoPulsar.stop();
-      }
-      _animacaoPulsar.dispose();
-    } catch (e) {
-      print("⚠️ Erro ao dispor _animacaoPulsar: $e");
-    }
-
-    try {
-      if (_animationController.isAnimating) {
-        _animationController.stop();
-      }
-      _animationController.dispose();
-    } catch (e) {
-      print("⚠️ Erro ao dispor _animationController: $e");
-    } 
-    try {
-      WidgetsBinding.instance.removeObserver(this);
-    } catch (e) {
-      print("⚠️ Erro ao remover observer: $e");
-    } 
-    try {
-      _screenFocusNode.dispose();
-    } catch (e) {
-      print("⚠️ Erro ao dispor _screenFocusNode: $e");
-    } 
-    try {
-      _model.dispose();
-    } catch (e) {
-      print("⚠️ Erro ao dispor model: $e");
-    } 
-    _matchLoadingStates.clear();
-    _activeMatches.clear();
-
-    _isDisposed = true;
-  } 
-  void _safeSetState(VoidCallback callback) {
-    if (mounted && !_isDisposed) {
-      setState(callback);
-    } else {
-      print("⚠️ Tentativa de setState em widget não montado/disposed");
-    }
-  }
-
-  void _closeNotification() {
-    _safeSetState(() {
-      _showActiveMatchNotification = false;
-      _showNoMatchNotification = false;
-    });
-
-    try {
-      FlutterAppBadger.removeBadge();
-    } catch (e) {
-      print("⚠️ Erro ao remover badge: $e");
-    }
-  }
-
-  void _showErrorNotification(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
-
-  Future<void> _goBackToMatch() async {
-    if (_isRedirecting) return;
-    
-    _isRedirecting = true;
-    
-    final userId = _model.user?.id;
-    if (userId == null) {
-      print("⚠️ Usuário não logado para voltar à partida");
-      _isRedirecting = false;
-      return;
-    }
-
-    if (_activeMatches.isEmpty) {
-      print("⚠️ Nenhuma partida ativa encontrada para voltar");
-      _isRedirecting = false;
-      return;
-    }
-
-    final match = _activeMatches.first;
-    final matchId = match.id;
-
-    try {
-      final result =
-          await matchService.activatePlayerInMatchAsync(matchId, userId);
-      if (result['isSuccess'] != true) {
-        _showErrorNotification(
-          "Erro ao reativar jogador na partida",
-        );
-        _isRedirecting = false;
-        return;  
-      }
-      final nextQuestionResult =
-          await questionService.nextQuestionMatchAsync(matchId);
-      if (nextQuestionResult['isSuccess'] != true) {
-        _showErrorNotification(
-          "Erro ao obter próxima questão da partida",
-        );
-        _isRedirecting = false;
-        return; 
-      }
-      final nextQuestion = nextQuestionResult['data']; 
-
-      if (mounted && !_isDisposed) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => Tela06SaladeJogoWidget(
-              matchInfo: match,
-              recebeuNotificaca: false, 
-              nextQuestion: nextQuestion,
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      print("💥 Erro ao voltar à partida: $e");
-      _isRedirecting = false;
-      if (mounted && !_isDisposed) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao voltar à partida. Tente novamente.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _checkForActiveMatchInProgress(
-      {bool silent = false, bool urgent = false}) async {
-    if (_isCheckingMatches && !urgent) return;
-
-    if (_isDisposed || !mounted) return; 
-    if (!urgent && _lastManualCheck != null) {
-      final timeSinceLastCheck = DateTime.now().difference(_lastManualCheck!);
-      if (timeSinceLastCheck < Duration(seconds: 30)) {
-        return;
-      }
-    }
-
-    if (!silent) {
-      _safeSetState(() {
-        _isCheckingMatches = true;
-      });
-    }
-
-    try {
-      final userId = _model.user?.id;
-      if (userId == null) {
-        print("⚠️ Usuário não logado para verificar partida ativa");
-        return;
-      }
-
-      final result =
-          await matchService.checkUserHasMatchInProgressToday(userId);
-
-      if (mounted && !_isDisposed && result['isSuccess'] == true) {
-        final hasActiveMatch = result['hasMatchToday'] ?? false;
-        final matchCount = result['matchCount'] ?? 0;
-        final List<MatchResponse> matches = result['matches'] ?? [];
- 
-        final bool stateChanged = _hasActiveMatch != hasActiveMatch ||
-            _showActiveMatchNotification != hasActiveMatch; 
-        if (stateChanged || urgent) {
-          _safeSetState(() {
-            _hasActiveMatch = hasActiveMatch;
-            _activeMatches = matches;
-            _showActiveMatchNotification = hasActiveMatch;
-
-            if (!silent && !hasActiveMatch) {
-              _showNoMatchNotification = true;
-            } else if (hasActiveMatch) {
-              _showNoMatchNotification = false;
-            }
-          }); 
-          await _updateAppBadge(hasActiveMatch);
-
-          _lastManualCheck = DateTime.now();
-        }
-
-        if (!silent) {
-          if (hasActiveMatch) {
-            print("🎮 USUÁRIO TEM $matchCount PARTIDA(S) EM ANDAMENTO HOJE");
-            matches.forEach((match) {
-              print(
-                  "  - Partida ID: ${match.id}, Status: ${match.statusMatch}, Início: ${match.matchStartDate}");
-            });
-          } else {
-            print("📭 USUÁRIO NÃO TEM PARTIDAS EM ANDAMENTO HOJE");
-          }
-        }
-      } else {
-        print("⚠️ Falha ao verificar partidas ativas: ${result['error']}");
-        if (mounted && !_isDisposed && !silent) {
-          _safeSetState(() {
-            _showActiveMatchNotification = false;
-            _hasActiveMatch = false;
-            _activeMatches = [];
-          });
-          await _updateAppBadge(false);
-        }
-      }
-    } catch (e) {
-      print("💥 Erro ao verificar partida em andamento: $e");
-      if (mounted && !_isDisposed && !silent) {
-        _safeSetState(() {
-          _showActiveMatchNotification = false;
-          _hasActiveMatch = false;
-          _activeMatches = [];
-        });
-        await _updateAppBadge(false);
-      }
-    } finally {
-      if (!silent && mounted && !_isDisposed) {
-        _safeSetState(() {
-          _isCheckingMatches = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _updateAppBadge(bool hasActiveMatch) async {
-    try {
-      if (hasActiveMatch) {
-        await FlutterAppBadger.updateBadgeCount(1);
-      } else {
-        await FlutterAppBadger.removeBadge();
-      }
-    } catch (e) {
-      print("⚠️ Erro ao atualizar badge: $e");
-    }
-  }
-
-  Widget _buildNoMatchTodayNotification() {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Color(0xFF9C27B0),
-            Color(0xFF7B1FA2),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0xFF9C27B0).withOpacity(0.4),
-            blurRadius: 20,
-            spreadRadius: 2,
-            offset: Offset(0, 6),
-          ),
-        ],
-        border: Border.all(
-          color: Colors.white.withOpacity(0.3),
-          width: 2,
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.4),
-                    width: 2,
-                  ),
-                ),
-                child: _isCheckingMatches
-                    ? CircularProgressIndicator(
-                        strokeWidth: 3,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      )
-                    : Icon(
-                        Icons.event_busy_rounded,
-                        color: Colors.white,
-                        size: 28,
-                      ),
-              ),
-              SizedBox(width: 15),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _isCheckingMatches
-                          ? 'VERIFICANDO...'
-                          : 'NENHUMA PARTIDA EM CURSO',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      _isCheckingMatches
-                          ? 'Verificando se está inscrito em uma partida em curso...'
-                          : 'Não há alguma partida em curso que você esteja inscrito.',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.95),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      maxLines: 2,
-                    ),
-                  ],
-                ),
-              ),
-              if (!_isCheckingMatches)
-                GestureDetector(
-                  onTap: () {
-                    _safeSetState(() {
-                      _showNoMatchNotification = false;
-                    });
-                  },
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.close_rounded,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNotificacaoPartidaAtiva() {
-    return AnimatedBuilder(
-      animation: _animacaoPulsar,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: 0.95 + (_animacaoPulsar.value * 0.1),
-          child: child,
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFF2196F3),
-              Color(0xFF1976D2),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Color(0xFF2196F3).withOpacity(0.5),
-              blurRadius: 20,
-              spreadRadius: 2,
-              offset: Offset(0, 6),
-            ),
-          ],
-          border: Border.all(
-            color: Colors.white.withOpacity(0.3),
-            width: 2,
-          ),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: _goBackToMatch,
-            splashColor: Colors.white.withOpacity(0.3),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.4),
-                        width: 2,
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.sports_esports_rounded,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                  ),
-                  SizedBox(width: 15),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '🏆 VOLTAR À PARTIDA!',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        SizedBox(height: 5),
-                        Text(
-                          'Você não entrou na partida por atraso ou desconexão. A partida ainda decorre!',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.95),
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          maxLines: 2,
-                        ),
-                        SizedBox(height: 8),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.4),
-                              width: 1.5,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.play_arrow_rounded,
-                                color: Colors.white,
-                                size: 16,
-                              ),
-                              SizedBox(width: 6),
-                              Text(
-                                'CLIQUE PARA VOLTAR',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  GestureDetector(
-                    onTap: _closeNotification,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.close_rounded,
-                        color: Colors.white,
-                        size: 22,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildManualCheckButton() {
-    return IconButton(
-      icon: _isCheckingMatches
-          ? SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            )
-          : Icon(
-              Icons.refresh_rounded,
-              color: Colors.white,
-              size: 22,
-            ),
-      onPressed: _isCheckingMatches
-          ? null
-          : () async {
-              print("🔄 Verificação manual solicitada");
-              await _checkForActiveMatchInProgress(urgent: true);
-            },
-      tooltip: 'Verificar partidas ativas',
-    );
+    _model.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (_firstBuild && mounted && !_isDisposed) {
-        _firstBuild = false;
-        await _checkForActiveMatchInProgress(silent: true);
-      }
-    });
-
     return WillPopScope(
       onWillPop: () async => false,
-      child: Focus(
-        focusNode: _screenFocusNode,
-        onFocusChange: (hasFocus) {
-          if (hasFocus && mounted && !_isDisposed && _shouldCheckOnFocus) {
-            if (_lastFocusCheck != null) {
-              final timeSinceLastFocusCheck = DateTime.now().difference(_lastFocusCheck!);
-              if (timeSinceLastFocusCheck < Duration(seconds: 10)) {
-                return;
-              }
-            }
-            
-            _lastFocusCheck = DateTime.now();
-            
-            Future.delayed(Duration(milliseconds: 500), () async {
-              if (mounted && !_isDisposed) {
-                await _checkForActiveMatchInProgress(urgent: true);
-              }
-            });
-          }
-        },
-        child: GestureDetector(
-          onTap: () async {
-            FocusScope.of(context).unfocus();
-
-            if (!_isCheckingMatches && mounted && !_isDisposed) {
-              await _checkForActiveMatchInProgress(silent: true);
-            }
-          },
-          child: Scaffold(
-            key: scaffoldKey,
-            backgroundColor: _backgroundColor,
-            body: Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    gradient: _primaryGradient,
-                    boxShadow: [
-                      BoxShadow(
-                        color: _primaryColor.withOpacity(0.3),
-                        blurRadius: 15,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: SafeArea(
-                    bottom: false,
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: _getResponsivePadding(context),
-                        vertical: 16,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: _getIconSize(context),
-                                height: _getIconSize(context),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: IconButton(
-                                  onPressed: _showMenuModal,
-                                  icon: Icon(
-                                    FontAwesomeIcons.bars,
-                                    color: Colors.white,
-                                    size: _getIconSize(context) - 28,
-                                  ),
-                                  splashRadius: 20,
-                                ),
-                              ),
-                              SizedBox(width: 16),
-                              Expanded(
-                                child: Text(
-                                  'GAME QUIZ',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize:
-                                        _getFontSize(context, baseSize: 20),
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                width: _getIconSize(context),
-                                height: _getIconSize(context),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.15),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: _buildManualCheckButton(),
-                              ),
-                              SizedBox(width: 8),
-                              Container(
-                                width: _getIconSize(context),
-                                height: _getIconSize(context),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.15),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: IconButton(
-                                  icon: Stack(
-                                    children: [
-                                      Icon(
-                                        Icons.notifications_outlined,
-                                        color: Colors.white,
-                                        size: _getIconSize(context) - 24,
-                                      ),
-                                      if (_hasActiveMatch)
-                                        Positioned(
-                                          right: 0,
-                                          top: 0,
-                                          child: Container(
-                                            width: 10,
-                                            height: 10,
-                                            decoration: BoxDecoration(
-                                              color: Colors.red,
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                color: Colors.white,
-                                                width: 1.5,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                  onPressed: () async {
-                                    await _checkForActiveMatchInProgress();
-                                  },
-                                  splashRadius: 20,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 8),
-                          Container(
-                            height: 2,
-                            width: 60,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ],
-                      ),
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Scaffold(
+          key: scaffoldKey,
+          backgroundColor: _backgroundColor,
+          body: Column(
+            children: [
+              // Header Premium - Mesmo estilo da tela de finanças
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: _primaryGradient,
+                  boxShadow: [
+                    BoxShadow(
+                      color: _primaryColor.withOpacity(0.3),
+                      blurRadius: 15,
+                      offset: Offset(0, 4),
                     ),
-                  ),
+                  ],
                 ),
-                if (_showNoMatchNotification) _buildNoMatchTodayNotification(),
-                if (_showActiveMatchNotification)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 10),
-                    child: _buildNotificacaoPartidaAtiva(),
-                  ),
-                if (_isCheckingMatches &&
-                    !_showNoMatchNotification &&
-                    !_showActiveMatchNotification)
-                  Container(
-                    margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                child: SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: _getResponsivePadding(context),
+                      vertical: 16,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.blue),
-                          ),
+                        Row(
+                          children: [
+                            // Botão Menu Premium
+                            Container(
+                              width: _getIconSize(context),
+                              height: _getIconSize(context),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: IconButton(
+                                onPressed: _showMenuModal,
+                                icon: Icon(
+                                  FontAwesomeIcons.bars,
+                                  color: Colors.white,
+                                  size: _getIconSize(context) - 28,
+                                ),
+                                splashRadius: 20,
+                              ),
+                            ),
+                            SizedBox(width: 16),
+                            Expanded(
+                              child: Text(
+                                'GAME QUIZ',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: _getFontSize(context, baseSize: 20),
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                            // Ícone de notificações
+                            Container(
+                              width: _getIconSize(context),
+                              height: _getIconSize(context),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.15),
+                                shape: BoxShape.circle,
+                              ),
+                              child: IconButton(
+                                icon: Icon(
+                                  Icons.notifications_outlined,
+                                  color: Colors.white,
+                                  size: _getIconSize(context) - 24,
+                                ),
+                                onPressed: () {
+                                  // Adicionar funcionalidade de notificações aqui
+                                },
+                                splashRadius: 20,
+                              ),
+                            ),
+                          ],
                         ),
-                        SizedBox(width: 10),
-                        Text(
-                          'Verificando partidas ativas...',
-                          style: TextStyle(
-                            color: Colors.blue[800],
-                            fontWeight: FontWeight.w500,
+                        SizedBox(height: 8),
+                        // Barra de progresso sutil
+                        Container(
+                          height: 2,
+                          width: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(2),
                           ),
                         ),
                       ],
                     ),
                   ),
-                Expanded(
-                  child: Center(
-                    child: Container(
-                      constraints: BoxConstraints(
-                        maxWidth: isWeb ? 1000 : double.infinity,
-                      ),
-                      child: RefreshIndicator(
-                        onRefresh: _refreshData,
-                        color: const Color(0xFFEC8D0D),
-                        backgroundColor: _backgroundColor,
-                        child: SingleChildScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding:
-                              EdgeInsets.all(_getResponsivePadding(context)),
-                          child: Column(
-                            children: [
-                              _buildUserProfileCard(context),
-                              const SizedBox(height: 24),
-                              _buildGameRoomButton(context),
-                              const SizedBox(height: 24),
-                              _buildSuperLeagueHeader(context),
-                              const SizedBox(height: 20),
-                              if (_model.isLoadingMatches)
-                                _buildLoadingState()
-                              else if (_model.matchList.isEmpty)
-                                _buildEmptyMatchesState(context)
-                              else
-                                _buildMatchList(context),
-                            ],
-                          ),
+                ),
+              ),
+
+              Expanded(
+                child: Center(
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: isWeb ? 1000 : double.infinity,
+                    ),
+                    child: RefreshIndicator(
+                      onRefresh: _refreshData,
+                      color: const Color(0xFFEC8D0D),
+                      backgroundColor: _backgroundColor,
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: EdgeInsets.all(_getResponsivePadding(context)),
+                        child: Column(
+                          children: [
+                            _buildUserProfileCard(context),
+                            const SizedBox(height: 24),
+                            _buildGameRoomButton(context),
+                            const SizedBox(height: 24),
+                            _buildSuperLeagueHeader(context),
+                            const SizedBox(height: 20),
+                            if (_model.isLoadingMatches)
+                              _buildLoadingState()
+                            else if (_model.matchList.isEmpty)
+                              _buildEmptyMatchesState(context)
+                            else
+                              _buildMatchList(context),
+                          ],
                         ),
                       ),
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
+  // Métodos auxiliares para responsividade
+  double _getResponsivePadding(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width < 350) return 12;
+    if (width < 400) return 14;
+    if (width < 500) return 16;
+    return 20;
+  }
+
+  double _getIconSize(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width < 350) return 38;
+    if (width < 400) return 40;
+    return 44;
+  }
+
+  double _getFontSize(BuildContext context, {required double baseSize}) {
+    final width = MediaQuery.of(context).size.width;
+    if (width < 350) return baseSize * 0.85;
+    if (width < 400) return baseSize * 0.9;
+    return baseSize;
+  }
+
   Future<void> _refreshData() async {
-    try {
-      await _model.getUserInfoAndAccountInfoAsync((VoidCallback fn) {
-        if (mounted && !_isDisposed) {
-          setState(fn);
-        }
-      }, context);
-      await _model.loadMatches((VoidCallback fn) {
-        if (mounted && !_isDisposed) {
-          setState(fn);
-        }
-      });
-      await _checkForActiveMatchInProgress(urgent: true);
-    } catch (e) {
-      print("⚠️ Erro no refresh: $e");
-    }
+    await _model.getUserInfoAndAccountInfoAsync(setState, context);
+    await _model.loadMatches(setState);
   }
 
   void _showMenuModal() async {
@@ -1016,11 +259,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
         ),
       ),
     );
-
-    if (mounted && !_isDisposed) {
-      await _checkForActiveMatchInProgress(silent: true);
-      _safeSetState(() {});
-    }
+    safeSetState(() {});
   }
 
   Widget _buildUserProfileCard(BuildContext context) {
@@ -1269,9 +508,9 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
                         ),
                       ),
                     );
-                    if (mounted && !_isDisposed) {
+                    if (mounted) {
                       await _refreshData();
-                      _safeSetState(() {});
+                      safeSetState(() {});
                     }
                   },
                 ),
@@ -1454,7 +693,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
                       ),
                     ),
                   );
-                  _safeSetState(() {});
+                  safeSetState(() {});
                 },
                 borderRadius: BorderRadius.circular(14),
                 child: Container(
@@ -1881,11 +1120,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
             ),
             child: FFButtonWidget(
               onPressed: () async {
-                await _model.loadMatches((VoidCallback fn) {
-                  if (mounted && !_isDisposed) {
-                    setState(fn);
-                  }
-                });
+                await _model.loadMatches(setState);
               },
               text: 'ATUALIZAR',
               icon: Icon(
@@ -1948,16 +1183,12 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
           onTap: () async {
             if (isThisCardLoading) return;
 
-            _safeSetState(() {
+            setState(() {
               _matchLoadingStates[match.id] = true;
             });
 
             try {
-              await _model.getUsersByMatchId((VoidCallback fn) {
-                if (mounted && !_isDisposed) {
-                  setState(fn);
-                }
-              }, match.id);
+              await _model.getUsersByMatchId(setState, match.id);
               CommonDialogWidget.showMatchParticipantsDialog(
                   context,
                   List.empty(),
@@ -1981,7 +1212,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
                 "Ocorreu um erro ao carregar os detalhes da partida.",
               );
             } finally {
-              _safeSetState(() {
+              setState(() {
                 _matchLoadingStates[match.id] = false;
               });
             }
@@ -2225,6 +1456,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
                           ),
                         ],
                       ),
+                      // CRONÔMETRO APENAS PARA PRÓXIMA PARTIDA
                       if (isNextMatch)
                         Padding(
                           padding: EdgeInsets.only(
@@ -2252,8 +1484,8 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: [
-                                    Color(0xFFD4AF37),
-                                    Color(0xFFB8860B),
+                                    Color(0xFFD4AF37), // Dourado
+                                    Color(0xFFB8860B), // Dourado escuro
                                   ],
                                 ),
                                 borderRadius:
@@ -2331,12 +1563,17 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
                             ),
                           ),
                         ),
+
                       SizedBox(
                           height: isVerySmallScreen
-                              ? (isNextMatch ? 8 : 10)
+                              ? (isNextMatch
+                                  ? 8
+                                  : 10) // Espaço menor se tiver cronômetro
                               : isSmallScreen
                                   ? (isNextMatch ? 10 : 12)
                                   : (isNextMatch ? 12 : 16)),
+
+                      // Informações da partida - Mantendo layout horizontal sempre
                       Container(
                         padding: EdgeInsets.all(isVerySmallScreen
                             ? 8
@@ -2400,12 +1637,15 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
                           ],
                         ),
                       ),
+
                       SizedBox(
                           height: isVerySmallScreen
                               ? 10
                               : isSmallScreen
                                   ? 12
                                   : 16),
+
+                      // Status do usuário na partida
                       if (isRegistered)
                         Container(
                           width: double.infinity,
@@ -2541,6 +1781,8 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
                     ],
                   ),
                 ),
+
+                // Loading overlay apenas para este card
                 if (isThisCardLoading)
                   Positioned.fill(
                     child: Container(
@@ -2645,11 +1887,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
   }
 
   Future<void> _handleMatchTap(MatchResponse match) async {
-    await _model.checkPlayerAlreadyRegisteredMatchAsync((VoidCallback fn) {
-      if (mounted && !_isDisposed) {
-        setState(fn);
-      }
-    }, match.id);
+    await _model.checkPlayerAlreadyRegisteredMatchAsync(setState, match.id);
 
     if (!_model.isNotRegisteredMatch) {
       Navigator.pop(context);
@@ -2677,17 +1915,9 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
       if (result == true) {
         Navigator.pop(context);
 
-        _safeSetState(() {
-          _model.getUserInfoAndAccountInfoAsync((VoidCallback fn) {
-            if (mounted && !_isDisposed) {
-              setState(fn);
-            }
-          }, context);
-          _model.loadMatches((VoidCallback fn) {
-            if (mounted && !_isDisposed) {
-              setState(fn);
-            }
-          });
+        setState(() {
+          _model.getUserInfoAndAccountInfoAsync(setState, context);
+          _model.loadMatches(setState);
         });
       }
     }
@@ -2725,17 +1955,9 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
     try {
       Navigator.pop(context);
       await _model.leaveMatchAsync(match.id);
-      _safeSetState(() {
-        _model.getUserInfoAndAccountInfoAsync((VoidCallback fn) {
-          if (mounted && !_isDisposed) {
-            setState(fn);
-          }
-        }, context);
-        _model.loadMatches((VoidCallback fn) {
-          if (mounted && !_isDisposed) {
-            setState(fn);
-          }
-        });
+      setState(() {
+        _model.getUserInfoAndAccountInfoAsync(setState, context);
+        _model.loadMatches(setState);
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -2808,27 +2030,5 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
         ),
       ),
     );
-  }
-
-  double _getResponsivePadding(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    if (width < 350) return 12;
-    if (width < 400) return 14;
-    if (width < 500) return 16;
-    return 20;
-  }
-
-  double _getIconSize(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    if (width < 350) return 38;
-    if (width < 400) return 40;
-    return 44;
-  }
-
-  double _getFontSize(BuildContext context, {required double baseSize}) {
-    final width = MediaQuery.of(context).size.width;
-    if (width < 350) return baseSize * 0.85;
-    if (width < 400) return baseSize * 0.9;
-    return baseSize;
   }
 }
