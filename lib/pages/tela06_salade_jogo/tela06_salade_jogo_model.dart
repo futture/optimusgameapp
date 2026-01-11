@@ -395,6 +395,9 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
                       OutlinedButton(
                         onPressed: isChecked
                             ? () async {
+                                if (safetyTimeout?.isActive ?? false) {
+                                  safetyTimeout?.cancel();
+                                }
                                 _questionWebSocketService?.disconnect();
                                 if (serverAllowedExit) {
                                   Navigator.of(currentContext!).push(
@@ -586,6 +589,9 @@ class Tela06SaladeJogoModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
                     width: double.infinity,
                     child: TextButton(
                       onPressed: () {
+                        if (safetyTimeout?.isActive ?? false) {
+                          safetyTimeout?.cancel();
+                        }
                         _questionWebSocketService?.disconnect();
                         if (safetyTimeout?.isActive ?? false) {
                             safetyTimeout?.cancel();
