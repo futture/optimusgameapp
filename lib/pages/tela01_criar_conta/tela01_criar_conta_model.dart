@@ -30,14 +30,14 @@ class Tela01CriarContaModel extends FlutterFlowModel<Tela06SaladeJogoWidget> {
   late bool inputSenhaVisibility2;
   String? Function(BuildContext, String?)? inputSenhaTextController2Validator;
   
-  bool? checkboxValue;
+  bool? checkboxValue = false;
 
   bool _isRegistering = false;
   bool _isSendingOtp = false;
   
   bool get isRegistering => _isRegistering;
   bool get isSendingOtp => _isSendingOtp;
-  
+  bool termsDialogShown = false;
   set isRegistering(bool value) => _isRegistering = value;
   
   final UserService _userService = UserService();

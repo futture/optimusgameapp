@@ -954,7 +954,6 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
                     ),
                   ),
                   SizedBox(height: 20),
-
                   Row(
                     children: [
                       Container(
@@ -977,9 +976,23 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
                             unselectedWidgetColor: Colors.transparent,
                           ),
                           child: Checkbox(
-                            value: _model.checkboxValue ??= true,
-                            onChanged: (value) =>
-                                setState(() => _model.checkboxValue = value),
+                            value: _model.checkboxValue,
+                            onChanged: (value) async {
+                              if (value == true && !_model.termsDialogShown) {
+                                bool? accepted =
+                                    await _showTermsAndConditionsDialog();
+                                if (accepted == true) {
+                                  setState(() {
+                                    _model.checkboxValue = true;
+                                    _model.termsDialogShown = true;
+                                  });
+                                }
+                              } else {
+                                setState(() {
+                                  _model.checkboxValue = value ?? false;
+                                });
+                              }
+                            },
                             activeColor: Colors.transparent,
                             checkColor: Colors.white,
                             materialTapTargetSize:
@@ -989,33 +1002,45 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
                       ),
                       SizedBox(width: 8),
                       Expanded(
-                        child: RichText(
-                          text: TextSpan(
-                            text: 'Eu concordo com os ',
-                            style: TextStyle(
-                              fontSize: isMobile ? 12 : 13,
-                              color: _textSecondary,
-                              fontWeight: FontWeight.w500,
+                        child: GestureDetector(
+                          onTap: () async {
+                            bool? accepted =
+                                await _showTermsAndConditionsDialog();
+                            if (accepted == true) {
+                              setState(() {
+                                _model.checkboxValue = true;
+                                _model.termsDialogShown = true;
+                              });
+                            }
+                          },
+                          child: RichText(
+                            text: TextSpan(
+                              text: 'Eu concordo com os ',
+                              style: TextStyle(
+                                fontSize: isMobile ? 12 : 13,
+                                color: _textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: 'Termos de Serviço',
+                                  style: TextStyle(
+                                    color: _primaryColor,
+                                    fontWeight: FontWeight.w600,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                                TextSpan(text: ' e '),
+                                TextSpan(
+                                  text: 'Política de Privacidade',
+                                  style: TextStyle(
+                                    color: _primaryColor,
+                                    fontWeight: FontWeight.w600,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ],
                             ),
-                            children: [
-                              TextSpan(
-                                text: 'Termos de Serviço',
-                                style: TextStyle(
-                                  color: _primaryColor,
-                                  fontWeight: FontWeight.w600,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                              TextSpan(text: ' e '),
-                              TextSpan(
-                                text: 'Política de Privacidade',
-                                style: TextStyle(
-                                  color: _primaryColor,
-                                  fontWeight: FontWeight.w600,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ],
                           ),
                         ),
                       ),
@@ -1162,9 +1187,20 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
 
   Future<void> _registerUser() async {
     if (_model.formKey.currentState?.validate() ?? false) {
-      if (!(_model.checkboxValue ?? false)) {
+      if (_model.checkboxValue != true) {
         _showWarningSnackBar(
             'Você precisa aceitar os Termos de Serviço e Política de Privacidade');
+
+        if (!_model.termsDialogShown) {
+          bool? accepted = await _showTermsAndConditionsDialog();
+          if (accepted == true) {
+            setState(() {
+              _model.checkboxValue = true;
+              _model.termsDialogShown = true;
+            });
+            _registerUser();
+          }
+        }
         return;
       }
 
@@ -1296,6 +1332,258 @@ class _Tela01CriarContaWidgetState extends State<Tela01CriarContaWidget>
         backgroundColor: _warningColor,
         duration: Duration(seconds: 3),
       ),
+    );
+  }
+
+  Future<bool?> _showTermsAndConditionsDialog() async {
+    return await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        final isMobile = MediaQuery.of(context).size.width < 768;
+
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: _surfaceColor,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Cabeçalho do popup
+                Container(
+                  padding: EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: _primaryGradient,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.gavel_rounded,
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'Termos e Condições',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: isMobile ? 22 : 24,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Por favor, leia atentamente',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: isMobile ? 14 : 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Conteúdo dos termos
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildTermSection(
+                          title: '1. Aceitação dos Termos',
+                          content:
+                              'Ao criar uma conta, você concorda com todos os termos e condições estabelecidos aqui.',
+                        ),
+                        SizedBox(height: 16),
+                        _buildTermSection(
+                          title: '2. Uso da Conta',
+                          content:
+                              'Você é responsável por manter a confidencialidade de sua senha e por todas as atividades que ocorrerem em sua conta.',
+                        ),
+                        SizedBox(height: 16),
+                        _buildTermSection(
+                          title: '3. Privacidade',
+                          content:
+                              'Respeitamos sua privacidade e protegemos seus dados pessoais de acordo com a Lei Geral de Proteção de Dados (LGPD).',
+                        ),
+                        SizedBox(height: 16),
+                        _buildTermSection(
+                          title: '4. Responsabilidades',
+                          content:
+                              'Você concorda em usar o serviço apenas para fins legais e de forma ética.',
+                        ),
+                        SizedBox(height: 16),
+                        _buildTermSection(
+                          title: '5. Modificações',
+                          content:
+                              'Reservamo-nos o direito de modificar estes termos a qualquer momento. Notificaremos sobre alterações significativas.',
+                        ),
+                        SizedBox(height: 16),
+
+                        // Seção de política de privacidade
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: _primaryColor.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _primaryColor.withOpacity(0.1),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Política de Privacidade',
+                                style: TextStyle(
+                                  color: _textPrimary,
+                                  fontSize: isMobile ? 16 : 17,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                '• Coletamos apenas informações necessárias\n'
+                                '• Não compartilhamos seus dados com terceiros\n'
+                                '• Usamos criptografia para proteger seus dados\n'
+                                '• Você pode solicitar exclusão de dados a qualquer momento',
+                                style: TextStyle(
+                                  color: _textSecondary,
+                                  fontSize: isMobile ? 13 : 14,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Botões de ação
+                Container(
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      top: BorderSide(
+                        color: _borderColor,
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: isMobile ? 48 : 52,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _borderColor,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(12),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () => Navigator.of(context).pop(false),
+                              child: Center(
+                                child: Text(
+                                  'RECUSAR',
+                                  style: TextStyle(
+                                    color: _textSecondary,
+                                    fontSize: isMobile ? 14 : 15,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: Container(
+                          height: isMobile ? 48 : 52,
+                          decoration: BoxDecoration(
+                            gradient: _primaryGradient,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: _primaryColor.withOpacity(0.3),
+                                blurRadius: 10,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(12),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () => Navigator.of(context).pop(true),
+                              child: Center(
+                                child: Text(
+                                  'ACEITAR',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: isMobile ? 14 : 15,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTermSection({required String title, required String content}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            color: _textPrimary,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        SizedBox(height: 8),
+        Text(
+          content,
+          style: TextStyle(
+            color: _textSecondary,
+            fontSize: 14,
+            height: 1.5,
+          ),
+        ),
+      ],
     );
   }
 }
