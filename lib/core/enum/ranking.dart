@@ -1,3 +1,5 @@
+//ranking.dart
+
 enum RankingPeriod {
   daily,  
   weekly, 
@@ -16,4 +18,20 @@ extension RankingPeriodExtension on RankingPeriod {
         return 'monthly';
     }
   }
+}
+
+enum RankingResultTypeEnum {
+  VITORIA,
+  DERROTA,
+}
+
+enum RankingPeriodEnum {
+  TODAY('daily'),
+  WEEKLY('weekly'),
+  MONTHLY('monthly'),
+  DATE('date'),
+  ALL_TIME('all_time');
+
+  final String value;
+  const RankingPeriodEnum(this.value);
 }
