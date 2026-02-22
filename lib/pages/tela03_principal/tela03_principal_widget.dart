@@ -145,7 +145,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
     }
     _checkTimer = null;
   }
- 
+
   void _cancelAllTimers() {
     for (var timer in _activeTimers) {
       if (timer.isActive) {
@@ -170,7 +170,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
 
     if (state == AppLifecycleState.resumed) {
       _isAppInForeground = true;
-      
+
       Future.delayed(Duration(seconds: 2), () {
         if (mounted && !_isDisposed) {
           _checkForActiveMatchInProgress(urgent: true);
@@ -178,7 +178,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
       });
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive) {
-      _isAppInForeground = false; 
+      _isAppInForeground = false;
     } else if (state == AppLifecycleState.detached) {
       _cleanupResources();
     }
@@ -189,7 +189,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
     super.didChangeDependencies();
 
     if (_isDisposed) return;
- 
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_firstBuild && mounted && !_isDisposed) {
         _firstBuild = false;
@@ -200,14 +200,14 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
 
   @override
   void dispose() {
-    _isDisposed = true;  
-    _cleanupResources(); 
-    super.dispose(); 
+    _isDisposed = true;
+    _cleanupResources();
+    super.dispose();
   }
- 
+
   void _cleanupResources() {
-    if (_isDisposed) return; 
-    _cancelAllTimers(); 
+    if (_isDisposed) return;
+    _cancelAllTimers();
     try {
       if (_animacaoPulsar.isAnimating) {
         _animacaoPulsar.stop();
@@ -224,27 +224,28 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
       _animationController.dispose();
     } catch (e) {
       print("⚠️ Erro ao dispor _animationController: $e");
-    } 
+    }
     try {
       WidgetsBinding.instance.removeObserver(this);
     } catch (e) {
       print("⚠️ Erro ao remover observer: $e");
-    } 
+    }
     try {
       _screenFocusNode.dispose();
     } catch (e) {
       print("⚠️ Erro ao dispor _screenFocusNode: $e");
-    } 
+    }
     try {
       _model.dispose();
     } catch (e) {
       print("⚠️ Erro ao dispor model: $e");
-    } 
+    }
     _matchLoadingStates.clear();
     _activeMatches.clear();
 
     _isDisposed = true;
-  } 
+  }
+
   void _safeSetState(VoidCallback callback) {
     if (mounted && !_isDisposed) {
       setState(callback);
@@ -277,9 +278,9 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
 
   Future<void> _goBackToMatch() async {
     if (_isRedirecting) return;
-    
+
     _isRedirecting = true;
-    
+
     final userId = _model.user?.id;
     if (userId == null) {
       print("⚠️ Usuário não logado para voltar à partida");
@@ -301,20 +302,20 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
           await matchService.returnOngoingMatchAsync(matchId, userId);
       if (result['isSuccess'] != true) {
         _showErrorNotification(
-          "Erro ao reativar jogador na partida",
+          result["error"].detail.details,
         );
         _isRedirecting = false;
-        return;  
+        return;
       }
-      
-      final nextQuestion = result['data']; 
+
+      final nextQuestion = result['data'];
 
       if (mounted && !_isDisposed) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (_) => Tela06SaladeJogoWidget(
               matchInfo: match,
-              recebeuNotificaca: false, 
+              recebeuNotificaca: false,
               nextQuestion: nextQuestion,
             ),
           ),
@@ -338,7 +339,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
       {bool silent = false, bool urgent = false}) async {
     if (_isCheckingMatches && !urgent) return;
 
-    if (_isDisposed || !mounted) return; 
+    if (_isDisposed || !mounted) return;
     if (!urgent && _lastManualCheck != null) {
       final timeSinceLastCheck = DateTime.now().difference(_lastManualCheck!);
       if (timeSinceLastCheck < Duration(seconds: 30)) {
@@ -366,9 +367,9 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
         final hasActiveMatch = result['hasMatchToday'] ?? false;
         final matchCount = result['matchCount'] ?? 0;
         final List<MatchResponse> matches = result['matches'] ?? [];
- 
+
         final bool stateChanged = _hasActiveMatch != hasActiveMatch ||
-            _showActiveMatchNotification != hasActiveMatch; 
+            _showActiveMatchNotification != hasActiveMatch;
         if (stateChanged || urgent) {
           _safeSetState(() {
             _hasActiveMatch = hasActiveMatch;
@@ -380,7 +381,7 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
             } else if (hasActiveMatch) {
               _showNoMatchNotification = false;
             }
-          }); 
+          });
           await _updateAppBadge(hasActiveMatch);
 
           _lastManualCheck = DateTime.now();
@@ -744,14 +745,15 @@ class _Tela03PrincipalWidgetState extends State<Tela03PrincipalWidget>
         onFocusChange: (hasFocus) {
           if (hasFocus && mounted && !_isDisposed && _shouldCheckOnFocus) {
             if (_lastFocusCheck != null) {
-              final timeSinceLastFocusCheck = DateTime.now().difference(_lastFocusCheck!);
+              final timeSinceLastFocusCheck =
+                  DateTime.now().difference(_lastFocusCheck!);
               if (timeSinceLastFocusCheck < Duration(seconds: 10)) {
                 return;
               }
             }
-            
+
             _lastFocusCheck = DateTime.now();
-            
+
             Future.delayed(Duration(milliseconds: 500), () async {
               if (mounted && !_isDisposed) {
                 await _checkForActiveMatchInProgress(urgent: true);

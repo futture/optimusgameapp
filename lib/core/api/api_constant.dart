@@ -1,5 +1,5 @@
 //const BASE_URL = "optimus-game-1089660016.us-east-1.elb.amazonaws.com/api/v1";
-const BASE_URL = "https://api.gamesoptimus.com/api/v1";
+const BASE_URL = "https://api.gamesoptimus.com/optmusgames/api/v1";
 //"https://api.gamesoptimus.com/api/v1";
 // "192.168.0.48:8000/api/v1";
 //"optimus-game-1089660016.us-east-1.elb.amazonaws.com/api/v1";
